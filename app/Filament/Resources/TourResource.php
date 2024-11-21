@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Models\Company;
 use App\Enums\ExpenseType;
 use App\Enums\TicketType;
 use App\Enums\TransportStatus;
@@ -25,6 +26,21 @@ class TourResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static function priceForCompany($companyId, $hotelRoomTypeId)
+    {
+        if (!$companyId || !$hotelRoomTypeId) {
+            return 0;
+        }
+
+        $company = Company::find($companyId);
+        $hotelRoomType = HotelRoomType::find($hotelRoomTypeId);
+        if ($company && $hotelRoomType) {
+            return $hotelRoomType->price + ($hotelRoomType->price * $company->additional_percent / 100);
+        }
+
+        return 0;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -33,6 +49,7 @@ class TourResource extends Resource
                     Components\Grid::make()->schema([
                         Components\Select::make('company_id')
                             ->relationship('company', 'name')
+                            ->reactive()
                             ->required(),
                         Forms\Components\TextInput::make('group_number')
                             ->required()
@@ -202,6 +219,13 @@ class TourResource extends Resource
                                                             return [];
                                                         })
                                                         ->nullable()
+                                                        ->reactive()
+                                                        ->afterStateUpdated(function ($get, $set) {
+                                                            $price = self::priceForCompany($get('../../../../company_id'), $get('hotel_room_type_id'));
+                                                            if ($price > 0) {
+                                                                $set('price', $price);
+                                                            }
+                                                        })
                                                         ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
                                                 ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
 
