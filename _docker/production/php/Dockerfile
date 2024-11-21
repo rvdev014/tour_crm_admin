@@ -37,3 +37,4 @@ COPY . .
 RUN chmod -R 777 public
 RUN chmod -R 777 storage
 
+EXPOSE 9000
