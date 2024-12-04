@@ -70,6 +70,9 @@ class TourCorporateResource extends Resource
 
 
                     Components\Repeater::make('days')
+                        ->extraAttributes([
+                            'class' => 'repeater-days'
+                        ])
                         ->collapsible()
                         ->cloneable()
                         ->relationship('days')
