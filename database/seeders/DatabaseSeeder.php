@@ -20,5 +20,11 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make(env('ADMIN_PASSWORD')),
             ]);
         }
+
+        $this->call([
+            CountrySeeder::class,
+            CompanySeeder::class,
+            RoomTypeSeeder::class,
+        ]);
     }
 }

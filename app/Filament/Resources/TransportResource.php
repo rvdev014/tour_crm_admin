@@ -17,7 +17,9 @@ class TransportResource extends Resource
 {
     protected static ?string $model = Transport::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-map-pin';
+    protected static ?int $navigationSort = 8;
+    protected static ?string $navigationGroup = 'Manual';
 
     public static function form(Form $form): Form
     {

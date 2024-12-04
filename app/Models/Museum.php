@@ -9,31 +9,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property int $id
  * @property string $name
+ * @property string $inn
  * @property int $country_id
  * @property int $city_id
+ * @property float $price_per_person
+ * @property string $created_at
+ * @property string $updated_at
  *
- * @property City $city
  * @property Country $country
- * @property Collection<HotelRoomType> $roomTypes
+ * @property City $city
+ * @property Collection<MuseumItem> $children
  */
-class Hotel extends Model
+class Museum extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'name',
+        'inn',
         'country_id',
         'city_id',
+        'price_per_person',
     ];
-
-    public function roomTypes(): HasMany
-    {
-        return $this->hasMany(HotelRoomType::class)->orderBy('id');
-    }
 
     public function country(): BelongsTo
     {
@@ -43,5 +41,10 @@ class Hotel extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(MuseumItem::class);
     }
 }

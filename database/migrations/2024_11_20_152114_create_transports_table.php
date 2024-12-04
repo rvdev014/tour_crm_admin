@@ -15,12 +15,9 @@ return new class extends Migration
 
         Schema::create('transports', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('number');
-            $table->integer('company_id')->nullable();
-            $table->foreign('company_id')->references('id')->on('companies');
-            $table->bigInteger('employee_id');
-            $table->foreign('employee_id')->references('id')->on('employees');
+            $table->integer('type');
+            $table->integer('comfort_level');
+            $table->decimal('price');
         });
 
         Schema::enableForeignKeyConstraints();

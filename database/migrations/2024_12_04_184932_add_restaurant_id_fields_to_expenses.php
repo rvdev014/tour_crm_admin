@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::disableForeignKeyConstraints();
-
-        Schema::create('hotels', function (Blueprint $table) {
+        Schema::create('restaurants', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->bigInteger('country_id')->nullable();
             $table->foreign('country_id')->references('id')->on('countries');
             $table->bigInteger('city_id')->nullable();
             $table->foreign('city_id')->references('id')->on('cities');
+            $table->timestamps();
         });
 
-        Schema::enableForeignKeyConstraints();
+        Schema::table('tour_day_expenses', function (Blueprint $table) {
+            $table->integer('restaurant_id')->nullable();
+            $table->foreign('restaurant_id')->references('id')->on('restaurants');
+        });
     }
 
     /**
@@ -30,6 +32,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hotels');
+        Schema::table('tour_day_expenses', function (Blueprint $table) {
+            $table->dropForeign(['restaurant_id']);
+            $table->dropColumn('restaurant_id');
+        });
+
+        Schema::dropIfExists('restaurants');
     }
 };

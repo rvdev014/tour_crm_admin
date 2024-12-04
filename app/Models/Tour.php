@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TourType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $price
  * @property int $expenses
  * @property int $income
+ * @property int $type
  *
  * @property Company $company
  * @property Country $country
@@ -44,19 +46,21 @@ class Tour extends Model
         'price',
         'status',
         'country_id',
+        'type'
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'type' => TourType::class
     ];
 
-    public function getIncomeAttribute()
+    public function getIncomeAttribute(): int
     {
         return $this->price - $this->expenses;
     }
 
-    public function getExpensesAttribute()
+    public function getExpensesAttribute(): int
     {
         return $this->days->sum(fn (TourDay $day) => $day->expenses->sum('price'));
     }

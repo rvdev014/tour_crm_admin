@@ -15,17 +15,26 @@ return new class extends Migration
 
         Schema::create('tours', function (Blueprint $table) {
             $table->id();
+            $table->string('group_number');
             $table->bigInteger('company_id');
             $table->foreign('company_id')->references('id')->on('companies');
-            $table->string('group_number');
             $table->date('start_date');
             $table->date('end_date');
+            $table->integer('pax');
+            $table->bigInteger('country_id');
+            $table->foreign('country_id')->references('id')->on('countries');
+            $table->bigInteger('city_id');
+            $table->foreign('city_id')->references('id')->on('cities');
+            $table->integer('created_by');
+            $table->foreign('created_by')->references('id')->on('users');
+
+
+            $table->integer('status')->nullable();
             $table->string('arrival')->nullable();
             $table->string('departure')->nullable();
             $table->string('rooming')->nullable();
-            $table->integer('pax');
-            $table->integer('status')->nullable();
-            $table->bigInteger('country_id');
+
+            $table->integer('type');
 
             $table->timestamps();
         });

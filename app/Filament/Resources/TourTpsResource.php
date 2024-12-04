@@ -6,8 +6,8 @@ use App\Models\Company;
 use App\Enums\ExpenseType;
 use App\Enums\TicketType;
 use App\Enums\TransportStatus;
-use App\Filament\Resources\TourResource\Pages;
-use App\Filament\Resources\TourResource\RelationManagers;
+use App\Filament\Resources\TourTpsResource\Pages;
+use App\Filament\Resources\TourTpsResource\RelationManagers;
 use App\Models\HotelRoomType;
 use App\Models\Tour;
 use App\Models\Transport;
@@ -20,11 +20,14 @@ use Filament\Tables\Columns;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class TourResource extends Resource
+class TourTpsResource extends Resource
 {
     protected static ?string $model = Tour::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationLabel = 'Tours TPS';
+    protected static ?string $slug = 'tour-tps';
+    protected static ?int $navigationSort = 1;
 
     protected static function priceForCompany($companyId, $hotelRoomTypeId)
     {
@@ -51,26 +54,17 @@ class TourResource extends Resource
                             ->relationship('company', 'name')
                             ->reactive()
                             ->required(),
-                        Forms\Components\TextInput::make('group_number')
-                            ->required()
-                            ->maxLength(255),
-                        Components\TextInput::make('price')
-                            ->required()
-                            ->numeric(),
                         Components\DatePicker::make('start_date')
                             ->required(),
                         Components\DatePicker::make('end_date')
                             ->required(),
-                        Components\TextInput::make('arrival')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('departure')
-                            ->maxLength(255),
-                        Components\TextInput::make('rooming')
-                            ->maxLength(255),
                         Components\Select::make('country_id')
                             ->relationship('country', 'name')
                             ->required(),
                         Components\TextInput::make('pax')
+                            ->required()
+                            ->numeric(),
+                        Components\TextInput::make('price')
                             ->required()
                             ->numeric(),
                     ]),

@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\RoomType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property string $name
  * @property int $hotel_id
- * @property RoomType $room_type
+ * @property int $room_type_id
  * @property float $price
  *
+ * @property RoomType $room_type
  * @property Hotel $hotel
  */
 class HotelRoomType extends Model
@@ -23,18 +22,18 @@ class HotelRoomType extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'name',
         'hotel_id',
-        'room_type',
+        'room_type_id',
         'price'
-    ];
-
-    protected $casts = [
-        'room_type' => RoomType::class
     ];
 
     public function hotel(): BelongsTo
     {
         return $this->belongsTo(Hotel::class);
+    }
+
+    public function roomType(): BelongsTo
+    {
+        return $this->belongsTo(RoomType::class)->orderBy('id');
     }
 }

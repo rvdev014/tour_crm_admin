@@ -1,37 +1,38 @@
 <?php
 
-namespace App\Filament\Resources\HotelResource\RelationManagers;
+namespace App\Filament\Resources\MuseumResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class RoomTypesRelationManager extends RelationManager
+class ChildrenRelationManager extends RelationManager
 {
-    protected static string $relationship = 'roomTypes';
+    protected static string $relationship = 'children';
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('room_type_id')
-                    ->relationship('roomType', 'name')
-                    ->required(),
-                Forms\Components\TextInput::make('price')
+                Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('price_per_person')
+                    ->required()
+                    ->numeric(),
             ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('roomType.name')
+            ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('roomType.name'),
-                Tables\Columns\TextColumn::make('price')->numeric(),
+                Tables\Columns\TextColumn::make('name'),
             ])
             ->filters([
                 //

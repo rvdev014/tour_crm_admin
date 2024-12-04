@@ -15,26 +15,26 @@ return new class extends Migration
 
         Schema::create('tour_day_expenses', function (Blueprint $table) {
             $table->id();
-            $table->integer('num_people')->nullable();
-            $table->timestamp('transport_time')->nullable();
-            $table->decimal('price');
-            $table->text('comment')->nullable();
-            $table->string('location')->nullable();
-            $table->string('transport_route')->nullable();
             $table->bigInteger('tour_day_id');
             $table->foreign('tour_day_id')->references('id')->on('tour_days');
-            $table->bigInteger('transport_status')->nullable();
-            $table->string('car_ids')->nullable();
-            $table->bigInteger('driver_employee_id')->nullable();
-            $table->foreign('driver_employee_id')->references('id')->on('employees');
-            $table->string('ticket_type')->nullable();
+
             $table->integer('type');
-            $table->string('ticket_time')->nullable();
+
+            $table->decimal('price');
+            $table->integer('pax')->nullable();
+            $table->integer('status')->nullable();
+            $table->text('comment')->nullable();
+
             $table->bigInteger('hotel_room_type_id')->nullable();
             $table->foreign('hotel_room_type_id')->references('id')->on('hotel_room_types');
-            $table->bigInteger('guide_employee_id')->nullable();
-            $table->foreign('guide_employee_id')->references('id')->on('employees');
-            $table->string('ticket_route')->nullable();
+
+            $table->string('guide_name')->nullable();
+            $table->integer('guide_type')->nullable();
+
+            $table->integer('transport_type')->nullable();
+            $table->integer('transport_comfort_level')->nullable();
+
+            $table->string('other_name')->nullable();
         });
 
         Schema::enableForeignKeyConstraints();

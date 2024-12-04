@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CityResource\Pages;
-use App\Filament\Resources\CityResource\RelationManagers;
-use App\Models\City;
+use App\Filament\Resources\RestaurantResource\Pages;
+use App\Filament\Resources\RestaurantResource\RelationManagers;
+use App\Models\Restaurant;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,13 +13,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CityResource extends Resource
+class RestaurantResource extends Resource
 {
-    protected static ?string $model = City::class;
+    protected static ?string $model = Restaurant::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
-    protected static ?int $navigationSort = 10;
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+    protected static ?int $navigationSort = 7;
+    protected static ?string $navigationGroup = 'Manual';
 
     public static function form(Form $form): Form
     {
@@ -30,6 +30,8 @@ class CityResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('country_id')
                     ->relationship('country', 'name'),
+                Forms\Components\Select::make('city_id')
+                    ->relationship('city', 'name'),
             ]);
     }
 
@@ -40,6 +42,19 @@ class CityResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('country.name')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('city.name')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -64,9 +79,9 @@ class CityResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCities::route('/'),
-            'create' => Pages\CreateCity::route('/create'),
-            'edit' => Pages\EditCity::route('/{record}/edit'),
+            'index' => Pages\ListRestaurants::route('/'),
+            'create' => Pages\CreateRestaurant::route('/create'),
+            'edit' => Pages\EditRestaurant::route('/{record}/edit'),
         ];
     }
 }

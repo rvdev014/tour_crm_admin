@@ -11,17 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::disableForeignKeyConstraints();
-
-        Schema::create('companies', function (Blueprint $table) {
+        Schema::create('museum_items', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('inn');
-            $table->integer('additional_percent')->nullable();
-            $table->text('comment')->nullable();
-        });
 
-        Schema::enableForeignKeyConstraints();
+            $table->integer('museum_id');
+            $table->foreign('museum_id')->references('id')->on('museums');
+
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->decimal('price_per_person');
+
+            $table->timestamps();
+        });
     }
 
     /**
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('companies');
+        Schema::dropIfExists('museum_items');
     }
 };

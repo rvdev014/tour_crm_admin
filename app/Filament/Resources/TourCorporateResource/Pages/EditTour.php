@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\TourResource\Pages;
+namespace App\Filament\Resources\TourCorporateResource\Pages;
 
-use App\Filament\Resources\TourResource;
+use App\Filament\Resources\TourCorporateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTour extends EditRecord
 {
-    protected static string $resource = TourResource::class;
+    protected static string $resource = TourCorporateResource::class;
 
     protected function getHeaderActions(): array
     {
