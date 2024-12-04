@@ -12,6 +12,16 @@ services:
   php:
     image: ravshan014/tour-crm-php:1
     restart: always
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: false
+      APP_NAME: Tour CRM
+      APP_URL: http://localhost
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       - db
 
