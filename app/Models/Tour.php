@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @property int $company_id
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property City $city
  * @property Country $country
  * @property Collection<TourDay> $days
+ * @property Collection<TourDayExpense> $daysExpenses
  * @property Collection<TourHotel> $hotels
  */
 class Tour extends Model
@@ -88,6 +90,11 @@ class Tour extends Model
     public function days(): HasMany
     {
         return $this->hasMany(TourDay::class);
+    }
+
+    public function daysExpenses(): HasManyThrough
+    {
+        return $this->hasManyThrough(TourDayExpense::class, TourDay::class);
     }
 
     public function hotels(): HasMany
