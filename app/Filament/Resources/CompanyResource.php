@@ -31,12 +31,14 @@ class CompanyResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('additional_percent')
                     ->numeric(),
+                Forms\Components\Textarea::make('comment'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -45,6 +47,7 @@ class CompanyResource extends Resource
                 Tables\Columns\TextColumn::make('additional_percent')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('comment'),
             ])
             ->filters([
                 //

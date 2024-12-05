@@ -18,7 +18,7 @@ class CountryResource extends Resource
     protected static ?string $model = Country::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-flag';
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 11;
     protected static ?string $navigationGroup = 'Settings';
 
     public static function form(Form $form): Form
@@ -34,6 +34,7 @@ class CountryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),

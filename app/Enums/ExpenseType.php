@@ -10,6 +10,7 @@ enum ExpenseType: int
     case Ticket = 4;
     case Lunch = 5;
     case Dinner = 6;
+    case Other = 7;
 
     public function getLabel(): string
     {
@@ -20,6 +21,7 @@ enum ExpenseType: int
             self::Ticket => 'Ticket',
             self::Lunch => 'Lunch',
             self::Dinner => 'Dinner',
+            self::Other => 'Other',
         };
     }
 

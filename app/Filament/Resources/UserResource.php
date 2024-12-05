@@ -2,25 +2,28 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\MuseumResource\Pages;
-use App\Filament\Resources\MuseumResource\RelationManagers;
-use App\Filament\Resources\MuseumResource\RelationManagers\ChildrenRelationManager;
-use App\Models\Museum;
+use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class MuseumResource extends Resource
+class UserResource extends Resource
 {
-    protected static ?string $model = Museum::class;
+    protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-library';
-    protected static ?int $navigationSort = 6;
-    protected static ?string $navigationGroup = 'Manual';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?int $navigationSort = 9;
+    protected static ?string $navigationGroup = 'Settings';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('role', '!=', 0);
+    }
 
     public static function form(Form $form): Form
     {
@@ -29,41 +32,42 @@ class MuseumResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('inn')
+                Forms\Components\TextInput::make('email')
+                    ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('country_id')
-                    ->relationship('country', 'name'),
-                Forms\Components\Select::make('city_id')
-                    ->relationship('city', 'name'),
-                Forms\Components\TextInput::make('price_per_person')
+//                Forms\Components\DateTimePicker::make('email_verified_at'),
+                Forms\Components\TextInput::make('password')
                     ->required()
-                    ->numeric(),
+                    ->maxLength(255),
+                Forms\Components\Select::make('role')
+                    ->options([
+                        0 => 'Admin',
+                        1 => 'Operator',
+                    ])
+                    ->required()
+                    ->default(1),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('inn')
+                Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('country.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('city.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('price_per_person')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('role')
+                    ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                /*Tables\Columns\TextColumn::make('email_verified_at')
+                    ->dateTime()
+                    ->sortable(),*/
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -85,16 +89,16 @@ class MuseumResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ChildrenRelationManager::class,
+            //
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListMuseums::route('/'),
-            'create' => Pages\CreateMuseum::route('/create'),
-            'edit' => Pages\EditMuseum::route('/{record}/edit'),
+            'index' => Pages\ListUsers::route('/'),
+            'create' => Pages\CreateUser::route('/create'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

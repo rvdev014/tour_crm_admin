@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\RestaurantResource\Pages;
 use App\Filament\Resources\RestaurantResource\RelationManagers;
+use App\Models\City;
 use App\Models\Restaurant;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -29,15 +30,26 @@ class RestaurantResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('country_id')
-                    ->relationship('country', 'name'),
+                    ->relationship('country', 'name')
+                    ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+                    ->reactive(),
                 Forms\Components\Select::make('city_id')
-                    ->relationship('city', 'name'),
+                    ->relationship('city', 'name')
+                    ->options(function ($get) {
+                        $countryId = $get('country_id');
+                        if (!empty($countryId)) {
+                            return City::where('country_id', $countryId)->get()->pluck('name', 'id');
+                        }
+
+                        return [];
+                    }),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),

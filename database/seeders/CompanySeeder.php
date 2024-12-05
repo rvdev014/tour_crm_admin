@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,7 +19,9 @@ class CompanySeeder extends Seeder
         ];
 
         foreach ($companies as $company) {
-            \App\Models\Company::create($company);
+            if (Company::where('inn', $company['inn'])->doesntExist()) {
+                Company::create($company);
+            }
         }
     }
 }

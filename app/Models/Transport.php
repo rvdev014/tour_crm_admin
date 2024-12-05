@@ -3,21 +3,17 @@
 namespace App\Models;
 
 use App\Enums\EmployeeType;
+use App\Enums\TransportComfortLevel;
+use App\Enums\TransportType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property string $name
- * @property string $type
- * @property string $description
- *
- * @property Company $company
- * @property Employee $employee
- * @property Employee $driverEmployee
- * @property Employee $guideEmployee
- *
+ * @property TransportType $type
+ * @property TransportComfortLevel $comfort_level
+ * @property float $price
  */
 class Transport extends Model
 {
@@ -26,6 +22,11 @@ class Transport extends Model
     public $timestamps = false;
 
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'type' => TransportType::class,
+        'comfort_level' => TransportComfortLevel::class,
+    ];
 
     public function company(): BelongsTo
     {

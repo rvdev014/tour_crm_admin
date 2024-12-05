@@ -9,28 +9,44 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property int $num_people
- * @property string $transport_time
- * @property float $price
- * @property string $comment
- * @property string $location
- * @property string $transport_route
  * @property int $tour_day_id
- * @property int $transport_status
- * @property string $car_ids
- * @property int $driver_employee_id
- * @property string $ticket_type
  * @property int $type
- * @property string $ticket_time
+ *
+ * Common fields
+ * @property float $price
+ * @property int $pax
+ * @property int $status
+ * @property string $comment
+ *
+ * Hotel
  * @property int $hotel_id
  * @property int $hotel_room_type_id
- * @property int $guide_employee_id
- * @property string $ticket_route
+ *
+ * Museum
+ * @property int $museum_id
+ * @property int $museum_item_id
+ * @property string $museum_inn
+ *
+ * Guide
+ * @property string $guide_name
+ * @property int $guide_type
+ *
+ * Transport
+ * @property int $transport_type
+ * @property int $transport_comfort_level
+ *
+ * Restaurant
+ * @property int $restaurant_id
+ *
+ * Other
+ * @property string $other_name
  *
  * @property TourDay $tourDay
- * @property Employee $driverEmployee
  * @property Hotel $hotel
  * @property HotelRoomType $hotelRoomType
+ * @property Museum $museum
+ * @property MuseumItem $museumItem
+ * @property Restaurant $restaurant
  * @property Employee $guideEmployee
  */
 class TourDayExpense extends Model
@@ -51,11 +67,6 @@ class TourDayExpense extends Model
         return $this->belongsTo(TourDay::class);
     }
 
-    public function driverEmployee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class)->where('type', EmployeeType::Driver);
-    }
-
     public function hotel(): BelongsTo
     {
         return $this->belongsTo(Hotel::class);
@@ -66,8 +77,18 @@ class TourDayExpense extends Model
         return $this->belongsTo(HotelRoomType::class);
     }
 
-    public function guideEmployee(): BelongsTo
+    public function museum(): BelongsTo
     {
-        return $this->belongsTo(Employee::class)->where('type', EmployeeType::Guide);
+        return $this->belongsTo(Museum::class);
+    }
+
+    public function museumItem(): BelongsTo
+    {
+        return $this->belongsTo(MuseumItem::class);
+    }
+
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
     }
 }

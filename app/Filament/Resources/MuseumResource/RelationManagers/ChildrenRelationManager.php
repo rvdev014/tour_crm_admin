@@ -30,9 +30,11 @@ class ChildrenRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->recordTitleAttribute('name')
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('price_per_person')->numeric(),
             ])
             ->filters([
                 //

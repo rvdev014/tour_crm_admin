@@ -2,22 +2,24 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TransportComfortLevel;
+use App\Enums\TransportType;
 use App\Filament\Resources\TransportResource\Pages;
 use App\Filament\Resources\TransportResource\RelationManagers;
 use App\Models\Transport;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TransportResource extends Resource
 {
     protected static ?string $model = Transport::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-map-pin';
+    protected static ?string $navigationIcon = 'heroicon-o-truck';
     protected static ?int $navigationSort = 8;
     protected static ?string $navigationGroup = 'Manual';
 
@@ -25,33 +27,42 @@ class TransportResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\Select::make('type')
+                    ->options(TransportType::class)
+                    ->required()
+                    ->rules([
+                        fn(Get $get): Closure => function (string $attribute, $value, $fail) use ($get) {
+                            $exists = Transport::query()
+                                ->where('type', $get('type'))
+                                ->where('comfort_level', $get('comfort_level'))
+                                ->exists();
+                            if ($exists) {
+                                $fail('The combination of type and comfort level already exists.');
+                            }
+                        },
+                    ]),
+                Forms\Components\Select::make('comfort_level')
+                    ->options(TransportComfortLevel::class)
                     ->required(),
-                Forms\Components\TextInput::make('number')
-                    ->required(),
-                Forms\Components\Select::make('company_id')
-                    ->relationship('company', 'name')
-                    ->required(),
-                Forms\Components\Select::make('employee_id')
-                    ->relationship('driverEmployee', 'name')
-                    ->required(),
+                Forms\Components\TextInput::make('price')->required(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('type')
+                    ->badge()
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('number')
+                Tables\Columns\TextColumn::make('comfort_level')
+                    ->badge()
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('company.name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('driverEmployee.name')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('price')
+                    ->money()
                     ->sortable(),
             ])
             ->filters([

@@ -18,7 +18,7 @@ class CityResource extends Resource
     protected static ?string $model = City::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 12;
     protected static ?string $navigationGroup = 'Settings';
 
     public static function form(Form $form): Form
@@ -36,6 +36,7 @@ class CityResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),

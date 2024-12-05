@@ -15,20 +15,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $group_number
  * @property Carbon $start_date
  * @property Carbon $end_date
- * @property string $arrival
- * @property string $departure
- * @property string $rooming
  * @property int $pax
  * @property int $status
  * @property int $country_id
+ * @property int $city_id
  * @property int $price
  * @property int $expenses
  * @property int $income
- * @property int $type
+ * @property TourType $type
  *
  * @property Company $company
+ * @property User $createdBy
+ * @property City $city
  * @property Country $country
  * @property Collection<TourDay> $days
+ * @property Collection<TourHotel> $hotels
  */
 class Tour extends Model
 {
@@ -46,7 +47,8 @@ class Tour extends Model
         'price',
         'status',
         'country_id',
-        'type'
+        'type',
+        'created_by',
     ];
 
     protected $casts = [
@@ -62,6 +64,9 @@ class Tour extends Model
 
     public function getExpensesAttribute(): int
     {
+        if ($this->type === TourType::Corporate) {
+            return $this->hotels->sum('price');
+        }
         return $this->days->sum(fn (TourDay $day) => $day->expenses->sum('price'));
     }
 
@@ -75,8 +80,24 @@ class Tour extends Model
         return $this->belongsTo(Country::class);
     }
 
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
     public function days(): HasMany
     {
         return $this->hasMany(TourDay::class);
     }
+
+    public function hotels(): HasMany
+    {
+        return $this->hasMany(TourHotel::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
 }

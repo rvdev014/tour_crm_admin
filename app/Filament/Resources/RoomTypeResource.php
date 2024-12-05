@@ -18,7 +18,7 @@ class RoomTypeResource extends Resource
     protected static ?string $model = RoomType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 10;
     protected static ?string $navigationGroup = 'Settings';
 
     public static function form(Form $form): Form
@@ -34,6 +34,7 @@ class RoomTypeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
