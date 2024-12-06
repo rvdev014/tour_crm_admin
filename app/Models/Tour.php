@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $pax
  * @property int $status
  * @property int $country_id
+ * @property int $created_by
  * @property int $city_id
  * @property int $price
  * @property int $expenses
@@ -47,6 +48,8 @@ class Tour extends Model
         'rooming',
         'pax',
         'price',
+        'expenses',
+        'income',
         'status',
         'country_id',
         'type',
@@ -58,19 +61,6 @@ class Tour extends Model
         'end_date' => 'date',
         'type' => TourType::class
     ];
-
-    public function getIncomeAttribute(): int
-    {
-        return $this->price - $this->expenses;
-    }
-
-    public function getExpensesAttribute(): int
-    {
-        if ($this->type === TourType::Corporate) {
-            return $this->hotels->sum('price');
-        }
-        return $this->days->sum(fn (TourDay $day) => $day->expenses->sum('price'));
-    }
 
     public function company(): BelongsTo
     {

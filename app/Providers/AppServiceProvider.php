@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Tour;
+use App\Observers\TourObserver;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\ServiceProvider;

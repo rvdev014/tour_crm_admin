@@ -363,25 +363,26 @@ class TourTpsResource extends Resource
                     ->date()
                     ->sortable(),
                 Columns\TextColumn::make('price')
+                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
                     ->money()
                     ->sortable(),
-//                    ->visible(fn($record) => TourService::visiblePrice($record)),
                 Columns\TextColumn::make('expenses')
-                    ->money()
                     ->badge()
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->sortable(),
-//                    ->visible(fn($record) => TourService::visiblePrice($record)),
-                Columns\TextColumn::make('income')
+                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
                     ->money()
+                    ->sortable(),
+                Columns\TextColumn::make('income')
                     ->badge()
                     ->color(fn(Tour $record) => $record->income > 0 ? 'success' : 'danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
+                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
+                    ->money()
                     ->sortable(),
-//                    ->visible(fn($record) => TourService::visiblePrice($record)),
                 Columns\TextColumn::make('createdBy.name')
                     ->sortable(),
+                Columns\TextColumn::make('country.name'),
 
                 /*Columns\TextColumn::make('status')
                     ->numeric()

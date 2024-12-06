@@ -2,8 +2,11 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\ToursCorporateChart;
+use App\Filament\Widgets\ToursTpsChart;
 use App\Filament\Widgets\DashboardStats;
 use App\Models\Country;
+use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -19,19 +22,14 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     public function filtersForm(Form $form): Form
     {
-        $startMonth = now()->startOfMonth();
-        $endMonth = now()->endOfMonth();
-        $uzbekistan = Country::where('name', 'Uzbekistan')->first();
+        $startMonth = $this->filters['start_date'] ? Carbon::parse($this->filters['start_date']) : now()->startOfMonth();
+        $endMonth = $this->filters['end_date'] ? Carbon::parse($this->filters['end_date']) : now()->endOfMonth();
 
         return $form->schema([
             Grid::make(3)->schema([
-                DatePicker::make('start_date')
-                    ->formatStateUsing(fn () => $startMonth->format('Y-m-d')),
-                DatePicker::make('end_date')
-                    ->formatStateUsing(fn () => $endMonth->format('Y-m-d')),
-                Select::make('country')
-                    ->options(Country::pluck('name', 'id')->toArray())
-                    ->formatStateUsing(fn () => $uzbekistan->id),
+                DatePicker::make('start_date')->formatStateUsing(fn() => $startMonth->format('Y-m-d')),
+                DatePicker::make('end_date')->formatStateUsing(fn() => $endMonth->format('Y-m-d')),
+                Select::make('country')->options(Country::pluck('name', 'id')->toArray()),
             ])
         ]);
     }
@@ -40,6 +38,8 @@ class Dashboard extends \Filament\Pages\Dashboard
     {
         return [
             DashboardStats::class,
+            ToursTpsChart::class,
+            ToursCorporateChart::class,
         ];
     }
 }

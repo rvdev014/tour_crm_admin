@@ -4,10 +4,13 @@ namespace App\Filament\Widgets;
 
 use App\Enums\TourType;
 use App\Models\Tour;
+use App\Models\TourDayExpense;
+use App\Services\TourService;
 use Carbon\Carbon;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\DB;
 
 class DashboardStats extends BaseWidget
 {
@@ -22,72 +25,78 @@ class DashboardStats extends BaseWidget
         return [
             $this->getToursStat($startDate, $endDate, $countryId, TourType::TPS),
             $this->getToursStat($startDate, $endDate, $countryId, TourType::Corporate),
-//            $this->getToursIncomeStat($startDate, $endDate, $countryId, TourType::Corporate),
+            $this->getTpsIncomeStat($startDate, $endDate, $countryId),
+            $this->getCorporateIncomeStat($startDate, $endDate, $countryId),
         ];
     }
 
     public function getToursStat(Carbon $startDate, Carbon $endDate, $countryId, TourType $tourType): Stat
     {
-        $toursTpsQuery = Tour::query()
-            ->where('type', $tourType)
-            ->when($countryId, fn($query, $countryId) => $query->where('country_id', $countryId));
+        $totalTours = TourService::getTotalCount($tourType, $startDate, $endDate, $countryId);
 
-        $totalTours = $toursTpsQuery->clone()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
+        $lastMonthTotalTours = TourService::getTotalCount(
+            $tourType,
+            $prevStartDate = $startDate->copy()->subMonth(),
+            $prevStartDate->copy()->endOfMonth(),
+            $countryId
+        );
 
-        $prevStartDate = $startDate->copy()->subMonth();
-        $prevEndDate = $prevStartDate->copy()->endOfMonth();
-
-        $lastMonthTotalTours = $toursTpsQuery->clone()
-            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])
-            ->count();
-
-        $difference = $totalTours - $lastMonthTotalTours;
-
-        $icon = $difference > 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down';
-        $color = $difference > 0 ? 'success' : 'danger';
-        $chart = $difference > 0 ? [7, 2, 10, 3, 15, 4, 17] : [17, 4, 15, 3, 10, 2, 7];
-
-        return Stat::make("Total tours {$tourType->getLabel()}", self::format($totalTours))
-            ->description("$difference increase")
-            ->descriptionIcon($icon)
-            ->chart($chart)
-            ->color($color);
+        return $this->getStat(
+            "Total tours {$tourType->getLabel()}",
+            self::format($totalTours),
+            $totalTours - $lastMonthTotalTours
+        );
     }
 
-    public function getToursIncomeStat(Carbon $startDate, Carbon $endDate, $countryId, TourType $tourType): Stat
+    public function getTpsIncomeStat(Carbon $startDate, Carbon $endDate, $countryId): Stat
     {
-        $toursTpsQuery = Tour::query()
-            ->where('type', $tourType)
-            ->when($countryId, fn($query, $countryId) => $query->where('country_id', $countryId));
+        $totalIncome = TourService::getTpsTotalIncome($startDate, $endDate, $countryId);
 
-        $totalTours = $toursTpsQuery->clone()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('income');
+        $prevTotalIncome = TourService::getTpsTotalIncome(
+            $prevStartDate = $startDate->copy()->subMonth(),
+            $prevStartDate->copy()->endOfMonth(),
+            $countryId
+        );
 
-        $prevStartDate = $startDate->copy()->subMonth();
-        $prevEndDate = $prevStartDate->copy()->endOfMonth();
+        return $this->getStat(
+            "Tours TPS profit",
+            '$' . self::format($totalIncome),
+            $totalIncome - $prevTotalIncome
+        );
+    }
 
-        $lastMonthTotalTours = $toursTpsQuery->clone()
-            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])
-            ->count();
+    public function getCorporateIncomeStat(Carbon $startDate, Carbon $endDate, $countryId): Stat
+    {
+        $totalIncome = TourService::getCorporateTotalIncome($startDate, $endDate, $countryId);
 
-        $difference = $totalTours - $lastMonthTotalTours;
+        $prevTotalIncome = TourService::getCorporateTotalIncome(
+            $prevStartDate = $startDate->copy()->subMonth(),
+            $prevStartDate->copy()->endOfMonth(),
+            $countryId
+        );
 
+        return $this->getStat(
+            "Tours Corporate profit",
+            '$' . self::format($totalIncome),
+            $totalIncome - $prevTotalIncome
+        );
+    }
+
+    public function getStat(string $label, $total, $difference): Stat
+    {
         $icon = $difference > 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down';
         $color = $difference > 0 ? 'success' : 'danger';
         $chart = $difference > 0 ? [7, 2, 10, 3, 15, 4, 17] : [17, 4, 15, 3, 10, 2, 7];
 
-        return Stat::make("Total tours {$tourType->getLabel()}", self::format($totalTours))
-            ->description("$difference increase")
-            ->descriptionIcon($icon)
-            ->chart($chart)
-            ->color($color);
+        return Stat::make($label, $total)->icon($icon)->color('success');
     }
 
     public static function format($value): string
     {
+        if ($value > 1000) {
+            return number_format($value / 1000, 2, ',', '') . 'K';
+        }
+
         return number_format($value);
     }
 }

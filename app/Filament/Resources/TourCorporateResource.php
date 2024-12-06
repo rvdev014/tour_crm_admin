@@ -173,22 +173,24 @@ class TourCorporateResource extends Resource
                     ->date()
                     ->sortable(),
                 Columns\TextColumn::make('price')
-                    ->money()
+                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
                     ->sortable(),
                 Columns\TextColumn::make('expenses')
-                    ->money()
                     ->badge()
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
+                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
+                    ->money()
                     ->sortable(),
                 Columns\TextColumn::make('income')
-                    ->money()
                     ->badge()
                     ->color(fn(Tour $record) => $record->income > 0 ? 'success' : 'danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
+                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
+                    ->money()
                     ->sortable(),
-                Columns\TextColumn::make('createdBy.name')
-                    ->sortable(),
+                Columns\TextColumn::make('createdBy.name')->sortable(),
+                Columns\TextColumn::make('country.name'),
             ])
             ->filters([
                 //
