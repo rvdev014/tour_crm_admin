@@ -174,6 +174,7 @@ class TourCorporateResource extends Resource
                     ->sortable(),
                 Columns\TextColumn::make('price')
                     ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
+                    ->money()
                     ->sortable(),
                 Columns\TextColumn::make('expenses')
                     ->badge()
