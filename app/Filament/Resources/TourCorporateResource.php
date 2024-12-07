@@ -12,6 +12,7 @@ use App\Models\Hotel;
 use App\Models\HotelRoomType;
 use App\Models\Tour;
 use App\Services\TourService;
+use Closure;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -19,6 +20,7 @@ use Filament\Tables;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class TourCorporateResource extends Resource
@@ -173,22 +175,37 @@ class TourCorporateResource extends Resource
                     ->date()
                     ->sortable(),
                 Columns\TextColumn::make('price')
-                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
-                    ->money()
+                    ->formatStateUsing(function($record, $state) {
+                        if (TourService::isVisible($record)) {
+                            return TourService::formatMoney($state);
+                        }
+
+                        return '-';
+                    })
                     ->sortable(),
                 Columns\TextColumn::make('expenses')
-                    ->badge()
+                    ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
-                    ->money()
+                    ->formatStateUsing(function($record, $state) {
+                        if (TourService::isVisible($record)) {
+                            return TourService::formatMoney($state);
+                        }
+
+                        return '-';
+                    })
                     ->sortable(),
                 Columns\TextColumn::make('income')
-                    ->badge()
+                    ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color(fn(Tour $record) => $record->income > 0 ? 'success' : 'danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
-                    ->money()
+                    ->formatStateUsing(function($record, $state) {
+                        if (TourService::isVisible($record)) {
+                            return TourService::formatMoney($state);
+                        }
+
+                        return '-';
+                    })
                     ->sortable(),
                 Columns\TextColumn::make('createdBy.name')->sortable(),
                 Columns\TextColumn::make('country.name'),
@@ -201,7 +218,7 @@ class TourCorporateResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

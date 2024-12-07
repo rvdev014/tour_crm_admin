@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TourCorporateResource\Pages;
 
 use App\Filament\Resources\TourCorporateResource;
+use Closure;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 

@@ -12,10 +12,12 @@ use App\Models\TourDayExpense;
 use App\Models\TourHotel;
 use App\Models\Transport;
 use App\Models\User;
+use Filament\Tables\Table;
+use Illuminate\Support\Number;
 
 class TourService
 {
-    public static function isIncomeVisible(Tour $tour): bool
+    public static function isVisible(Tour $tour): bool
     {
         /** @var User $user */
         $user = auth()->user();
@@ -159,5 +161,22 @@ class TourService
 
         $transport = Transport::where('type', $transportType)->where('comfort_level', $comfortLevel)->first();
         return $transport?->price ?? 0;
+    }
+
+    public static function formatMoney($money, $divideBy = 0, $currency = null): ?string
+    {
+        if (blank($money)) {
+            return null;
+        }
+
+        if (! is_numeric($money)) {
+            return $money;
+        }
+
+        if ($divideBy) {
+            $money /= $divideBy;
+        }
+
+        return Number::currency($money, Table::$defaultCurrency);
     }
 }

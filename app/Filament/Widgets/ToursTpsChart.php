@@ -33,7 +33,8 @@ class ToursTpsChart extends ChartWidget
             $data = [];
             for ($i = 1; $i <= 12; $i++) {
                 $data[] = Tour::query()
-                    ->whereMonth('start_date', $i)
+                    ->whereMonth('created_at', $i)
+                    ->whereYear('created_at', date('Y'))
                     ->where('type', TourType::TPS)
                     ->where('country_id', $country->id)
                     ->sum('income');

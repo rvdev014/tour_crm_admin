@@ -32,19 +32,4 @@ class Transport extends Model
     {
         return $this->belongsTo(Company::class);
     }
-
-    public function employee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class);
-    }
-
-    public function driverEmployee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class, 'employee_id')->where('type', EmployeeType::Driver);
-    }
-
-    public function guideEmployee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class, 'employee_id')->where('type', EmployeeType::Guide);
-    }
 }

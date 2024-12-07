@@ -23,6 +23,7 @@ use Filament\Tables;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class TourTpsResource extends Resource
@@ -363,22 +364,37 @@ class TourTpsResource extends Resource
                     ->date()
                     ->sortable(),
                 Columns\TextColumn::make('price')
-                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
-                    ->money()
+                    ->formatStateUsing(function($record, $state) {
+                        if (TourService::isVisible($record)) {
+                            return TourService::formatMoney($state);
+                        }
+
+                        return '-';
+                    })
                     ->sortable(),
                 Columns\TextColumn::make('expenses')
-                    ->badge()
+                    ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
-                    ->money()
+                    ->formatStateUsing(function($record, $state) {
+                        if (TourService::isVisible($record)) {
+                            return TourService::formatMoney($state);
+                        }
+
+                        return '-';
+                    })
                     ->sortable(),
                 Columns\TextColumn::make('income')
-                    ->badge()
+                    ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color(fn(Tour $record) => $record->income > 0 ? 'success' : 'danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(fn($state, $record) => TourService::isIncomeVisible($record) ? $state : null)
-                    ->money()
+                    ->formatStateUsing(function($record, $state) {
+                        if (TourService::isVisible($record)) {
+                            return TourService::formatMoney($state);
+                        }
+
+                        return '-';
+                    })
                     ->sortable(),
                 Columns\TextColumn::make('createdBy.name')
                     ->sortable(),
@@ -399,7 +415,7 @@ class TourTpsResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin())
                 ]),
             ]);
     }

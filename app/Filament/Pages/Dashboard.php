@@ -2,28 +2,38 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\DashboardStats;
 use App\Filament\Widgets\ToursCorporateChart;
 use App\Filament\Widgets\ToursTpsChart;
-use App\Filament\Widgets\DashboardStats;
 use App\Models\Country;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
     use HasFiltersForm;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->isAdmin();
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->isAdmin();
+    }
+
     public function filtersForm(Form $form): Form
     {
-        $startMonth = $this->filters['start_date'] ? Carbon::parse($this->filters['start_date']) : now()->startOfMonth();
-        $endMonth = $this->filters['end_date'] ? Carbon::parse($this->filters['end_date']) : now()->endOfMonth();
+        $startDate = $this->filters['start_date'] ?? null;
+        $endDate = $this->filters['end_date'] ?? null;
+
+        $startMonth = $startDate ? Carbon::parse($startDate) : now()->startOfMonth();
+        $endMonth = $endDate ? Carbon::parse($endDate) : now()->endOfMonth();
 
         return $form->schema([
             Grid::make(3)->schema([

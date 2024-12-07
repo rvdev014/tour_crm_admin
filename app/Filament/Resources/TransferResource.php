@@ -73,10 +73,8 @@ class TransferResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('transport_type')
-                    ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('transport_comfort_level')
-                    ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
                     ->money()

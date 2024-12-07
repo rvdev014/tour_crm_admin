@@ -54,11 +54,9 @@ class TransportResource extends Resource
             ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('type')
-                    ->badge()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('comfort_level')
-                    ->badge()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
