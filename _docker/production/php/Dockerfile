@@ -1,6 +1,4 @@
-FROM php:8.2-fpm
-
-COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
+FROM php:8.2-fpm as builder
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -22,19 +20,37 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
     docker-php-ext-install zip && \
     docker-php-ext-install gd
 
-WORKDIR /app
+RUN adduser nonroot
 
-COPY ./composer.json composer.json
-COPY ./composer.lock composer.lock
 
-ENV COMPOSER_ALLOW_SUPERUSER=1
+FROM builder as composer
+
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --filename=composer \
     --install-dir=/usr/local/bin
 
-COPY . .
+WORKDIR /app
 
-RUN chmod -R 777 public
-RUN chmod -R 777 storage
+COPY ./composer.json ./composer.lock ./
+
+RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
+
+
+##### PRODUCTION IMAGE PHP ######
+FROM php:8.2-fpm-alpine
+
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /usr/local/etc/php /usr/local/etc/php
+COPY --from=builder /usr/local/lib/php /usr/local/lib/php
+
+COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
+
+WORKDIR /app
+
+USER nonroot
+
+COPY ./ ./
+
+COPY --from=composer /app/vendor /app/vendor
 
 EXPOSE 9000

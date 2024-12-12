@@ -1,9 +1,7 @@
-FROM nginx:latest
+FROM nginx:1.22-alpine
 
 COPY ./_docker/production/nginx/conf.d /etc/nginx/conf.d
 
-WORKDIR /app
-
-COPY ./public public
+COPY ./public /app/public
 
 EXPOSE 80
