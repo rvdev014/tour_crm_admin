@@ -1,7 +1,7 @@
 services:
   db:
-    image: postgres:latest
-    restart: always
+    image: postgres:17.2-alpine
+#    restart: always
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -13,12 +13,12 @@ services:
     image: ravshan014/tour-crm-php:1
     restart: always
     environment:
-      APP_ENV: prod
-      APP_DEBUG: false
+      APP_ENV: local
+      APP_DEBUG: true
       APP_NAME: Tour CRM
       APP_URL: http://localhost
       DB_HOST: db
-      DB_PORT: 5432
+      DB_PORT:  5432
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -34,7 +34,7 @@ services:
       - php
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:8.14
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
