@@ -1,6 +1,4 @@
-FROM php:8.2-fpm
-
-RUN adduser nonroot
+FROM php:8.2-fpm AS builder
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -22,9 +20,17 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
     docker-php-ext-install zip && \
     docker-php-ext-install gd
 
+################################
+FROM php:8.2-fpm-alpine
+
+COPY --from=builder /usr/local/etc/php /usr/local/etc/php
+COPY --from=builder /usr/local/lib/php /usr/local/lib/php
+
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --filename=composer \
     --install-dir=/usr/local/bin
+
+RUN addgroup -S appgroup && adduser -S nonroot -G appgroup
 
 USER nonroot
 
