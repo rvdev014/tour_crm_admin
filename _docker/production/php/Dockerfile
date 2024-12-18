@@ -1,41 +1,41 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
-# Install required Alpine packages
-RUN apk add --no-cache \
-    libpq \
-    libsodium \
+RUN apt-get update && apt-get install -y \
+    curl \
     unzip \
-    postgresql-dev \
+    libpq-dev \
+    libc-client-dev \
+    libicu-dev \
+    zlib1g-dev \
     libpng-dev \
     libzip-dev \
+    libkrb5-dev \
+    zip && \
+    rm -rf /var/lib/apt/lists/*
 
-# Configure and install PHP extensions
-RUN docker-php-ext-configure pgsql && \
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
+    docker-php-ext-install pgsql pdo_pgsql && \
     docker-php-ext-configure intl && \
-    docker-php-ext-install -j$(nproc) \
-        gd \
-        pgsql \
-        pdo_pgsql \
-        intl \
-        zip
+    docker-php-ext-install -j$(nproc) intl && \
+    docker-php-ext-install zip && \
+    docker-php-ext-install gd
 
-# Clean up build dependencies
-RUN apk del \
-    libpng-dev \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libjpeg-dev \
-    libzip-dev \
-    icu-dev \
-    zlib-dev
+COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
-# Add a non-root user for better security
-RUN addgroup -S appgroup && adduser -S nonroot -G appgroup
+RUN adduser nonroot
+
 USER nonroot
 
 WORKDIR /app
 
-EXPOSE 9000
+COPY ./composer.* .
 
-# Default command
-CMD ["php-fpm"]
+RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
+
+COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
+
+COPY --chown=nonroot:nonroot . .
+
+RUN composer dump-autoload --optimize
+
+EXPOSE 9000

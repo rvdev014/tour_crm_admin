@@ -1,0 +1,50 @@
+# Use the official PHP 8.2 FPM Alpine base image
+FROM php:8.2-fpm-alpine
+
+# Install dependencies and PHP extensions
+RUN set -ex \
+    # Install build dependencies
+    && apk add --virtual .build-deps \
+        libtool \
+        libzip-dev \
+        freetype-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        postgresql-dev \
+        zlib-dev \
+    \
+    # Install runtime dependencies
+    && apk add \
+        libzip \
+        freetype \
+        libjpeg-turbo \
+        libpng \
+        zlib
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg &&  \
+    docker-php-ext-install -j$(nproc) pdo_pgsql gd intl zip
+
+COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
+
+RUN addgroup -S nonrootgroup && adduser -S -G nonrootgroup nonroot
+
+USER nonroot
+
+# Set working directory
+WORKDIR /app
+
+COPY ./composer.* .
+
+RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
+
+COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
+
+COPY --chown=nonroot:nonroot . .
+
+RUN composer dump-autoload --optimize
+
+# Expose default PHP-FPM port
+EXPOSE 9000
+
+# Start PHP-FPM
+CMD ["php-fpm"]
