@@ -14,7 +14,7 @@ services:
       - tour-crm-db:/var/lib/postgresql/data
 
   php:
-    image: ravshan014/tour-crm-php:3
+    image: ravshan014/tour-crm-php:1
     environment:
       APP_ENV: local
       APP_DEBUG: true

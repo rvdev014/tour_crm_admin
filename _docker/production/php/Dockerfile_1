@@ -34,8 +34,6 @@ FROM php:8.2-fpm-alpine
 # Copy compiled PHP extensions from the build stage
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
-
 COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
 # Install only runtime dependencies
@@ -56,6 +54,8 @@ WORKDIR /app
 
 COPY ./composer.* .
 RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction --prefer-dist
+
+COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
 
 COPY --chown=nonroot:nonroot . .
 RUN composer dump-autoload --optimize
