@@ -44,4 +44,4 @@ composer:
 
 .PHONY: backup
 backup:
-	docker-compose exec db pg_dumpall -c -U postgres > backup.sql
+	docker-compose exec db pg_dumpall -c -U postgres > backups/backup.sql
