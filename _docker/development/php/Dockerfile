@@ -22,12 +22,8 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
     docker-php-ext-install zip && \
     docker-php-ext-install gd
 
-ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN curl -sS https://getcomposer.org/installer | php -- \
-    --filename=composer \
-    --install-dir=/usr/local/bin
+COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
 
-RUN chmod -R 777 /app
-
+EXPOSE 9000

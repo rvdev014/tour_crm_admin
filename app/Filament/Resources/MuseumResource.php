@@ -6,6 +6,7 @@ use App\Filament\Resources\MuseumResource\Pages;
 use App\Filament\Resources\MuseumResource\RelationManagers;
 use App\Filament\Resources\MuseumResource\RelationManagers\ChildrenRelationManager;
 use App\Models\Museum;
+use App\Services\TourService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -33,9 +34,13 @@ class MuseumResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('country_id')
-                    ->relationship('country', 'name'),
+                    ->relationship('country', 'name')
+                    ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+                    ->reactive(),
                 Forms\Components\Select::make('city_id')
-                    ->relationship('city', 'name'),
+                    ->relationship('city', 'name')
+                    ->options(fn ($get) => TourService::getCities($get('country_id')))
+                    ->reactive(),
                 Forms\Components\TextInput::make('price_per_person')
                     ->required()
                     ->numeric(),

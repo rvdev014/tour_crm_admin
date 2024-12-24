@@ -6,6 +6,7 @@ use App\Filament\Resources\HotelResource\Pages;
 use App\Filament\Resources\HotelResource\RelationManagers;
 use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
 use App\Models\Hotel;
+use App\Services\TourService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -30,9 +31,12 @@ class HotelResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('country_id')
-                    ->relationship('country', 'name'),
+                    ->relationship('country', 'name')
+                    ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+                    ->reactive(),
                 Forms\Components\Select::make('city_id')
-                    ->relationship('city', 'name'),
+                    ->relationship('city', 'name')
+                    ->options(fn ($get) => TourService::getCities($get('country_id'))),
             ]);
     }
 

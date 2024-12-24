@@ -16,6 +16,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $name
  * @property string $email
  * @property string $password
+ * @property int $operator_percent_tps
  * @property UserRole $role
  */
 class User extends Authenticatable implements FilamentUser
@@ -31,7 +32,8 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'operator_percent_tps'
     ];
 
     /**

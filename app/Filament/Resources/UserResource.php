@@ -48,6 +48,7 @@ class UserResource extends Resource
                     ])
                     ->required()
                     ->default(1),
+                Forms\Components\TextInput::make('operator_percent_tps'),
             ]);
     }
 
@@ -60,6 +61,9 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('role')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('operator_percent_tps')
+                    ->suffix('%')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

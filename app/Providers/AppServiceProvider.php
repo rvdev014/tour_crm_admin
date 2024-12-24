@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         FilamentAsset::register([
-            Css::make('custom-stylesheet', __DIR__ . '/../../resources/css/custom.css'),
+            Css::make('custom-stylesheet', __DIR__ . '/../../resources/custom-css/admin.css'),
         ]);
     }
 }

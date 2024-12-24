@@ -1,6 +1,6 @@
 services:
     nginx:
-        image: nginx:latest
+        image: nginx:1.22-alpine
         volumes:
             - ./:/app
             - ./_docker/development/nginx/conf.d:/etc/nginx/conf.d
@@ -18,7 +18,7 @@ services:
             - vendor:/app/vendor
 
     db:
-        image: postgres:latest
+        image: postgres:17.2-alpine
         environment:
             POSTGRES_USER: ${DB_USERNAME}
             POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -27,7 +27,7 @@ services:
             - postgres:/var/lib/postgresql/data
 
     pgadmin:
-        image: dpage/pgadmin4
+        image: dpage/pgadmin4:8.14
         environment:
             PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
             PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}

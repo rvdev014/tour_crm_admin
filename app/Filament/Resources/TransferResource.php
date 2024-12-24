@@ -18,7 +18,6 @@ use Filament\Tables\Table;
 class TransferResource extends Resource
 {
     protected static ?string $model = Transfer::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
     protected static ?int $navigationSort = 3;
 
@@ -26,6 +25,34 @@ class TransferResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('from_city_id')
+                    ->label('City from')
+                    ->relationship('fromCity', 'name')
+                    ->options(fn ($get) => TourService::getCities(null, isAll: true))
+                    ->reactive(),
+
+                Forms\Components\Select::make('to_city_id')
+                    ->label('City to')
+                    ->relationship('toCity', 'name')
+                    ->options(function ($get) {
+                        $fromCityId = $get('from_city_id');
+                        if (!empty($fromCityId)) {
+                            $cities = TourService::getCities(null, false, true);
+                            return $cities->filter(fn($city) => $city->id != $fromCityId)->pluck('name', 'id');
+                        }
+
+                        return [];
+                    })
+                    ->reactive(),
+
+                Forms\Components\Select::make('company_id')
+                    ->label('Company')
+                    ->relationship('company', 'name')
+                    ->required(),
+
+                Forms\Components\TextInput::make('group_number')
+                    ->label('Group number'),
+
                 Forms\Components\Select::make('transport_type')
                     ->label('Transport type')
                     ->options(TransportType::class)
@@ -60,9 +87,7 @@ class TransferResource extends Resource
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric(),
-                Forms\Components\Select::make('company_id')
-                    ->relationship('company', 'name')
-                    ->required(),
+
                 Forms\Components\Textarea::make('comment')
                     ->columnSpanFull(),
             ]);
@@ -72,15 +97,14 @@ class TransferResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('transport_type')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('transport_comfort_level')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('fromCity.name')->sortable(),
+                Tables\Columns\TextColumn::make('toCity.name')->sortable(),
+                Tables\Columns\TextColumn::make('transport_type')->sortable(),
+                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
+                Tables\Columns\TextColumn::make('company.name'),
+                Tables\Columns\TextColumn::make('group_number'),
                 Tables\Columns\TextColumn::make('price')
                     ->money()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('company.name')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()

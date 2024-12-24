@@ -2,21 +2,125 @@
 
 namespace App\Services;
 
+use App\Enums\ExpenseType;
 use App\Enums\TourType;
+use App\Models\City;
 use App\Models\Company;
+use App\Models\Hotel;
 use App\Models\HotelRoomType;
 use App\Models\Museum;
 use App\Models\MuseumItem;
+use App\Models\Restaurant;
 use App\Models\Tour;
 use App\Models\TourDayExpense;
 use App\Models\TourHotel;
 use App\Models\Transport;
 use App\Models\User;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 
 class TourService
 {
+    public static function onPax($get, $set)
+    {
+        $type = $get('type');
+
+        if ($type == ExpenseType::Lunch->value || $type == ExpenseType::Dinner->value || $type == ExpenseType::Show->value) {
+            $price = !empty($get('price')) ? $get('price') : 0;
+            $pax = !empty($get('pax')) ? $get('pax') : 0;
+            if (!$pax) {
+                $set('total_price', $price);
+            } else {
+                $set('total_price', $price * $pax);
+            }
+        }
+
+        if ($type == ExpenseType::Museum->value) {
+            $price = TourService::getMuseumPrice(
+                $get('museum_id'),
+                $get('pax'),
+                $get('museum_item_id')
+            );
+            $set('price', $price);
+        }
+    }
+
+    public static function getHotelRoomTypes($hotelId): array|Collection
+    {
+        if (!empty($hotelId)) {
+            $result = [];
+            $hRoomTypes = HotelRoomType::where('hotel_id', $hotelId)->get();
+            foreach ($hRoomTypes as $hRoomType) {
+                $result[$hRoomType->id] = "{$hRoomType->roomType->name} {$hRoomType->price}";
+            }
+
+            return $result;
+        }
+
+        return [];
+    }
+
+    public static function getCities($countryId, bool $isPluck = true, $isAll = false): array|Collection
+    {
+        if (!empty($countryId)) {
+            $result = City::where('country_id', $countryId)->get();
+            return $isPluck ? $result->pluck('name', 'id') : $result;
+        }
+
+        if ($isAll) {
+            $result = City::all();
+            return $isPluck ? $result->pluck('name', 'id') : $result;
+        }
+
+        return [];
+    }
+
+    public static function getRestaurants($localCityId, $globalCityId, $countryId): array|Collection
+    {
+        if (!empty($localCityId)) {
+            return Restaurant::where('city_id', $localCityId)->get()->pluck('name', 'id');
+        }
+        if (!empty($globalCityId)) {
+            return Restaurant::where('city_id', $globalCityId)->get()->pluck('name', 'id');
+        }
+        if (!empty($countryId)) {
+            return Restaurant::where('country_id', $countryId)->get()->pluck('name', 'id');
+        }
+
+        return [];
+    }
+
+    public static function getHotels($localCityId, $globalCityId, $countryId): array|Collection
+    {
+        if (!empty($localCityId)) {
+            return Hotel::where('city_id', $localCityId)->get()->pluck('name', 'id');
+        }
+        if (!empty($globalCityId)) {
+            return Hotel::where('city_id', $globalCityId)->get()->pluck('name', 'id');
+        }
+        if (!empty($countryId)) {
+            return Hotel::where('country_id', $countryId)->get()->pluck('name', 'id');
+        }
+
+        return [];
+    }
+
+    public static function getMuseums($localCityId, $globalCityId, $countryId): array|Collection
+    {
+        if (!empty($localCityId)) {
+            return Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
+        }
+        if (!empty($globalCityId)) {
+            return Museum::where('city_id', $globalCityId)->get()->pluck('name', 'id');
+        }
+        if (!empty($countryId)) {
+            return Museum::where('country_id', $countryId)->get()->pluck('name', 'id');
+        }
+
+        return [];
+    }
+
     public static function isVisible(Tour $tour): bool
     {
         /** @var User $user */

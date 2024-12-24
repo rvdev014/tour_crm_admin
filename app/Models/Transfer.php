@@ -14,8 +14,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $transport_type
  * @property int $transport_comfort_level
+ * @property int $from_city_id
+ * @property int $to_city_id
  * @property float $price
+ * @property float $total_price
  * @property int $company_id
+ * @property string $group_number
  * @property int $status
  * @property int $pax
  * @property string $comment
@@ -23,6 +27,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $updated_at
  *
  * @property Company $company
+ * @property City $fromCity
+ * @property City $toCity
  */
 class Transfer extends Model
 {
@@ -31,8 +37,12 @@ class Transfer extends Model
     protected $fillable = [
         'transport_type',
         'transport_comfort_level',
+        'from_city_id',
+        'to_city_id',
+        'total_price',
         'price',
         'company_id',
+        'group_number',
         'status',
         'pax',
         'comment',
@@ -47,5 +57,15 @@ class Transfer extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function fromCity(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'from_city_id');
+    }
+
+    public function toCity(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'to_city_id');
     }
 }

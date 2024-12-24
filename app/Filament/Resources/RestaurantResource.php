@@ -6,6 +6,7 @@ use App\Filament\Resources\RestaurantResource\Pages;
 use App\Filament\Resources\RestaurantResource\RelationManagers;
 use App\Models\City;
 use App\Models\Restaurant;
+use App\Services\TourService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -35,14 +36,7 @@ class RestaurantResource extends Resource
                     ->reactive(),
                 Forms\Components\Select::make('city_id')
                     ->relationship('city', 'name')
-                    ->options(function ($get) {
-                        $countryId = $get('country_id');
-                        if (!empty($countryId)) {
-                            return City::where('country_id', $countryId)->get()->pluck('name', 'id');
-                        }
-
-                        return [];
-                    }),
+                    ->options(fn ($get) => TourService::getCities($get('country_id'))),
             ]);
     }
 
