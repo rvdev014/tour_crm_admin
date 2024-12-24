@@ -10,6 +10,9 @@ php-push-%:
 nginx-push-%:
 	docker push ravshan014/tour-crm-nginx:$*
 
+push:
+	make php-push-1
+	make nginx-push-1
 
 
 ############# DOCKER COMPOSE #############

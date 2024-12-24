@@ -451,7 +451,7 @@ class TourTpsResource extends Resource
 
 
                             // Lunch and Dinner
-                            Components\Grid::make(3)->schema([
+                            Components\Grid::make()->schema([
                                 Components\Select::make('restaurant_id')
                                     ->label('Restaurant')
                                     ->relationship('restaurant', 'name')

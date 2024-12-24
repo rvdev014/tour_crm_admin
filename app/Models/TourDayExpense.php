@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * Hotel
  * @property int $hotel_id
  * @property int $hotel_room_type_id
+ * @property int $hotel_add_percent
  *
  * Museum
  * @property int $museum_id
