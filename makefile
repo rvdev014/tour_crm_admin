@@ -2,11 +2,16 @@
 
 php-build-%:
 	docker --log-level debug build --file _docker/production/php/Dockerfile_$* --tag ravshan014/tour-crm-php:$* .
+
+nginx-build:
+	docker --log-level debug build --file _docker/production/nginx/Dockerfile --tag ravshan014/tour-crm-nginx:1 .
+
 nginx-build-%:
 	docker --log-level debug build --file _docker/production/nginx/Dockerfile_$* --tag ravshan014/tour-crm-nginx:$* .
 
 php-push-%:
 	docker push ravshan014/tour-crm-php:$*
+
 nginx-push-%:
 	docker push ravshan014/tour-crm-nginx:$*
 

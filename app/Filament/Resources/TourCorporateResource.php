@@ -634,6 +634,10 @@ class TourCorporateResource extends Resource
                     })
                     ->sortable(),
                 Columns\TextColumn::make('createdBy.name')->sortable(),
+                Columns\TextColumn::make('createdBy.operator_percent_tps')
+                    ->label('Operator %')
+                    ->suffix('%')
+                    ->sortable(),
                 Columns\TextColumn::make('country.name'),
             ])
             ->filters([
