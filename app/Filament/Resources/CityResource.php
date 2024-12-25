@@ -29,6 +29,7 @@ class CityResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('country_id')
+                    ->native(false)
                     ->relationship('country', 'name'),
             ]);
     }

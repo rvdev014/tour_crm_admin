@@ -39,7 +39,9 @@ class Dashboard extends \Filament\Pages\Dashboard
             Grid::make(3)->schema([
                 DatePicker::make('start_date')->formatStateUsing(fn() => $startMonth->format('Y-m-d')),
                 DatePicker::make('end_date')->formatStateUsing(fn() => $endMonth->format('Y-m-d')),
-                Select::make('country')->options(Country::pluck('name', 'id')->toArray()),
+                Select::make('country')
+                    ->native(false)
+                    ->options(Country::pluck('name', 'id')->toArray()),
             ])
         ]);
     }

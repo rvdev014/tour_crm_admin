@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Enums\EmployeeType;
+use App\Enums\ExpenseType;
+use App\Observers\TourDayExpenseObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 /**
  * @property int $id
  * @property int $tour_day_id
- * @property int $type
+ * @property ExpenseType $type
  *
  * Common fields
  * @property float $price
@@ -74,6 +77,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property Restaurant $restaurant
  * @property Employee $guideEmployee
  */
+
+#[ObservedBy([TourDayExpenseObserver::class])]
 class TourDayExpense extends Model
 {
     use HasFactory;
@@ -85,6 +90,7 @@ class TourDayExpense extends Model
     protected $casts = [
         'transport_time' => 'datetime',
         'car_ids' => 'array',
+        'type' => ExpenseType::class,
     ];
 
     public function tourDay(): BelongsTo

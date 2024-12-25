@@ -22,7 +22,7 @@ enum ExpenseStatus: int implements HasLabel, HasColor
     {
         return match ($this) {
             self::Confirmed => 'success',
-            self::Waiting => 'yellow',
+            self::Waiting => 'warning',
         };
     }
 }

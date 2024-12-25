@@ -20,6 +20,7 @@ class RoomTypesRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\Select::make('room_type_id')
+                    ->native(false)
                     ->relationship('roomType', 'name')
                     ->required()
                     ->rules([

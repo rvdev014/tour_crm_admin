@@ -26,12 +26,14 @@ class TransferResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('from_city_id')
+                    ->native(false)
                     ->label('City from')
                     ->relationship('fromCity', 'name')
-                    ->options(fn ($get) => TourService::getCities(null, isAll: true))
+                    ->options(fn () => TourService::getCities(null, isAll: true))
                     ->reactive(),
 
                 Forms\Components\Select::make('to_city_id')
+                    ->native(false)
                     ->label('City to')
                     ->relationship('toCity', 'name')
                     ->options(function ($get) {
@@ -43,9 +45,11 @@ class TransferResource extends Resource
 
                         return [];
                     })
+                    ->preload()
                     ->reactive(),
 
                 Forms\Components\Select::make('company_id')
+                    ->native(false)
                     ->label('Company')
                     ->relationship('company', 'name')
                     ->required(),
@@ -54,6 +58,7 @@ class TransferResource extends Resource
                     ->label('Group number'),
 
                 Forms\Components\Select::make('transport_type')
+                    ->native(false)
                     ->label('Transport type')
                     ->options(TransportType::class)
                     ->reactive()
@@ -66,6 +71,7 @@ class TransferResource extends Resource
                     }),
 
                 Forms\Components\Select::make('transport_comfort_level')
+                    ->native(false)
                     ->label('Comfort level')
                     ->options(TransportComfortLevel::class)
                     ->reactive()
@@ -81,6 +87,7 @@ class TransferResource extends Resource
                     ->label('Pax'),
 
                 Forms\Components\Select::make('status')
+                    ->native(false)
                     ->options(ExpenseStatus::class)
                     ->label('Status'),
 

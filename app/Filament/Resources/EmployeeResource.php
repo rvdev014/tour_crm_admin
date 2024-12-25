@@ -30,6 +30,7 @@ class EmployeeResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('type')
+                    ->native(false)
                     ->required()
                     ->options(EmployeeType::class),
                 Forms\Components\TextInput::make('phone')

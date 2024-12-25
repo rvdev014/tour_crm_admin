@@ -54,3 +54,8 @@
     transition: 0.2s ease-in-out;
 }
 
+
+.fi-topbar-open-sidebar-btn {
+    background: #d97706!important;
+    color: #fff!important;
+}

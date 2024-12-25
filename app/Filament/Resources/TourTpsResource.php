@@ -46,7 +46,31 @@ class TourTpsResource extends Resource
     {
         return $form->schema([
             Components\Select::make('company_id')
+                ->native(false)
                 ->relationship('company', 'name')
+                ->afterStateUpdated(function($get, $set) {
+                    $days = collect($get('days') ?? []);
+
+                    $updatedDays = $days->map(function ($day) use ($get) {
+                        $expenses = collect($day['expenses'] ?? []);
+                        $updatedExpenses = $expenses->map(function ($expense) use ($get) {
+                            if ($expense['type'] == ExpenseType::Hotel->value) {
+                                $additionalPercent = TourService::getAdditionalPercent($get('company_id'));
+                                $price = TourService::getHotelPrice($expense['hotel_room_type_id'], $additionalPercent);
+                                $expense['hotel_add_percent'] = $additionalPercent;
+                                $expense['price'] = $price;
+                                return $expense;
+                            }
+
+                            return $expense;
+                        });
+
+                        $day['expenses'] = $updatedExpenses->toArray();
+                        return $day;
+                    });
+
+                    $set('days', $updatedDays->toArray());
+                })
                 ->reactive()
                 ->required(),
             Components\DatePicker::make('start_date')
@@ -54,13 +78,16 @@ class TourTpsResource extends Resource
             Components\DatePicker::make('end_date')
                 ->required(),
             Components\Select::make('country_id')
+                ->native(false)
                 ->relationship('country', 'name')
                 ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                 ->reactive()
                 ->required(),
             Components\Select::make('city_id')
+                ->native(false)
                 ->relationship('city', 'name')
                 ->options(fn($get) => TourService::getCities($get('country_id')))
+                ->preload()
                 ->reactive(),
             Components\TextInput::make('pax')
                 ->required()
@@ -95,9 +122,11 @@ class TourTpsResource extends Resource
                             ->required()
                             ->reactive(),
                         Components\Select::make('city_id')
+                            ->native(false)
                             ->relationship('city', 'name')
                             ->options(fn($get) => TourService::getCities($get('../../country_id')))
                             ->reactive()
+                            ->preload()
                             ->required(),
                     ]),
                     Components\Repeater::make('expenses')
@@ -123,6 +152,7 @@ class TourTpsResource extends Resource
                             Components\Grid::make()->schema([
                                 Hidden::make('index'),
                                 Components\Select::make('type')
+                                    ->native(false)
                                     ->label('Expense Type')
                                     ->options(ExpenseType::class)
                                     ->required()
@@ -163,6 +193,7 @@ class TourTpsResource extends Resource
                             // Hotel
                             Components\Grid::make()->schema([
                                 Components\Select::make('hotel_id')
+                                    ->native(false)
                                     ->label('Hotel')
                                     ->relationship('hotel', 'name')
                                     ->options(function ($get) {
@@ -172,25 +203,43 @@ class TourTpsResource extends Resource
 
                                         return TourService::getHotels($localCityId, $globalCityId, $countryId);
                                     })
-                                    ->afterStateUpdated(fn($set) => $set('hotel_room_type_id', null))
-                                    ->reactive()
-                                    ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
-                                Components\Select::make('hotel_room_type_id')
-                                    ->label('Hotel Room Type')
-                                    ->options(fn($get) => TourService::getHotelRoomTypes($get('hotel_id')))
-                                    ->afterStateUpdated(function ($get, $set) {
-                                        $hotelRoomType = HotelRoomType::find($get('hotel_room_type_id'));
-                                        $set('price', $hotelRoomType->price);
+                                    ->preload()
+                                    ->afterStateUpdated(function($get, $set) {
+                                        $set('hotel_room_type_id', null);
+                                        $set('hotel_add_percent', null);
+                                        $set('price', null);
                                     })
                                     ->reactive()
                                     ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
-
-                                Components\Select::make('status')
-                                    ->options(ExpenseStatus::class)
-                                    ->label('Status')
+                                Components\Select::make('hotel_room_type_id')
+                                    ->native(false)
+                                    ->label('Hotel Room Type')
+                                    ->options(fn($get) => TourService::getHotelRoomTypes($get('hotel_id')))
+                                    ->afterStateUpdated(function($get, $set) {
+                                        $additionalPercent = TourService::getAdditionalPercent($get('../../../../company_id'));
+                                        $price = TourService::getHotelPrice($get('hotel_room_type_id'), $additionalPercent);
+                                        $set('hotel_add_percent', $additionalPercent);
+                                        $set('price', $price);
+                                    })
+                                    ->preload()
+                                    ->reactive()
                                     ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
+
+                            Components\Grid::make()->schema([
+                                Components\Select::make('status')
+                                    ->options(ExpenseStatus::class)
+                                    ->native(false)
+                                    ->label('Status')
+                                    ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
+
+                                Components\TextInput::make('hotel_add_percent')
+                                    ->label('Additional Percent (%)')
+                                    ->formatStateUsing(fn($record) => $record?->hotel_add_percent)
+                                    ->readOnly()
+                                    ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
+                            ]),
 
                             // Museum
                             Components\Grid::make(3)->schema([
@@ -198,6 +247,7 @@ class TourTpsResource extends Resource
                                 Components\Grid::make()->schema([
                                     Components\Select::make('museum_id')
                                         ->label('Museum')
+                                        ->native(false)
                                         ->options(function ($get) {
                                             $countryId = $get('../../../../country_id');
                                             $globalCityId = $get('../../../../city_id');
@@ -205,6 +255,7 @@ class TourTpsResource extends Resource
 
                                             return TourService::getMuseums($localCityId, $globalCityId, $countryId);
                                         })
+                                        ->preload()
                                         ->relationship('museum', 'name')
                                         ->reactive()
                                         ->afterStateUpdated(function ($get, $set) {
@@ -220,6 +271,7 @@ class TourTpsResource extends Resource
                                         ->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
                                     Components\Select::make('museum_item_id')
                                         ->label('Museum Children')
+                                        ->native(false)
                                         ->relationship('museumItem', 'name')
                                         ->afterStateUpdated(function ($get, $set) {
                                             $price = TourService::getMuseumPrice(
@@ -250,6 +302,7 @@ class TourTpsResource extends Resource
                                         ->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
 
                                     Components\Select::make('status')
+                                        ->native(false)
                                         ->options(ExpenseStatus::class)
                                         ->label('Status')
                                         ->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
@@ -264,11 +317,13 @@ class TourTpsResource extends Resource
                                     ->visible(fn($get) => $get('type') == ExpenseType::Guide->value),
 
                                 Components\Select::make('guide_type')
+                                    ->native(false)
                                     ->label('Guide type')
                                     ->options(GuideType::class)
                                     ->visible(fn($get) => $get('type') == ExpenseType::Guide->value),
 
                                 Components\Select::make('status')
+                                    ->native(false)
                                     ->options(ExpenseStatus::class)
                                     ->label('Status')
                                     ->visible(fn($get) => $get('type') == ExpenseType::Guide->value),
@@ -277,13 +332,16 @@ class TourTpsResource extends Resource
                             // Transport
                             Components\Grid::make()->schema([
                                 Components\Select::make('from_city_id')
+                                    ->native(false)
                                     ->label('City from')
                                     ->relationship('fromCity', 'name')
                                     ->options(fn ($get) => TourService::getCities($get('../../../../country_id')))
                                     ->reactive()
+                                    ->preload()
                                     ->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
 
                                 Components\Select::make('to_city_id')
+                                    ->native(false)
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
                                     ->options(function ($get) {
@@ -295,12 +353,15 @@ class TourTpsResource extends Resource
 
                                         return [];
                                     })
+                                    ->preload()
                                     ->reactive()
+                                    ->preload()
                                     ->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
 
                             Components\Grid::make()->schema([
                                 Components\Select::make('transport_type')
+                                    ->native(false)
                                     ->label('Transport type')
                                     ->options(TransportType::class)
                                     ->afterStateUpdated(function ($get, $set) {
@@ -314,6 +375,7 @@ class TourTpsResource extends Resource
                                     ->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
 
                                 Components\Select::make('transport_comfort_level')
+                                    ->native(false)
                                     ->label('Comfort level')
                                     ->options(TransportComfortLevel::class)
                                     ->afterStateUpdated(function ($get, $set) {
@@ -330,6 +392,7 @@ class TourTpsResource extends Resource
 
                             Components\Grid::make()->schema([
                                 Components\Select::make('status')
+                                    ->native(false)
                                     ->options(ExpenseStatus::class)
                                     ->label('Status')
                                     ->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
@@ -341,6 +404,7 @@ class TourTpsResource extends Resource
                                     ->label('Total price'),
 
                                 Components\Select::make('status')
+                                    ->native(false)
                                     ->label('Status')
                                     ->options(ExpenseStatus::class),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Show->value),
@@ -349,13 +413,16 @@ class TourTpsResource extends Resource
                             // Train
                             Components\Grid::make()->schema([
                                 Components\Select::make('from_city_id')
+                                    ->native(false)
                                     ->label('City from')
                                     ->relationship('fromCity', 'name')
                                     ->options(fn ($get) => TourService::getCities($get('../../../../country_id')))
                                     ->reactive()
+                                    ->preload()
                                     ->visible(fn($get) => $get('type') == ExpenseType::Train->value),
 
                                 Components\Select::make('to_city_id')
+                                    ->native(false)
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
                                     ->options(function ($get) {
@@ -368,15 +435,18 @@ class TourTpsResource extends Resource
                                         return [];
                                     })
                                     ->reactive()
+                                    ->preload()
                                     ->visible(fn($get) => $get('type') == ExpenseType::Train->value),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
 
                             Components\Grid::make()->schema([
                                 Components\Select::make('train_class')
+                                    ->native(false)
                                     ->label('Train class')
                                     ->options(TrainClass::class),
 
                                 Components\Select::make('status')
+                                    ->native(false)
                                     ->label('Status')
                                     ->options(ExpenseStatus::class),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
@@ -393,13 +463,16 @@ class TourTpsResource extends Resource
                             // Plane
                             Components\Grid::make()->schema([
                                 Components\Select::make('from_city_id')
+                                    ->native(false)
                                     ->label('City from')
                                     ->relationship('fromCity', 'name')
                                     ->options(fn ($get) => TourService::getCities($get('../../../../country_id')))
                                     ->reactive()
+                                    ->preload()
                                     ->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
 
                                 Components\Select::make('to_city_id')
+                                    ->native(false)
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
                                     ->options(function ($get) {
@@ -412,6 +485,7 @@ class TourTpsResource extends Resource
                                         return [];
                                     })
                                     ->reactive()
+                                    ->preload()
                                     ->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
 
@@ -419,6 +493,7 @@ class TourTpsResource extends Resource
                                 Components\TimePicker::make('arrival_time')->label('Arrival time'),
                                 Components\TimePicker::make('departure_time')->label('Departure time'),
                                 Components\Select::make('status')
+                                    ->native(false)
                                     ->label('Status')
                                     ->options(ExpenseStatus::class),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
@@ -430,6 +505,7 @@ class TourTpsResource extends Resource
                                     ->label('Conference name'),
 
                                 Components\Select::make('status')
+                                    ->native(false)
                                     ->label('Status')
                                     ->options(ExpenseStatus::class),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
@@ -453,6 +529,7 @@ class TourTpsResource extends Resource
                             // Lunch and Dinner
                             Components\Grid::make()->schema([
                                 Components\Select::make('restaurant_id')
+                                    ->native(false)
                                     ->label('Restaurant')
                                     ->relationship('restaurant', 'name')
                                     ->options(function ($get) {
@@ -463,6 +540,7 @@ class TourTpsResource extends Resource
                                         return TourService::getRestaurants($localCityId, $globalCityId, $countryId);
                                     })
                                     ->reactive()
+                                    ->preload()
                                     ->visible(fn($get) => self::isLunchAndDinner($get('type'))),
 
                                 Components\TextInput::make('total_price')

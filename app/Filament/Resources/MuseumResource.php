@@ -34,12 +34,15 @@ class MuseumResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('country_id')
+                    ->native(false)
                     ->relationship('country', 'name')
                     ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                     ->reactive(),
                 Forms\Components\Select::make('city_id')
+                    ->native(false)
                     ->relationship('city', 'name')
                     ->options(fn ($get) => TourService::getCities($get('country_id')))
+                    ->preload()
                     ->reactive(),
                 Forms\Components\TextInput::make('price_per_person')
                     ->required()

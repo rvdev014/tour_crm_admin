@@ -41,6 +41,7 @@ class TourCorporateResource_old extends Resource
     {
         return $form->schema([
             Components\Select::make('company_id')
+                ->native(false)
                 ->relationship('company', 'name')
                 ->required()
                 ->afterStateUpdated(function($get, $set) {
@@ -61,12 +62,15 @@ class TourCorporateResource_old extends Resource
             Components\DatePicker::make('end_date')
                 ->required(),
             Components\Select::make('country_id')
+                ->native(false)
                 ->relationship('country', 'name')
                 ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                 ->reactive()
                 ->required(),
             Components\Select::make('city_id')
+                ->native(false)
                 ->relationship('city', 'name')
+                ->preload()
                 ->options(fn ($get) => TourService::getCities($get('country_id'))),
             Components\TextInput::make('pax')
                 ->required()
@@ -123,6 +127,7 @@ class TourCorporateResource_old extends Resource
 
                                 return [];
                             })
+                            ->preload()
                             ->afterStateUpdated(function($get, $set) {
                                 $additionalPercent = TourService::getAdditionalPercent($get('../../company_id'));
                                 $price = TourService::getHotelPrice($get('hotel_room_type_id'), $additionalPercent);

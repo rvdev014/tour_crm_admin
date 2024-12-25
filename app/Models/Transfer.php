@@ -22,10 +22,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $group_number
  * @property int $status
  * @property int $pax
+ * @property int $tour_day_expense_id
  * @property string $comment
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
+ * @property TourDayExpense $tourDayExpense
  * @property Company $company
  * @property City $fromCity
  * @property City $toCity
@@ -46,6 +48,7 @@ class Transfer extends Model
         'status',
         'pax',
         'comment',
+        'tour_day_expense_id',
     ];
 
     protected $casts = [
@@ -67,5 +70,10 @@ class Transfer extends Model
     public function toCity(): BelongsTo
     {
         return $this->belongsTo(City::class, 'to_city_id');
+    }
+
+    public function tourDayExpense(): BelongsTo
+    {
+        return $this->belongsTo(TourDayExpense::class);
     }
 }

@@ -42,6 +42,7 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('role')
+                    ->native(false)
                     ->options([
                         0 => 'Admin',
                         1 => 'Operator',

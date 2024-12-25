@@ -31,11 +31,14 @@ class HotelResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('country_id')
+                    ->native(false)
                     ->relationship('country', 'name')
                     ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                     ->reactive(),
                 Forms\Components\Select::make('city_id')
+                    ->native(false)
                     ->relationship('city', 'name')
+                    ->preload()
                     ->options(fn ($get) => TourService::getCities($get('country_id'))),
             ]);
     }
