@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\GuideType;
 use App\Enums\TourType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property Carbon $start_date
  * @property Carbon $end_date
  * @property int $pax
+ * @property int $leader_pax
+ * @property string $comment
  * @property int $status
  * @property int $country_id
  * @property int $created_by
@@ -25,6 +28,10 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $expenses
  * @property int $income
  * @property TourType $type
+ * @property GuideType $guide_type
+ * @property string $guide_name
+ * @property string $guide_phone
+ * @property int $guide_price
  *
  * @property Company $company
  * @property User $createdBy
@@ -47,13 +54,21 @@ class Tour extends Model
         'departure',
         'rooming',
         'pax',
+        'leader_pax',
+        'comment',
         'price',
         'expenses',
         'income',
         'status',
         'country_id',
+        'city_id',
         'type',
         'created_by',
+
+        'guide_type',
+        'guide_name',
+        'guide_phone',
+        'guide_price',
     ];
 
     protected $casts = [
