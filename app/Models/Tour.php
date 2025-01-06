@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $price
  * @property int $expenses
  * @property int $income
+ * @property int $hotel_expenses_total
  * @property TourType $type
  * @property GuideType $guide_type
  * @property string $guide_name
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property City $city
  * @property Country $country
  * @property Collection<TourDay> $days
+ * @property Collection<TourHotelRoomType> $hotelRoomTypes
  * @property Collection<TourDayExpense> $daysExpenses
  * @property Collection<TourHotel> $hotels
  */
@@ -58,6 +60,7 @@ class Tour extends Model
         'comment',
         'price',
         'expenses',
+        'hotel_expenses_total',
         'income',
         'status',
         'country_id',
@@ -95,6 +98,11 @@ class Tour extends Model
     public function days(): HasMany
     {
         return $this->hasMany(TourDay::class);
+    }
+
+    public function hotelRoomTypes(): HasMany
+    {
+        return $this->hasMany(TourHotelRoomType::class);
     }
 
     public function daysExpenses(): HasManyThrough

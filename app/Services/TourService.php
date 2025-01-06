@@ -11,11 +11,15 @@ use App\Models\HotelRoomType;
 use App\Models\Museum;
 use App\Models\MuseumItem;
 use App\Models\Restaurant;
+use App\Models\RoomType;
+use App\Models\Show;
 use App\Models\Tour;
 use App\Models\TourDayExpense;
 use App\Models\TourHotel;
 use App\Models\Transport;
 use App\Models\User;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
@@ -25,7 +29,6 @@ class TourService
     public static function onPax($get, $set)
     {
         $type = $get('type');
-
         if ($type == ExpenseType::Lunch->value || $type == ExpenseType::Dinner->value || $type == ExpenseType::Show->value) {
             $price = !empty($get('price')) ? $get('price') : 0;
             $pax = !empty($get('pax')) ? $get('pax') : 0;
@@ -54,10 +57,8 @@ class TourService
             foreach ($hRoomTypes as $hRoomType) {
                 $result[$hRoomType->id] = "{$hRoomType->roomType->name} {$hRoomType->price}";
             }
-
             return $result;
         }
-
         return [];
     }
 
@@ -67,58 +68,71 @@ class TourService
             $result = City::where('country_id', $countryId)->get();
             return $isPluck ? $result->pluck('name', 'id') : $result;
         }
-
         if ($isAll) {
             $result = City::all();
             return $isPluck ? $result->pluck('name', 'id') : $result;
         }
-
         return [];
     }
 
     public static function getRestaurants($localCityId, $globalCityId, $countryId): array|Collection
     {
+        $result = [];
         if (!empty($localCityId)) {
-            return Restaurant::where('city_id', $localCityId)->get()->pluck('name', 'id');
+            $result = Restaurant::where('city_id', $localCityId)->get()->pluck('name', 'id');
         }
         if (!empty($globalCityId)) {
-            return Restaurant::where('city_id', $globalCityId)->get()->pluck('name', 'id');
+            $result = Restaurant::where('city_id', $globalCityId)->get()->pluck('name', 'id');
         }
         if (!empty($countryId)) {
-            return Restaurant::where('country_id', $countryId)->get()->pluck('name', 'id');
+            $result = Restaurant::where('country_id', $countryId)->get()->pluck('name', 'id');
         }
-
-        return [];
+        return $result;
     }
 
     public static function getHotels($localCityId, $globalCityId, $countryId): array|Collection
     {
+        $result = [];
         if (!empty($localCityId)) {
-            return Hotel::where('city_id', $localCityId)->get()->pluck('name', 'id');
+            $result = Hotel::where('city_id', $localCityId)->get()->pluck('name', 'id');
         }
         if (!empty($globalCityId)) {
-            return Hotel::where('city_id', $globalCityId)->get()->pluck('name', 'id');
+            $result = Hotel::where('city_id', $globalCityId)->get()->pluck('name', 'id');
         }
         if (!empty($countryId)) {
-            return Hotel::where('country_id', $countryId)->get()->pluck('name', 'id');
+            $result = Hotel::where('country_id', $countryId)->get()->pluck('name', 'id');
         }
-
-        return [];
+        return $result;
     }
 
     public static function getMuseums($localCityId, $globalCityId, $countryId): array|Collection
     {
+        $result = [];
         if (!empty($localCityId)) {
-            return Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
+            $result = Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
         }
         if (!empty($globalCityId)) {
-            return Museum::where('city_id', $globalCityId)->get()->pluck('name', 'id');
+            $result = Museum::where('city_id', $globalCityId)->get()->pluck('name', 'id');
         }
         if (!empty($countryId)) {
-            return Museum::where('country_id', $countryId)->get()->pluck('name', 'id');
+            $result = Museum::where('country_id', $countryId)->get()->pluck('name', 'id');
         }
+        return $result;
+    }
 
-        return [];
+    public static function getShows($localCityId, $globalCityId, $countryId): array|Collection
+    {
+        $result = [];
+        if (!empty($localCityId)) {
+            $result = Show::where('city_id', $localCityId)->get()->pluck('name', 'id');
+        }
+        if (!empty($globalCityId)) {
+            $result = Show::where('city_id', $globalCityId)->get()->pluck('name', 'id');
+        }
+        if (!empty($countryId)) {
+            $result = Show::where('country_id', $countryId)->get()->pluck('name', 'id');
+        }
+        return $result;
     }
 
     public static function isVisible(Tour $tour): bool
@@ -128,11 +142,9 @@ class TourService
         if ($user->isAdmin()) {
             return true;
         }
-
         if ($tour->created_by == $user->id) {
             return true;
         }
-
         return false;
     }
 
@@ -200,7 +212,6 @@ class TourService
         }
 
         $currentYear = date('y');
-
         return "{$firstLetter}{$number}{$currentYear}{$lastLetter}";
     }
 
@@ -219,7 +230,6 @@ class TourService
         if (!$companyId) {
             return 0;
         }
-
         $company = Company::find($companyId);
         return $company?->additional_percent ?? 0;
     }
@@ -235,10 +245,8 @@ class TourService
             if ($additionalPercent) {
                 return $hotelRoomType->price + ($hotelRoomType->price * $additionalPercent / 100);
             }
-
             return $hotelRoomType->price;
         }
-
         return 0;
     }
 
@@ -247,12 +255,10 @@ class TourService
         if (!$museumId || !$pax) {
             return 0;
         }
-
         if ($museumItemId) {
             $museumItem = MuseumItem::find($museumItemId);
             return $museumItem->price_per_person * $pax;
         }
-
         $museum = Museum::find($museumId);
         return $museum->price_per_person * $pax;
     }
@@ -262,7 +268,6 @@ class TourService
         if (!$transportType || !$comfortLevel) {
             return 0;
         }
-
         $transport = Transport::where('type', $transportType)->where('comfort_level', $comfortLevel)->first();
         return $transport?->price ?? 0;
     }
@@ -272,15 +277,34 @@ class TourService
         if (blank($money)) {
             return null;
         }
-
-        if (! is_numeric($money)) {
+        if (!is_numeric($money)) {
             return $money;
         }
-
         if ($divideBy) {
             $money /= $divideBy;
         }
-
         return Number::currency($money, Table::$defaultCurrency);
+    }
+
+    public static function generateRoomingSchema(): array
+    {
+        return [
+            Grid::make(3)->schema(
+                RoomType::all()->map(function (RoomType $roomType) {
+                    return TextInput::make("hotel_type_{$roomType->id}")
+                        ->label($roomType->name)
+                        ->formatStateUsing(function ($record) use ($roomType) {
+                            if (!$record) {
+                                return 0;
+                            }
+                            $roomType = $record->hotelRoomTypes->first(
+                                fn($hotelRoomType) => $hotelRoomType->hotel_room_type_id == $roomType->id
+                            );
+                            return $roomType?->amount ?? 0;
+                        })
+                        ->numeric();
+                })->toArray()
+            )
+        ];
     }
 }

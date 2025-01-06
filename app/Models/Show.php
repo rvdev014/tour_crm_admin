@@ -2,40 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property int $id
  * @property string $name
- * @property string $email
  * @property int $country_id
  * @property int $city_id
+ * @property float $price_per_person
  *
- * @property City $city
  * @property Country $country
- * @property Collection<HotelRoomType> $roomTypes
+ * @property City $city
  */
-class Hotel extends Model
+class Show extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'name',
-        'email',
         'country_id',
         'city_id',
+        'price_per_person',
     ];
-
-    public function roomTypes(): HasMany
-    {
-        return $this->hasMany(HotelRoomType::class)->orderBy('id');
-    }
 
     public function country(): BelongsTo
     {

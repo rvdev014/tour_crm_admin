@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tour_day_expenses', function (Blueprint $table) {
-            $table->dropColumn('guide_type');
+        Schema::table('restaurants', function (Blueprint $table) {
+            $table->float('price_per_person')->nullable();
         });
     }
 
@@ -21,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-
+        Schema::table('restaurants', function (Blueprint $table) {
+            $table->dropColumn('price_per_person');
+        });
     }
 };

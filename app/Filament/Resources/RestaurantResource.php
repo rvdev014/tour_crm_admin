@@ -30,6 +30,9 @@ class RestaurantResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required(),
                 Forms\Components\Select::make('country_id')
                     ->native(false)
                     ->relationship('country', 'name')
@@ -40,6 +43,9 @@ class RestaurantResource extends Resource
                     ->relationship('city', 'name')
                     ->preload()
                     ->options(fn ($get) => TourService::getCities($get('country_id'))),
+                Forms\Components\TextInput::make('price_per_person')
+                    ->required()
+                    ->numeric(),
             ]);
     }
 
@@ -50,12 +56,14 @@ class RestaurantResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('country.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('city.name')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('price_per_person'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

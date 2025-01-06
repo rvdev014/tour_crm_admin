@@ -6,7 +6,6 @@ use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Enums\TourType;
-use App\Enums\TrainClass;
 use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
 use App\Filament\Resources\TourTpsResource\Pages;
@@ -14,7 +13,6 @@ use App\Filament\Resources\TourTpsResource\RelationManagers;
 use App\Models\City;
 use App\Models\Company;
 use App\Models\Country;
-use App\Models\HotelRoomType;
 use App\Models\Museum;
 use App\Models\Tour;
 use App\Models\User;
@@ -30,6 +28,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TourTpsResource extends Resource
 {
@@ -50,63 +49,71 @@ class TourTpsResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Components\TextInput::make('tour_id')
-                ->formatStateUsing(function ($record) {
-                    if (!empty($record)) {
-                        return $record->id;
-                    }
-                    // last id from tours table
-                    $lastId = Tour::query()->where('type', TourType::TPS)->latest()->first()->id ?? 0;
-                    return $lastId + 1;
-                })
-                ->readOnly(),
-            Components\Select::make('company_id')
-                ->native(false)
-                ->relationship('company', 'name')
-                ->reactive()
-                ->required(),
-            Components\Select::make('country_id')
-                ->native(false)
-                ->relationship('country', 'name')
-                ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
-                ->reactive()
-                ->required(),
-            Components\Select::make('city_id')
-                ->native(false)
-                ->relationship('city', 'name')
-                ->options(fn($get) => TourService::getCities($get('country_id')))
-                ->preload()
-                ->reactive(),
-            Components\DatePicker::make('start_date')
-                ->label('Arrival time')
-                ->required(),
-            Components\DatePicker::make('end_date')
-                ->label('Departure time')
-                ->required(),
-            Components\TextInput::make('pax')
-                ->required()
-                ->numeric(),
-            Components\TextInput::make('leader_pax')
-                ->numeric(),
-            Components\TextInput::make('price')
-                ->required()
-                ->numeric(),
-            Components\Textarea::make('comment'),
-
-            Components\Select::make('guide_type')
-                ->native(false)
-                ->options(GuideType::class)
-                ->reactive()
-                ->required(),
-
-            Components\Grid::make(3)->schema([
-                Components\TextInput::make('guide_name'),
-                Components\TextInput::make('guide_phone'),
-                Components\TextInput::make('guide_price')
+            Components\Fieldset::make('Tour details')->schema([
+                Components\TextInput::make('tour_id')
+                    ->formatStateUsing(function ($record) {
+                        if (!empty($record)) {
+                            return $record->id;
+                        }
+                        // last id from tours table
+                        $toursTableSequence = DB::selectOne('SELECT last_value + 1 AS next_id FROM tours_id_seq;');
+                        return ($toursTableSequence?->next_id ?? 1);
+                    })
+                    ->readOnly(),
+                Components\Select::make('company_id')
+                    ->native(false)
+                    ->relationship('company', 'name')
+                    ->reactive()
+                    ->required(),
+                Components\Select::make('country_id')
+                    ->native(false)
+                    ->relationship('country', 'name')
+                    ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+                    ->reactive()
+                    ->required(),
+                Components\Select::make('city_id')
+                    ->native(false)
+                    ->relationship('city', 'name')
+                    ->options(fn($get) => TourService::getCities($get('country_id')))
+                    ->preload()
+                    ->reactive()
+                    ->required(),
+                Components\DatePicker::make('start_date')
+                    ->label('Arrival time')
+                    ->required(),
+                Components\DatePicker::make('end_date')
+                    ->label('Departure time')
+                    ->required(),
+                Components\TextInput::make('pax')
                     ->required()
-                    ->numeric()
-                    ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
-            ])->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
+                    ->numeric(),
+                Components\TextInput::make('leader_pax')
+                    ->numeric(),
+                Components\TextInput::make('price')
+                    ->required()
+                    ->numeric(),
+                Components\Textarea::make('comment'),
+            ]),
+
+            Components\Fieldset::make('Guide info')->schema([
+                Components\Select::make('guide_type')
+                    ->native(false)
+                    ->options(GuideType::class)
+                    ->reactive()
+                    ->required(),
+
+                Components\Grid::make(3)->schema([
+                    Components\TextInput::make('guide_name'),
+                    Components\TextInput::make('guide_phone'),
+                    Components\TextInput::make('guide_price')
+                        ->required()
+                        ->numeric(),
+                ])->visible(fn($get) => $get('guide_type') == GuideType::Escort->value)
+            ]),
+
+            // Add section with subtitle
+            Components\Fieldset::make('Rooming')
+                ->schema(TourService::generateRoomingSchema()),
 
             Components\Repeater::make('days')
                 ->extraAttributes(['class' => 'repeater-days'])
@@ -166,7 +173,14 @@ class TourTpsResource extends Resource
                                 Components\Select::make('type')
                                     ->native(false)
                                     ->label('Expense Type')
-                                    ->options(ExpenseType::class)
+                                    ->options(function ($get) {
+                                        $options = ExpenseType::casesOptions();
+                                        unset($options[ExpenseType::Conference->value]);
+                                        if ($get('../../../../guide_type') == GuideType::Escort->value) {
+                                            unset($options[ExpenseType::Guide->value]);
+                                        }
+                                        return $options;
+                                    })
                                     ->required()
                                     ->reactive(),
 
@@ -193,78 +207,76 @@ class TourTpsResource extends Resource
                                     ->required()
                                     ->visible(fn($get) => self::isPriceVisible($get('type'))),*/
 
-                                Components\Textarea::make('comment')
-                                    ->label('Comment'),
-
-                                Components\TextInput::make('pax')
+                                /*Components\TextInput::make('pax')
                                     ->label('Pax')
                                     ->afterStateUpdated(fn($get, $set) => TourService::onPax($get, $set))
                                     ->live(onBlur: true)
-                                    ->visible(fn($get) => self::isPaxVisible($get('type'))),
+                                    ->visible(fn($get) => self::isPaxVisible($get('type'))),*/
                             ]),
 
                             // Hotel
-                            Components\Grid::make()->schema([
-                                Components\Select::make('hotel_id')
-                                    ->native(false)
-                                    ->label('Hotel')
-                                    ->relationship('hotel', 'name')
-                                    ->options(function ($get) {
-                                        $countryId = $get('../../../../country_id');
-                                        $globalCityId = $get('../../../../city_id');
-                                        $localCityId = $get('../../city_id');
-
-                                        return TourService::getHotels($localCityId, $globalCityId, $countryId);
-                                    })
-                                    ->preload()
-                                    ->afterStateUpdated(function ($get, $set) {
-                                        $set('hotel_room_type_id', null);
-                                        $set('hotel_add_percent', null);
-                                        $set('price', null);
-                                    })
-                                    ->reactive(),
-                                Components\Select::make('hotel_room_type_id')
-                                    ->native(false)
-                                    ->label('Hotel Room Type')
-                                    ->options(fn($get) => TourService::getHotelRoomTypes($get('hotel_id')))
-                                    ->afterStateUpdated(function ($get, $set) {
-                                        $additionalPercent = TourService::getAdditionalPercent(
-                                            $get('../../../../company_id')
-                                        );
-                                        $price = TourService::getHotelPrice(
-                                            $get('hotel_room_type_id'),
-                                            $additionalPercent
-                                        );
-                                        $set('hotel_add_percent', $additionalPercent);
-                                        $set('price', $price);
-                                    })
-                                    ->preload()
-                                    ->reactive(),
-
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
-
-                            Components\Grid::make()->schema([
-                                Components\Select::make('status')
-                                    ->options(ExpenseStatus::class)
-                                    ->native(false)
-                                    ->label('Status'),
+                            Components\Fieldset::make('Hotel info')->schema([
+                                Components\Grid::make()->schema([
+                                    Components\Select::make('hotel_id')
+                                        ->native(false)
+                                        ->label('Hotel')
+                                        ->relationship('hotel', 'name')
+                                        ->options(function ($get) {
+                                            $countryId = $get('../../../../country_id');
+                                            $globalCityId = $get('../../../../city_id');
+                                            $localCityId = $get('../../city_id');
+                                            return TourService::getHotels($localCityId, $globalCityId, $countryId);
+                                        })
+                                        ->preload()
+                                        ->reactive(),
+                                    Components\Select::make('status')
+                                        ->options(ExpenseStatus::class)
+                                        ->native(false)
+                                        ->label('Status'),
+                                    Components\Textarea::make('comment')
+                                        ->label('Comment')
+                                        ->columnSpanFull(),
+                                ])
                             ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
 
                             // Guide
-                            Components\Grid::make()->schema([
-                                Components\TextInput::make('guide_name')
-                                    ->label('Guide name'),
-                                Components\TextInput::make('guide_phone')
-                                    ->label('Guide phone'),
+                            Components\Fieldset::make('Guide info')->schema([
+                                Components\Grid::make()->schema([
+                                    Components\TextInput::make('guide_name')
+                                        ->label('Guide name'),
+                                    Components\TextInput::make('guide_phone')
+                                        ->label('Guide phone'),
 
-                                Components\Select::make('status')
-                                    ->native(false)
-                                    ->options(ExpenseStatus::class)
-                                    ->label('Status'),
+                                    Components\Select::make('status')
+                                        ->native(false)
+                                        ->options(ExpenseStatus::class)
+                                        ->label('Status'),
+
+                                    Components\TextInput::make('guide_price')
+                                        ->statePath('price')
+                                        ->label('Price'),
+
+                                    Components\Textarea::make('comment')
+                                        ->label('Comment')
+                                        ->columnSpanFull(),
+                                ]),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Guide->value),
 
                             // Transport
-                            Components\Grid::make()->schema([
+                            Components\Fieldset::make('Transport info')->schema([
+
+                                Components\Select::make('transport_type')
+                                    ->native(false)
+                                    ->label('Transport type')
+                                    ->options(TransportType::class)
+                                    ->afterStateUpdated(function ($get, $set) {
+                                        $price = TourService::getTransportPrice(
+                                            $get('transport_type'),
+                                            $get('transport_comfort_level'),
+                                        );
+                                        $set('price', $price);
+                                    })
+                                    ->reactive(),
 
                                 Components\Select::make('to_city_id')
                                     ->native(false)
@@ -285,21 +297,6 @@ class TourTpsResource extends Resource
                                     ->preload()
                                     ->reactive()
                                     ->preload(),
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
-
-                            Components\Grid::make()->schema([
-                                Components\Select::make('transport_type')
-                                    ->native(false)
-                                    ->label('Transport type')
-                                    ->options(TransportType::class)
-                                    ->afterStateUpdated(function ($get, $set) {
-                                        $price = TourService::getTransportPrice(
-                                            $get('transport_type'),
-                                            $get('transport_comfort_level'),
-                                        );
-                                        $set('price', $price);
-                                    })
-                                    ->reactive(),
 
                                 Components\Select::make('transport_comfort_level')
                                     ->native(false)
@@ -314,169 +311,213 @@ class TourTpsResource extends Resource
                                     })
                                     ->reactive(),
 
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
-
-                            Components\Grid::make()->schema([
                                 Components\Select::make('status')
                                     ->native(false)
                                     ->options(ExpenseStatus::class)
                                     ->label('Status'),
+
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
+
                             ])->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
 
                             // Museum
-                            Components\Grid::make(3)->schema([
+                            Components\Fieldset::make('Museum info')->schema([
+
+                                Components\Select::make('museum_id')
+                                    ->label('Museum')
+                                    ->native(false)
+                                    ->relationship('museum', 'name')
+                                    ->options(function ($get) {
+                                        $countryId = $get('../../../../country_id');
+                                        $globalCityId = $get('../../../../city_id');
+                                        $localCityId = $get('../../city_id');
+                                        return TourService::getMuseums($localCityId, $globalCityId, $countryId);
+                                    })
+                                    ->createOptionForm([
+                                        Components\Grid::make()->schema([
+                                            Components\TextInput::make('name')
+                                                ->required()
+                                                ->maxLength(255),
+                                            Components\TextInput::make('inn')
+                                                ->required()
+                                                ->maxLength(255),
+                                            Components\Select::make('country_id')
+                                                ->native(false)
+                                                ->relationship('country', 'name')
+                                                ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+                                                ->reactive(),
+                                            Components\Select::make('city_id')
+                                                ->native(false)
+                                                ->relationship('city', 'name')
+                                                ->options(fn($get) => TourService::getCities($get('country_id')))
+                                                ->preload()
+                                                ->reactive(),
+                                            Components\TextInput::make('price_per_person')
+                                                ->required()
+                                                ->numeric(),
+                                        ])
+                                    ])
+                                    ->preload()
+                                    ->reactive(),
+                                Components\Select::make('museum_item_id')
+                                    ->label('Museum Children')
+                                    ->native(false)
+                                    ->relationship('museumItem', 'name')
+                                    ->reactive()
+                                    ->disabled(function ($get) {
+                                        if (!$get('museum_id')) {
+                                            return true;
+                                        }
+                                        /** @var Museum $museum */
+                                        $museum = Museum::find($get('museum_id'));
+                                        return !$museum || $museum->children->count() == 0;
+                                    }),
+
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
+
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
+
+                            // Lunch and Dinner
+                            Components\Fieldset::make('Lunch / Dinner info')->schema([
+
+                                Components\Select::make('restaurant_id')
+                                    ->native(false)
+                                    ->label('Restaurant')
+                                    ->relationship('restaurant', 'name')
+                                    ->options(function ($get) {
+                                        $countryId = $get('../../../../country_id');
+                                        $globalCityId = $get('../../../../city_id');
+                                        $localCityId = $get('../../city_id');
+
+                                        return TourService::getRestaurants($localCityId, $globalCityId, $countryId);
+                                    })
+                                    ->reactive()
+                                    ->preload(),
+
+                                Components\Select::make('status')
+                                    ->options(ExpenseStatus::class)
+                                    ->native(false)
+                                    ->label('Status'),
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
+
+                            ])->visible(fn($get) => self::isLunch($get('type'))),
+
+                            // Train
+                            Components\Fieldset::make('Train info')->schema([
+
+                                Components\Grid::make(3)->schema([
+                                    Components\Select::make('train_name')
+                                        ->native(false)
+                                        ->label('Train name')
+                                        ->options([
+                                            'sharq' => 'Sharq',
+                                            'afrosiyob' => 'Afrosiyob',
+                                        ]),
+
+                                    Components\Select::make('to_city_id')
+                                        ->native(false)
+                                        ->label('City to')
+                                        ->relationship('toCity', 'name')
+                                        ->options(function ($get) {
+                                            $localCityId = $get('../../city_id');
+                                            if (!empty($localCityId)) {
+                                                $cities = TourService::getCities($get('../../../../country_id'), false);
+                                                return $cities->filter(fn($city) => $city->id != $localCityId)->pluck(
+                                                    'name',
+                                                    'id'
+                                                );
+                                            }
+
+                                            return [];
+                                        })
+                                        ->reactive()
+                                        ->preload(),
+
+                                    Components\TextInput::make('price')
+                                        ->label('Price')
+                                        ->required(),
+                                ]),
+
+                                Components\Grid::make(3)->schema([
+                                    Components\TextInput::make('train_class_economy')
+                                        ->label('Economy')
+                                        ->numeric(),
+                                    Components\TextInput::make('train_class_vip')
+                                        ->label('VIP')
+                                        ->numeric(),
+                                    Components\TextInput::make('train_class_second')
+                                        ->label('Second')
+                                        ->numeric(),
+                                ]),
+
+                                Components\Grid::make(3)->schema([
+                                    Components\TimePicker::make('departure_time')
+                                        ->label('Departure time'),
+                                    Components\TimePicker::make('arrival_time')
+                                        ->label('Arrival time'),
+                                    Components\Select::make('status')
+                                        ->options(ExpenseStatus::class)
+                                        ->native(false)
+                                        ->label('Status'),
+                                ]),
+
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
+
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
+
+                            // Show
+                            Components\Fieldset::make('Show info')->schema([
 
                                 Components\Grid::make()->schema([
-                                    Components\Select::make('museum_id')
-                                        ->label('Museum')
+                                    Components\Select::make('show_id')
                                         ->native(false)
+                                        ->label('Show')
+                                        ->relationship('show', 'name')
                                         ->options(function ($get) {
                                             $countryId = $get('../../../../country_id');
                                             $globalCityId = $get('../../../../city_id');
                                             $localCityId = $get('../../city_id');
 
-                                            return TourService::getMuseums($localCityId, $globalCityId, $countryId);
+                                            return TourService::getShows($localCityId, $globalCityId, $countryId);
                                         })
+                                        ->reactive()
                                         ->preload()
-                                        ->relationship('museum', 'name')
-                                        ->reactive()
-                                        ->afterStateUpdated(function ($get, $set) {
-                                            $set('museum_item_id', null);
-
-                                            $price = TourService::getMuseumPrice(
-                                                $get('museum_id'),
-                                                $get('pax'),
-                                                $get('museum_item_id')
-                                            );
-                                            $set('price', $price);
-                                        })
-                                        ->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
-                                    Components\Select::make('museum_item_id')
-                                        ->label('Museum Children')
-                                        ->native(false)
-                                        ->relationship('museumItem', 'name')
-                                        ->afterStateUpdated(function ($get, $set) {
-                                            $price = TourService::getMuseumPrice(
-                                                $get('museum_id'),
-                                                $get('pax'),
-                                                $get('museum_item_id')
-                                            );
-                                            $set('price', $price);
-                                        })
-                                        ->reactive()
-                                        ->disabled(function ($get) {
-                                            if (!$get('museum_id')) {
-                                                return true;
-                                            }
-                                            /** @var Museum $museum */
-                                            $museum = Museum::find($get('museum_id'));
-                                            return !$museum || $museum->children->count() == 0;
-                                        }),
-                                ]),
-
-                                Components\Grid::make(3)->schema([
-                                    Components\TextInput::make('museum_inn')
-                                        ->label('Museum Inn')
-                                        ->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
-
-                                    Components\TextInput::make('museum_guide')
-                                        ->label('Guide')
-                                        ->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
-
+                                        ->required(),
                                     Components\Select::make('status')
-                                        ->native(false)
                                         ->options(ExpenseStatus::class)
-                                        ->label('Status')
-                                        ->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
+                                        ->native(false)
+                                        ->label('Status'),
+                                    Components\Textarea::make('comment')
+                                        ->label('Comment')
+                                        ->columnSpanFull(),
                                 ]),
 
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Museum->value),
-
-                            // Show
-                            Components\Grid::make()->schema([
-                                Components\TextInput::make('total_price')
-                                    ->label('Total price'),
-
-                                Components\Select::make('status')
-                                    ->native(false)
-                                    ->label('Status')
-                                    ->options(ExpenseStatus::class),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Show->value),
 
-
-                            // Train
-                            Components\Grid::make()->schema([
-                                Components\Select::make('from_city_id')
-                                    ->native(false)
-                                    ->label('City from')
-                                    ->relationship('fromCity', 'name')
-                                    ->options(fn($get) => TourService::getCities($get('../../../../country_id')))
-                                    ->reactive()
-                                    ->preload()
-                                    ->visible(fn($get) => $get('type') == ExpenseType::Train->value),
-
-                                Components\Select::make('to_city_id')
-                                    ->native(false)
-                                    ->label('City to')
-                                    ->relationship('toCity', 'name')
-                                    ->options(function ($get) {
-                                        $fromCityId = $get('from_city_id');
-                                        if (!empty($fromCityId)) {
-                                            $cities = TourService::getCities($get('../../../../country_id'), false);
-                                            return $cities->filter(fn($city) => $city->id != $fromCityId)->pluck(
-                                                'name',
-                                                'id'
-                                            );
-                                        }
-
-                                        return [];
-                                    })
-                                    ->reactive()
-                                    ->preload()
-                                    ->visible(fn($get) => $get('type') == ExpenseType::Train->value),
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
-
-                            Components\Grid::make()->schema([
-                                Components\Select::make('train_class')
-                                    ->native(false)
-                                    ->label('Train class')
-                                    ->options(TrainClass::class),
-
-                                Components\Select::make('status')
-                                    ->native(false)
-                                    ->label('Status')
-                                    ->options(ExpenseStatus::class),
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
-
-                            Components\Grid::make()->schema([
-                                Components\TimePicker::make('arrival_time')
-                                    ->label('Arrival time'),
-
-                                Components\TimePicker::make('departure_time')
-                                    ->label('Departure time'),
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
-
-
                             // Plane
-                            Components\Grid::make()->schema([
-                                Components\Select::make('from_city_id')
-                                    ->native(false)
-                                    ->label('City from')
-                                    ->relationship('fromCity', 'name')
-                                    ->options(fn($get) => TourService::getCities($get('../../../../country_id')))
-                                    ->reactive()
-                                    ->preload()
-                                    ->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
+                            Components\Fieldset::make('Plane info')->schema([
+
+                                Components\TextInput::make('price')
+                                    ->label('Price')
+                                    ->required(),
 
                                 Components\Select::make('to_city_id')
                                     ->native(false)
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
                                     ->options(function ($get) {
-                                        $fromCityId = $get('from_city_id');
-                                        if (!empty($fromCityId)) {
+                                        $localCityId = $get('../../city_id');
+                                        if (!empty($localCityId)) {
                                             $cities = TourService::getCities($get('../../../../country_id'), false);
-                                            return $cities->filter(fn($city) => $city->id != $fromCityId)->pluck(
+                                            return $cities->filter(fn($city) => $city->id != $localCityId)->pluck(
                                                 'name',
                                                 'id'
                                             );
@@ -485,19 +526,25 @@ class TourTpsResource extends Resource
                                         return [];
                                     })
                                     ->reactive()
-                                    ->preload()
-                                    ->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
+                                    ->preload(),
 
-                            Components\Grid::make()->schema([
-                                Components\TimePicker::make('arrival_time')->label('Arrival time'),
-                                Components\TimePicker::make('departure_time')->label('Departure time'),
-                                Components\Select::make('status')
-                                    ->native(false)
-                                    ->label('Status')
-                                    ->options(ExpenseStatus::class),
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
+                                Components\Grid::make(3)->schema([
+                                    Components\TimePicker::make('departure_time')->label('Departure time'),
 
+                                    Components\TimePicker::make('arrival_time')->label('Arrival time'),
+
+                                    Components\Select::make('status')
+                                        ->options(ExpenseStatus::class)
+                                        ->native(false)
+                                        ->label('Status'),
+
+                                ]),
+
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
+
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
 
                             // Conference
                             Components\Grid::make()->schema([
@@ -524,30 +571,6 @@ class TourTpsResource extends Resource
                                 Components\TextInput::make('total_price')
                                     ->label('Total price'),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
-
-
-                            // Lunch and Dinner
-                            Components\Grid::make()->schema([
-                                Components\Select::make('restaurant_id')
-                                    ->native(false)
-                                    ->label('Restaurant')
-                                    ->relationship('restaurant', 'name')
-                                    ->options(function ($get) {
-                                        $countryId = $get('../../../../country_id');
-                                        $globalCityId = $get('../../../../city_id');
-                                        $localCityId = $get('../../city_id');
-
-                                        return TourService::getRestaurants($localCityId, $globalCityId, $countryId);
-                                    })
-                                    ->reactive()
-                                    ->preload()
-                                    ->visible(fn($get) => self::isLunch($get('type'))),
-
-                                Components\TextInput::make('total_price')
-                                    ->label('Total price')
-                                    ->visible(fn($get) => self::isLunch($get('type'))),
-
-                            ])->visible(fn($get) => self::isLunch($get('type'))),
 
                             // Other
                             Components\Grid::make()->schema([

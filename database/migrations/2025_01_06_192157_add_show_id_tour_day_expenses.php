@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tour_day_expenses', function (Blueprint $table) {
-            $table->dropColumn('guide_type');
+            $table->unsignedBigInteger('show_id')->nullable();
+            $table->foreign('show_id')->references('id')->on('shows')->onDelete('cascade');
         });
     }
 
@@ -21,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-
+        Schema::table('tour_day_expenses', function (Blueprint $table) {
+            $table->dropForeign(['show_id']);
+            $table->dropColumn('show_id');
+        });
     }
 };

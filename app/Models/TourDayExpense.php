@@ -31,44 +31,42 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * Museum
  * @property int $museum_id
  * @property int $museum_item_id
- * @property int $museum_pax
  * @property string $museum_inn
  *
  * Guide
  * @property string $guide_name
- * @property int $guide_type
- * @property int $guide_pax
+ * @property string $guide_phone
  *
  * Transport
  * @property int $transport_type
  * @property int $transport_comfort_level
  * @property int $from_city_id
  * @property int $to_city_id
- * @property int $transport_pax
  *
  * Train
- * @property int $train_class
+ * @property string $train_name
+ * @property int $train_class_economy
+ * @property int $train_class_vip
+ * @property int $train_class_second
  * @property string $arrival_time
  * @property string $departure_time
- * @property int $train_pax
+ *
+ * Show
+ * @property int $show_id
  *
  * Conference
  * @property string $conference_name
  * @property int $coffee_break
- * @property int $conference_pax
- *
- * Plane
- * @property int $plane_pax
  *
  * Restaurant
  * @property int $restaurant_id
- * @property int $lunch_pax
  *
  * Other
  * @property string $other_name
  *
  * @property City $fromCity
  * @property City $toCity
+ * @property Show $show
  * @property TourDay $tourDay
  * @property Hotel $hotel
  * @property HotelRoomType $hotelRoomType
@@ -131,5 +129,10 @@ class TourDayExpense extends Model
     public function toCity(): BelongsTo
     {
         return $this->belongsTo(City::class, 'to_city_id');
+    }
+
+    public function show(): BelongsTo
+    {
+        return $this->belongsTo(Show::class);
     }
 }

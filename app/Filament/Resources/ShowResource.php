@@ -2,25 +2,22 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\HotelResource\Pages;
-use App\Filament\Resources\HotelResource\RelationManagers;
-use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
-use App\Models\Hotel;
+use App\Filament\Resources\ShowResource\Pages;
+use App\Filament\Resources\ShowResource\RelationManagers;
+use App\Models\Show;
 use App\Services\TourService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class HotelResource extends Resource
+class ShowResource extends Resource
 {
-    protected static ?string $model = Hotel::class;
+    protected static ?string $model = Show::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
-    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?int $navigationSort = 5;
     protected static ?string $navigationGroup = 'Manual';
 
     public static function form(Form $form): Form
@@ -30,9 +27,6 @@ class HotelResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required(),
                 Forms\Components\Select::make('country_id')
                     ->native(false)
                     ->relationship('country', 'name')
@@ -43,25 +37,35 @@ class HotelResource extends Resource
                     ->relationship('city', 'name')
                     ->preload()
                     ->options(fn ($get) => TourService::getCities($get('country_id'))),
+                Forms\Components\TextInput::make('price_per_person')
+                    ->required()
+                    ->numeric(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('country.name')
-                    ->label('Country')
-                    ->searchable()
+                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('city.name')
-                    ->label('City')
-                    ->searchable()
+                    ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('price_per_person')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -79,16 +83,16 @@ class HotelResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RoomTypesRelationManager::class,
+            //
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHotels::route('/'),
-            'create' => Pages\CreateHotel::route('/create'),
-            'edit' => Pages\EditHotel::route('/{record}/edit'),
+            'index' => Pages\ListShows::route('/'),
+            'create' => Pages\CreateShow::route('/create'),
+            'edit' => Pages\EditShow::route('/{record}/edit'),
         ];
     }
 }

@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tour_day_expenses', function (Blueprint $table) {
-            $table->dropColumn('guide_type');
+        Schema::table('tours', function (Blueprint $table) {
+            $table->float('hotel_expenses_total')->after('expenses')->nullable();
         });
     }
 
@@ -21,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-
+        Schema::table('tours', function (Blueprint $table) {
+            $table->dropColumn('hotel_expenses_total');
+        });
     }
 };

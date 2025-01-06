@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tour_day_expenses', function (Blueprint $table) {
-            $table->dropColumn('guide_type');
+            $table->string('guide_phone')->nullable()->after('guide_name');
         });
     }
 
@@ -21,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-
+        Schema::table('tour_day_expenses', function (Blueprint $table) {
+            $table->dropColumn('guide_phone');
+        });
     }
 };

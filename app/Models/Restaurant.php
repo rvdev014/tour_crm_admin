@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property string $name
+ * @property string $email
  * @property int $country_id
  * @property int $city_id
+ * @property int $price_per_person
  *
  * @property Country $country
  * @property City $city
@@ -20,8 +22,10 @@ class Restaurant extends Model
 
     protected $fillable = [
         'name',
+        'email',
         'country_id',
         'city_id',
+        'price_per_person',
     ];
 
     public function country(): BelongsTo

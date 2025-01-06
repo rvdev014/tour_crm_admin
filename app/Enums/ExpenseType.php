@@ -16,13 +16,30 @@ enum ExpenseType: int
     case Show = 10;
     case Conference = 11;
 
+    public static function casesOptions(): array
+    {
+        return [
+            1 => self::Hotel->getLabel(),
+            2 => self::Guide->getLabel(),
+            3 => self::Transport->getLabel(),
+            4 => self::Museum->getLabel(),
+            5 => self::Lunch->getLabel(),
+            6 => self::Dinner->getLabel(),
+            8 => self::Train->getLabel(),
+            9 => self::Plane->getLabel(),
+            10 => self::Show->getLabel(),
+            11 => self::Conference->getLabel(),
+            7 => self::Other->getLabel(),
+        ];
+    }
+
     public function getLabel(): string
     {
         return match ($this) {
             self::Hotel => 'Hotel',
             self::Guide => 'Guide',
             self::Transport => 'Transport',
-            self::Museum => 'Ticket',
+            self::Museum => 'Museum',
             self::Lunch => 'Lunch',
             self::Dinner => 'Dinner',
             self::Other => 'Other',
@@ -42,6 +59,11 @@ enum ExpenseType: int
             self::Museum => 'bg-red-500',
             self::Lunch => 'bg-pink-500',
             self::Dinner => 'bg-purple-500',
+            self::Other => throw new \Exception('To be implemented'),
+            self::Train => throw new \Exception('To be implemented'),
+            self::Plane => throw new \Exception('To be implemented'),
+            self::Show => throw new \Exception('To be implemented'),
+            self::Conference => throw new \Exception('To be implemented'),
         };
     }
 }
