@@ -5,12 +5,13 @@ namespace App\Filament\Resources\TourTpsResource\Pages;
 use App\Enums\ExpenseType;
 use App\Filament\Resources\TourTpsResource;
 use App\Models\TourHotelRoomType;
+use App\Services\TourService;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTour extends EditRecord
 {
-    use SaveTour;
+    use SaveTourTps;
 
     protected static string $resource = TourTpsResource::class;
 
@@ -53,7 +54,7 @@ class EditTour extends EditRecord
             }
         }
 
-        $this->sendMails($data, $days);
+        TourService::sendMails($data, $days);
 
         return $data;
     }

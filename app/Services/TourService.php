@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
 use App\Enums\TourType;
+use App\Mail\HotelMail;
+use App\Mail\RestaurantMail;
 use App\Models\City;
 use App\Models\Company;
 use App\Models\Hotel;
@@ -24,6 +26,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Number;
 
 class TourService
@@ -319,5 +322,52 @@ class TourService
     public static function getCompanies(CompanyType $type)
     {
         return Company::where('type', $type)->get()->pluck('name', 'id');
+    }
+
+    public static function sendMails($tourData, $days): void
+    {
+        $hotelsData = [];
+        $restaurantsData = [];
+        foreach ($days as $day) {
+            foreach ($day['expenses'] as $expense) {
+                switch ($expense['type']) {
+                    case ExpenseType::Hotel->value:
+                        $hotelId = $expense['hotel_id'];
+                        if ($hotel = Hotel::find($hotelId)) {
+                            $hotelsData[$day['date']] = [
+                                'hotel' => $hotel,
+                                'expense' => $expense,
+                            ];
+                        }
+                        break;
+                    case ExpenseType::Lunch->value:
+                    case ExpenseType::Dinner->value:
+                        $restaurantId = $expense['restaurant_id'];
+                        if ($restaurant = Restaurant::find($restaurantId)) {
+                            $restaurantsData[$day['date']] = [
+                                'restaurant' => $restaurant,
+                                'expense' => $expense,
+                            ];
+                        }
+                        break;
+                }
+            }
+        }
+
+        foreach ($hotelsData as $date => $hotelItem) {
+            /** @var Hotel $hotel */
+            $hotel = $hotelItem['hotel'];
+            if (!empty($hotel->email)) {
+                Mail::to($hotel->email)->send(new HotelMail($date, $hotelItem['expense'], $tourData));
+            }
+        }
+
+        foreach ($restaurantsData as $date => $restaurantItem) {
+            /** @var Restaurant $restaurant */
+            $restaurant = $restaurantItem['restaurant'];
+            if (!empty($restaurant->email)) {
+                Mail::to($restaurant->email)->send(new RestaurantMail($date, $restaurantItem['expense'], $tourData));
+            }
+        }
     }
 }

@@ -182,35 +182,6 @@ class TourTpsResource extends Resource
                                     })
                                     ->required()
                                     ->reactive(),
-
-                                /*Components\TextInput::make('price')
-                                    ->label('Price')
-                                    ->afterStateUpdated(function ($get, $set) {
-                                        $price = !empty($get('price')) ? $get('price') : 0;
-                                        $pax = !empty($get('pax')) ? $get('pax') : 0;
-
-                                        if (self::isLunch($get('type')) || $get('type') == ExpenseType::Show->value) {
-                                            if (!$pax) {
-                                                $set('total_price', $price);
-                                            } else {
-                                                $set('total_price', $price * $pax);
-                                            }
-                                        }
-
-                                        if ($get('type') == ExpenseType::Conference->value) {
-                                            $coffeeBreak = !empty($get('coffee_break')) ? $get('coffee_break') : 0;
-                                            $set('total_price', $price + ($price * $coffeeBreak / 100));
-                                        }
-                                    })
-                                    ->live(onBlur: true)
-                                    ->required()
-                                    ->visible(fn($get) => self::isPriceVisible($get('type'))),*/
-
-                                /*Components\TextInput::make('pax')
-                                    ->label('Pax')
-                                    ->afterStateUpdated(fn($get, $set) => TourService::onPax($get, $set))
-                                    ->live(onBlur: true)
-                                    ->visible(fn($get) => self::isPaxVisible($get('type'))),*/
                             ]),
 
                             // Hotel
@@ -545,39 +516,18 @@ class TourTpsResource extends Resource
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
 
-                            // Conference
-                            Components\Grid::make()->schema([
-                                Components\TimePicker::make('conference_name')
-                                    ->label('Conference name'),
-
-                                Components\Select::make('status')
-                                    ->native(false)
-                                    ->label('Status')
-                                    ->options(ExpenseStatus::class),
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
-
-                            Components\Grid::make()->schema([
-                                Components\TextInput::make('coffee_break')
-                                    ->suffix('%')
-                                    ->afterStateUpdated(function ($get, $set) {
-                                        $price = !empty($get('price')) ? $get('price') : 0;
-                                        $coffeeBreak = !empty($get('coffee_break')) ? $get('coffee_break') : 0;
-                                        $set('total_price', $price + ($price * $coffeeBreak / 100));
-                                    })
-                                    ->live(onBlur: true)
-                                    ->label('Coffee break'),
-
-                                Components\TextInput::make('total_price')
-                                    ->label('Total price'),
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
-
                             // Other
-                            Components\Grid::make()->schema([
-
+                            Components\Fieldset::make('Plane info')->schema([
                                 Components\TextInput::make('other_name')
-                                    ->label('Name')
-                                    ->visible(fn($get) => $get('type') == ExpenseType::Other->value),
+                                    ->label('Name'),
 
+                                Components\TextInput::make('price')
+                                    ->label('Price')
+                                    ->required(),
+
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Other->value),
 
                         ])
@@ -590,22 +540,6 @@ class TourTpsResource extends Resource
         return in_array($expenseType, [
 //            ExpenseType::Hotel->value,
             ExpenseType::Guide->value,
-            ExpenseType::Transport->value,
-            ExpenseType::Train->value,
-            ExpenseType::Plane->value,
-            ExpenseType::Show->value,
-            ExpenseType::Conference->value,
-            ExpenseType::Museum->value,
-            ExpenseType::Lunch->value,
-            ExpenseType::Dinner->value
-        ]);
-    }
-
-    public static function isPaxVisible($expenseType): bool
-    {
-        return in_array($expenseType, [
-//            ExpenseType::Hotel->value,
-//            ExpenseType::Guide->value,
             ExpenseType::Transport->value,
             ExpenseType::Train->value,
             ExpenseType::Plane->value,

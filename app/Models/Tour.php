@@ -42,6 +42,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property Collection<TourHotelRoomType> $hotelRoomTypes
  * @property Collection<TourDayExpense> $daysExpenses
  * @property Collection<TourHotel> $hotels
+ * @property Collection<TourPassenger> $passengers
  */
 class Tour extends Model
 {
@@ -120,4 +121,8 @@ class Tour extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function passengers(): HasMany
+    {
+        return $this->hasMany(TourPassenger::class);
+    }
 }

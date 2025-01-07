@@ -13,7 +13,7 @@ use App\Models\Show;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 
-trait SaveTour
+trait SaveTourTps
 {
     protected function getExpensesData($days, $totalPax)
     {
@@ -73,52 +73,5 @@ trait SaveTour
             }
         }
         return $hotelExpensesTotal;
-    }
-
-    protected function sendMails($tourData, $days): void
-    {
-        $hotelsData = [];
-        $restaurantsData = [];
-        foreach ($days as $day) {
-            foreach ($day['expenses'] as $expense) {
-                switch ($expense['type']) {
-                    case ExpenseType::Hotel->value:
-                        $hotelId = $expense['hotel_id'];
-                        if ($hotel = Hotel::find($hotelId)) {
-                            $hotelsData[$day['date']] = [
-                                'hotel' => $hotel,
-                                'expense' => $expense,
-                            ];
-                        }
-                        break;
-                    case ExpenseType::Lunch->value:
-                    case ExpenseType::Dinner->value:
-                        $restaurantId = $expense['restaurant_id'];
-                        if ($restaurant = Restaurant::find($restaurantId)) {
-                            $restaurantsData[$day['date']] = [
-                                'restaurant' => $restaurant,
-                                'expense' => $expense,
-                            ];
-                        }
-                        break;
-                }
-            }
-        }
-
-        foreach ($hotelsData as $date => $hotelItem) {
-            /** @var Hotel $hotel */
-            $hotel = $hotelItem['hotel'];
-            if (!empty($hotel->email)) {
-                Mail::to($hotel->email)->send(new HotelMail($date, $hotelItem['expense'], $tourData));
-            }
-        }
-
-        foreach ($restaurantsData as $date => $restaurantItem) {
-            /** @var Restaurant $restaurant */
-            $restaurant = $restaurantItem['restaurant'];
-            if (!empty($restaurant->email)) {
-                Mail::to($restaurant->email)->send(new RestaurantMail($date, $restaurantItem['expense'], $tourData));
-            }
-        }
     }
 }

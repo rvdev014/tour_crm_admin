@@ -22,16 +22,14 @@ enum CompanyType: int implements HasLabel, HasIcon, HasColor
     public function getCssClass(): string
     {
         return match ($this) {
-            self::TPS => 'badge badge-primary',
-            self::Corporate => 'badge badge-secondary',
+            self::TPS, self::Corporate => '',
         };
     }
 
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::TPS => 'primary',
-            self::Corporate => 'secondary',
+            self::TPS, self::Corporate => '',
         };
     }
 

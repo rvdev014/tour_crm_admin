@@ -2,30 +2,33 @@
 
 namespace App\Filament\Resources\TourCorporateResource\Pages;
 
-use App\Enums\ExpenseType;
 use App\Enums\TourType;
 use App\Filament\Resources\TourCorporateResource;
-use App\Models\Transfer;
-use App\Services\TourService;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Arr;
 
 class CreateTour extends CreateRecord
 {
+    use SaveTourCorporate;
+
     protected static string $resource = TourCorporateResource::class;
     protected static ?string $title = 'Create Tour Corporate';
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['type'] = TourType::Corporate;
-        $data['group_number'] = TourService::getGroupNumber(TourType::Corporate);
         $data['created_by'] = auth()->id();
+        $totalPax = $this->form->getRawState()['passengers'] ?? 0;
 
         $days = collect($this->form->getRawState()['days'] ?? []);
-        $totalExpenses = $days->flatMap(fn($day) => $day['expenses'])->sum('price');
+        $expensesData = $this->getExpensesData($days, $totalPax);
+        $totalExpenses = $expensesData->sum('price');
+
+        // Calculate total expenses and income
 
         $data['expenses'] = $totalExpenses;
         $data['income'] = $data['price'] - $totalExpenses;
+
+//        TourService::sendMails($data, $days);
 
         return $data;
     }
