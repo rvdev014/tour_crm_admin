@@ -53,6 +53,8 @@ class EditTour extends EditRecord
             }
         }
 
+        $this->sendMails($data, $days);
+
         return $data;
     }
 

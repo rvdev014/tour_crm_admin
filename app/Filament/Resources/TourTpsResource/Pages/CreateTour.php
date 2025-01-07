@@ -36,7 +36,7 @@ class CreateTour extends CreateRecord
         $data['expenses'] = $totalExpenses;
         $data['income'] = $data['price'] - $totalExpenses;
 
-        $this->sendMails($expensesData);
+        $this->sendMails($data, $days);
 
         return $data;
     }

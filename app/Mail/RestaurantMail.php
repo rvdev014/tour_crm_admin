@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -13,12 +14,18 @@ class RestaurantMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    protected $date;
+    protected $expense;
+    protected $tourData;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($date, $expense, $tourData)
     {
-        //
+        $this->date = $date;
+        $this->expense = $expense;
+        $this->tourData = $tourData;
     }
 
     /**
@@ -38,6 +45,11 @@ class RestaurantMail extends Mailable
     {
         return new Content(
             view: 'mails.restaurant',
+            with: [
+                'date' => Carbon::parse($this->date)->format('d-m-Y'),
+                'expense' => $this->expense,
+                'tourData' => $this->tourData,
+            ],
         );
     }
 

@@ -75,36 +75,46 @@ trait SaveTour
         return $hotelExpensesTotal;
     }
 
-    protected function sendMails($expensesData): void
+    protected function sendMails($tourData, $days): void
     {
-        /** @var Hotel[] $hotels */
-        /** @var Restaurant[] $restaurants */
-        $hotels = [];
-        $restaurants = [];
-        foreach ($expensesData as $expense) {
-            switch ($expense['type']) {
-                case ExpenseType::Hotel->value:
-                    $hotelId = $expense['hotel_id'];
-                    if ($hotel = Hotel::find($hotelId)) {
-                        $hotels[$hotelId] = $hotel;
-                    }
-                    break;
-                case ExpenseType::Lunch->value:
-                case ExpenseType::Dinner->value:
-                    $restaurantId = $expense['restaurant_id'];
-                    if ($restaurant = Restaurant::find($restaurantId)) {
-                        $restaurants[$restaurantId] = $restaurant;
-                    }
-                    break;
+        $hotelsData = [];
+        $restaurantsData = [];
+        foreach ($days as $day) {
+            foreach ($day['expenses'] as $expense) {
+                switch ($expense['type']) {
+                    case ExpenseType::Hotel->value:
+                        $hotelId = $expense['hotel_id'];
+                        if ($hotel = Hotel::find($hotelId)) {
+                            $hotelsData[$day['date']] = [
+                                'hotel' => $hotel,
+                                'expense' => $expense,
+                            ];
+                        }
+                        break;
+                    case ExpenseType::Lunch->value:
+                    case ExpenseType::Dinner->value:
+                        $restaurantId = $expense['restaurant_id'];
+                        if ($restaurant = Restaurant::find($restaurantId)) {
+                            $restaurantsData[$day['date']] = [
+                                'restaurant' => $restaurant,
+                                'expense' => $expense,
+                            ];
+                        }
+                        break;
+                }
             }
         }
 
-        foreach ($hotels as $hotel) {
-            Mail::to($hotel->email)->send(new HotelMail());
+        foreach ($hotelsData as $date => $hotelItem) {
+            /** @var Hotel $hotel */
+            $hotel = $hotelItem['hotel'];
+            Mail::to($hotel->email)->send(new HotelMail($date, $hotelItem['expense'], $tourData));
         }
 
-        foreach ($restaurants as $restaurant) {
-            Mail::to($restaurant->email)->send(new RestaurantMail());
+        foreach ($restaurantsData as $date => $restaurantItem) {
+            /** @var Restaurant $restaurant */
+            $restaurant = $restaurantItem['restaurant'];
+            Mail::to($restaurant->email)->send(new RestaurantMail($date, $restaurantItem['expense'], $tourData));
         }
     }
 }
