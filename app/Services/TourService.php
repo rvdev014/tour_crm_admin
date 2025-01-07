@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
 use App\Enums\TourType;
 use App\Models\City;
@@ -22,6 +23,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Number;
 
 class TourService
@@ -197,17 +199,23 @@ class TourService
             ->sum('price');
     }
 
+    public static function tourNextId(): int
+    {
+        $toursTableSequence = DB::selectOne('SELECT last_value + 1 AS next_id FROM tours_id_seq;');
+        return ($toursTableSequence?->next_id ?? 1);
+    }
+
     public static function getGroupNumber(TourType $tourType): string
     {
         $userName = auth()->user()->name;
         $firstLetter = substr($userName, 0, 1);
-        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
+//        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
 
         if ($tourType == TourType::TPS) {
-            $number = self::threeDigit($corporateToursCount);
+            $number = self::threeDigit(self::tourNextId());
             $lastLetter = 'T';
         } else {
-            $number = self::addHundred($corporateToursCount);
+            $number = self::addHundred(self::tourNextId());
             $lastLetter = 'C';
         }
 
@@ -306,5 +314,10 @@ class TourService
                 })->toArray()
             )
         ];
+    }
+
+    public static function getCompanies(CompanyType $type)
+    {
+        return Company::where('type', $type)->get()->pluck('name', 'id');
     }
 }

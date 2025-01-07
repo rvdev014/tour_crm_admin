@@ -19,7 +19,7 @@ class CreateTour extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['type'] = TourType::TPS;
-        $data['group_number'] = TourService::getGroupNumber(TourType::TPS);
+//        $data['group_number'] = TourService::getGroupNumber(TourType::TPS);
         $data['created_by'] = auth()->id();
         $totalPax = $data['pax'] + ($data['leader_pax'] ?? 0);
 

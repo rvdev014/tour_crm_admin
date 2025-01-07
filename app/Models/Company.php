@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CompanyType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name
  * @property string $inn
  * @property string $comment
+ * @property CompanyType $type
  * @property int $additional_percent
  */
 class Company extends Model
@@ -21,7 +23,12 @@ class Company extends Model
     protected $fillable = [
         'name',
         'inn',
+        'type',
         'comment',
         'additional_percent'
+    ];
+
+    protected $casts = [
+        'type' => CompanyType::class,
     ];
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\CompanyType;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\GuideType;
@@ -28,7 +29,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class TourTpsResource extends Resource
 {
@@ -50,19 +50,18 @@ class TourTpsResource extends Resource
     {
         return $form->schema([
             Components\Fieldset::make('Tour details')->schema([
-                Components\TextInput::make('tour_id')
+                Components\TextInput::make('group_number')
                     ->formatStateUsing(function ($record) {
                         if (!empty($record)) {
-                            return $record->id;
+                            return $record->group_number;
                         }
-                        // last id from tours table
-                        $toursTableSequence = DB::selectOne('SELECT last_value + 1 AS next_id FROM tours_id_seq;');
-                        return ($toursTableSequence?->next_id ?? 1);
+                        return TourService::getGroupNumber(TourType::TPS);
                     })
                     ->readOnly(),
                 Components\Select::make('company_id')
                     ->native(false)
                     ->relationship('company', 'name')
+                    ->options(TourService::getCompanies(CompanyType::TPS))
                     ->reactive()
                     ->required(),
                 Components\Select::make('country_id')
