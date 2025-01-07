@@ -108,13 +108,17 @@ trait SaveTour
         foreach ($hotelsData as $date => $hotelItem) {
             /** @var Hotel $hotel */
             $hotel = $hotelItem['hotel'];
-            Mail::to($hotel->email)->send(new HotelMail($date, $hotelItem['expense'], $tourData));
+            if (!empty($hotel->email)) {
+                Mail::to($hotel->email)->send(new HotelMail($date, $hotelItem['expense'], $tourData));
+            }
         }
 
         foreach ($restaurantsData as $date => $restaurantItem) {
             /** @var Restaurant $restaurant */
             $restaurant = $restaurantItem['restaurant'];
-            Mail::to($restaurant->email)->send(new RestaurantMail($date, $restaurantItem['expense'], $tourData));
+            if (!empty($restaurant->email)) {
+                Mail::to($restaurant->email)->send(new RestaurantMail($date, $restaurantItem['expense'], $tourData));
+            }
         }
     }
 }
