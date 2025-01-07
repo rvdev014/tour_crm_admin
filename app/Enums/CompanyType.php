@@ -14,8 +14,8 @@ enum CompanyType: int implements HasLabel, HasIcon, HasColor
     public function getLabel(): string
     {
         return match ($this) {
-            self::TPS => 'Guide',
-            self::Corporate => 'Driver',
+            self::TPS => 'TPS',
+            self::Corporate => 'Corporate',
         };
     }
 
