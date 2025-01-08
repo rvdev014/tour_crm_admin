@@ -77,11 +77,11 @@ class TourTpsResource extends Resource
                     ->preload()
                     ->reactive(),
                 Components\DatePicker::make('start_date')
-                    ->format('d.m.Y')
+                    ->displayFormat('d.m.Y')
                     ->label('Arrival time')
                     ->required(),
                 Components\DatePicker::make('end_date')
-                    ->format('d.m.Y')
+                    ->displayFormat('d.m.Y')
                     ->label('Departure time')
                     ->required(),
                 Components\TextInput::make('pax')
@@ -138,7 +138,7 @@ class TourTpsResource extends Resource
                 ->schema([
                     Components\Grid::make()->schema([
                         Components\DatePicker::make('date')
-                            ->format('d.m.Y')
+                            ->displayFormat('d.m.Y')
                             ->required()
                             ->reactive(),
                         Components\Select::make('city_id')

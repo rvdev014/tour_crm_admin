@@ -142,7 +142,7 @@ class TourCorporateResource extends Resource
                 ->schema([
                     Components\Grid::make()->schema([
                         Components\DatePicker::make('date')
-                            ->format('d.m.Y')
+                            ->displayFormat('d.m.Y')
                             ->required()
                             ->reactive(),
                         Components\Select::make('city_id')
