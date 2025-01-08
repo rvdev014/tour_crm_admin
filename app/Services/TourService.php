@@ -9,6 +9,7 @@ use App\Mail\HotelMail;
 use App\Mail\RestaurantMail;
 use App\Models\City;
 use App\Models\Company;
+use App\Models\Country;
 use App\Models\Hotel;
 use App\Models\HotelRoomType;
 use App\Models\Museum;
@@ -67,8 +68,15 @@ class TourService
         return [];
     }
 
-    public static function getCities($countryId, bool $isPluck = true, $isAll = false): array|Collection
+    public static function getCities($countryId = null, bool $isPluck = true, $isAll = false): array|Collection
     {
+        if (!$countryId) {
+            $countryId = Country::query()->where('name', 'Uzbekistan')->first()?->id;
+            if (!$countryId) {
+                throw new \Exception('Country \'Uzbekistan\' not found');
+            }
+        }
+
         if (!empty($countryId)) {
             $result = City::where('country_id', $countryId)->get();
             return $isPluck ? $result->pluck('name', 'id') : $result;

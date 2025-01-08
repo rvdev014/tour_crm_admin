@@ -58,8 +58,10 @@ class TourCorporateResource_old extends Resource
                 })
                 ->reactive(),
             Components\DatePicker::make('start_date')
+                ->format('d.m.Y')
                 ->required(),
             Components\DatePicker::make('end_date')
+                ->format('d.m.Y')
                 ->required(),
             Components\Select::make('country_id')
                 ->native(false)

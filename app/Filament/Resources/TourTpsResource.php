@@ -75,12 +75,13 @@ class TourTpsResource extends Resource
                     ->relationship('city', 'name')
                     ->options(fn($get) => TourService::getCities($get('country_id')))
                     ->preload()
-                    ->reactive()
-                    ->required(),
+                    ->reactive(),
                 Components\DatePicker::make('start_date')
+                    ->format('d.m.Y')
                     ->label('Arrival time')
                     ->required(),
                 Components\DatePicker::make('end_date')
+                    ->format('d.m.Y')
                     ->label('Departure time')
                     ->required(),
                 Components\TextInput::make('pax')
@@ -137,12 +138,13 @@ class TourTpsResource extends Resource
                 ->schema([
                     Components\Grid::make()->schema([
                         Components\DatePicker::make('date')
+                            ->format('d.m.Y')
                             ->required()
                             ->reactive(),
                         Components\Select::make('city_id')
                             ->native(false)
                             ->relationship('city', 'name')
-                            ->options(fn($get) => TourService::getCities($get('../../country_id')))
+                            ->options(fn($get) => TourService::getCities())
                             ->reactive()
                             ->preload()
                             ->required(),
@@ -252,18 +254,7 @@ class TourTpsResource extends Resource
                                     ->native(false)
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
-                                    ->options(function ($get) {
-                                        $localCityId = $get('../../city_id');
-                                        if (!empty($localCityId)) {
-                                            $cities = TourService::getCities($get('../../../../country_id'), false);
-                                            return $cities->filter(fn($city) => $city->id != $localCityId)->pluck(
-                                                'name',
-                                                'id'
-                                            );
-                                        }
-
-                                        return [];
-                                    })
+                                    ->options(TourService::getCities())
                                     ->preload()
                                     ->reactive()
                                     ->preload(),
@@ -394,18 +385,7 @@ class TourTpsResource extends Resource
                                         ->native(false)
                                         ->label('City to')
                                         ->relationship('toCity', 'name')
-                                        ->options(function ($get) {
-                                            $localCityId = $get('../../city_id');
-                                            if (!empty($localCityId)) {
-                                                $cities = TourService::getCities($get('../../../../country_id'), false);
-                                                return $cities->filter(fn($city) => $city->id != $localCityId)->pluck(
-                                                    'name',
-                                                    'id'
-                                                );
-                                            }
-
-                                            return [];
-                                        })
+                                        ->options(TourService::getCities())
                                         ->reactive()
                                         ->preload(),
 
@@ -483,18 +463,7 @@ class TourTpsResource extends Resource
                                     ->native(false)
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
-                                    ->options(function ($get) {
-                                        $localCityId = $get('../../city_id');
-                                        if (!empty($localCityId)) {
-                                            $cities = TourService::getCities($get('../../../../country_id'), false);
-                                            return $cities->filter(fn($city) => $city->id != $localCityId)->pluck(
-                                                'name',
-                                                'id'
-                                            );
-                                        }
-
-                                        return [];
-                                    })
+                                    ->options(TourService::getCities())
                                     ->reactive()
                                     ->preload(),
 
@@ -535,22 +504,6 @@ class TourTpsResource extends Resource
         ]);
     }
 
-    public static function isPriceVisible($expenseType): bool
-    {
-        return in_array($expenseType, [
-//            ExpenseType::Hotel->value,
-            ExpenseType::Guide->value,
-            ExpenseType::Transport->value,
-            ExpenseType::Train->value,
-            ExpenseType::Plane->value,
-            ExpenseType::Show->value,
-            ExpenseType::Conference->value,
-            ExpenseType::Museum->value,
-            ExpenseType::Lunch->value,
-            ExpenseType::Dinner->value
-        ]);
-    }
-
     public static function isLunch($expenseType): bool
     {
         return in_array($expenseType, [ExpenseType::Lunch->value, ExpenseType::Dinner->value]);
@@ -562,7 +515,6 @@ class TourTpsResource extends Resource
             ->striped()
             ->filters([
                 Tables\Filters\Filter::make('country_id')
-                    ->label('Group number')
                     ->form([
                         Components\Select::make('country_id')
                             ->native(false)
