@@ -193,12 +193,7 @@ class TourTpsResource extends Resource
                                         ->native(false)
                                         ->label('Hotel')
                                         ->relationship('hotel', 'name')
-                                        ->options(function ($get) {
-                                            $countryId = $get('../../../../country_id');
-                                            $globalCityId = $get('../../../../city_id');
-                                            $localCityId = $get('../../city_id');
-                                            return TourService::getHotels($localCityId, $globalCityId, $countryId);
-                                        })
+                                        ->options(fn ($get) => TourService::getHotels($get('../../city_id')))
                                         ->preload()
                                         ->reactive(),
                                     Components\Select::make('status')
@@ -290,12 +285,7 @@ class TourTpsResource extends Resource
                                     ->label('Museum')
                                     ->native(false)
                                     ->relationship('museum', 'name')
-                                    ->options(function ($get) {
-                                        $countryId = $get('../../../../country_id');
-                                        $globalCityId = $get('../../../../city_id');
-                                        $localCityId = $get('../../city_id');
-                                        return TourService::getMuseums($localCityId, $globalCityId, $countryId);
-                                    })
+                                    ->options(fn ($get) => TourService::getMuseums($get('../../city_id')))
                                     ->createOptionForm([
                                         Components\Grid::make()->schema([
                                             Components\TextInput::make('name')
@@ -349,13 +339,7 @@ class TourTpsResource extends Resource
                                     ->native(false)
                                     ->label('Restaurant')
                                     ->relationship('restaurant', 'name')
-                                    ->options(function ($get) {
-                                        $countryId = $get('../../../../country_id');
-                                        $globalCityId = $get('../../../../city_id');
-                                        $localCityId = $get('../../city_id');
-
-                                        return TourService::getRestaurants($localCityId, $globalCityId, $countryId);
-                                    })
+                                    ->options(fn ($get) => TourService::getRestaurants($get('../../city_id')))
                                     ->reactive()
                                     ->preload(),
 
@@ -431,13 +415,7 @@ class TourTpsResource extends Resource
                                         ->native(false)
                                         ->label('Show')
                                         ->relationship('show', 'name')
-                                        ->options(function ($get) {
-                                            $countryId = $get('../../../../country_id');
-                                            $globalCityId = $get('../../../../city_id');
-                                            $localCityId = $get('../../city_id');
-
-                                            return TourService::getShows($localCityId, $globalCityId, $countryId);
-                                        })
+                                        ->options(fn ($get) => TourService::getShows($get('../../city_id')))
                                         ->reactive()
                                         ->preload()
                                         ->required(),

@@ -88,64 +88,24 @@ class TourService
         return [];
     }
 
-    public static function getRestaurants($localCityId, $globalCityId, $countryId): array|Collection
+    public static function getRestaurants($localCityId): array|Collection
     {
-        $result = [];
-        if (!empty($localCityId)) {
-            $result = Restaurant::where('city_id', $localCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($globalCityId)) {
-            $result = Restaurant::where('city_id', $globalCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($countryId)) {
-            $result = Restaurant::where('country_id', $countryId)->get()->pluck('name', 'id');
-        }
-        return $result;
+        return Restaurant::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
-    public static function getHotels($localCityId, $globalCityId, $countryId): array|Collection
+    public static function getHotels($localCityId): array|Collection
     {
-        $result = [];
-        if (!empty($localCityId)) {
-            $result = Hotel::where('city_id', $localCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($globalCityId)) {
-            $result = Hotel::where('city_id', $globalCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($countryId)) {
-            $result = Hotel::where('country_id', $countryId)->get()->pluck('name', 'id');
-        }
-        return $result;
+        return Hotel::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
-    public static function getMuseums($localCityId, $globalCityId, $countryId): array|Collection
+    public static function getMuseums($localCityId): array|Collection
     {
-        $result = [];
-        if (!empty($localCityId)) {
-            $result = Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($globalCityId)) {
-            $result = Museum::where('city_id', $globalCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($countryId)) {
-            $result = Museum::where('country_id', $countryId)->get()->pluck('name', 'id');
-        }
-        return $result;
+        return Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
-    public static function getShows($localCityId, $globalCityId, $countryId): array|Collection
+    public static function getShows($localCityId): array|Collection
     {
-        $result = [];
-        if (!empty($localCityId)) {
-            $result = Show::where('city_id', $localCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($globalCityId)) {
-            $result = Show::where('city_id', $globalCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($countryId)) {
-            $result = Show::where('country_id', $countryId)->get()->pluck('name', 'id');
-        }
-        return $result;
+        return Show::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
     public static function isVisible(Tour $tour): bool
