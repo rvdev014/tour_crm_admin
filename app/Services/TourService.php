@@ -103,6 +103,11 @@ class TourService
         return Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
+    public static function getMuseumItems($museumId): array|Collection
+    {
+        return MuseumItem::where('museum_id', $museumId)->get()->pluck('name', 'id');
+    }
+
     public static function getShows($localCityId): array|Collection
     {
         return Show::where('city_id', $localCityId)->get()->pluck('name', 'id');
@@ -183,12 +188,13 @@ class TourService
 //        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
 
         if ($tourType == TourType::TPS) {
-            $number = self::threeDigit(self::tourNextId());
+//            $number = self::threeDigit(self::tourNextId());
             $lastLetter = 'T';
         } else {
-            $number = self::addHundred(self::tourNextId());
             $lastLetter = 'C';
         }
+
+        $number = self::addHundred(self::tourNextId());
 
         $currentYear = date('y');
         return "{$firstLetter}{$number}{$currentYear}{$lastLetter}";
@@ -211,6 +217,17 @@ class TourService
         }
         $company = Company::find($companyId);
         return $company?->additional_percent ?? 0;
+    }
+
+    public static function getCompanyAddPercent($companyId): ?int
+    {
+        $addPercent = null;
+        if ($companyId) {
+            /** @var Company $company */
+            $company = Company::query()->find($companyId);
+            $addPercent = $company?->additional_percent ?? null;
+        }
+        return $addPercent;
     }
 
     public static function getHotelPrice($hotelRoomTypeId, $additionalPercent): float|int
@@ -270,16 +287,16 @@ class TourService
         return [
             Grid::make(3)->schema(
                 RoomType::all()->map(function (RoomType $roomType) {
-                    return TextInput::make("hotel_type_{$roomType->id}")
+                    return TextInput::make("room_type_{$roomType->id}")
                         ->label($roomType->name)
                         ->formatStateUsing(function ($record) use ($roomType) {
                             if (!$record) {
                                 return 0;
                             }
-                            $roomType = $record->hotelRoomTypes->first(
-                                fn($hotelRoomType) => $hotelRoomType->hotel_room_type_id == $roomType->id
+                            $tourRoomType = $record->roomTypes->first(
+                                fn($item) => $item->room_type_id == $roomType->id
                             );
-                            return $roomType?->amount ?? 0;
+                            return $tourRoomType?->amount ?? 0;
                         })
                         ->numeric();
                 })->toArray()

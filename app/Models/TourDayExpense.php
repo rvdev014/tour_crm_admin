@@ -6,6 +6,7 @@ use App\Enums\EmployeeType;
 use App\Enums\ExpenseType;
 use App\Observers\TourDayExpenseObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * Museum
  * @property int $museum_id
  * @property int $museum_item_id
+ * @property array $museum_item_ids
  * @property string $museum_inn
  *
  * Guide
@@ -72,6 +74,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property HotelRoomType $hotelRoomType
  * @property Museum $museum
  * @property MuseumItem $museumItem
+ * @property Collection<MuseumItem> $museumItems
  * @property Restaurant $restaurant
  * @property Employee $guideEmployee
  */
@@ -89,6 +92,7 @@ class TourDayExpense extends Model
         'transport_time' => 'datetime',
         'car_ids' => 'array',
         'type' => ExpenseType::class,
+        'museum_item_ids' => 'array',
     ];
 
     public function tourDay(): BelongsTo

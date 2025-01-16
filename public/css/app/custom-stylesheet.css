@@ -2,7 +2,7 @@
     background: #1e4e6e;
 }
 
-.fi-sidebar-item-label, .fi-sidebar-group-label, .fi-sidebar-item-icon, .fi-fo-repeater-item-header  .fi-icon-btn-icon {
+.fi-sidebar-item-label, .fi-sidebar-group-label, .fi-sidebar-item-icon, .fi-icon-btn-icon {
     color: #fff!important;
 }
 
@@ -54,20 +54,3 @@
     transition: 0.2s ease-in-out;
 }
 
-
-.fi-topbar-open-sidebar-btn {
-    background: #d97706!important;
-    color: #fff!important;
-}
-
-.fi-input-wrp-suffix {
-    background-color: #d97706!important;
-    border-radius: 0 7px 7px 0;
-}
-
-.fi-input-wrp-suffix .fi-icon-btn-icon {
-    color: #fff!important;
-}
-.fi-input-wrp-suffix .fi-input-wrp-label {
-    color: #fff!important;
-}

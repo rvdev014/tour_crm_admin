@@ -2,17 +2,17 @@
 
 namespace App\Filament\Resources\TourTpsResource\Pages;
 
-use App\Enums\ExpenseType;
+use App\Enums\ExpenseStatus;
+use App\Enums\TourStatus;
 use App\Enums\TourType;
 use App\Filament\Resources\TourTpsResource;
-use App\Models\TourHotelRoomType;
+use App\Models\TourRoomType;
+use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateTour extends CreateRecord
 {
-    use SaveTourTps;
-
     protected static string $resource = TourTpsResource::class;
     protected static ?string $title = 'Create Tour TPS';
 
@@ -20,18 +20,21 @@ class CreateTour extends CreateRecord
     {
         $data['type'] = TourType::TPS;
         $data['created_by'] = auth()->id();
-        $totalPax = $data['pax'] + ($data['leader_pax'] ?? 0);
 
         $days = collect($this->form->getRawState()['days'] ?? []);
-        $expensesData = $this->getExpensesData($days, $totalPax);
+        $allExpenses = $days->flatMap(fn($day) => $day['expenses']);
 
-        $hotelExpenses = $expensesData->filter(fn($expense) => $expense['type'] == ExpenseType::Hotel->value);
-        $roomTypeAmounts = $this->getRoomingAmounts($data);
-        $hotelExpensesTotal = $this->getHotelExpensesTotal($hotelExpenses, $roomTypeAmounts);
+        $tourStatus = TourStatus::Confirmed;
+        foreach ($allExpenses as $expense) {
+            $status = $expense['status'] ?? null;
+            if ($status == ExpenseStatus::New->value || $status == ExpenseStatus::Waiting->value) {
+                $tourStatus = TourStatus::NotConfirmed;
+                break;
+            }
+        }
+        $data['status'] = $tourStatus;
 
-        $totalExpenses = $expensesData->sum('price') + $hotelExpensesTotal + ($data['guide_price'] ?? 0);
-
-        $data['hotel_expenses_total'] = $hotelExpensesTotal;
+        $totalExpenses = $allExpenses->sum('price') + ($data['guide_price'] ?? 0);
         $data['expenses'] = $totalExpenses;
         $data['income'] = $data['price'] - $totalExpenses;
 
@@ -42,15 +45,15 @@ class CreateTour extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $roomTypeAmounts = $this->getRoomingAmounts($this->form->getRawState());
+        $roomTypeAmounts = ExpenseService::getRoomingAmounts($this->form->getRawState());
         foreach ($roomTypeAmounts as $roomTypeId => $amount) {
             if (empty($amount)) {
                 continue;
             }
-            TourHotelRoomType::query()->updateOrCreate(
+            TourRoomType::query()->updateOrCreate(
                 [
                     'tour_id' => $this->record->id,
-                    'hotel_room_type_id' => $roomTypeId,
+                    'room_type_id' => $roomTypeId,
                 ],
                 [
                     'amount' => $amount,

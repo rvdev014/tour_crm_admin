@@ -5,18 +5,13 @@ namespace App\Filament\Resources;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
-use App\Enums\GuideType;
 use App\Enums\TourType;
 use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
 use App\Filament\Resources\TourCorporateResource\Pages;
 use App\Filament\Resources\TourCorporateResource\RelationManagers;
-use App\Models\City;
-use App\Models\Company;
-use App\Models\Country;
 use App\Models\Museum;
 use App\Models\Tour;
-use App\Models\User;
 use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Forms\Components;
@@ -28,9 +23,8 @@ use Filament\Tables\Columns;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 
-class TourCorporateResource extends Resource
+class TourCorporateResource_olf extends Resource
 {
     protected static ?string $model = Tour::class;
 
@@ -57,12 +51,10 @@ class TourCorporateResource extends Resource
                         return TourService::getGroupNumber(TourType::Corporate);
                     })
                     ->readOnly(),
-
                 Components\Select::make('company_id')
                     ->native(false)
                     ->relationship('company', 'name')
-                    ->options(TourService::getCompanies(CompanyType::Corporate))
-                    ->reactive()
+                    ->options(fn($get) => TourService::getCompanies(CompanyType::Corporate))
                     ->required(),
 
                 Components\Repeater::make('passengers')
@@ -77,10 +69,6 @@ class TourCorporateResource extends Resource
 
                 Components\Textarea::make('comment'),
             ]),
-
-            // Add section with subtitle
-            Components\Fieldset::make('Rooming')
-                ->schema(TourService::generateRoomingSchema()),
 
             Components\Repeater::make('days')
                 ->extraAttributes(['class' => 'repeater-days'])
@@ -111,9 +99,9 @@ class TourCorporateResource extends Resource
                         Components\Select::make('city_id')
                             ->native(false)
                             ->relationship('city', 'name')
-                            ->options(fn($get) => TourService::getCities())
-                            ->reactive()
+                            ->options(fn($get) => TourService::getCities($get('../../country_id')))
                             ->preload()
+                            ->reactive()
                             ->required(),
                     ]),
                     Components\Repeater::make('expenses')
@@ -157,7 +145,7 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->label('Hotel')
                                         ->relationship('hotel', 'name')
-                                        ->options(fn($get) => TourService::getHotels($get('../../city_id')))
+                                        ->options(fn ($get) => TourService::getHotels($get('../../city_id')))
                                         ->preload()
                                         ->reactive(),
                                     Components\Select::make('status')
@@ -246,7 +234,7 @@ class TourCorporateResource extends Resource
                                     ->label('Museum')
                                     ->native(false)
                                     ->relationship('museum', 'name')
-                                    ->options(fn($get) => TourService::getMuseums($get('../../city_id')))
+                                    ->options(fn ($get) => TourService::getMuseums($get('../../city_id')))
                                     ->createOptionForm([
                                         Components\Grid::make()->schema([
                                             Components\TextInput::make('name')
@@ -267,8 +255,7 @@ class TourCorporateResource extends Resource
                                                 ->preload()
                                                 ->reactive(),
                                             Components\TextInput::make('price_per_person')
-                                                ->required()
-                                                ->numeric(),
+                                                ->required(),
                                         ])
                                     ])
                                     ->preload()
@@ -301,7 +288,7 @@ class TourCorporateResource extends Resource
                                     ->native(false)
                                     ->label('Restaurant')
                                     ->relationship('restaurant', 'name')
-                                    ->options(fn($get) => TourService::getRestaurants($get('../../city_id')))
+                                    ->options(fn ($get) => TourService::getRestaurants($get('../../city_id')))
                                     ->reactive()
                                     ->preload(),
 
@@ -337,7 +324,8 @@ class TourCorporateResource extends Resource
                                         ->preload(),
 
                                     Components\TextInput::make('price')
-                                        ->label('Price'),
+                                        ->label('Price')
+                                        ->required(),
                                 ]),
 
                                 Components\Grid::make(3)->schema([
@@ -377,7 +365,7 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->label('Show')
                                         ->relationship('show', 'name')
-                                        ->options(fn($get) => TourService::getShows($get('../../city_id')))
+                                        ->options(fn ($get) => TourService::getShows($get('../../city_id')))
                                         ->reactive()
                                         ->preload()
                                         ->required(),
@@ -463,25 +451,22 @@ class TourCorporateResource extends Resource
                         ])
                         ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
                             $tourData = $get('../../');
-                            $passengers = $tourData['passengers'] ?? [];
+                            $totalPax = $tourData['passengers'] ? count($tourData['passengers']) : 0;
                             return ExpenseService::mutateExpense(
                                 $data,
-                                count($passengers),
-                                ExpenseService::getRoomingAmounts($tourData),
-                                $tourData['company_id']
+                                $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
+                                ExpenseService::getRoomingAmounts($tourData)
                             );
                         })
                         ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
                             $tourData = $get('../../');
-                            $passengers = $tourData['passengers'] ?? [];
                             return ExpenseService::mutateExpense(
                                 $data,
-                                count($passengers),
-                                ExpenseService::getRoomingAmounts($tourData),
-                                $tourData['company_id']
+                                $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
+                                ExpenseService::getRoomingAmounts($tourData)
                             );
                         })
-                ]),
+                ])
         ]);
     }
 
@@ -494,94 +479,27 @@ class TourCorporateResource extends Resource
     {
         return $table
             ->striped()
-            ->filters([
-                Tables\Filters\Filter::make('country_id')
-                    ->form([
-                        Components\Select::make('country_id')
-                            ->native(false)
-                            ->relationship('country', 'name')
-                            ->options(Country::all()->pluck('name', 'id')->toArray()),
-                        Components\Select::make('city_id')
-                            ->native(false)
-                            ->relationship('city', 'name')
-                            ->options(fn($get) => TourService::getCities($get('country_id')))
-                            ->preload(),
-                        Components\Select::make('company_id')
-                            ->native(false)
-                            ->relationship('company', 'name')
-                            ->options(Company::query()->pluck('name', 'id')->toArray()),
-                        Components\Select::make('created_by')
-                            ->label('Admin creator')
-                            ->native(false)
-                            ->relationship('createdBy', 'name')
-                            ->options(User::query()->pluck('name', 'id')->toArray()),
-
-                        Components\DatePicker::make('created_from'),
-                        Components\DatePicker::make('created_until'),
-                    ])
-                    ->query(function (Builder $query, $data) {
-                        return $query
-                            ->when(
-                                $data['country_id'],
-                                fn($query, $countryId) => $query->where('country_id', $countryId)
-                            )
-                            ->when($data['city_id'], fn($query, $cityId) => $query->where('city_id', $cityId))
-                            ->when(
-                                $data['company_id'],
-                                fn($query, $companyId) => $query->where('company_id', $companyId)
-                            )
-                            ->when(
-                                $data['created_by'],
-                                fn($query, $createdBy) => $query->where('created_by', $createdBy)
-                            )
-                            ->when(
-                                $data['created_from'],
-                                fn($query, $createdFrom) => $query->whereDate('created_at', '>=', $createdFrom)
-                            )
-                            ->when(
-                                $data['created_until'],
-                                fn($query, $createdUntil) => $query->whereDate('created_at', '<=', $createdUntil)
-                            );
-                    })
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
-                        if ($data['country_id'] ?? null) {
-                            $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
-                        }
-                        if ($data['city_id'] ?? null) {
-                            $indicators['city_id'] = 'City: ' . City::find($data['city_id'])->name;
-                        }
-                        if ($data['company_id'] ?? null) {
-                            $indicators['company_id'] = 'Company: ' . Company::find($data['company_id'])->name;
-                        }
-                        if ($data['created_by'] ?? null) {
-                            $indicators['created_by'] = 'Admin creator: ' . User::find($data['created_by'])->name;
-                        }
-                        if ($data['created_from'] ?? null) {
-                            $indicators['created_from'] = 'Order from ' . Carbon::parse(
-                                    $data['created_from']
-                                )->toFormattedDateString();
-                        }
-                        if ($data['created_until'] ?? null) {
-                            $indicators['created_until'] = 'Order until ' . Carbon::parse(
-                                    $data['created_until']
-                                )->toFormattedDateString();
-                        }
-
-                        return $indicators;
-                    })
-            ])
             ->columns([
                 Columns\TextColumn::make('group_number')
                     ->searchable(),
-
                 Columns\TextColumn::make('company.name')
                     ->numeric()
                     ->sortable(),
+                Columns\TextColumn::make('start_date')
+                    ->date()
+                    ->sortable(),
+                Columns\TextColumn::make('end_date')
+                    ->date()
+                    ->sortable(),
+                Columns\TextColumn::make('price')
+                    ->formatStateUsing(function ($record, $state) {
+                        if (TourService::isVisible($record)) {
+                            return TourService::formatMoney($state);
+                        }
 
-                Columns\TextColumn::make('status')
-                    ->badge(),
-
+                        return '-';
+                    })
+                    ->sortable(),
                 Columns\TextColumn::make('expenses')
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
@@ -594,29 +512,34 @@ class TourCorporateResource extends Resource
                         return '-';
                     })
                     ->sortable(),
+                Columns\TextColumn::make('income')
+                    ->badge(fn(Tour $record) => TourService::isVisible($record))
+                    ->color(fn(Tour $record) => $record->income > 0 ? 'success' : 'danger')
+                    ->size(Columns\TextColumn\TextColumnSize::Large)
+                    ->formatStateUsing(function ($record, $state) {
+                        if (TourService::isVisible($record)) {
+                            return TourService::formatMoney($state);
+                        }
 
-                Columns\TextColumn::make('createdBy.name')
+                        return '-';
+                    })
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Columns\TextColumn::make('createdBy.name')->sortable(),
+                Columns\TextColumn::make('createdBy.operator_percent_tps')
+                    ->label('Operator %')
+                    ->suffix('%')
+                    ->sortable(),
+                Columns\TextColumn::make('country.name'),
+            ])
+            ->filters([
+                //
             ])
             ->actions([
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-document-text')
-                    ->requiresConfirmation()
-                    ->url(fn(Tour $record) => route('export', $record)),
                 Tables\Actions\EditAction::make(),
-            ])
-            ->headerActions([
-
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin())
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

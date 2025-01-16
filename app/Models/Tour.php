@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\GuideType;
+use App\Enums\TourStatus;
 use App\Enums\TourType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -39,7 +40,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property City $city
  * @property Country $country
  * @property Collection<TourDay> $days
- * @property Collection<TourHotelRoomType> $hotelRoomTypes
+ * @property Collection<TourRoomType> $roomTypes
  * @property Collection<TourDayExpense> $daysExpenses
  * @property Collection<TourHotel> $hotels
  * @property Collection<TourPassenger> $passengers
@@ -76,9 +77,10 @@ class Tour extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'type' => TourType::class
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'type' => TourType::class,
+        'status' => TourStatus::class,
     ];
 
     public function company(): BelongsTo
@@ -101,9 +103,9 @@ class Tour extends Model
         return $this->hasMany(TourDay::class);
     }
 
-    public function hotelRoomTypes(): HasMany
+    public function roomTypes(): HasMany
     {
-        return $this->hasMany(TourHotelRoomType::class);
+        return $this->hasMany(TourRoomType::class);
     }
 
     public function daysExpenses(): HasManyThrough
