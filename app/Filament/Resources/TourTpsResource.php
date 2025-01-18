@@ -91,7 +91,6 @@ class TourTpsResource extends Resource
                 Components\TextInput::make('leader_pax')
                     ->numeric(),
                 Components\TextInput::make('price')
-                    ->required()
                     ->numeric(),
                 Components\Textarea::make('comment'),
             ]),
