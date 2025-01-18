@@ -223,6 +223,7 @@ class TourTpsResource extends Resource
 
                                     Components\TextInput::make('guide_price')
                                         ->statePath('price')
+                                        ->numeric()
                                         ->label('Price'),
 
                                     Components\Textarea::make('comment')
@@ -268,6 +269,7 @@ class TourTpsResource extends Resource
                                         ->label('Status'),
 
                                     Components\TextInput::make('price')
+                                        ->numeric()
                                         ->label('Price'),
                                 ]),
 
@@ -375,6 +377,7 @@ class TourTpsResource extends Resource
                                         ->preload(),
 
                                     Components\TextInput::make('price')
+                                        ->numeric()
                                         ->label('Price'),
                                 ]),
 
@@ -434,6 +437,7 @@ class TourTpsResource extends Resource
                             Components\Fieldset::make('Plane info')->schema([
 
                                 Components\TextInput::make('price')
+                                    ->numeric()
                                     ->label('Price'),
 
                                 Components\Select::make('to_city_id')
@@ -468,6 +472,7 @@ class TourTpsResource extends Resource
                                     ->label('Name'),
 
                                 Components\TextInput::make('price')
+                                    ->numeric()
                                     ->label('Price'),
 
                                 Components\Textarea::make('comment')
