@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $guide_price
  * @property int $transport_type
  * @property int $transport_comfort_level
+ * @property int $single_supplement_price
  *
  * @property Company $company
  * @property User $createdBy
@@ -80,6 +81,7 @@ class Tour extends Model
 
         'transport_comfort_level',
         'transport_type',
+        'single_supplement_price',
     ];
 
     protected $casts = [

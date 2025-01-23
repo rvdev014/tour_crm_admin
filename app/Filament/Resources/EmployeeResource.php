@@ -32,6 +32,8 @@ class EmployeeResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('type')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->required()
                     ->options(EmployeeType::class),
                 Forms\Components\TextInput::make('phone')
@@ -50,7 +52,7 @@ class EmployeeResource extends Resource
                 Tables\Columns\TextColumn::make('type')
                     ->searchable()
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state->getLabel()),
+                    ->formatStateUsing(fn($state) => $state->getLabel()),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
             ])

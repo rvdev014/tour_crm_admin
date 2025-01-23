@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $price_per_person
  * @property string $created_at
  * @property string $updated_at
+ * @property string $contract
  *
  * @property Museum $museum
  */
@@ -25,6 +26,7 @@ class MuseumItem extends Model
         'description',
         'museum_id',
         'price_per_person',
+        'contract',
     ];
 
     public function museum(): BelongsTo

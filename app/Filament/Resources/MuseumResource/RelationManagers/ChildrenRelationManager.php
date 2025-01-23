@@ -21,6 +21,8 @@ class ChildrenRelationManager extends RelationManager
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('contract')
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('price_per_person')
                     ->required()
                     ->numeric(),
@@ -34,6 +36,7 @@ class ChildrenRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('contract'),
                 Tables\Columns\TextColumn::make('price_per_person')->numeric(),
             ])
             ->filters([

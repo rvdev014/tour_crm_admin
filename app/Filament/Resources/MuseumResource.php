@@ -27,26 +27,36 @@ class MuseumResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('inn')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Select::make('country_id')
-                    ->native(false)
-                    ->relationship('country', 'name')
-                    ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
-                    ->reactive(),
-                Forms\Components\Select::make('city_id')
-                    ->native(false)
-                    ->relationship('city', 'name')
-                    ->options(fn ($get) => TourService::getCities($get('country_id')))
-                    ->preload()
-                    ->reactive(),
-                Forms\Components\TextInput::make('price_per_person')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('inn')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('contract')
+                        ->maxLength(255),
+                ]),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\Select::make('country_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->relationship('country', 'name')
+                        ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+                        ->reactive(),
+                    Forms\Components\Select::make('city_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->relationship('city', 'name')
+                        ->options(fn($get) => TourService::getCities($get('country_id')))
+                        ->preload()
+                        ->reactive(),
+                    Forms\Components\TextInput::make('price_per_person')
+                        ->required()
+                        ->numeric(),
+                ]),
             ]);
     }
 
@@ -58,6 +68,8 @@ class MuseumResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('inn')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('contract')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('country.name')
                     ->numeric()

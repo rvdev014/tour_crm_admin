@@ -35,14 +35,17 @@ class RestaurantResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('country_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->relationship('country', 'name')
                     ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                     ->reactive(),
                 Forms\Components\Select::make('city_id')
                     ->native(false)
-                    ->relationship('city', 'name')
+                    ->searchable()
                     ->preload()
-                    ->options(fn ($get) => TourService::getCities($get('country_id'))),
+                    ->relationship('city', 'name')
+                    ->options(fn($get) => TourService::getCities($get('country_id'))),
                 Forms\Components\TextInput::make('price_per_person')
                     ->required()
                     ->numeric(),

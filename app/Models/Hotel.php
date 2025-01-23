@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $email
  * @property int $country_id
  * @property int $city_id
+ * @property string $inn
  *
  * @property City $city
  * @property Country $country
@@ -30,6 +31,7 @@ class Hotel extends Model
         'email',
         'country_id',
         'city_id',
+        'inn',
     ];
 
     public function roomTypes(): HasMany

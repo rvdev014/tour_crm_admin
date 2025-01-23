@@ -21,13 +21,13 @@ class ExportClientService
         $spreadsheet = IOFactory::load($templateFile);
         $sheet = $spreadsheet->getActiveSheet();
 
-        $allExpenses = $tour->days->flatMap(fn (TourDay $day) => $day->expenses);
+        $allExpenses = $tour->days->flatMap(fn(TourDay $day) => $day->expenses);
 
         /** @var TourDayExpense $planeExpense */
-        $planeExpense = $allExpenses->first(fn (TourDayExpense $expense) => $expense->type == ExpenseType::Plane);
+        $planeExpense = $allExpenses->first(fn(TourDayExpense $expense) => $expense->type == ExpenseType::Plane);
 
         /** @var Collection<TourDayExpense> $extraExpenses */
-        $extraExpenses = $allExpenses->filter(fn (TourDayExpense $expense) => $expense->type == ExpenseType::Extra);
+        $extraExpenses = $allExpenses->filter(fn(TourDayExpense $expense) => $expense->type == ExpenseType::Extra);
 
         $expenseTotal = $tour->expenses;
         $planePriceTotal = $planeExpense->price;
@@ -100,7 +100,7 @@ class ExportClientService
     public static function getExpensesList(Tour $tour): string
     {
         $expenses = $tour->days->flatMap(function (TourDay $day) {
-            return $day->expenses->map(fn (TourDayExpense $expense) => "* " . $expense->type->getLabel());
+            return $day->expenses->map(fn(TourDayExpense $expense) => "* " . $expense->type->getLabel());
         });
 
         return $expenses->implode("\n");

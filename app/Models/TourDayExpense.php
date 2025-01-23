@@ -31,6 +31,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * Museum
  * @property int $museum_id
+ * @property array $museum_ids
  * @property int $museum_item_id
  * @property array $museum_item_ids
  * @property string $museum_inn
@@ -68,6 +69,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * Other
  * @property string $other_name
+ * @property string $hotel_checkin_time
  *
  * @property City $fromCity
  * @property City $toCity
@@ -81,7 +83,6 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property Restaurant $restaurant
  * @property Employee $guideEmployee
  */
-
 #[ObservedBy([TourDayExpenseObserver::class])]
 class TourDayExpense extends Model
 {
@@ -95,6 +96,7 @@ class TourDayExpense extends Model
         'transport_time' => 'datetime',
         'car_ids' => 'array',
         'type' => ExpenseType::class,
+        'museum_ids' => 'array',
         'museum_item_ids' => 'array',
     ];
 

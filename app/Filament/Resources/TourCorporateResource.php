@@ -60,6 +60,8 @@ class TourCorporateResource extends Resource
 
                 Components\Select::make('company_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->relationship('company', 'name')
                     ->options(TourService::getCompanies(CompanyType::Corporate))
                     ->reactive()
@@ -110,6 +112,8 @@ class TourCorporateResource extends Resource
                             ->reactive(),
                         Components\Select::make('city_id')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('city', 'name')
                             ->options(fn($get) => TourService::getCities())
                             ->reactive()
@@ -144,6 +148,8 @@ class TourCorporateResource extends Resource
                                 Hidden::make('index'),
                                 Components\Select::make('type')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('Expense Type')
                                     ->options(ExpenseType::class)
                                     ->required()
@@ -155,6 +161,8 @@ class TourCorporateResource extends Resource
                                 Components\Grid::make()->schema([
                                     Components\Select::make('hotel_id')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Hotel')
                                         ->relationship('hotel', 'name')
                                         ->options(fn($get) => TourService::getHotels($get('../../city_id')))
@@ -163,6 +171,8 @@ class TourCorporateResource extends Resource
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Status'),
                                     Components\Textarea::make('comment')
                                         ->label('Comment')
@@ -180,6 +190,8 @@ class TourCorporateResource extends Resource
 
                                     Components\Select::make('status')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->options(ExpenseStatus::class)
                                         ->label('Status'),
 
@@ -198,11 +210,15 @@ class TourCorporateResource extends Resource
 
                                 Components\Select::make('transport_type')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('Transport type')
                                     ->options(TransportType::class),
 
                                 Components\Select::make('to_city_id')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
                                     ->options(TourService::getCities())
@@ -213,6 +229,8 @@ class TourCorporateResource extends Resource
                                 Components\Grid::make(3)->schema([
                                     Components\Select::make('transport_comfort_level')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Comfort level')
                                         ->options(TransportComfortLevel::class)
                                         ->afterStateUpdated(function ($get, $set) {
@@ -226,6 +244,8 @@ class TourCorporateResource extends Resource
 
                                     Components\Select::make('status')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->options(ExpenseStatus::class)
                                         ->label('Status'),
 
@@ -245,6 +265,8 @@ class TourCorporateResource extends Resource
                                 Components\Select::make('museum_id')
                                     ->label('Museum')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->relationship('museum', 'name')
                                     ->options(fn($get) => TourService::getMuseums($get('../../city_id')))
                                     ->createOptionForm([
@@ -257,14 +279,17 @@ class TourCorporateResource extends Resource
                                                 ->maxLength(255),
                                             Components\Select::make('country_id')
                                                 ->native(false)
+                                                ->searchable()
+                                                ->preload()
                                                 ->relationship('country', 'name')
                                                 ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                                                 ->reactive(),
                                             Components\Select::make('city_id')
                                                 ->native(false)
+                                                ->searchable()
+                                                ->preload()
                                                 ->relationship('city', 'name')
                                                 ->options(fn($get) => TourService::getCities($get('country_id')))
-                                                ->preload()
                                                 ->reactive(),
                                             Components\TextInput::make('price_per_person')
                                                 ->required()
@@ -276,9 +301,10 @@ class TourCorporateResource extends Resource
                                 Components\Select::make('museum_item_ids')
                                     ->label('Museum Children')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->options(fn($get) => TourService::getMuseumItems($get('museum_id')))
                                     ->multiple()
-                                    ->preload()
                                     ->disabled(function ($get) {
                                         if (!$get('museum_id')) {
                                             return true;
@@ -299,15 +325,18 @@ class TourCorporateResource extends Resource
 
                                 Components\Select::make('restaurant_id')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('Restaurant')
                                     ->relationship('restaurant', 'name')
                                     ->options(fn($get) => TourService::getRestaurants($get('../../city_id')))
-                                    ->reactive()
-                                    ->preload(),
+                                    ->reactive(),
 
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('Status'),
 
                                 Components\Textarea::make('comment')
@@ -322,6 +351,8 @@ class TourCorporateResource extends Resource
                                 Components\Grid::make(3)->schema([
                                     Components\Select::make('train_name')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Train name')
                                         ->options([
                                             'sharq' => 'Sharq',
@@ -330,6 +361,8 @@ class TourCorporateResource extends Resource
 
                                     Components\Select::make('to_city_id')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('City to')
                                         ->relationship('toCity', 'name')
                                         ->options(TourService::getCities())
@@ -360,6 +393,8 @@ class TourCorporateResource extends Resource
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Status'),
                                 ]),
 
@@ -375,6 +410,8 @@ class TourCorporateResource extends Resource
                                 Components\Grid::make()->schema([
                                     Components\Select::make('show_id')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Show')
                                         ->relationship('show', 'name')
                                         ->options(fn($get) => TourService::getShows($get('../../city_id')))
@@ -384,6 +421,8 @@ class TourCorporateResource extends Resource
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Status'),
                                     Components\Textarea::make('comment')
                                         ->label('Comment')
@@ -400,6 +439,8 @@ class TourCorporateResource extends Resource
 
                                 Components\Select::make('to_city_id')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
                                     ->options(TourService::getCities())
@@ -414,6 +455,8 @@ class TourCorporateResource extends Resource
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Status'),
 
                                 ]),
@@ -453,6 +496,8 @@ class TourCorporateResource extends Resource
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('Status'),
 
                                 Components\Textarea::make('comment')
@@ -494,30 +539,41 @@ class TourCorporateResource extends Resource
     {
         return $table
             ->striped()
+            ->defaultSort('start_date', 'asc')
             ->filters([
                 Tables\Filters\Filter::make('country_id')
                     ->form([
                         Components\Select::make('country_id')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('country', 'name')
                             ->options(Country::all()->pluck('name', 'id')->toArray()),
                         Components\Select::make('city_id')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('city', 'name')
                             ->options(fn($get) => TourService::getCities($get('country_id')))
                             ->preload(),
                         Components\Select::make('company_id')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('company', 'name')
                             ->options(Company::query()->pluck('name', 'id')->toArray()),
                         Components\Select::make('created_by')
                             ->label('Admin creator')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('createdBy', 'name')
                             ->options(User::query()->pluck('name', 'id')->toArray()),
 
-                        Components\DatePicker::make('created_from'),
-                        Components\DatePicker::make('created_until'),
+                        Components\DatePicker::make('created_from')
+                            ->displayFormat('d.m.Y'),
+                        Components\DatePicker::make('created_until')
+                            ->displayFormat('d.m.Y'),
                     ])
                     ->query(function (Builder $query, $data) {
                         return $query

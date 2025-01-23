@@ -39,10 +39,10 @@ class CompanyResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('inn')
                     ->maxLength(255)
-                    ->visible(fn ($get) => $get('type') == CompanyType::Corporate->value),
+                    ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
                 Forms\Components\TextInput::make('additional_percent')
                     ->numeric()
-                    ->visible(fn ($get) => $get('type') == CompanyType::Corporate->value),
+                    ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
                 Forms\Components\Textarea::make('comment'),
             ]);
     }

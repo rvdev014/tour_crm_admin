@@ -27,13 +27,17 @@ class TransferResource extends Resource
             ->schema([
                 Forms\Components\Select::make('from_city_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->label('City from')
                     ->relationship('fromCity', 'name')
-                    ->options(fn () => TourService::getCities(null, isAll: true))
+                    ->options(fn() => TourService::getCities(null, isAll: true))
                     ->reactive(),
 
                 Forms\Components\Select::make('to_city_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->label('City to')
                     ->relationship('toCity', 'name')
                     ->options(function ($get) {
@@ -50,6 +54,8 @@ class TransferResource extends Resource
 
                 Forms\Components\Select::make('company_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->label('Company')
                     ->relationship('company', 'name')
                     ->required(),
@@ -59,6 +65,8 @@ class TransferResource extends Resource
 
                 Forms\Components\Select::make('transport_type')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->label('Transport type')
                     ->options(TransportType::class)
                     ->reactive()
@@ -72,6 +80,8 @@ class TransferResource extends Resource
 
                 Forms\Components\Select::make('transport_comfort_level')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->label('Comfort level')
                     ->options(TransportComfortLevel::class)
                     ->reactive()
@@ -88,6 +98,8 @@ class TransferResource extends Resource
 
                 Forms\Components\Select::make('status')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->options(ExpenseStatus::class)
                     ->label('Status'),
 
@@ -103,6 +115,7 @@ class TransferResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('company.name'),
                 Tables\Columns\TextColumn::make('created_at')

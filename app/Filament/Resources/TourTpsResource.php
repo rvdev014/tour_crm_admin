@@ -61,18 +61,24 @@ class TourTpsResource extends Resource
                     ->readOnly(),
                 Components\Select::make('company_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->relationship('company', 'name')
                     ->options(TourService::getCompanies(CompanyType::TPS))
                     ->reactive()
                     ->required(),
                 Components\Select::make('country_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->relationship('country', 'name')
                     ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                     ->reactive()
                     ->required(),
                 Components\Select::make('city_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->relationship('city', 'name')
                     ->options(fn($get) => TourService::getCities($get('country_id')))
                     ->preload()
@@ -92,12 +98,17 @@ class TourTpsResource extends Resource
                     ->numeric(),
                 Components\TextInput::make('price')
                     ->numeric(),
-                Components\Textarea::make('comment'),
+                Components\TextInput::make('single_supplement_price')
+                    ->numeric(),
+                Components\Textarea::make('comment')
+                    ->columnSpanFull(),
             ]),
 
             Components\Fieldset::make('Guide info')->schema([
                 Components\Select::make('guide_type')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->options(GuideType::class)
                     ->reactive()
                     ->required(),
@@ -116,10 +127,14 @@ class TourTpsResource extends Resource
             Components\Fieldset::make('Transport info')->schema([
                 Components\Select::make('transport_type')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->options(TransportType::class),
 
                 Components\Select::make('transport_comfort_level')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->options(TransportComfortLevel::class),
             ]),
 
@@ -130,12 +145,22 @@ class TourTpsResource extends Resource
                 ->addActionLabel('Add day')
                 ->columnSpanFull()
                 ->addActionAlignment('end')
-                ->itemLabel(function ($get, $uuid) {
+                ->itemLabel(function ($get, $set, $uuid) {
                     $current = Arr::get($get('days'), $uuid);
                     $index = array_search($uuid, array_keys($get('days'))) ?? 0;
+                    $previous = null;
+                    if ($index > 0) {
+                        $previous = Arr::get($get('days'), array_keys($get('days'))[$index - 1]);
+                    }
+
                     $index++;
 
                     $date = $current['date'];
+                    if (!$date && $previous && !empty($previous['date'] ?? null)) {
+                        $previousDate = Carbon::parse($previous['date']);
+                        $set('days.' . $uuid . '.date', $previousDate->addDay()->format('Y-m-d'));
+                    }
+
                     if ($date) {
                         $date = date('d.m.Y', strtotime($date));
                         return "Day $index ($date)";
@@ -151,6 +176,8 @@ class TourTpsResource extends Resource
                             ->reactive(),
                         Components\Select::make('city_id')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('city', 'name')
                             ->options(fn($get) => TourService::getCities())
                             ->reactive()
@@ -161,6 +188,7 @@ class TourTpsResource extends Resource
                         ->extraAttributes(['class' => 'repeater-expenses'])
                         ->collapsed(fn($record) => !empty($record->id))
                         ->collapsible()
+                        ->cloneable()
                         ->itemLabel(function ($get, $uuid) {
                             $current = Arr::get($get('expenses'), $uuid);
                             $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
@@ -185,6 +213,8 @@ class TourTpsResource extends Resource
                                 Hidden::make('index'),
                                 Components\Select::make('type')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('Expense Type')
                                     ->options(function ($get) {
                                         $options = ExpenseType::casesOptions();
@@ -200,9 +230,11 @@ class TourTpsResource extends Resource
 
                             // Hotel
                             Components\Fieldset::make('Hotel info')->schema([
-                                Components\Grid::make()->schema([
+                                Components\Grid::make(3)->schema([
                                     Components\Select::make('hotel_id')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Hotel')
                                         ->relationship('hotel', 'name')
                                         ->options(fn($get) => TourService::getHotels($get('../../city_id')))
@@ -211,11 +243,15 @@ class TourTpsResource extends Resource
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Status'),
-                                    Components\Textarea::make('comment')
-                                        ->label('Comment')
-                                        ->columnSpanFull(),
-                                ])
+                                    Components\TimePicker::make('hotel_checkin_time')
+                                        ->label('Check-in time'),
+                                ]),
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
 
                             // Guide
@@ -228,6 +264,8 @@ class TourTpsResource extends Resource
 
                                     Components\Select::make('status')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->options(ExpenseStatus::class)
                                         ->label('Status'),
 
@@ -255,15 +293,17 @@ class TourTpsResource extends Resource
                                 Components\Grid::make(3)->schema([
                                     Components\Select::make('to_city_id')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('City to')
                                         ->relationship('toCity', 'name')
                                         ->options(TourService::getCities())
-                                        ->preload()
-                                        ->reactive()
-                                        ->preload(),
+                                        ->reactive(),
 
                                     Components\Select::make('status')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->options(ExpenseStatus::class)
                                         ->label('Status'),
 
@@ -281,9 +321,12 @@ class TourTpsResource extends Resource
                             // Museum
                             Components\Fieldset::make('Museum info')->schema([
 
-                                Components\Select::make('museum_id')
+                                Components\Select::make('museum_ids')
                                     ->label('Museum')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
+                                    ->multiple()
                                     ->relationship('museum', 'name')
                                     ->options(fn($get) => TourService::getMuseums($get('../../city_id')))
                                     ->createOptionForm([
@@ -296,14 +339,17 @@ class TourTpsResource extends Resource
                                                 ->maxLength(255),
                                             Components\Select::make('country_id')
                                                 ->native(false)
+                                                ->searchable()
+                                                ->preload()
                                                 ->relationship('country', 'name')
                                                 ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                                                 ->reactive(),
                                             Components\Select::make('city_id')
                                                 ->native(false)
+                                                ->searchable()
+                                                ->preload()
                                                 ->relationship('city', 'name')
                                                 ->options(fn($get) => TourService::getCities($get('country_id')))
-                                                ->preload()
                                                 ->reactive(),
                                             Components\TextInput::make('price_per_person')
                                                 ->required()
@@ -315,16 +361,18 @@ class TourTpsResource extends Resource
                                 Components\Select::make('museum_item_ids')
                                     ->label('Museum Children')
                                     ->native(false)
-                                    ->options(fn($get) => TourService::getMuseumItems($get('museum_id')))
+                                    ->searchable()
+                                    ->preload()
+                                    ->options(fn($get) => TourService::getMuseumItems($get('museum_ids')))
                                     ->multiple()
                                     ->preload()
                                     ->disabled(function ($get) {
-                                        if (!$get('museum_id')) {
+                                        if (empty($get('museum_ids'))) {
                                             return true;
                                         }
-                                        /** @var Museum $museum */
-                                        $museum = Museum::find($get('museum_id'));
-                                        return !$museum || $museum->children->count() == 0;
+                                        $museums = Museum::query()->whereIn('id', $get('museum_ids'))->get();
+                                        return $museums->isEmpty() || $museums->flatMap(fn($museum) => $museum->children
+                                            )->isEmpty();
                                     }),
 
                                 Components\Textarea::make('comment')
@@ -338,15 +386,18 @@ class TourTpsResource extends Resource
 
                                 Components\Select::make('restaurant_id')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('Restaurant')
                                     ->relationship('restaurant', 'name')
                                     ->options(fn($get) => TourService::getRestaurants($get('../../city_id')))
-                                    ->reactive()
-                                    ->preload(),
+                                    ->reactive(),
 
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('Status'),
 
                                 Components\Textarea::make('comment')
@@ -361,6 +412,8 @@ class TourTpsResource extends Resource
                                 Components\Grid::make(3)->schema([
                                     Components\Select::make('train_name')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Train name')
                                         ->options([
                                             'sharq' => 'Sharq',
@@ -369,11 +422,12 @@ class TourTpsResource extends Resource
 
                                     Components\Select::make('to_city_id')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('City to')
                                         ->relationship('toCity', 'name')
                                         ->options(TourService::getCities())
-                                        ->reactive()
-                                        ->preload(),
+                                        ->reactive(),
 
                                     Components\TextInput::make('price')
                                         ->numeric()
@@ -400,6 +454,8 @@ class TourTpsResource extends Resource
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Status'),
                                 ]),
 
@@ -415,15 +471,18 @@ class TourTpsResource extends Resource
                                 Components\Grid::make()->schema([
                                     Components\Select::make('show_id')
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Show')
                                         ->relationship('show', 'name')
                                         ->options(fn($get) => TourService::getShows($get('../../city_id')))
                                         ->reactive()
-                                        ->preload()
                                         ->required(),
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Status'),
                                     Components\Textarea::make('comment')
                                         ->label('Comment')
@@ -441,11 +500,12 @@ class TourTpsResource extends Resource
 
                                 Components\Select::make('to_city_id')
                                     ->native(false)
+                                    ->searchable()
+                                    ->preload()
                                     ->label('City to')
                                     ->relationship('toCity', 'name')
                                     ->options(TourService::getCities())
-                                    ->reactive()
-                                    ->preload(),
+                                    ->reactive(),
 
                                 Components\Grid::make(3)->schema([
                                     Components\TimePicker::make('departure_time')->label('Departure time'),
@@ -455,6 +515,8 @@ class TourTpsResource extends Resource
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
                                         ->native(false)
+                                        ->searchable()
+                                        ->preload()
                                         ->label('Status'),
 
                                 ]),
@@ -509,30 +571,40 @@ class TourTpsResource extends Resource
     {
         return $table
             ->striped()
+            ->defaultSort('start_date', 'asc')
             ->filters([
                 Tables\Filters\Filter::make('country_id')
                     ->form([
                         Components\Select::make('country_id')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('country', 'name')
                             ->options(Country::all()->pluck('name', 'id')->toArray()),
                         Components\Select::make('city_id')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('city', 'name')
-                            ->options(fn($get) => TourService::getCities($get('country_id')))
-                            ->preload(),
+                            ->options(fn($get) => TourService::getCities($get('country_id'))),
                         Components\Select::make('company_id')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('company', 'name')
                             ->options(Company::query()->pluck('name', 'id')->toArray()),
                         Components\Select::make('created_by')
                             ->label('Admin creator')
                             ->native(false)
+                            ->searchable()
+                            ->preload()
                             ->relationship('createdBy', 'name')
                             ->options(User::query()->pluck('name', 'id')->toArray()),
 
-                        Components\DatePicker::make('created_from'),
-                        Components\DatePicker::make('created_until'),
+                        Components\DatePicker::make('created_from')
+                            ->displayFormat('d.m.Y'),
+                        Components\DatePicker::make('created_until')
+                            ->displayFormat('d.m.Y'),
                     ])
                     ->query(function (Builder $query, $data) {
                         return $query
@@ -551,11 +623,11 @@ class TourTpsResource extends Resource
                             )
                             ->when(
                                 $data['created_from'],
-                                fn($query, $createdFrom) => $query->whereDate('created_at', '>=', $createdFrom)
+                                fn($query, $createdFrom) => $query->whereDate('start_date', '>=', $createdFrom)
                             )
                             ->when(
                                 $data['created_until'],
-                                fn($query, $createdUntil) => $query->whereDate('created_at', '<=', $createdUntil)
+                                fn($query, $createdUntil) => $query->whereDate('start_date', '<=', $createdUntil)
                             );
                     })
                     ->indicateUsing(function (array $data): array {

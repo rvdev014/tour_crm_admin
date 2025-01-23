@@ -103,9 +103,9 @@ class TourService
         return Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
-    public static function getMuseumItems($museumId): array|Collection
+    public static function getMuseumItems($museumIds): array|Collection
     {
-        return MuseumItem::where('museum_id', $museumId)->get()->pluck('name', 'id');
+        return MuseumItem::query()->whereIn('museum_id', $museumIds)->get()->pluck('name', 'id');
     }
 
     public static function getShows($localCityId): array|Collection

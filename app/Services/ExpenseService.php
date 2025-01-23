@@ -19,7 +19,6 @@ class ExpenseService
         $addPercent = TourService::getCompanyAddPercent($companyId);
 
         switch ($data['type']) {
-
             case ExpenseType::Hotel->value:
                 /** @var Hotel $hotel */
                 $hotel = Hotel::query()->find($data['hotel_id']);
@@ -49,11 +48,13 @@ class ExpenseService
                     if ($museumItems->isNotEmpty()) {
                         $data['price'] = $museumItems->sum('price_per_person') * $totalPax;
                     }
-                } else if (!empty($museumId)) {
-                    /** @var Museum $museum */
-                    $museum = Museum::query()->find($museumId);
-                    if ($museum) {
-                        $data['price'] = $museum->price_per_person * $totalPax;
+                } else {
+                    if (!empty($museumId)) {
+                        /** @var Museum $museum */
+                        $museum = Museum::query()->find($museumId);
+                        if ($museum) {
+                            $data['price'] = $museum->price_per_person * $totalPax;
+                        }
                     }
                 }
 
