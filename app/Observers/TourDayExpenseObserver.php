@@ -28,6 +28,8 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             $transfer = Transfer::where('tour_day_expense_id', $tourDayExpense->id)->first();
             if ($transfer) {
                 $transfer->update($this->changedAttributes($tourDayExpense));
+            } else {
+                Transfer::create($this->changedAttributes($tourDayExpense));
             }
         }
     }
@@ -61,7 +63,7 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
     public function changedAttributes(TourDayExpense $tourDayExpense): array
     {
         return [
-            'from_city_id' => $tourDayExpense->from_city_id,
+            'from_city_id' => $tourDayExpense->tourDay->city_id,
             'to_city_id' => $tourDayExpense->to_city_id,
             'comment' => $tourDayExpense->comment,
             'company_id' => $tourDayExpense->tourDay->tour->company_id,
@@ -70,8 +72,11 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             'transport_comfort_level' => $tourDayExpense->transport_comfort_level,
             'price' => $tourDayExpense->price,
             'status' => $tourDayExpense->status,
-            'pax' => $tourDayExpense->pax,
+            'pax' => $tourDayExpense->tourDay->tour->pax,
             'tour_day_expense_id' => $tourDayExpense->id,
+
+            'driver' => $tourDayExpense->transport_driver,
+            'place_of_submission' => $tourDayExpense->transport_place,
         ];
     }
 }

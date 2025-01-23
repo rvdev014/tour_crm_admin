@@ -104,29 +104,35 @@ class TransferResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('fromCity.name')->sortable(),
-                Tables\Columns\TextColumn::make('toCity.name')->sortable(),
-                Tables\Columns\TextColumn::make('transport_type')->sortable(),
-                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
                 Tables\Columns\TextColumn::make('company.name'),
-                Tables\Columns\TextColumn::make('group_number'),
-                Tables\Columns\TextColumn::make('price')
-                    ->money()
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Date')
+                    ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('place_of_submission')->sortable(),
                 Tables\Columns\TextColumn::make('pax')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('fromCity.name')
+                    ->label('Route')
+                    ->formatStateUsing(function ($record, $state) {
+                        return $state . ' - ' . $record->toCity?->name;
+                    }),
+//                Tables\Columns\TextColumn::make('toCity.name')->sortable(),
+                Tables\Columns\TextColumn::make('driver'),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('transport_type')->sortable(),
+                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
+                Tables\Columns\TextColumn::make('group_number')->sortable(),
+                Tables\Columns\TextColumn::make('price')
+                    ->money()
+                    ->sortable(),
+//                Tables\Columns\TextColumn::make('updated_at')
+//                    ->dateTime()
+//                    ->sortable()
+//                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

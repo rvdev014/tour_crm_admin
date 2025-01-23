@@ -113,6 +113,16 @@ class TourTpsResource extends Resource
             Components\Fieldset::make('Rooming')
                 ->schema(TourService::generateRoomingSchema()),
 
+            Components\Fieldset::make('Transport info')->schema([
+                Components\Select::make('transport_type')
+                    ->native(false)
+                    ->options(TransportType::class),
+
+                Components\Select::make('transport_comfort_level')
+                    ->native(false)
+                    ->options(TransportComfortLevel::class),
+            ]),
+
             Components\Repeater::make('days')
                 ->extraAttributes(['class' => 'repeater-days'])
                 ->collapsible()
@@ -235,33 +245,22 @@ class TourTpsResource extends Resource
                             // Transport
                             Components\Fieldset::make('Transport info')->schema([
 
-                                Components\Select::make('transport_type')
-                                    ->native(false)
-                                    ->label('Transport type')
-                                    ->options(TransportType::class),
-
-                                Components\Select::make('to_city_id')
-                                    ->native(false)
-                                    ->label('City to')
-                                    ->relationship('toCity', 'name')
-                                    ->options(TourService::getCities())
-                                    ->preload()
-                                    ->reactive()
-                                    ->preload(),
+                                Components\Grid::make(3)->schema([
+                                    Components\TextInput::make('transport_driver'),
+                                    Components\TimePicker::make('transport_time'),
+                                    Components\TextInput::make('transport_place')
+                                        ->label('Place of submission'),
+                                ]),
 
                                 Components\Grid::make(3)->schema([
-                                    Components\Select::make('transport_comfort_level')
+                                    Components\Select::make('to_city_id')
                                         ->native(false)
-                                        ->label('Comfort level')
-                                        ->options(TransportComfortLevel::class)
-                                        ->afterStateUpdated(function ($get, $set) {
-                                            $price = TourService::getTransportPrice(
-                                                $get('transport_type'),
-                                                $get('transport_comfort_level'),
-                                            );
-                                            $set('price', $price);
-                                        })
-                                        ->reactive(),
+                                        ->label('City to')
+                                        ->relationship('toCity', 'name')
+                                        ->options(TourService::getCities())
+                                        ->preload()
+                                        ->reactive()
+                                        ->preload(),
 
                                     Components\Select::make('status')
                                         ->native(false)

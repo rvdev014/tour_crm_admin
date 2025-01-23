@@ -44,6 +44,9 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property int $transport_comfort_level
  * @property int $from_city_id
  * @property int $to_city_id
+ * @property string $transport_driver
+ * @property string $transport_time
+ * @property string $transport_place
  *
  * Train
  * @property string $train_name
