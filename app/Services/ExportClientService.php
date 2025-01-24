@@ -22,6 +22,7 @@ class ExportClientService
         $spreadsheet = IOFactory::load($templateFile);
         $sheet = $spreadsheet->getActiveSheet();
 
+        /** @var \Illuminate\Support\Collection $allExpenses */
         $allExpenses = $tour->days->flatMap(fn(TourDay $day) => $day->expenses);
 
         /** @var TourDayExpense $planeExpense */
@@ -50,7 +51,9 @@ class ExportClientService
         $dueTotal = $expenseTotal - $tourLeadersPriceTotal;
         $dueTotalWithWords = self::getPriceWithWords($dueTotal);
 
-        $expensesList = self::getExpensesList($tour);
+//        $expensesList = self::getExpensesList($tour);
+        $expensesList = $allExpenses->groupBy(fn(TourDayExpense $expense) => $expense->type->getLabel())
+            ->map(fn($expenses, string $type) => "* $type");
 
         $flightInfo = "-";
         if ($planeExpense?->fromCity && $planeExpense?->toCity) {
@@ -58,11 +61,6 @@ class ExportClientService
         }
 
         $roomTypes = $tour->roomTypes->mapWithKeys(fn(TourRoomType $roomType) => [$roomType->roomType->name => $roomType->amount]);
-        $roomTypes = $roomTypes->merge([
-            'sda' => 2,
-            '11212' => 34,
-            'wqw' => 3,
-        ]);
 
         $placeholders = [
             '{date}' => now()->format('m/d/Y'),
@@ -113,6 +111,7 @@ class ExportClientService
 
         $sheet->getRowDimension(17)->setRowHeight(15 * $expensesList->count());
         $sheet->getStyle('J13:K15')->getAlignment()->setWrapText(true);
+        $sheet->getStyle('J13:K15')->getFont()->setItalic(true);
 
         $roomingHeight = 15 * $roomTypes->count() / 3;
         $sheet->getRowDimension(13)->setRowHeight($roomingHeight);
@@ -124,9 +123,11 @@ class ExportClientService
 
     public static function getExpensesList(Tour $tour): \Illuminate\Support\Collection
     {
-        return $tour->days->flatMap(function (TourDay $day) {
-            return $day->expenses->map(fn(TourDayExpense $expense) => "* " . $expense->type->getLabel());
-        });
+        return $tour->days
+            ->groupBy(fn (TourDay $day) => $day->date->format('d.m.Y'))
+            ->flatMap(function (TourDay $day) {
+                return $day->expenses->map(fn(TourDayExpense $expense) => "* " . $expense->type->getLabel());
+            });
     }
 
     public static function getPriceWithWords(int $price): string
