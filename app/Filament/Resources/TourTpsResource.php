@@ -762,6 +762,11 @@ class TourTpsResource extends Resource
                     ->icon('heroicon-o-document-text')
                     ->requiresConfirmation()
                     ->url(fn(Tour $record) => route('export', $record)),
+//                Tables\Actions\Action::make('export-client')
+//                    ->label('Export')
+//                    ->icon('heroicon-o-document-text')
+//                    ->requiresConfirmation()
+//                    ->url(fn(Tour $record) => route('export-client', $record)),
                 Tables\Actions\EditAction::make(),
             ])
             ->headerActions([

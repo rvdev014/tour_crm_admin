@@ -11,24 +11,26 @@ class ExportController extends Controller
 {
     public function export(Tour $tour): void
     {
+        $spreadsheet = ExportService::getExport($tour);
+
         $filename = "Tour_" . $tour->group_number . ".xlsx";
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
 
-        $spreadsheet = ExportService::getExport($tour);
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
     }
 
     public function exportClient(Tour $tour): void
     {
-        $filename = "Tour_" . $tour->group_number . ".xlsx";
+        $spreadsheet = ExportClientService::getExport($tour);
+
+        $filename = "Tour_" . $tour->group_number . "_client.xlsx";
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
 
-        $spreadsheet = ExportClientService::getExport($tour);
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
     }

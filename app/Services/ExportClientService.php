@@ -6,6 +6,7 @@ use App\Enums\ExpenseType;
 use App\Models\Tour;
 use App\Models\TourDay;
 use App\Models\TourDayExpense;
+use App\Models\TourRoomType;
 use Illuminate\Database\Eloquent\Collection;
 use NumberFormatter;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -30,7 +31,7 @@ class ExportClientService
         $extraExpenses = $allExpenses->filter(fn(TourDayExpense $expense) => $expense->type == ExpenseType::Extra);
 
         $expenseTotal = $tour->expenses;
-        $planePriceTotal = $planeExpense->price;
+        $planePriceTotal = $planeExpense?->price;
         $extraPriceTotal = $extraExpenses->sum('price');
 
         $pax = $tour->pax + $tour->leader_pax;
@@ -49,15 +50,31 @@ class ExportClientService
         $dueTotal = $expenseTotal - $tourLeadersPriceTotal;
         $dueTotalWithWords = self::getPriceWithWords($dueTotal);
 
+        $expensesList = self::getExpensesList($tour);
+
+        $flightInfo = "-";
+        if ($planeExpense?->fromCity && $planeExpense?->toCity) {
+            $flightInfo = $planeExpense->fromCity->name . ' - ' . $planeExpense->toCity->name . ' flight';
+        }
+
+        $roomTypes = $tour->roomTypes->mapWithKeys(fn(TourRoomType $roomType) => [$roomType->roomType->name => $roomType->amount]);
+        $roomTypes = $roomTypes->merge([
+            'sda' => 2,
+            '11212' => 34,
+            'wqw' => 3,
+        ]);
+
         $placeholders = [
             '{date}' => now()->format('m/d/Y'),
             '{groupNumber}' => $tour->group_number,
-            '{personsCount}' => $tour->pax . '-' . $tour->leader_pax . ' FOC',
+            '{personsCount}' => $tour->pax . '+' . $tour->leader_pax . ' FOC',
             '{arrivalDate}' => $tour->start_date->format('m/d/Y'),
             '{departureDate}' => $tour->end_date->format('m/d/Y'),
-            '{expensesList}' => self::getExpensesList($tour),
-            '{cityFrom}' => $planeExpense->fromCity->name,
-            '{cityTo}' => $planeExpense->toCity->name,
+            '{expensesList}' => $expensesList->implode("\n"),
+
+            '{flightInfo}' => $flightInfo,
+            '{cityFrom}' => $planeExpense?->fromCity->name,
+            '{cityTo}' => $planeExpense?->toCity->name,
 
             '{pax}' => $pax,
             '{paxPrice}' => $paxPrice,
@@ -78,32 +95,38 @@ class ExportClientService
             '{tourLeaderPriceTotal}' => $tourLeadersPrice * $tour->leader_pax,
 
             '{dueTotal}' => $expenseTotal - $tourLeadersPriceTotal,
-            '{dueTotalWithWords}' => 'Twenty-three thousand four hundred thirteen',
+            '{dueTotalWithWords}' => ucfirst($dueTotalWithWords),
+
+            '{rooming}' => $roomTypes->map(fn($amount, $roomType) => "$roomType - $amount")->implode("\n"),
         ];
 
-        $roomTypes = [
-            'Double/Twin' => 15,
-            'Single' => 5,
-            'Triple' => 5,
-        ];
-
-        $i = 0;
-        foreach ($roomTypes as $label => $roomType) {
-            $sheet->setCellValue("J" . (13 + $i), $label);
-            $sheet->setCellValue("K" . (13 + $i), $roomType);
-            $i++;
+        foreach ($sheet->getRowIterator() as $row) {
+            foreach ($row->getCellIterator() as $cell) {
+                $cellValue = $cell->getValue();
+                if (is_string($cellValue)) {
+                    // Replace placeholders in the cell value
+                    $newValue = str_replace(array_keys($placeholders), array_values($placeholders), $cellValue);
+                    $cell->setValue($newValue);
+                }
+            }
         }
+
+        $sheet->getRowDimension(17)->setRowHeight(15 * $expensesList->count());
+        $sheet->getStyle('J13:K15')->getAlignment()->setWrapText(true);
+
+        $roomingHeight = 15 * $roomTypes->count() / 3;
+        $sheet->getRowDimension(13)->setRowHeight($roomingHeight);
+        $sheet->getRowDimension(14)->setRowHeight($roomingHeight);
+        $sheet->getRowDimension(15)->setRowHeight($roomingHeight);
 
         return $spreadsheet;
     }
 
-    public static function getExpensesList(Tour $tour): string
+    public static function getExpensesList(Tour $tour): \Illuminate\Support\Collection
     {
-        $expenses = $tour->days->flatMap(function (TourDay $day) {
+        return $tour->days->flatMap(function (TourDay $day) {
             return $day->expenses->map(fn(TourDayExpense $expense) => "* " . $expense->type->getLabel());
         });
-
-        return $expenses->implode("\n");
     }
 
     public static function getPriceWithWords(int $price): string
