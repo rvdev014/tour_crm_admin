@@ -327,7 +327,6 @@ class TourTpsResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->multiple()
-                                    ->relationship('museum', 'name')
                                     ->options(fn($get) => TourService::getMuseums($get('../../city_id')))
                                     ->createOptionForm([
                                         Components\Grid::make()->schema([
@@ -371,8 +370,7 @@ class TourTpsResource extends Resource
                                             return true;
                                         }
                                         $museums = Museum::query()->whereIn('id', $get('museum_ids'))->get();
-                                        return $museums->isEmpty() || $museums->flatMap(fn($museum) => $museum->children
-                                            )->isEmpty();
+                                        return $museums->isEmpty();
                                     }),
 
                                 Components\Textarea::make('comment')

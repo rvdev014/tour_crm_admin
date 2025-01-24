@@ -32,29 +32,6 @@ use Illuminate\Support\Number;
 
 class TourService
 {
-    public static function onPax($get, $set)
-    {
-        $type = $get('type');
-        if ($type == ExpenseType::Lunch->value || $type == ExpenseType::Dinner->value || $type == ExpenseType::Show->value) {
-            $price = !empty($get('price')) ? $get('price') : 0;
-            $pax = !empty($get('pax')) ? $get('pax') : 0;
-            if (!$pax) {
-                $set('total_price', $price);
-            } else {
-                $set('total_price', $price * $pax);
-            }
-        }
-
-        if ($type == ExpenseType::Museum->value) {
-            $price = TourService::getMuseumPrice(
-                $get('museum_id'),
-                $get('pax'),
-                $get('museum_item_id')
-            );
-            $set('price', $price);
-        }
-    }
-
     public static function getHotelRoomTypes($hotelId): array|Collection
     {
         if (!empty($hotelId)) {
