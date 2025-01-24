@@ -40,6 +40,7 @@ class ExpenseService
             case ExpenseType::Museum->value:
 
                 $museumId = $data['museum_id'] ?? null;
+                $museumIds = $data['museum_ids'] ?? null;
                 $museumItemId = $data['museum_item_id'] ?? null;
                 $museumItemIds = $data['museum_item_ids'] ?? null;
 
@@ -49,11 +50,10 @@ class ExpenseService
                         $data['price'] = $museumItems->sum('price_per_person') * $totalPax;
                     }
                 } else {
-                    if (!empty($museumId)) {
-                        /** @var Museum $museum */
-                        $museum = Museum::query()->find($museumId);
-                        if ($museum) {
-                            $data['price'] = $museum->price_per_person * $totalPax;
+                    if (!empty($museumIds)) {
+                        $museums = Museum::query()->whereIn('id', $museumIds)->get();
+                        if ($museums->isNotEmpty()) {
+                            $data['price'] = $museums->sum('price_per_person') * $totalPax;
                         }
                     }
                 }
