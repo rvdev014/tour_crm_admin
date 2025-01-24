@@ -26,6 +26,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -145,22 +146,23 @@ class TourTpsResource extends Resource
                 ->addActionLabel('Add day')
                 ->columnSpanFull()
                 ->addActionAlignment('end')
+                ->afterStateUpdated(function ($state, $get, $set) {
+                    $prevDate = null;
+                    foreach ($state as $uuid => $day) {
+                        $date = $day['date'];
+                        if (empty($date) && $prevDate) {
+                            $set("days.$uuid.date", Carbon::parse($prevDate)->addDay()->format('Y-m-d'));
+                        }
+
+                        $prevDate = $date;
+                    }
+                })
                 ->itemLabel(function ($get, $set, $uuid) {
                     $current = Arr::get($get('days'), $uuid);
                     $index = array_search($uuid, array_keys($get('days'))) ?? 0;
-                    $previous = null;
-                    if ($index > 0) {
-                        $previous = Arr::get($get('days'), array_keys($get('days'))[$index - 1]);
-                    }
 
                     $index++;
-
                     $date = $current['date'];
-                    if (!$date && $previous && !empty($previous['date'] ?? null)) {
-                        $previousDate = Carbon::parse($previous['date']);
-                        $set('days.' . $uuid . '.date', $previousDate->addDay()->format('Y-m-d'));
-                    }
-
                     if ($date) {
                         $date = date('d.m.Y', strtotime($date));
                         return "Day $index ($date)";
@@ -180,6 +182,28 @@ class TourTpsResource extends Resource
                             ->preload()
                             ->relationship('city', 'name')
                             ->options(fn($get) => TourService::getCities())
+                            ->afterStateUpdated(function ($get, $set) {
+                                $days = $get('../');
+
+                                $hotelsData = [];
+
+                                $prevCityId = null;
+                                foreach ($days as $uuidDay => $day) {
+                                    $cityId = $day['city_id'];
+                                    $expenses = $day['expenses'];
+
+                                    foreach ($expenses as $uuid => $expense) {
+                                        $hotelId = $expense['hotel_id'];
+                                        if (empty($hotelId) && $cityId == $prevCityId && isset($hotelsData[$cityId])) {
+                                            $set("expenses.$uuid.hotel_id", $hotelsData[$cityId]);
+                                        }
+
+                                        $hotelsData[$cityId] = $hotelId;
+                                    }
+
+                                    $prevCityId = $cityId;
+                                }
+                            })
                             ->reactive()
                             ->preload()
                             ->required(),
@@ -569,6 +593,11 @@ class TourTpsResource extends Resource
     {
         return $table
             ->striped()
+            // CAN GROUP TABLE BY CUSTOM COLUMNS
+//            ->groups([
+//                Group::make('start_date')
+//                    ->collapsible(),
+//            ])
             ->defaultSort('start_date', 'asc')
             ->filters([
                 Tables\Filters\Filter::make('country_id')
@@ -722,6 +751,10 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('pax')
                     ->numeric()
                     ->sortable(),*/
+
+//                Columns\Layout\Split::make([
+//
+//                ])->collapsible()
             ])
             ->actions([
                 Tables\Actions\Action::make('export')
