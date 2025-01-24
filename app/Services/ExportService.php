@@ -5,23 +5,15 @@ namespace App\Services;
 use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Enums\TourType;
-use App\Models\Company;
-use App\Models\Hotel;
 use App\Models\HotelRoomType;
-use App\Models\Museum;
-use App\Models\MuseumItem;
-use App\Models\Restaurant;
-use App\Models\Show;
 use App\Models\Tour;
 use App\Models\TourRoomType;
-use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Writer\IWriter;
 
 class ExportService
 {

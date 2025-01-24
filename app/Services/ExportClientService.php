@@ -16,6 +16,7 @@ class ExportClientService
 {
     public static function getExport(Tour $tour): Spreadsheet
     {
+        dd($tour);
         $templateFile = __DIR__ . '/Templates/Invoice_client.xlsx';
 
         // Load the template file
@@ -109,11 +110,11 @@ class ExportClientService
             }
         }
 
-        $sheet->getRowDimension(17)->setRowHeight(15 * $expensesList->count());
+        $sheet->getRowDimension(17)->setRowHeight(max(40, 15 * $expensesList->count()));
         $sheet->getStyle('J13:K15')->getAlignment()->setWrapText(true);
         $sheet->getStyle('J13:K15')->getFont()->setItalic(true);
 
-        $roomingHeight = 15 * $roomTypes->count() / 3;
+        $roomingHeight = max(15, 15 * $roomTypes->count() / 3);
         $sheet->getRowDimension(13)->setRowHeight($roomingHeight);
         $sheet->getRowDimension(14)->setRowHeight($roomingHeight);
         $sheet->getRowDimension(15)->setRowHeight($roomingHeight);
