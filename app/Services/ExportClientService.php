@@ -37,13 +37,13 @@ class ExportClientService
 
         $pax = $tour->pax + $tour->leader_pax;
         $paxPriceTotal = $expenseTotal - $planePriceTotal;
-        $paxPrice = ceil($paxPriceTotal / $pax);
+        $paxPrice = ceil($paxPriceTotal / ($pax ?? 1));
 
         $planePax = $pax;
-        $planePrice = ceil($planePriceTotal / $planePax);
+        $planePrice = ceil($planePriceTotal / ($planePax ?? 1));
 
         $extraPax = $tour->leader_pax;
-        $extraPrice = ceil($extraPriceTotal / $extraPax);
+        $extraPrice = ceil($extraPriceTotal / ($extraPax ?? 1));
 
         $tourLeadersPrice = $paxPrice + $planePrice;
         $tourLeadersPriceTotal = $tourLeadersPrice * $tour->leader_pax;
