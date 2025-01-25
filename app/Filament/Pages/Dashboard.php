@@ -17,6 +17,8 @@ class Dashboard extends \Filament\Pages\Dashboard
 {
     use HasFiltersForm;
 
+    protected static ?string $title = 'Dashboard11111';
+
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()->isAdmin();

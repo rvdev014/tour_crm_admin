@@ -70,5 +70,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.APP_PATH }}
-            git pull
             ./build.sh
