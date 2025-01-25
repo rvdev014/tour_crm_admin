@@ -39,6 +39,8 @@ services:
       context: .
       dockerfile: _docker/production/php/Dockerfile_2
 #    image: ravshan014/tour-crm-php:1
+    env_file:
+      - .env
     depends_on:
         db:
           condition: service_healthy
