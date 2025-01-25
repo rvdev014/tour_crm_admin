@@ -35,13 +35,19 @@ services:
 #      - tour-crm-db:/var/lib/postgresql/data
 
   php:
-    image: ravshan014/tour-crm-php:1
+    build:
+      context: .
+      dockerfile: _docker/production/php/Dockerfile_2
+#    image: ravshan014/tour-crm-php:1
     depends_on:
         db:
           condition: service_healthy
 
   nginx:
-    image: ravshan014/tour-crm-nginx:1
+    build:
+      context: .
+      dockerfile: _docker/production/nginx/Dockerfile
+#    image: ravshan014/tour-crm-nginx:1
     ports:
       - "${APP_PORT}:80"
     depends_on:
