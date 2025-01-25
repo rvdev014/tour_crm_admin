@@ -21,3 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('export/{tour}', [\App\Http\Controllers\ExportController::class, 'export'])->name('export');
 Route::get('export-client/{tour}', [\App\Http\Controllers\ExportController::class, 'exportClient'])->name('export-client');
 Route::get('export-museum/{tour}', [\App\Http\Controllers\ExportController::class, 'exportMuseum'])->name('export-museum');
+Route::get('export-hotel/{tour}', [\App\Http\Controllers\ExportController::class, 'exportHotel'])->name('export-hotel');

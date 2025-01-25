@@ -16,7 +16,6 @@ class ExportClientService
 {
     public static function getExport(Tour $tour): Spreadsheet
     {
-        dd($tour);
         $templateFile = __DIR__ . '/Templates/Invoice_client.xlsx';
 
         // Load the template file
@@ -38,13 +37,13 @@ class ExportClientService
 
         $pax = $tour->pax + $tour->leader_pax;
         $paxPriceTotal = $expenseTotal - $planePriceTotal;
-        $paxPrice = $paxPriceTotal / $pax;
+        $paxPrice = ceil($paxPriceTotal / $pax);
 
         $planePax = $pax;
-        $planePrice = $planePriceTotal / $planePax;
+        $planePrice = ceil($planePriceTotal / $planePax);
 
         $extraPax = $tour->leader_pax;
-        $extraPrice = $extraPriceTotal / $extraPax;
+        $extraPrice = ceil($extraPriceTotal / $extraPax);
 
         $tourLeadersPrice = $paxPrice + $planePrice;
         $tourLeadersPriceTotal = $tourLeadersPrice * $tour->leader_pax;
@@ -52,7 +51,6 @@ class ExportClientService
         $dueTotal = $expenseTotal - $tourLeadersPriceTotal;
         $dueTotalWithWords = self::getPriceWithWords($dueTotal);
 
-//        $expensesList = self::getExpensesList($tour);
         $expensesList = $allExpenses->groupBy(fn(TourDayExpense $expense) => $expense->type->getLabel())
             ->map(fn($expenses, string $type) => "* $type");
 
@@ -110,7 +108,7 @@ class ExportClientService
             }
         }
 
-        $sheet->getRowDimension(17)->setRowHeight(max(40, 15 * $expensesList->count()));
+        $sheet->getRowDimension(17)->setRowHeight(max(40, 15 * ($expensesList->count() + 1)));
         $sheet->getStyle('J13:K15')->getAlignment()->setWrapText(true);
         $sheet->getStyle('J13:K15')->getFont()->setItalic(true);
 

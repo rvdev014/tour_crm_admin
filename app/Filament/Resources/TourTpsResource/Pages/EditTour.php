@@ -66,16 +66,20 @@ class EditTour extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+//            Actions\Action::make('export_hotel')
+//                ->label('Hotels')
+//                ->icon('heroicon-o-document-text')
+//                ->url(route('export-hotel', $this->record)),
             Actions\Action::make('export_museum')
-                ->label('Report by Museums')
+                ->label('Museums')
                 ->icon('heroicon-o-document-text')
                 ->url(route('export-museum', $this->record)),
-//            Actions\Action::make('export_client')
-//                ->label('Report for Client')
-//                ->icon('heroicon-o-document-text')
-//                ->url(route('export-client', $this->record)),
+           Actions\Action::make('export_client')
+               ->label('Client')
+               ->icon('heroicon-o-document-text')
+               ->url(route('export-client', $this->record)),
             Actions\Action::make('export')
-                ->label('Export')
+                ->label('Report')
                 ->icon('heroicon-o-document-text')
                 ->url(route('export', $this->record)),
             Actions\DeleteAction::make()

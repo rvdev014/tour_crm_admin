@@ -210,9 +210,9 @@ class TourTpsResource extends Resource
                     ]),
                     Components\Repeater::make('expenses')
                         ->extraAttributes(['class' => 'repeater-expenses'])
-                        ->collapsed(fn($record) => !empty($record->id))
                         ->collapsible()
                         ->cloneable()
+                        ->collapsed(fn ($record, $get, $state) => !empty($record->id))
                         ->itemLabel(function ($get, $uuid) {
                             $current = Arr::get($get('expenses'), $uuid);
                             $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
@@ -254,7 +254,7 @@ class TourTpsResource extends Resource
 
                             // Hotel
                             Components\Fieldset::make('Hotel info')->schema([
-                                Components\Grid::make(3)->schema([
+                                Components\Grid::make(4)->schema([
                                     Components\Select::make('hotel_id')
                                         ->native(false)
                                         ->searchable()
@@ -272,6 +272,8 @@ class TourTpsResource extends Resource
                                         ->label('Status'),
                                     Components\TimePicker::make('hotel_checkin_time')
                                         ->label('Check-in time'),
+                                    Components\TimePicker::make('hotel_checkout_time')
+                                        ->label('Check-out time'),
                                 ]),
                                 Components\Textarea::make('comment')
                                     ->label('Comment')
@@ -566,6 +568,7 @@ class TourTpsResource extends Resource
                         ])
                         ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
                             $tourData = $get('../../');
+                            $data['from_city_id'] = $get('city_id');
                             return ExpenseService::mutateExpense(
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
@@ -574,6 +577,7 @@ class TourTpsResource extends Resource
                         })
                         ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
                             $tourData = $get('../../');
+                            $data['from_city_id'] = $get('city_id');
                             return ExpenseService::mutateExpense(
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),

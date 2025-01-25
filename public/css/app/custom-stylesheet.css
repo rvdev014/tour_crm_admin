@@ -54,3 +54,13 @@
     transition: 0.2s ease-in-out;
 }
 
+
+.fi-topbar-open-sidebar-btn {
+    background: #1e4e6e;
+    color: #fff;
+}
+.fi-sidebar-header .fi-icon-btn {
+    background: #1e4e6e;
+    color: #fff;
+}
+

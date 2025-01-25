@@ -11,6 +11,7 @@ use App\Models\TourDayExpense;
 use Illuminate\Database\Eloquent\Collection;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
@@ -27,9 +28,11 @@ class ExportMuseumService
         $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
 
+        $tableStartRow = 0;
         $museumsData = self::getMuseums($tour);
         foreach ($museumsData as $museumData) {
-            $sheet = self::genTable($sheet, $museumData, 1, 'J');
+            $sheet = self::genTable($sheet, $museumData, $tableStartRow + 1, 'J');
+            $tableStartRow = $sheet->getHighestRow();
         }
 
         foreach (range('A', $sheet->getHighestColumn()) as $col) {
@@ -63,7 +66,10 @@ class ExportMuseumService
 
         $currentRow = $startRow + 1;
         $sheet->mergeCells("A$currentRow:F$currentRow");
-        $sheet->setCellValue("A$currentRow", 'МУЗЕЙ ЗАПОВЕДНИК «ИЧАН КАЛЪА»');
+        $museumName = $museumData['museum'];
+        $sheet->setCellValue("A$currentRow", "МУЗЕЙ «{$museumName}»");
+        $sheet->getRowDimension($currentRow)->setRowHeight(15);
+        $sheet->getStyle("A$currentRow")->getFont()->setItalic(true);
         $sheet->setCellValue("I$currentRow", 'Дата:');
         $sheet->setCellValue("J$currentRow", '10/3/2018');
         $sheet->getStyle("A$currentRow:J$currentRow")->getFont()->setSize(11);
@@ -109,6 +115,15 @@ class ExportMuseumService
         $sheet->getStyle("A$currentRow:J$currentRow")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle("A$currentRow:J$currentRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getRowDimension($currentRow)->setRowHeight(30);
+
+        ///////////////// FOOTER //////////////////////
+        $currentRow++;
+        $sheet->mergeCells("A$currentRow:J$currentRow");
+        $sheet->setCellValue("A$currentRow", "Семейное предприятие «EAST ASIA POINT»\nР/счет 20208000205000278001\nТашкентский областной филиал Банка  “Асака»      МФО  00411    ИНН 207160718       ОКЭД 79900");
+        $sheet->getStyle("A$currentRow")->getFont()->setItalic(true);
+        $sheet->getRowDimension($currentRow)->setRowHeight(45);
+
+        $sheet->getStyle('A' . $startRow + 2 . ':J' . $startRow + 3)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         return $sheet;
     }
