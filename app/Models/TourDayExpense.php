@@ -78,6 +78,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property Hotel $hotel
  * @property HotelRoomType $hotelRoomType
  * @property Museum $museum
+ * @property Collection<Museum> $museums
  * @property MuseumItem $museumItem
  * @property Collection<MuseumItem> $museumItems
  * @property Restaurant $restaurant

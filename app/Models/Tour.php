@@ -137,4 +137,17 @@ class Tour extends Model
     {
         return $this->hasMany(TourPassenger::class);
     }
+
+    public function getTotalPax($withLeader = true): int
+    {
+        if ($this->type == TourType::Corporate) {
+            return $this->passengers()->count();
+        }
+
+        if (!$withLeader) {
+            return $this->pax;
+        }
+
+        return $this->pax + $this->leader_pax;
+    }
 }
