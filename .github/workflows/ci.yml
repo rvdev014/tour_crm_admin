@@ -58,3 +58,25 @@ jobs:
           --health-retries 5
 
 
+
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.APP_PATH }}
+            git pull origin
+            docker-compose -f docker-compose-prod.yml down --remove-orphans
+            docker-compose -f docker-compose-prod.yml up -d --build
+            docker-compose -f docker-compose-prod.yml exec php composer install --no-interaction --no-progress --no-suggest
+            docker-compose -f docker-compose-prod.yml exec php php artisan migrate --force
+            docker-compose -f docker-compose-prod.yml exec php php artisan optimize:clear
+            docker-compose -f docker-compose-prod.yml exec php php artisan optimize
+            docker-compose -f docker-compose-prod.yml exec php php artisan icons:cache
