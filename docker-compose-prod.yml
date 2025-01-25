@@ -31,7 +31,8 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - tour-crm-db:/var/lib/postgresql/data
+      - ./_docker/data/postgres:/var/lib/postgresql/data
+#      - tour-crm-db:/var/lib/postgresql/data
 
   php:
     image: ravshan014/tour-crm-php:1
