@@ -59,19 +59,12 @@ class ExportController extends Controller
      */
     public function exportHotel(Tour $tour): void
     {
-// Load the template file
-        $templateProcessor = new TemplateProcessor(__DIR__ . '/../../Services/Templates/Report_hotel.docx');
+        $templateProcessor = ExportHotelService::getExport($tour);
 
-// Replace placeholders
-        $templateProcessor->setValue('name', 'John Doe');
-        $templateProcessor->setValue('order_id', '12345');
-
-// Set headers for download
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         header('Content-Disposition: attachment; filename="customized.docx"');
         header('Cache-Control: max-age=0');
 
-// Save the updated document directly to the output stream
         $templateProcessor->saveAs('php://output');
     }
 }
