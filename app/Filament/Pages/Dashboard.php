@@ -17,7 +17,7 @@ class Dashboard extends \Filament\Pages\Dashboard
 {
     use HasFiltersForm;
 
-    protected static ?string $title = 'Dashboard';
+    protected static ?string $title = 'Dashboard 111';
 
     public static function shouldRegisterNavigation(): bool
     {
