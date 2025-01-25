@@ -62,6 +62,7 @@ jobs:
 
   deploy:
     name: Deploy
+    needs: tests
     runs-on: ubuntu-24.04
     steps:
       - name: Deploy using ssh
