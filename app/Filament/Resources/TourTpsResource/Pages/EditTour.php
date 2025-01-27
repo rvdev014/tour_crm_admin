@@ -74,10 +74,10 @@ class EditTour extends EditRecord
                 ->label('Museums')
                 ->icon('heroicon-o-document-text')
                 ->url(route('export-museum', $this->record)),
-           Actions\Action::make('export_client')
-               ->label('Client')
-               ->icon('heroicon-o-document-text')
-               ->url(route('export-client', $this->record)),
+            Actions\Action::make('export_client')
+                ->label('Client')
+                ->icon('heroicon-o-document-text')
+                ->url(route('export-client', $this->record)),
             Actions\Action::make('export')
                 ->label('Report')
                 ->icon('heroicon-o-document-text')

@@ -42,15 +42,15 @@ class ExportController extends Controller
 
     public function exportMuseum(Tour $tour): void
     {
-       $spreadsheet = ExportMuseumService::getExport($tour);
+        $spreadsheet = ExportMuseumService::getExport($tour);
 
-       $filename = "Tour_" . $tour->group_number . "_museum.xlsx";
-       header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-       header('Content-Disposition: attachment; filename="' . $filename . '"');
-       header('Cache-Control: max-age=0');
+        $filename = "Tour_" . $tour->group_number . "_museum.xlsx";
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
 
-       $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-       $writer->save('php://output');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
     }
 
     /**

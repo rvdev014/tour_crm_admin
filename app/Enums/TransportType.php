@@ -5,7 +5,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum TransportType: int implements HasLabel, HasColor
+enum TransportType:int implements HasLabel, HasColor
 {
     case Sedan = 1;
     case SUV = 2;
@@ -17,12 +17,12 @@ enum TransportType: int implements HasLabel, HasColor
     public function getLabel(): string
     {
         return match ($this) {
-            self::Sedan => 'Sedan',
-            self::SUV => 'SUV',
+            self::Sedan   => 'Sedan',
+            self::SUV     => 'SUV',
             self::Minivan => 'Minivan 3-4',
             self::Minibus => 'Minibus 5-14',
-            self::Bus30 => 'Bus 30-35',
-            self::Bus40 => 'Bus 40-45',
+            self::Bus30   => 'Bus 30-35',
+            self::Bus40   => 'Bus 40-45',
         };
     }
 
@@ -30,7 +30,7 @@ enum TransportType: int implements HasLabel, HasColor
     {
         return match ($this) {
             self::Sedan => '',
-            self::SUV => '',
+            self::SUV   => '',
         };
     }
 }

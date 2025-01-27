@@ -6,7 +6,7 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum TourStatus: int implements HasLabel, HasColor, HasIcon
+enum TourStatus:int implements HasLabel, HasColor, HasIcon
 {
     case Confirmed = 1;
     case NotConfirmed = 2;
@@ -14,7 +14,7 @@ enum TourStatus: int implements HasLabel, HasColor, HasIcon
     public function getLabel(): string
     {
         return match ($this) {
-            self::Confirmed => 'Confirmed',
+            self::Confirmed    => 'Confirmed',
             self::NotConfirmed => 'Not Confirmed',
         };
     }
@@ -22,7 +22,7 @@ enum TourStatus: int implements HasLabel, HasColor, HasIcon
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::Confirmed => 'success',
+            self::Confirmed    => 'success',
             self::NotConfirmed => 'danger',
         };
     }
@@ -30,7 +30,7 @@ enum TourStatus: int implements HasLabel, HasColor, HasIcon
     public function getIcon(): ?string
     {
         return match ($this) {
-            self::Confirmed => '',
+            self::Confirmed    => '',
             self::NotConfirmed => '',
         };
     }

@@ -34,7 +34,7 @@ class TransportResource extends Resource
                     ->options(TransportType::class)
                     ->required()
                     ->rules([
-                        fn(Get $get): Closure => function (string $attribute, $value, $fail) use ($get) {
+                        fn(Get $get): Closure => function(string $attribute, $value, $fail) use ($get) {
                             $exists = Transport::query()
                                 ->where('type', $get('type'))
                                 ->where('comfort_level', $get('comfort_level'))

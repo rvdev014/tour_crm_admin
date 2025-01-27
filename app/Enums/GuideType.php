@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum GuideType: int
+enum GuideType:int
 {
     case Local = 1;
     case Escort = 2;
@@ -10,7 +10,7 @@ enum GuideType: int
     public function getLabel(): string
     {
         return match ($this) {
-            self::Local => 'Local',
+            self::Local  => 'Local',
             self::Escort => 'Escort',
         };
     }

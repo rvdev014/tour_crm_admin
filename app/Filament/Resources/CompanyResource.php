@@ -29,7 +29,7 @@ class CompanyResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('type')
                     ->options(CompanyType::class)
-                    ->afterStateUpdated(function ($get, $set) {
+                    ->afterStateUpdated(function($get, $set) {
                         if ($get('type') == CompanyType::TPS->value) {
                             $set('inn', null);
                             $set('additional_percent', null);

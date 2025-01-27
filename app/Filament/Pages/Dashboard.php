@@ -40,10 +40,12 @@ class Dashboard extends \Filament\Pages\Dashboard
             Grid::make(3)->schema([
                 DatePicker::make('start_date')
                     ->formatStateUsing(fn() => $startMonth->format('d-m-Y'))
-                    ->displayFormat('d.m.Y'),
+                    ->displayFormat('d.m.Y')
+                    ->native(false),
                 DatePicker::make('end_date')
                     ->formatStateUsing(fn() => $endMonth->format('d-m-Y'))
-                    ->displayFormat('d.m.Y'),
+                    ->displayFormat('d.m.Y')
+                    ->native(false),
                 Select::make('country')
                     ->native(false)
                     ->searchable()

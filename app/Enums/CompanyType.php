@@ -6,7 +6,7 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum CompanyType: int implements HasLabel, HasIcon, HasColor
+enum CompanyType:int implements HasLabel, HasIcon, HasColor
 {
     case TPS = 1;
     case Corporate = 2;
@@ -14,7 +14,7 @@ enum CompanyType: int implements HasLabel, HasIcon, HasColor
     public function getLabel(): string
     {
         return match ($this) {
-            self::TPS => 'TPS',
+            self::TPS       => 'TPS',
             self::Corporate => 'Corporate',
         };
     }
@@ -36,7 +36,7 @@ enum CompanyType: int implements HasLabel, HasIcon, HasColor
     public function getIcon(): ?string
     {
         return match ($this) {
-            self::TPS => '',
+            self::TPS       => '',
             self::Corporate => '',
         };
     }
