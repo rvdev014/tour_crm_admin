@@ -80,6 +80,7 @@ class TourTpsResource extends Resource
                     ->required(),
                 Components\DatePicker::make('start_date')
                     ->label('Arrival time')
+                    ->native(false)
                     ->required(),
                 Components\DatePicker::make('end_date')
                     ->label('Departure time')
