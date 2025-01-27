@@ -27,6 +27,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
+ * @property string $driver
+ * @property string $place_of_submission
+ *
  * @property TourDayExpense $tourDayExpense
  * @property Company $company
  * @property City $fromCity
@@ -49,6 +52,9 @@ class Transfer extends Model
         'pax',
         'comment',
         'tour_day_expense_id',
+
+        'driver',
+        'place_of_submission',
     ];
 
     protected $casts = [

@@ -43,6 +43,8 @@ class UserResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('role')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->options([
                         0 => 'Admin',
                         1 => 'Operator',

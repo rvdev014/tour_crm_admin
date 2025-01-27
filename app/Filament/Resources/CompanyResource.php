@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\CompanyType;
 use App\Filament\Resources\CompanyResource\Pages;
 use App\Filament\Resources\CompanyResource\RelationManagers;
 use App\Models\Company;
@@ -26,11 +27,22 @@ class CompanyResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('type')
+                    ->options(CompanyType::class)
+                    ->afterStateUpdated(function ($get, $set) {
+                        if ($get('type') == CompanyType::TPS->value) {
+                            $set('inn', null);
+                            $set('additional_percent', null);
+                        }
+                    })
+                    ->reactive()
+                    ->required(),
                 Forms\Components\TextInput::make('inn')
-                    ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
                 Forms\Components\TextInput::make('additional_percent')
-                    ->numeric(),
+                    ->numeric()
+                    ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
                 Forms\Components\Textarea::make('comment'),
             ]);
     }
@@ -42,6 +54,8 @@ class CompanyResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('type')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('inn')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('additional_percent')

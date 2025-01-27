@@ -8,19 +8,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $tour_id
- * @property int $hotel_room_type_id
+ * @property int $room_type_id
  * @property int $amount
  *
  * @property Tour $tour
- * @property HotelRoomType $hotelRoomType
+ * @property RoomType $roomType
  */
-class TourHotelRoomType extends Model
+class TourRoomType extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'tour_id',
-        'hotel_room_type_id',
+        'room_type_id',
         'amount',
     ];
 
@@ -29,8 +29,8 @@ class TourHotelRoomType extends Model
         return $this->belongsTo(Tour::class);
     }
 
-    public function hotelRoomType(): BelongsTo
+    public function roomType(): BelongsTo
     {
-        return $this->belongsTo(HotelRoomType::class);
+        return $this->belongsTo(RoomType::class);
     }
 }

@@ -29,6 +29,8 @@ class TransportResource extends Resource
             ->schema([
                 Forms\Components\Select::make('type')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->options(TransportType::class)
                     ->required()
                     ->rules([
@@ -44,6 +46,8 @@ class TransportResource extends Resource
                     ]),
                 Forms\Components\Select::make('comfort_level')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->options(TransportComfortLevel::class)
                     ->required(),
                 Forms\Components\TextInput::make('price')->required(),

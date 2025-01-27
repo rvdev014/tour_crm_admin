@@ -30,6 +30,8 @@ class CityResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('country_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->relationship('country', 'name'),
             ]);
     }

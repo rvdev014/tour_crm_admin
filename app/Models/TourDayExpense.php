@@ -6,6 +6,7 @@ use App\Enums\EmployeeType;
 use App\Enums\ExpenseType;
 use App\Observers\TourDayExpenseObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +31,9 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * Museum
  * @property int $museum_id
+ * @property array $museum_ids
  * @property int $museum_item_id
+ * @property array $museum_item_ids
  * @property string $museum_inn
  *
  * Guide
@@ -42,6 +45,9 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property int $transport_comfort_level
  * @property int $from_city_id
  * @property int $to_city_id
+ * @property string $transport_driver
+ * @property string $transport_time
+ * @property string $transport_place
  *
  * Train
  * @property string $train_name
@@ -63,6 +69,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * Other
  * @property string $other_name
+ * @property string $hotel_checkin_time
  *
  * @property City $fromCity
  * @property City $toCity
@@ -71,11 +78,12 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property Hotel $hotel
  * @property HotelRoomType $hotelRoomType
  * @property Museum $museum
+ * @property Collection<Museum> $museums
  * @property MuseumItem $museumItem
+ * @property Collection<MuseumItem> $museumItems
  * @property Restaurant $restaurant
  * @property Employee $guideEmployee
  */
-
 #[ObservedBy([TourDayExpenseObserver::class])]
 class TourDayExpense extends Model
 {
@@ -89,6 +97,8 @@ class TourDayExpense extends Model
         'transport_time' => 'datetime',
         'car_ids' => 'array',
         'type' => ExpenseType::class,
+        'museum_ids' => 'array',
+        'museum_item_ids' => 'array',
     ];
 
     public function tourDay(): BelongsTo

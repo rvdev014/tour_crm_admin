@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
 use App\Enums\TourType;
+use App\Mail\HotelMail;
+use App\Mail\RestaurantMail;
 use App\Models\City;
 use App\Models\Company;
+use App\Models\Country;
 use App\Models\Hotel;
 use App\Models\HotelRoomType;
 use App\Models\Museum;
@@ -22,33 +26,12 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Number;
 
 class TourService
 {
-    public static function onPax($get, $set)
-    {
-        $type = $get('type');
-        if ($type == ExpenseType::Lunch->value || $type == ExpenseType::Dinner->value || $type == ExpenseType::Show->value) {
-            $price = !empty($get('price')) ? $get('price') : 0;
-            $pax = !empty($get('pax')) ? $get('pax') : 0;
-            if (!$pax) {
-                $set('total_price', $price);
-            } else {
-                $set('total_price', $price * $pax);
-            }
-        }
-
-        if ($type == ExpenseType::Museum->value) {
-            $price = TourService::getMuseumPrice(
-                $get('museum_id'),
-                $get('pax'),
-                $get('museum_item_id')
-            );
-            $set('price', $price);
-        }
-    }
-
     public static function getHotelRoomTypes($hotelId): array|Collection
     {
         if (!empty($hotelId)) {
@@ -62,8 +45,15 @@ class TourService
         return [];
     }
 
-    public static function getCities($countryId, bool $isPluck = true, $isAll = false): array|Collection
+    public static function getCities($countryId = null, bool $isPluck = true, $isAll = false): array|Collection
     {
+        if (!$countryId) {
+            $countryId = Country::query()->where('name', 'Uzbekistan')->first()?->id;
+            if (!$countryId) {
+                throw new \Exception('Country \'Uzbekistan\' not found');
+            }
+        }
+
         if (!empty($countryId)) {
             $result = City::where('country_id', $countryId)->get();
             return $isPluck ? $result->pluck('name', 'id') : $result;
@@ -75,64 +65,29 @@ class TourService
         return [];
     }
 
-    public static function getRestaurants($localCityId, $globalCityId, $countryId): array|Collection
+    public static function getRestaurants($localCityId): array|Collection
     {
-        $result = [];
-        if (!empty($localCityId)) {
-            $result = Restaurant::where('city_id', $localCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($globalCityId)) {
-            $result = Restaurant::where('city_id', $globalCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($countryId)) {
-            $result = Restaurant::where('country_id', $countryId)->get()->pluck('name', 'id');
-        }
-        return $result;
+        return Restaurant::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
-    public static function getHotels($localCityId, $globalCityId, $countryId): array|Collection
+    public static function getHotels($localCityId): array|Collection
     {
-        $result = [];
-        if (!empty($localCityId)) {
-            $result = Hotel::where('city_id', $localCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($globalCityId)) {
-            $result = Hotel::where('city_id', $globalCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($countryId)) {
-            $result = Hotel::where('country_id', $countryId)->get()->pluck('name', 'id');
-        }
-        return $result;
+        return Hotel::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
-    public static function getMuseums($localCityId, $globalCityId, $countryId): array|Collection
+    public static function getMuseums($localCityId): array|Collection
     {
-        $result = [];
-        if (!empty($localCityId)) {
-            $result = Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($globalCityId)) {
-            $result = Museum::where('city_id', $globalCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($countryId)) {
-            $result = Museum::where('country_id', $countryId)->get()->pluck('name', 'id');
-        }
-        return $result;
+        return Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
-    public static function getShows($localCityId, $globalCityId, $countryId): array|Collection
+    public static function getMuseumItems($museumIds): array|Collection
     {
-        $result = [];
-        if (!empty($localCityId)) {
-            $result = Show::where('city_id', $localCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($globalCityId)) {
-            $result = Show::where('city_id', $globalCityId)->get()->pluck('name', 'id');
-        }
-        if (!empty($countryId)) {
-            $result = Show::where('country_id', $countryId)->get()->pluck('name', 'id');
-        }
-        return $result;
+        return MuseumItem::query()->whereIn('museum_id', $museumIds)->get()->pluck('name', 'id');
+    }
+
+    public static function getShows($localCityId): array|Collection
+    {
+        return Show::where('city_id', $localCityId)->get()->pluck('name', 'id');
     }
 
     public static function isVisible(Tour $tour): bool
@@ -197,19 +152,26 @@ class TourService
             ->sum('price');
     }
 
+    public static function tourNextId(): int
+    {
+        $toursTableSequence = DB::selectOne('SELECT last_value + 1 AS next_id FROM tours_id_seq;');
+        return ($toursTableSequence?->next_id ?? 1);
+    }
+
     public static function getGroupNumber(TourType $tourType): string
     {
         $userName = auth()->user()->name;
         $firstLetter = substr($userName, 0, 1);
-        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
+//        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
 
         if ($tourType == TourType::TPS) {
-            $number = self::threeDigit($corporateToursCount);
+//            $number = self::threeDigit(self::tourNextId());
             $lastLetter = 'T';
         } else {
-            $number = self::addHundred($corporateToursCount);
             $lastLetter = 'C';
         }
+
+        $number = self::addHundred(self::tourNextId());
 
         $currentYear = date('y');
         return "{$firstLetter}{$number}{$currentYear}{$lastLetter}";
@@ -232,6 +194,17 @@ class TourService
         }
         $company = Company::find($companyId);
         return $company?->additional_percent ?? 0;
+    }
+
+    public static function getCompanyAddPercent($companyId): ?int
+    {
+        $addPercent = null;
+        if ($companyId) {
+            /** @var Company $company */
+            $company = Company::query()->find($companyId);
+            $addPercent = $company?->additional_percent ?? null;
+        }
+        return $addPercent;
     }
 
     public static function getHotelPrice($hotelRoomTypeId, $additionalPercent): float|int
@@ -291,20 +264,72 @@ class TourService
         return [
             Grid::make(3)->schema(
                 RoomType::all()->map(function (RoomType $roomType) {
-                    return TextInput::make("hotel_type_{$roomType->id}")
+                    return TextInput::make("room_type_{$roomType->id}")
                         ->label($roomType->name)
                         ->formatStateUsing(function ($record) use ($roomType) {
                             if (!$record) {
                                 return 0;
                             }
-                            $roomType = $record->hotelRoomTypes->first(
-                                fn($hotelRoomType) => $hotelRoomType->hotel_room_type_id == $roomType->id
+                            $tourRoomType = $record->roomTypes->first(
+                                fn($item) => $item->room_type_id == $roomType->id
                             );
-                            return $roomType?->amount ?? 0;
+                            return $tourRoomType?->amount ?? 0;
                         })
                         ->numeric();
                 })->toArray()
             )
         ];
+    }
+
+    public static function getCompanies(CompanyType $type)
+    {
+        return Company::where('type', $type)->get()->pluck('name', 'id');
+    }
+
+    public static function sendMails($tourData, $days): void
+    {
+        $hotelsData = [];
+        $restaurantsData = [];
+        foreach ($days as $day) {
+            foreach ($day['expenses'] as $expense) {
+                switch ($expense['type']) {
+                    case ExpenseType::Hotel->value:
+                        $hotelId = $expense['hotel_id'];
+                        if ($hotel = Hotel::find($hotelId)) {
+                            $hotelsData[$day['date']] = [
+                                'hotel' => $hotel,
+                                'expense' => $expense,
+                            ];
+                        }
+                        break;
+                    case ExpenseType::Lunch->value:
+                    case ExpenseType::Dinner->value:
+                        $restaurantId = $expense['restaurant_id'];
+                        if ($restaurant = Restaurant::find($restaurantId)) {
+                            $restaurantsData[$day['date']] = [
+                                'restaurant' => $restaurant,
+                                'expense' => $expense,
+                            ];
+                        }
+                        break;
+                }
+            }
+        }
+
+        foreach ($hotelsData as $date => $hotelItem) {
+            /** @var Hotel $hotel */
+            $hotel = $hotelItem['hotel'];
+            if (!empty($hotel->email)) {
+                Mail::to($hotel->email)->send(new HotelMail($date, $hotelItem['expense'], $tourData));
+            }
+        }
+
+        foreach ($restaurantsData as $date => $restaurantItem) {
+            /** @var Restaurant $restaurant */
+            $restaurant = $restaurantItem['restaurant'];
+            if (!empty($restaurant->email)) {
+                Mail::to($restaurant->email)->send(new RestaurantMail($date, $restaurantItem['expense'], $tourData));
+            }
+        }
     }
 }

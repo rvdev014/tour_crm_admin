@@ -10,7 +10,7 @@ enum ExpenseType: int
     case Museum = 4;
     case Lunch = 5;
     case Dinner = 6;
-    case Other = 7;
+    case Extra = 7;
     case Train = 8;
     case Plane = 9;
     case Show = 10;
@@ -29,7 +29,7 @@ enum ExpenseType: int
             9 => self::Plane->getLabel(),
             10 => self::Show->getLabel(),
             11 => self::Conference->getLabel(),
-            7 => self::Other->getLabel(),
+            7 => self::Extra->getLabel(),
         ];
     }
 
@@ -42,7 +42,7 @@ enum ExpenseType: int
             self::Museum => 'Museum',
             self::Lunch => 'Lunch',
             self::Dinner => 'Dinner',
-            self::Other => 'Other',
+            self::Extra => 'Extra',
             self::Train => 'Train',
             self::Plane => 'Plane',
             self::Show => 'Show',
@@ -59,7 +59,7 @@ enum ExpenseType: int
             self::Museum => 'bg-red-500',
             self::Lunch => 'bg-pink-500',
             self::Dinner => 'bg-purple-500',
-            self::Other => throw new \Exception('To be implemented'),
+            self::Extra => throw new \Exception('To be implemented'),
             self::Train => throw new \Exception('To be implemented'),
             self::Plane => throw new \Exception('To be implemented'),
             self::Show => throw new \Exception('To be implemented'),

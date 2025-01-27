@@ -21,10 +21,12 @@ class RoomTypesRelationManager extends RelationManager
             ->schema([
                 Forms\Components\Select::make('room_type_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->relationship('roomType', 'name')
                     ->required()
                     ->rules([
-                        fn (Get $get): Closure => function (string $attribute, $value, $fail) use ($get) {
+                        fn(Get $get): Closure => function (string $attribute, $value, $fail) use ($get) {
                             /** @var Hotel $hotel */
                             $hotel = $this->getOwnerRecord();
                             if ($hotel->roomTypes->contains('room_type_id', $value)) {

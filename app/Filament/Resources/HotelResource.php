@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\HotelResource\Pages;
-use App\Filament\Resources\HotelResource\RelationManagers;
 use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
 use App\Models\Hotel;
 use App\Services\TourService;
@@ -12,8 +11,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HotelResource extends Resource
 {
@@ -27,22 +24,29 @@ class HotelResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required(),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('email')
+                        ->email()
+                        ->required()
+                        ->unique(ignoreRecord: true),
+                    Forms\Components\TextInput::make('inn'),
+                ]),
                 Forms\Components\Select::make('country_id')
                     ->native(false)
+                    ->searchable()
+                    ->preload()
                     ->relationship('country', 'name')
                     ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
                     ->reactive(),
                 Forms\Components\Select::make('city_id')
                     ->native(false)
-                    ->relationship('city', 'name')
+                    ->searchable()
                     ->preload()
-                    ->options(fn ($get) => TourService::getCities($get('country_id'))),
+                    ->relationship('city', 'name')
+                    ->options(fn($get) => TourService::getCities($get('country_id'))),
             ]);
     }
 
@@ -54,6 +58,7 @@ class HotelResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email'),
+                Tables\Columns\TextColumn::make('inn'),
                 Tables\Columns\TextColumn::make('country.name')
                     ->label('Country')
                     ->searchable()

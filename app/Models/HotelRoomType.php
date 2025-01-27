@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $room_type_id
  * @property float $price
  *
- * @property RoomType $room_type
+ * @property RoomType $roomType
  * @property Hotel $hotel
  */
 class HotelRoomType extends Model
@@ -35,5 +35,14 @@ class HotelRoomType extends Model
     public function roomType(): BelongsTo
     {
         return $this->belongsTo(RoomType::class)->orderBy('id');
+    }
+
+    public function getPrice($addPercent): int|float
+    {
+        $hotelPrice = $this->price;
+        if ($addPercent) {
+            $hotelPrice += $hotelPrice * $addPercent / 100;
+        }
+        return $hotelPrice;
     }
 }

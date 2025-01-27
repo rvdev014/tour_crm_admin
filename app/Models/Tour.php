@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\GuideType;
+use App\Enums\TourStatus;
 use App\Enums\TourType;
+use App\Enums\TransportType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,15 +35,19 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property string $guide_name
  * @property string $guide_phone
  * @property int $guide_price
+ * @property int $transport_type
+ * @property int $transport_comfort_level
+ * @property int $single_supplement_price
  *
  * @property Company $company
  * @property User $createdBy
  * @property City $city
  * @property Country $country
  * @property Collection<TourDay> $days
- * @property Collection<TourHotelRoomType> $hotelRoomTypes
+ * @property Collection<TourRoomType> $roomTypes
  * @property Collection<TourDayExpense> $daysExpenses
  * @property Collection<TourHotel> $hotels
+ * @property Collection<TourPassenger> $passengers
  */
 class Tour extends Model
 {
@@ -72,12 +78,19 @@ class Tour extends Model
         'guide_name',
         'guide_phone',
         'guide_price',
+
+        'transport_comfort_level',
+        'transport_type',
+        'single_supplement_price',
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'type' => TourType::class
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'type' => TourType::class,
+        'status' => TourStatus::class,
+        'guide_type' => GuideType::class,
+        'transport_type' => TransportType::class,
     ];
 
     public function company(): BelongsTo
@@ -100,9 +113,9 @@ class Tour extends Model
         return $this->hasMany(TourDay::class);
     }
 
-    public function hotelRoomTypes(): HasMany
+    public function roomTypes(): HasMany
     {
-        return $this->hasMany(TourHotelRoomType::class);
+        return $this->hasMany(TourRoomType::class);
     }
 
     public function daysExpenses(): HasManyThrough
@@ -120,4 +133,21 @@ class Tour extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function passengers(): HasMany
+    {
+        return $this->hasMany(TourPassenger::class);
+    }
+
+    public function getTotalPax($withLeader = true): int
+    {
+        if ($this->type == TourType::Corporate) {
+            return $this->passengers()->count();
+        }
+
+        if (!$withLeader) {
+            return $this->pax;
+        }
+
+        return $this->pax + $this->leader_pax;
+    }
 }

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float $price_per_person
  * @property string $created_at
  * @property string $updated_at
+ * @property string $contract
  *
  * @property Country $country
  * @property City $city
@@ -31,6 +32,7 @@ class Museum extends Model
         'country_id',
         'city_id',
         'price_per_person',
+        'contract',
     ];
 
     public function country(): BelongsTo
