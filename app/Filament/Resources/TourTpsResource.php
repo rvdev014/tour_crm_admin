@@ -92,6 +92,7 @@ class TourTpsResource extends Resource
                 Components\DateTimePicker::make('end_date')
                     ->displayFormat('d.m.Y H:i:s')
                     ->label('Departure time')
+                    ->native(false)
                     ->required(),
                 Components\TextInput::make('pax')
                     ->required()
