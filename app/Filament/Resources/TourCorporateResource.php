@@ -50,7 +50,7 @@ class TourCorporateResource extends Resource
             Components\Fieldset::make('Tour details')->schema([
 
                 Components\TextInput::make('group_number')
-                    ->formatStateUsing(function ($record) {
+                    ->formatStateUsing(function($record) {
                         if (!empty($record)) {
                             return $record->group_number;
                         }
@@ -91,7 +91,7 @@ class TourCorporateResource extends Resource
                 ->addActionLabel('Add day')
                 ->columnSpanFull()
                 ->addActionAlignment('end')
-                ->itemLabel(function ($get, $uuid) {
+                ->itemLabel(function($get, $uuid) {
                     $current = Arr::get($get('days'), $uuid);
                     $index = array_search($uuid, array_keys($get('days'))) ?? 0;
                     $index++;
@@ -108,6 +108,7 @@ class TourCorporateResource extends Resource
                     Components\Grid::make()->schema([
                         Components\DatePicker::make('date')
                             ->displayFormat('d.m.Y')
+                            ->native(false)
                             ->required()
                             ->reactive(),
                         Components\Select::make('city_id')
@@ -124,7 +125,7 @@ class TourCorporateResource extends Resource
                         ->extraAttributes(['class' => 'repeater-expenses'])
                         ->collapsed(fn($record) => !empty($record->id))
                         ->collapsible()
-                        ->itemLabel(function ($get, $uuid) {
+                        ->itemLabel(function($get, $uuid) {
                             $current = Arr::get($get('expenses'), $uuid);
                             $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
                             $index++;
@@ -233,7 +234,7 @@ class TourCorporateResource extends Resource
                                         ->preload()
                                         ->label('Comfort level')
                                         ->options(TransportComfortLevel::class)
-                                        ->afterStateUpdated(function ($get, $set) {
+                                        ->afterStateUpdated(function($get, $set) {
                                             $price = TourService::getTransportPrice(
                                                 $get('transport_type'),
                                                 $get('transport_comfort_level'),
@@ -305,7 +306,7 @@ class TourCorporateResource extends Resource
                                     ->preload()
                                     ->options(fn($get) => TourService::getMuseumItems($get('museum_id')))
                                     ->multiple()
-                                    ->disabled(function ($get) {
+                                    ->disabled(function($get) {
                                         if (!$get('museum_id')) {
                                             return true;
                                         }
@@ -506,7 +507,7 @@ class TourCorporateResource extends Resource
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
                         ])
-                        ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
+                        ->mutateRelationshipDataBeforeCreateUsing(function($data, $get) {
                             $tourData = $get('../../');
                             $passengers = $tourData['passengers'] ?? [];
                             return ExpenseService::mutateExpense(
@@ -516,7 +517,7 @@ class TourCorporateResource extends Resource
                                 $tourData['company_id']
                             );
                         })
-                        ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
+                        ->mutateRelationshipDataBeforeSaveUsing(function($data, $get) {
                             $tourData = $get('../../');
                             $passengers = $tourData['passengers'] ?? [];
                             return ExpenseService::mutateExpense(
@@ -571,11 +572,13 @@ class TourCorporateResource extends Resource
                             ->options(User::query()->pluck('name', 'id')->toArray()),
 
                         Components\DatePicker::make('created_from')
-                            ->displayFormat('d.m.Y'),
+                            ->displayFormat('d.m.Y')
+                            ->native(false),
                         Components\DatePicker::make('created_until')
-                            ->displayFormat('d.m.Y'),
+                            ->displayFormat('d.m.Y')
+                            ->native(false),
                     ])
-                    ->query(function (Builder $query, $data) {
+                    ->query(function(Builder $query, $data) {
                         return $query
                             ->when(
                                 $data['country_id'],
@@ -599,7 +602,7 @@ class TourCorporateResource extends Resource
                                 fn($query, $createdUntil) => $query->whereDate('created_at', '<=', $createdUntil)
                             );
                     })
-                    ->indicateUsing(function (array $data): array {
+                    ->indicateUsing(function(array $data): array {
                         $indicators = [];
                         if ($data['country_id'] ?? null) {
                             $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
@@ -642,7 +645,7 @@ class TourCorporateResource extends Resource
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(function ($record, $state) {
+                    ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney($state);
                         }

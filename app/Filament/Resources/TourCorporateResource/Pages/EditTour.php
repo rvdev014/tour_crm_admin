@@ -57,7 +57,7 @@ class EditTour extends EditRecord
             }
         }
 
-//        TourService::sendMails($data, $days);
+        //        TourService::sendMails($data, $days);
 
         return $data;
     }

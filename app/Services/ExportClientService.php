@@ -59,7 +59,9 @@ class ExportClientService
             $flightInfo = $planeExpense->fromCity->name . ' - ' . $planeExpense->toCity->name . ' flight';
         }
 
-        $roomTypes = $tour->roomTypes->mapWithKeys(fn(TourRoomType $roomType) => [$roomType->roomType->name => $roomType->amount]);
+        $roomTypes = $tour->roomTypes->mapWithKeys(
+            fn(TourRoomType $roomType) => [$roomType->roomType->name => $roomType->amount]
+        );
 
         $placeholders = [
             '{date}' => now()->format('m/d/Y'),
@@ -123,8 +125,8 @@ class ExportClientService
     public static function getExpensesList(Tour $tour): \Illuminate\Support\Collection
     {
         return $tour->days
-            ->groupBy(fn (TourDay $day) => $day->date->format('d.m.Y'))
-            ->flatMap(function (TourDay $day) {
+            ->groupBy(fn(TourDay $day) => $day->date->format('d.m.Y'))
+            ->flatMap(function(TourDay $day) {
                 return $day->expenses->map(fn(TourDayExpense $expense) => "* " . $expense->type->getLabel());
             });
     }

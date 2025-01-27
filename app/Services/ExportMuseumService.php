@@ -119,11 +119,16 @@ class ExportMuseumService
         ///////////////// FOOTER //////////////////////
         $currentRow++;
         $sheet->mergeCells("A$currentRow:J$currentRow");
-        $sheet->setCellValue("A$currentRow", "Семейное предприятие «EAST ASIA POINT»\nР/счет 20208000205000278001\nТашкентский областной филиал Банка  “Асака»      МФО  00411    ИНН 207160718       ОКЭД 79900");
+        $sheet->setCellValue(
+            "A$currentRow",
+            "Семейное предприятие «EAST ASIA POINT»\nР/счет 20208000205000278001\nТашкентский областной филиал Банка  “Асака»      МФО  00411    ИНН 207160718       ОКЭД 79900"
+        );
         $sheet->getStyle("A$currentRow")->getFont()->setItalic(true);
         $sheet->getRowDimension($currentRow)->setRowHeight(45);
 
-        $sheet->getStyle('A' . $startRow + 2 . ':J' . $startRow + 3)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A' . $startRow + 2 . ':J' . $startRow + 3)->getBorders()->getAllBorders()->setBorderStyle(
+            Border::BORDER_THIN
+        );
 
         return $sheet;
     }
@@ -153,9 +158,9 @@ class ExportMuseumService
 
     public static function collectMuseums(
         \Illuminate\Support\Collection &$result,
-        Tour $tour,
-        TourDay $tourDay,
-        $museums
+        Tour                           $tour,
+        TourDay                        $tourDay,
+                                       $museums
     ): void {
         $date = $tourDay->date->format('d.m.Y');
 

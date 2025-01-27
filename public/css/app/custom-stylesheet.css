@@ -3,15 +3,16 @@
 }
 
 .fi-sidebar-item-label, .fi-sidebar-group-label, .fi-sidebar-item-icon, .fi-icon-btn-icon {
-    color: #fff!important;
+    color: #fff !important;
 }
 
 
 .fi-sidebar-item .fi-sidebar-item-button:hover {
-    background-color: #447ca1!important;
+    background-color: #447ca1 !important;
 }
+
 .fi-sidebar-item.fi-active .fi-sidebar-item-button {
-    background-color: #447ca1!important;
+    background-color: #447ca1 !important;
 }
 
 
@@ -19,38 +20,46 @@
     background: #447ca1;
     border-radius: 10px 10px 0 0;
 }
+
 .repeater-days .fi-fo-repeater-item-content {
     border-radius: 0 0 10px 10px;
 }
+
 .repeater-days .fi-fo-repeater-item-header h4 {
-    color: #fff!important;
+    color: #fff !important;
 }
+
 .repeater-days .fi-fo-repeater-item {
-    border: 2px solid #447ca1!important;
+    border: 2px solid #447ca1 !important;
 }
+
 .repeater-days .fi-btn {
-    background: #447ca1!important;
-    color: #fff!important;
+    background: #447ca1 !important;
+    color: #fff !important;
     transition: 0.2s ease-in-out;
 }
+
 .repeater-days .fi-btn:hover {
-    background: #1e4e6e!important;
+    background: #1e4e6e !important;
     transition: 0.2s ease-in-out;
 }
 
 .repeater-expenses .fi-fo-repeater-item-header {
     background: #d97706;
 }
+
 .repeater-expenses .fi-fo-repeater-item {
-    border: 2px solid #d97706!important;
+    border: 2px solid #d97706 !important;
 }
+
 .repeater-expenses .fi-btn {
-    background: #d97706!important;
-    color: #fff!important;
+    background: #d97706 !important;
+    color: #fff !important;
     transition: 0.2s ease-in-out;
 }
+
 .repeater-expenses .fi-btn:hover {
-    background: #a85b00!important;
+    background: #a85b00 !important;
     transition: 0.2s ease-in-out;
 }
 
@@ -58,6 +67,7 @@
     background: #1e4e6e;
     color: #fff;
 }
+
 .fi-sidebar-header .fi-icon-btn {
     background: #1e4e6e;
     color: #fff;

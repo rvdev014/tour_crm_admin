@@ -11,6 +11,7 @@
             margin: 0;
             padding: 0;
         }
+
         .email-container {
             max-width: 600px;
             margin: 20px auto;
@@ -20,19 +21,23 @@
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .email-header {
             background-color: #4CAF50;
             color: #ffffff;
             text-align: center;
             padding: 15px;
         }
+
         .email-body {
             padding: 20px;
             color: #333333;
         }
+
         .email-body p {
             margin: 0 0 10px;
         }
+
         .email-footer {
             background-color: #f1f1f1;
             text-align: center;

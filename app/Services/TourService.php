@@ -117,7 +117,7 @@ class TourService
         $totalExpense = TourDayExpense::query()
             ->whereHas(
                 'tourDay',
-                fn($query) => $query->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
+                fn($query) => $query->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
                     $q->whereBetween('created_at', [$startDate, $endDate])
                         ->where('type', TourType::TPS)
                         ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
@@ -132,7 +132,7 @@ class TourService
     public static function getCorporateTotalIncome($startDate, $endDate, $countryId): float|int
     {
         $totalExpense = TourHotel::query()
-            ->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
+            ->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate])
                     ->where('type', TourType::Corporate)
                     ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
@@ -162,10 +162,10 @@ class TourService
     {
         $userName = auth()->user()->name;
         $firstLetter = substr($userName, 0, 1);
-//        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
+        //        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
 
         if ($tourType == TourType::TPS) {
-//            $number = self::threeDigit(self::tourNextId());
+            //            $number = self::threeDigit(self::tourNextId());
             $lastLetter = 'T';
         } else {
             $lastLetter = 'C';
@@ -263,10 +263,10 @@ class TourService
     {
         return [
             Grid::make(3)->schema(
-                RoomType::all()->map(function (RoomType $roomType) {
+                RoomType::all()->map(function(RoomType $roomType) {
                     return TextInput::make("room_type_{$roomType->id}")
                         ->label($roomType->name)
-                        ->formatStateUsing(function ($record) use ($roomType) {
+                        ->formatStateUsing(function($record) use ($roomType) {
                             if (!$record) {
                                 return 0;
                             }

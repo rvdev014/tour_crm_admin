@@ -40,7 +40,7 @@ class TransferResource extends Resource
                     ->preload()
                     ->label('City to')
                     ->relationship('toCity', 'name')
-                    ->options(function ($get) {
+                    ->options(function($get) {
                         $fromCityId = $get('from_city_id');
                         if (!empty($fromCityId)) {
                             $cities = TourService::getCities(null, false, true);
@@ -70,7 +70,7 @@ class TransferResource extends Resource
                     ->label('Transport type')
                     ->options(TransportType::class)
                     ->reactive()
-                    ->afterStateUpdated(function ($get, $set) {
+                    ->afterStateUpdated(function($get, $set) {
                         $price = TourService::getTransportPrice(
                             $get('transport_type'),
                             $get('transport_comfort_level'),
@@ -85,7 +85,7 @@ class TransferResource extends Resource
                     ->label('Comfort level')
                     ->options(TransportComfortLevel::class)
                     ->reactive()
-                    ->afterStateUpdated(function ($get, $set) {
+                    ->afterStateUpdated(function($get, $set) {
                         $price = TourService::getTransportPrice(
                             $get('transport_type'),
                             $get('transport_comfort_level'),
@@ -128,10 +128,10 @@ class TransferResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('fromCity.name')
                     ->label('Route')
-                    ->formatStateUsing(function ($record, $state) {
+                    ->formatStateUsing(function($record, $state) {
                         return $state . ' - ' . $record->toCity?->name;
                     }),
-//                Tables\Columns\TextColumn::make('toCity.name')->sortable(),
+                //                Tables\Columns\TextColumn::make('toCity.name')->sortable(),
                 Tables\Columns\TextColumn::make('driver'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
@@ -142,10 +142,10 @@ class TransferResource extends Resource
                 Tables\Columns\TextColumn::make('price')
                     ->money()
                     ->sortable(),
-//                Tables\Columns\TextColumn::make('updated_at')
-//                    ->dateTime()
-//                    ->sortable()
-//                    ->toggleable(isToggledHiddenByDefault: true),
+                //                Tables\Columns\TextColumn::make('updated_at')
+                //                    ->dateTime()
+                //                    ->sortable()
+                //                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

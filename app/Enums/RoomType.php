@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum RoomType: int
+enum RoomType:int
 {
     case Single = 1;
     case Double = 2;
@@ -15,7 +15,7 @@ enum RoomType: int
             self::Single => 'Single',
             self::Double => 'Double',
             self::Triple => 'Triple',
-            self::Quad => 'Quad',
+            self::Quad   => 'Quad',
         };
     }
 }

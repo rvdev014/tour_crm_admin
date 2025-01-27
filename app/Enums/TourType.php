@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum TourType: int
+enum TourType:int
 {
     case TPS = 1;
     case Corporate = 2;
@@ -10,7 +10,7 @@ enum TourType: int
     public function getLabel(): string
     {
         return match ($this) {
-            self::TPS => 'TPS',
+            self::TPS       => 'TPS',
             self::Corporate => 'Corporate',
         };
     }

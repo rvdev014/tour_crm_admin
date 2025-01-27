@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,7 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('hotel_room_types', function (Blueprint $table) {
+        Schema::create('hotel_room_types', function(Blueprint $table) {
             $table->id();
             $table->decimal('price');
             $table->integer('room_type');

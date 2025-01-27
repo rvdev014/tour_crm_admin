@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum TicketType: int
+enum TicketType:int
 {
     case Bus = 1;
     case Train = 2;
@@ -11,7 +11,7 @@ enum TicketType: int
     public function getLabel(): string
     {
         return match ($this) {
-            self::Bus => 'Bus',
+            self::Bus   => 'Bus',
             self::Train => 'Train',
             self::Plain => 'Plain',
         };

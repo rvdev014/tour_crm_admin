@@ -25,7 +25,10 @@ class ExportHotelService
         $rooming = $tour->roomTypes->mapWithKeys(fn(TourRoomType $roomType) => [
             $roomType->roomType->name => $roomType->amount
         ]);
-        $templateProcessor->setValue('{rooming}', $rooming->map(fn($amount, $roomType) => "$roomType: $amount")->implode("\t\t"));
+        $templateProcessor->setValue(
+            '{rooming}',
+            $rooming->map(fn($amount, $roomType) => "$roomType: $amount")->implode("\t\t")
+        );
         $templateProcessor->setValue('{country}', $tour->country->name);
 
 
