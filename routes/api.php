@@ -25,4 +25,4 @@ Route::get('export-client/{tour}', [\App\Http\Controllers\ExportController::clas
 Route::get('export-museum/{tour}', [\App\Http\Controllers\ExportController::class, 'exportMuseum'])->name(
     'export-museum'
 );
-Route::get('export-hotel/{tour}', [\App\Http\Controllers\ExportController::class, 'exportHotel'])->name('export-hotel');
+Route::get('export-hotel/{tour}', [\App\Http\Controllers\ExportController::class, 'exportHotelsZip'])->name('export-hotel');

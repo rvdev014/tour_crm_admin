@@ -288,6 +288,10 @@ class TourService
 
     public static function sendMails($tourData, $days): void
     {
+        if (app()->environment('local')) {
+            return;
+        }
+
         $hotelsData = [];
         $restaurantsData = [];
         foreach ($days as $day) {

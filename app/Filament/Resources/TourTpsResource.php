@@ -26,7 +26,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -53,7 +52,7 @@ class TourTpsResource extends Resource
         return $form->schema([
             Components\Fieldset::make('Tour details')->schema([
                 Components\TextInput::make('group_number')
-                    ->formatStateUsing(function($record) {
+                    ->formatStateUsing(function ($record) {
                         if (!empty($record)) {
                             return $record->group_number;
                         }
@@ -148,7 +147,7 @@ class TourTpsResource extends Resource
                 ->addActionLabel('Add day')
                 ->columnSpanFull()
                 ->addActionAlignment('end')
-                ->afterStateUpdated(function($state, $get, $set) {
+                ->afterStateUpdated(function ($state, $get, $set) {
                     $prevDate = null;
                     foreach ($state as $uuid => $day) {
                         $date = $day['date'];
@@ -159,7 +158,7 @@ class TourTpsResource extends Resource
                         $prevDate = $date;
                     }
                 })
-                ->itemLabel(function($get, $set, $uuid) {
+                ->itemLabel(function ($get, $set, $uuid) {
                     $current = Arr::get($get('days'), $uuid);
                     $index = array_search($uuid, array_keys($get('days'))) ?? 0;
 
@@ -185,7 +184,7 @@ class TourTpsResource extends Resource
                             ->preload()
                             ->relationship('city', 'name')
                             ->options(fn($get) => TourService::getCities())
-                            ->afterStateUpdated(function($get, $set) {
+                            ->afterStateUpdated(function ($get, $set) {
                                 $days = $get('../');
 
                                 $hotelsData = [];
@@ -216,7 +215,7 @@ class TourTpsResource extends Resource
                         ->collapsible()
                         ->cloneable()
                         ->collapsed(fn($record, $get, $state) => !empty($record->id))
-                        ->itemLabel(function($get, $uuid) {
+                        ->itemLabel(function ($get, $uuid) {
                             $current = Arr::get($get('expenses'), $uuid);
                             $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
                             $index++;
@@ -243,7 +242,7 @@ class TourTpsResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->label('Expense Type')
-                                    ->options(function($get) {
+                                    ->options(function ($get) {
                                         $options = ExpenseType::casesOptions();
                                         unset($options[ExpenseType::Conference->value]);
                                         if ($get('../../../../guide_type') == GuideType::Escort->value) {
@@ -257,7 +256,7 @@ class TourTpsResource extends Resource
 
                             // Hotel
                             Components\Fieldset::make('Hotel info')->schema([
-                                Components\Grid::make(4)->schema([
+                                Components\Grid::make(3)->schema([
                                     Components\Select::make('hotel_id')
                                         ->native(false)
                                         ->searchable()
@@ -275,8 +274,8 @@ class TourTpsResource extends Resource
                                         ->label('Status'),
                                     Components\TimePicker::make('hotel_checkin_time')
                                         ->label('Check-in time'),
-                                    Components\TimePicker::make('hotel_checkout_time')
-                                        ->label('Check-out time'),
+//                                    Components\TimePicker::make('hotel_checkout_time')
+//                                        ->label('Check-out time'),
                                 ]),
                                 Components\Textarea::make('comment')
                                     ->label('Comment')
@@ -394,7 +393,7 @@ class TourTpsResource extends Resource
                                     ->options(fn($get) => TourService::getMuseumItems($get('museum_ids')))
                                     ->multiple()
                                     ->preload()
-                                    ->disabled(function($get) {
+                                    ->disabled(function ($get) {
                                         if (empty($get('museum_ids'))) {
                                             return true;
                                         }
@@ -569,7 +568,7 @@ class TourTpsResource extends Resource
                             ])->visible(fn($get) => $get('type') == ExpenseType::Extra->value),
 
                         ])
-                        ->mutateRelationshipDataBeforeCreateUsing(function($data, $get) {
+                        ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
                             $tourData = $get('../../');
                             $data['from_city_id'] = $get('city_id');
                             return ExpenseService::mutateExpense(
@@ -578,7 +577,7 @@ class TourTpsResource extends Resource
                                 ExpenseService::getRoomingAmounts($tourData)
                             );
                         })
-                        ->mutateRelationshipDataBeforeSaveUsing(function($data, $get) {
+                        ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
                             $tourData = $get('../../');
                             $data['from_city_id'] = $get('city_id');
                             return ExpenseService::mutateExpense(
@@ -642,7 +641,7 @@ class TourTpsResource extends Resource
                             ->displayFormat('d.m.Y')
                             ->native(false),
                     ])
-                    ->query(function(Builder $query, $data) {
+                    ->query(function (Builder $query, $data) {
                         return $query
                             ->when(
                                 $data['country_id'],
@@ -666,7 +665,7 @@ class TourTpsResource extends Resource
                                 fn($query, $createdUntil) => $query->whereDate('start_date', '<=', $createdUntil)
                             );
                     })
-                    ->indicateUsing(function(array $data): array {
+                    ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['country_id'] ?? null) {
                             $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
@@ -709,7 +708,7 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('status')
                     ->badge(),
                 Columns\TextColumn::make('price')
-                    ->formatStateUsing(function($record, $state) {
+                    ->formatStateUsing(function ($record, $state) {
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney($state);
                         }
@@ -721,7 +720,7 @@ class TourTpsResource extends Resource
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(function($record, $state) {
+                    ->formatStateUsing(function ($record, $state) {
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney($state);
                         }
@@ -733,7 +732,7 @@ class TourTpsResource extends Resource
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color(fn(Tour $record) => $record->income > 0 ? 'success' : 'danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(function($record, $state) {
+                    ->formatStateUsing(function ($record, $state) {
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney($state);
                         }
@@ -765,12 +764,29 @@ class TourTpsResource extends Resource
                 //
                 //                ])->collapsible()
             ])
+//            ->recordAction(function (Tour $record) {
+//                return Pages\EditTour::route($record);
+//            })
+//            ->recordUrl(null)
             ->actions([
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-document-text')
-                    ->requiresConfirmation()
-                    ->url(fn(Tour $record) => route('export', $record)),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('export_hotel')
+                        ->label('Hotels')
+                        ->icon('heroicon-o-document-text')
+                        ->url(fn(Tour $record) => route('export-hotel', $record)),
+                    Tables\Actions\Action::make('export_museum')
+                        ->label('Museums')
+                        ->icon('heroicon-o-document-text')
+                        ->url(fn(Tour $record) => route('export-museum', $record)),
+                    Tables\Actions\Action::make('export_client')
+                        ->label('Client')
+                        ->icon('heroicon-o-document-text')
+                        ->url(fn(Tour $record) => route('export-client', $record)),
+                    Tables\Actions\Action::make('export')
+                        ->label('Report')
+                        ->icon('heroicon-o-document-text')
+                        ->url(fn(Tour $record) => route('export', $record)),
+                ]),
                 //                Tables\Actions\Action::make('export-client')
                 //                    ->label('Export')
                 //                    ->icon('heroicon-o-document-text')
