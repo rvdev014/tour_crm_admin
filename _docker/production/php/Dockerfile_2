@@ -20,10 +20,10 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
     docker-php-ext-install zip && \
     docker-php-ext-install gd
 
+ENV COMPOSER_ALLOW_SUPERUSER 1
 COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
-RUN adduser nonroot
-
+#RUN adduser nonroot
 #USER nonroot
 
 WORKDIR /app
@@ -34,8 +34,13 @@ RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
 
 COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
 
-#COPY --chown=nonroot:nonroot . .
 COPY . .
+
+RUN chown -R $USER:www-data storage
+RUN chown -R $USER:www-data bootstrap/cache
+
+RUN chmod -R 775 storage
+RUN chmod -R 775 bootstrap/cache
 
 RUN composer dump-autoload --optimize
 
