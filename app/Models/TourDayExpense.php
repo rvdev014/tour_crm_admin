@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EmployeeType;
+use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Observers\TourDayExpenseObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -99,6 +100,7 @@ class TourDayExpense extends Model
         'type' => ExpenseType::class,
         'museum_ids' => 'array',
         'museum_item_ids' => 'array',
+        'status' => ExpenseStatus::class,
     ];
 
     public function tourDay(): BelongsTo

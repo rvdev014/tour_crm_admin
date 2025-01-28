@@ -9,6 +9,7 @@ use App\Enums\GuideType;
 use App\Enums\TourType;
 use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
+use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
 use App\Filament\Resources\TourTpsResource\Pages;
 use App\Filament\Resources\TourTpsResource\RelationManagers;
 use App\Models\City;
@@ -23,6 +24,8 @@ use Filament\Forms\Components;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns;
@@ -759,15 +762,9 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('pax')
                     ->numeric()
                     ->sortable(),*/
-
-                //                Columns\Layout\Split::make([
-                //
-                //                ])->collapsible()
             ])
-//            ->recordAction(function (Tour $record) {
-//                return Pages\EditTour::route($record);
-//            })
-//            ->recordUrl(null)
+            ->recordUrl(null)
+            ->recordAction(StatusAction::class)
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('export_hotel')
@@ -787,12 +784,8 @@ class TourTpsResource extends Resource
                         ->icon('heroicon-o-document-text')
                         ->url(fn(Tour $record) => route('export', $record)),
                 ]),
-                //                Tables\Actions\Action::make('export-client')
-                //                    ->label('Export')
-                //                    ->icon('heroicon-o-document-text')
-                //                    ->requiresConfirmation()
-                //                    ->url(fn(Tour $record) => route('export-client', $record)),
                 Tables\Actions\EditAction::make(),
+                StatusAction::make()->label('')->icon(''),
             ])
             ->headerActions([
 
@@ -816,7 +809,7 @@ class TourTpsResource extends Resource
         return [
             'index' => Pages\ListTours::route('/'),
             'create' => Pages\CreateTour::route('/create'),
-            'edit' => Pages\EditTour::route('/{record}/edit'),
+            'edit' => Pages\EditTour::route('/{record}/edit')
         ];
     }
 }
