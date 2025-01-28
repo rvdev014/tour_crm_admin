@@ -29,8 +29,12 @@ enum TransportType:int implements HasLabel, HasColor
     public function getColor(): string
     {
         return match ($this) {
-            self::Sedan => '',
-            self::SUV   => '',
+            self::Sedan   => 'blue',
+            self::SUV     => 'green',
+            self::Minivan => 'yellow',
+            self::Minibus => 'orange',
+            self::Bus30   => 'red',
+            self::Bus40   => 'purple',
         };
     }
 }
