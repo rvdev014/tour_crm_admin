@@ -24,7 +24,7 @@ COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
 RUN adduser nonroot
 
-USER nonroot
+#USER nonroot
 
 WORKDIR /app
 
@@ -34,7 +34,8 @@ RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
 
 COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
 
-COPY --chown=nonroot:nonroot . .
+#COPY --chown=nonroot:nonroot . .
+COPY . .
 
 RUN composer dump-autoload --optimize
 
