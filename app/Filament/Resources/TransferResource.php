@@ -114,11 +114,12 @@ class TransferResource extends Resource
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('place_of_submission'),
+
                     Forms\Components\TimePicker::make('time')
                         ->native(false),
 
                     Forms\Components\TextInput::make('price')
-                        ->required()
                         ->numeric(),
                 ]),
 
