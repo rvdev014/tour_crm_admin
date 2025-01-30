@@ -2,7 +2,18 @@
     background: #1e4e6e;
 }
 
-.fi-sidebar-item-label, .fi-sidebar-group-label, .fi-sidebar-item-icon, .fi-icon-btn-icon {
+.fi-sidebar-item-label, .fi-sidebar-group-label, .fi-sidebar-item-icon {
+    color: #fff !important;
+}
+
+.fi-sidebar-nav .fi-icon-btn-icon {
+    color: #fff !important;
+}
+
+.fi-fo-repeater .fi-icon-btn-icon {
+    color: #fff !important;
+}
+.fi-fo-repeater .fi-btn-icon {
     color: #fff !important;
 }
 

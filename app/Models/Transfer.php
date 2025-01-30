@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $updated_at
  *
  * @property string $driver
+ * @property string $time
  * @property string $place_of_submission
  *
  * @property TourDayExpense $tourDayExpense
@@ -54,6 +55,7 @@ class Transfer extends Model
         'tour_day_expense_id',
 
         'driver',
+        'time',
         'place_of_submission',
     ];
 

@@ -25,87 +25,102 @@ class TransferResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('from_city_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->label('City from')
-                    ->relationship('fromCity', 'name')
-                    ->options(fn() => TourService::getCities(null, isAll: true))
-                    ->reactive(),
 
-                Forms\Components\Select::make('to_city_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->label('City to')
-                    ->relationship('toCity', 'name')
-                    ->options(function($get) {
-                        $fromCityId = $get('from_city_id');
-                        if (!empty($fromCityId)) {
-                            $cities = TourService::getCities(null, false, true);
-                            return $cities->filter(fn($city) => $city->id != $fromCityId)->pluck('name', 'id');
-                        }
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\Select::make('from_city_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->label('City from')
+                        ->relationship('fromCity', 'name')
+                        ->options(fn() => TourService::getCities(null, isAll: true))
+                        ->reactive(),
 
-                        return [];
-                    })
-                    ->preload()
-                    ->reactive(),
+                    Forms\Components\Select::make('to_city_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->label('City to')
+                        ->relationship('toCity', 'name')
+                        ->options(function($get) {
+                            $fromCityId = $get('from_city_id');
+                            if (!empty($fromCityId)) {
+                                $cities = TourService::getCities(null, false, true);
+                                return $cities->filter(fn($city) => $city->id != $fromCityId)->pluck('name', 'id');
+                            }
 
-                Forms\Components\Select::make('company_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->label('Company')
-                    ->relationship('company', 'name')
-                    ->required(),
+                            return [];
+                        })
+                        ->preload()
+                        ->reactive(),
 
-                Forms\Components\TextInput::make('group_number')
-                    ->label('Group number'),
+                    Forms\Components\Select::make('company_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->label('Company')
+                        ->relationship('company', 'name')
+                        ->required(),
+                ]),
 
-                Forms\Components\Select::make('transport_type')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->label('Transport type')
-                    ->options(TransportType::class)
-                    ->reactive()
-                    ->afterStateUpdated(function($get, $set) {
-                        $price = TourService::getTransportPrice(
-                            $get('transport_type'),
-                            $get('transport_comfort_level'),
-                        );
-                        $set('price', $price);
-                    }),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('group_number')
+                        ->label('Group number'),
 
-                Forms\Components\Select::make('transport_comfort_level')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->label('Comfort level')
-                    ->options(TransportComfortLevel::class)
-                    ->reactive()
-                    ->afterStateUpdated(function($get, $set) {
-                        $price = TourService::getTransportPrice(
-                            $get('transport_type'),
-                            $get('transport_comfort_level'),
-                        );
-                        $set('price', $price);
-                    }),
+                    Forms\Components\TextInput::make('pax')
+                        ->label('Pax'),
 
-                Forms\Components\TextInput::make('pax')
-                    ->label('Pax'),
+                    Forms\Components\Select::make('status')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(ExpenseStatus::class)
+                        ->label('Status'),
+                ]),
 
-                Forms\Components\Select::make('status')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->options(ExpenseStatus::class)
-                    ->label('Status'),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('driver')
+                        ->label('Driver'),
 
-                Forms\Components\TextInput::make('price')
-                    ->required()
-                    ->numeric(),
+                    Forms\Components\Select::make('transport_type')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->label('Transport type')
+                        ->options(TransportType::class)
+                        ->reactive()
+                        ->afterStateUpdated(function($get, $set) {
+                            $price = TourService::getTransportPrice(
+                                $get('transport_type'),
+                                $get('transport_comfort_level'),
+                            );
+                            $set('price', $price);
+                        }),
+
+                    Forms\Components\Select::make('transport_comfort_level')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->label('Comfort level')
+                        ->options(TransportComfortLevel::class)
+                        ->reactive()
+                        ->afterStateUpdated(function($get, $set) {
+                            $price = TourService::getTransportPrice(
+                                $get('transport_type'),
+                                $get('transport_comfort_level'),
+                            );
+                            $set('price', $price);
+                        }),
+                ]),
+
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TimePicker::make('time')
+                        ->native(false),
+
+                    Forms\Components\TextInput::make('price')
+                        ->required()
+                        ->numeric(),
+                ]),
 
                 Forms\Components\Textarea::make('comment')
                     ->columnSpanFull(),
