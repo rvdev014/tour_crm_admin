@@ -26,9 +26,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $comment
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Carbon $date_time
  *
  * @property string $driver
- * @property string $time
  * @property string $place_of_submission
  *
  * @property TourDayExpense $tourDayExpense
@@ -55,7 +55,7 @@ class Transfer extends Model
         'tour_day_expense_id',
 
         'driver',
-        'time',
+        'date_time',
         'place_of_submission',
     ];
 
@@ -63,6 +63,7 @@ class Transfer extends Model
         'status' => ExpenseStatus::class,
         'transport_type' => TransportType::class,
         'transport_comfort_level' => TransportComfortLevel::class,
+        'date_time' => 'datetime',
     ];
 
     public function company(): BelongsTo

@@ -388,8 +388,10 @@ class TourCorporateResource extends Resource
 
                                 Components\Grid::make(3)->schema([
                                     Components\TimePicker::make('departure_time')
+                                        ->seconds(false)
                                         ->label('Departure time'),
                                     Components\TimePicker::make('arrival_time')
+                                        ->seconds(false)
                                         ->label('Arrival time'),
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
@@ -449,9 +451,13 @@ class TourCorporateResource extends Resource
                                     ->preload(),
 
                                 Components\Grid::make(3)->schema([
-                                    Components\TimePicker::make('departure_time')->label('Departure time'),
+                                    Components\TimePicker::make('departure_time')
+                                        ->seconds(false)
+                                        ->label('Departure time'),
 
-                                    Components\TimePicker::make('arrival_time')->label('Arrival time'),
+                                    Components\TimePicker::make('arrival_time')
+                                        ->seconds(false)
+                                        ->label('Arrival time'),
 
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)

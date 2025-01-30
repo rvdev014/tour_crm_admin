@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\ExpenseType;
 use App\Models\TourDayExpense;
 use App\Models\Transfer;
+use Carbon\Carbon;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
 class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
@@ -62,21 +63,24 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
 
     public function changedAttributes(TourDayExpense $tourDayExpense): array
     {
+        $expenseDate = $tourDayExpense->tourDay->date->format('Y-m-d');
+        $dateTime = Carbon::parse($expenseDate . ' ' . ($tourDayExpense->transport_time ?? '00:00:00'));
+
         return [
             'from_city_id' => $tourDayExpense->tourDay->city_id,
             'to_city_id' => $tourDayExpense->to_city_id,
             'comment' => $tourDayExpense->comment,
             'company_id' => $tourDayExpense->tourDay->tour->company_id,
             'group_number' => $tourDayExpense->tourDay->tour->group_number,
-            'transport_type' => $tourDayExpense->transport_type,
-            'transport_comfort_level' => $tourDayExpense->transport_comfort_level,
+            'transport_type' => $tourDayExpense->tourDay->tour->transport_type,
+            'transport_comfort_level' => $tourDayExpense->tourDay->tour->transport_comfort_level,
             'price' => $tourDayExpense->price,
             'status' => $tourDayExpense->status,
             'pax' => $tourDayExpense->tourDay->tour->pax,
             'tour_day_expense_id' => $tourDayExpense->id,
 
             'driver' => $tourDayExpense->transport_driver,
-            'time' => $tourDayExpense->transport_time,
+            'date_time' => $dateTime,
             'place_of_submission' => $tourDayExpense->transport_place,
         ];
     }

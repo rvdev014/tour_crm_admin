@@ -2,18 +2,7 @@
     background: #1e4e6e;
 }
 
-.fi-sidebar-item-label, .fi-sidebar-group-label, .fi-sidebar-item-icon {
-    color: #fff !important;
-}
-
-.fi-sidebar-nav .fi-icon-btn-icon {
-    color: #fff !important;
-}
-
-.fi-fo-repeater .fi-icon-btn-icon {
-    color: #fff !important;
-}
-.fi-fo-repeater .fi-btn-icon {
+.fi-sidebar-item-label, .fi-sidebar-group-label, .fi-sidebar-item-icon, .fi-icon-btn-icon {
     color: #fff !important;
 }
 
@@ -74,12 +63,3 @@
     transition: 0.2s ease-in-out;
 }
 
-.fi-topbar-open-sidebar-btn {
-    background: #1e4e6e;
-    color: #fff;
-}
-
-.fi-sidebar-header .fi-icon-btn {
-    background: #1e4e6e;
-    color: #fff;
-}

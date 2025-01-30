@@ -146,7 +146,7 @@ class ExportMuseumService
                 if (!empty($museumExpense->museum_item_ids)) {
                     $museumItems = MuseumItem::query()->whereIn('id', $museumExpense->museum_item_ids)->get();
                     self::collectMuseums($result, $tour, $tourDay, $museumItems);
-                } else {
+                } else if (!empty($museumExpense->museum_ids)) {
                     $museums = Museum::query()->whereIn('id', $museumExpense->museum_ids)->get();
                     self::collectMuseums($result, $tour, $tourDay, $museums);
                 }

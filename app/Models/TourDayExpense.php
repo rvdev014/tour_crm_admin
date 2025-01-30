@@ -95,7 +95,7 @@ class TourDayExpense extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'transport_time' => 'datetime',
+//        'transport_time' => 'datetime',
         'car_ids' => 'array',
         'type' => ExpenseType::class,
         'museum_ids' => 'array',

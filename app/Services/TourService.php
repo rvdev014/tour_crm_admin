@@ -48,46 +48,108 @@ class TourService
     public static function getCities($countryId = null, bool $isPluck = true, $isAll = false): array|Collection
     {
         if (!$countryId) {
-            $countryId = Country::query()->where('name', 'Uzbekistan')->first()?->id;
+            $countryId = CacheService::remember(
+                'uzbekistan_country_id',
+                fn() => Country::query()->where('name', 'Uzbekistan')->first()?->id
+            );
             if (!$countryId) {
                 throw new \Exception('Country \'Uzbekistan\' not found');
             }
         }
 
         if (!empty($countryId)) {
-            $result = City::where('country_id', $countryId)->get();
-            return $isPluck ? $result->pluck('name', 'id') : $result;
+            $result = CacheService::remember(
+                "cities_{$countryId}",
+                fn() => City::query()
+                    ->select('name', 'id')
+                    ->where('country_id', $countryId)
+                    ->get()
+            );
+            return $isPluck ? $result->pluck('name', 'id')->toArray() : $result->toArray();
         }
         if ($isAll) {
-            $result = City::all();
-            return $isPluck ? $result->pluck('name', 'id') : $result;
+            $result = CacheService::remember('cities', fn() => City::query()->select('name', 'id')->get());
+            return $isPluck ? $result->pluck('name', 'id')->toArray() : $result->toArray();
         }
         return [];
     }
 
     public static function getRestaurants($localCityId): array|Collection
     {
-        return Restaurant::where('city_id', $localCityId)->get()->pluck('name', 'id');
+        return CacheService::remember(
+            "restaurants_{$localCityId}",
+            fn() => Restaurant::query()
+                ->select('name', 'id')
+                ->where('city_id', $localCityId)
+                ->get()
+                ->pluck('name', 'id')
+                ->toArray()
+        );
     }
 
     public static function getHotels($localCityId): array|Collection
     {
-        return Hotel::where('city_id', $localCityId)->get()->pluck('name', 'id');
+        return CacheService::remember(
+            "hotels_{$localCityId}",
+            fn() => Hotel::query()
+                ->select('name', 'id')
+                ->where('city_id', $localCityId)
+                ->get()
+                ->pluck('name', 'id')
+                ->toArray()
+        );
     }
 
     public static function getMuseums($localCityId): array|Collection
     {
-        return Museum::where('city_id', $localCityId)->get()->pluck('name', 'id');
+        return CacheService::remember(
+            "museums_{$localCityId}",
+            fn() => Museum::query()
+                ->select('name', 'id')
+                ->where('city_id', $localCityId)
+                ->get()
+                ->pluck('name', 'id')
+                ->toArray()
+        );
+    }
+
+    public static function getMuseumsByIds($ids): array|Collection
+    {
+        return CacheService::remember(
+            "museums_ids_" . implode(',', $ids),
+            fn() => Museum::query()
+                ->select('name', 'id')
+                ->whereIn('id', $ids)
+                ->get()
+                ->pluck('name', 'id')
+                ->toArray()
+        );
     }
 
     public static function getMuseumItems($museumIds): array|Collection
     {
-        return MuseumItem::query()->whereIn('museum_id', $museumIds)->get()->pluck('name', 'id');
+        return CacheService::remember(
+            "museum_items_" . implode(',', $museumIds),
+            fn() => MuseumItem::query()
+                ->select('name', 'id')
+                ->whereIn('museum_id', $museumIds)
+                ->get()
+                ->pluck('name', 'id')
+                ->toArray()
+        );
     }
 
     public static function getShows($localCityId): array|Collection
     {
-        return Show::where('city_id', $localCityId)->get()->pluck('name', 'id');
+        return CacheService::remember(
+            "shows_{$localCityId}",
+            fn() => Show::query()
+                ->select('name', 'id')
+                ->where('city_id', $localCityId)
+                ->get()
+                ->pluck('name', 'id')
+                ->toArray()
+        );
     }
 
     public static function isVisible(Tour $tour): bool
@@ -117,7 +179,7 @@ class TourService
         $totalExpense = TourDayExpense::query()
             ->whereHas(
                 'tourDay',
-                fn($query) => $query->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
+                fn($query) => $query->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
                     $q->whereBetween('created_at', [$startDate, $endDate])
                         ->where('type', TourType::TPS)
                         ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
@@ -132,7 +194,7 @@ class TourService
     public static function getCorporateTotalIncome($startDate, $endDate, $countryId): float|int
     {
         $totalExpense = TourHotel::query()
-            ->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
+            ->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate])
                     ->where('type', TourType::Corporate)
                     ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
@@ -201,7 +263,7 @@ class TourService
         $addPercent = null;
         if ($companyId) {
             /** @var Company $company */
-            $company = Company::query()->find($companyId);
+            $company = Company::query()->select('additional_percent')->find($companyId);
             $addPercent = $company?->additional_percent ?? null;
         }
         return $addPercent;
@@ -263,10 +325,10 @@ class TourService
     {
         return [
             Grid::make(3)->schema(
-                RoomType::all()->map(function(RoomType $roomType) {
+                RoomType::all()->map(function (RoomType $roomType) {
                     return TextInput::make("room_type_{$roomType->id}")
                         ->label($roomType->name)
-                        ->formatStateUsing(function($record) use ($roomType) {
+                        ->formatStateUsing(function ($record) use ($roomType) {
                             if (!$record) {
                                 return 0;
                             }
@@ -283,7 +345,7 @@ class TourService
 
     public static function getCompanies(CompanyType $type)
     {
-        return Company::where('type', $type)->get()->pluck('name', 'id');
+        return Company::query()->select('name', 'id')->where('type', $type)->get()->pluck('name', 'id')->toArray();
     }
 
     public static function sendMails($tourData, $days): void

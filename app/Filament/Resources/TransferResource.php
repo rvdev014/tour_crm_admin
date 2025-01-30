@@ -42,7 +42,7 @@ class TransferResource extends Resource
                         ->preload()
                         ->label('City to')
                         ->relationship('toCity', 'name')
-                        ->options(function($get) {
+                        ->options(function ($get) {
                             $fromCityId = $get('from_city_id');
                             if (!empty($fromCityId)) {
                                 $cities = TourService::getCities(null, false, true);
@@ -68,7 +68,8 @@ class TransferResource extends Resource
                         ->label('Group number'),
 
                     Forms\Components\TextInput::make('pax')
-                        ->label('Pax'),
+                        ->label('Pax')
+                        ->numeric(),
 
                     Forms\Components\Select::make('status')
                         ->native(false)
@@ -89,7 +90,7 @@ class TransferResource extends Resource
                         ->label('Transport type')
                         ->options(TransportType::class)
                         ->reactive()
-                        ->afterStateUpdated(function($get, $set) {
+                        ->afterStateUpdated(function ($get, $set) {
                             $price = TourService::getTransportPrice(
                                 $get('transport_type'),
                                 $get('transport_comfort_level'),
@@ -104,7 +105,7 @@ class TransferResource extends Resource
                         ->label('Comfort level')
                         ->options(TransportComfortLevel::class)
                         ->reactive()
-                        ->afterStateUpdated(function($get, $set) {
+                        ->afterStateUpdated(function ($get, $set) {
                             $price = TourService::getTransportPrice(
                                 $get('transport_type'),
                                 $get('transport_comfort_level'),
@@ -114,10 +115,12 @@ class TransferResource extends Resource
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\TextInput::make('place_of_submission'),
+                    Forms\Components\TextInput::make('place_of_submission')
+                        ->label('Pick up Location'),
 
-                    Forms\Components\TimePicker::make('time')
-                        ->native(false),
+                    Forms\Components\DateTimePicker::make('date_time')
+                        ->native(false)
+                        ->seconds(false),
 
                     Forms\Components\TextInput::make('price')
                         ->numeric(),
@@ -131,32 +134,52 @@ class TransferResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->modifyQueryUsing(fn ($query) => $query->with(['fromCity', 'toCity', 'company']))
+            ->defaultSort('date_time', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('company.name'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Date')
+
+                Tables\Columns\TextColumn::make('date_time')
+                    ->label('Date & Time')
                     ->dateTime()
+                    ->formatStateUsing(fn ($state) => $state->format('d.m.Y H:i'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('place_of_submission')->sortable(),
+
+                Tables\Columns\TextColumn::make('place_of_submission')
+                    ->label('Pick up Location'),
+
                 Tables\Columns\TextColumn::make('pax')
+                    ->formatStateUsing(function ($record, $state) {
+                        return $state . ' pax';
+                    })
                     ->numeric()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('fromCity.name')
                     ->label('Route')
-                    ->formatStateUsing(function($record, $state) {
+                    ->formatStateUsing(function ($record, $state) {
                         return $state . ' - ' . $record->toCity?->name;
                     }),
-                //                Tables\Columns\TextColumn::make('toCity.name')->sortable(),
+
                 Tables\Columns\TextColumn::make('driver'),
+
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('transport_type')->sortable(),
+
                 Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
+
                 Tables\Columns\TextColumn::make('group_number')->sortable(),
+
                 Tables\Columns\TextColumn::make('price')
                     ->money()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime()
                     ->sortable(),
                 //                Tables\Columns\TextColumn::make('updated_at')
                 //                    ->dateTime()

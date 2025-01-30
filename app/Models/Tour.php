@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\GuideType;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
+use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -35,8 +36,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property string $guide_name
  * @property string $guide_phone
  * @property int $guide_price
- * @property int $transport_type
- * @property int $transport_comfort_level
+ * @property TransportType $transport_type
+ * @property TransportComfortLevel $transport_comfort_level
  * @property int $single_supplement_price
  *
  * @property Company $company
@@ -79,8 +80,8 @@ class Tour extends Model
         'guide_phone',
         'guide_price',
 
-        'transport_comfort_level',
         'transport_type',
+        'transport_comfort_level',
         'single_supplement_price',
     ];
 
@@ -91,6 +92,7 @@ class Tour extends Model
         'status' => TourStatus::class,
         'guide_type' => GuideType::class,
         'transport_type' => TransportType::class,
+        'transport_comfort_level' => TransportComfortLevel::class,
     ];
 
     public function company(): BelongsTo
