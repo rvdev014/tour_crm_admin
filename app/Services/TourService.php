@@ -65,11 +65,11 @@ class TourService
                     ->where('country_id', $countryId)
                     ->get()
             );
-            return $isPluck ? $result->pluck('name', 'id')->toArray() : $result->toArray();
+            return $isPluck ? $result->pluck('name', 'id') : $result;
         }
         if ($isAll) {
             $result = CacheService::remember('cities', fn() => City::query()->select('name', 'id')->get());
-            return $isPluck ? $result->pluck('name', 'id')->toArray() : $result->toArray();
+            return $isPluck ? $result->pluck('name', 'id') : $result;
         }
         return [];
     }
@@ -83,7 +83,6 @@ class TourService
                 ->where('city_id', $localCityId)
                 ->get()
                 ->pluck('name', 'id')
-                ->toArray()
         );
     }
 
@@ -96,7 +95,6 @@ class TourService
                 ->where('city_id', $localCityId)
                 ->get()
                 ->pluck('name', 'id')
-                ->toArray()
         );
     }
 
@@ -109,7 +107,6 @@ class TourService
                 ->where('city_id', $localCityId)
                 ->get()
                 ->pluck('name', 'id')
-                ->toArray()
         );
     }
 
@@ -122,7 +119,6 @@ class TourService
                 ->whereIn('id', $ids)
                 ->get()
                 ->pluck('name', 'id')
-                ->toArray()
         );
     }
 
@@ -135,7 +131,6 @@ class TourService
                 ->whereIn('museum_id', $museumIds)
                 ->get()
                 ->pluck('name', 'id')
-                ->toArray()
         );
     }
 
@@ -148,7 +143,6 @@ class TourService
                 ->where('city_id', $localCityId)
                 ->get()
                 ->pluck('name', 'id')
-                ->toArray()
         );
     }
 
@@ -345,7 +339,7 @@ class TourService
 
     public static function getCompanies(CompanyType $type)
     {
-        return Company::query()->select('name', 'id')->where('type', $type)->get()->pluck('name', 'id')->toArray();
+        return Company::query()->select('name', 'id')->where('type', $type)->get()->pluck('name', 'id');
     }
 
     public static function sendMails($tourData, $days): void

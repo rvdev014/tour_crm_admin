@@ -67,10 +67,8 @@ jobs:
 
       - name: Deploy
         run: |
-          echo "Deploying..."
           cd ${{ secrets.APP_PATH }}
           ./build.sh
-          echo "Deployed successfully!"
 
 #  deploy:
 #    name: Deploy
