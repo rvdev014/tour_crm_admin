@@ -16,6 +16,8 @@ services:
         volumes:
             - ./:/app
             - vendor:/app/vendor
+        depends_on:
+            - db
 
     db:
         image: postgres:17.2-alpine

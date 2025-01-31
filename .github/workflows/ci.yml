@@ -7,7 +7,7 @@ on:
 jobs:
   tests:
     name: Run tests
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
 
     steps:
       - uses: actions/checkout@v2
@@ -60,14 +60,29 @@ jobs:
   deploy:
     name: Deploy
     needs: tests
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     steps:
-      - name: Deploy using ssh
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ${{ secrets.APP_PATH }}
-            ./build.sh
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy
+        run: |
+          echo "Deploying..."
+          cd ${{ secrets.APP_PATH }}
+          ./build.sh
+          echo "Deployed successfully!"
+
+#  deploy:
+#    name: Deploy
+#    needs: tests
+#    runs-on: self-hosted
+#    steps:
+#      - name: Deploy using ssh
+#        uses: appleboy/ssh-action@v1.1.0
+#        with:
+#          host: ${{ secrets.SSH_HOST }}
+#          username: ${{ secrets.SSH_USERNAME }}
+#          key: ${{ secrets.SSH_PRIVATE_KEY }}
+#          script: |
+#            cd ${{ secrets.APP_PATH }}
+#            ./build.sh
