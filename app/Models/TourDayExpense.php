@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property float $price
  * @property float $total_price
  * @property int $pax
- * @property int $status
+ * @property ExpenseStatus $status
  * @property string $comment
  *
  * Hotel

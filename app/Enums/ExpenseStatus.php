@@ -10,6 +10,8 @@ enum ExpenseStatus:int implements HasLabel, HasColor
     case New = 1;
     case Confirmed = 2;
     case Waiting = 3;
+    case Rejected = 4;
+    case Done = 5;
 
     public function getLabel(): string
     {
@@ -17,6 +19,8 @@ enum ExpenseStatus:int implements HasLabel, HasColor
             self::New       => 'New',
             self::Confirmed => 'Confirmed',
             self::Waiting   => 'Waiting',
+            self::Rejected  => 'Rejected',
+            self::Done      => 'Done',
         };
     }
 
@@ -26,6 +30,8 @@ enum ExpenseStatus:int implements HasLabel, HasColor
             self::New       => 'primary',
             self::Confirmed => 'success',
             self::Waiting   => 'warning',
+            self::Rejected  => 'danger',
+            self::Done      => 'info',
         };
     }
 }

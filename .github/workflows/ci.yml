@@ -5,12 +5,12 @@ on:
       - master
 
 jobs:
-  tests:
-    name: Run tests
-    runs-on: self-hosted
-
-    steps:
-      - uses: actions/checkout@v2
+#  tests:
+#    name: Run tests
+#    runs-on: self-hosted
+#
+#    steps:
+#      - uses: actions/checkout@v2
 
   #      - name: Cache Composer dependencies
   #        uses: actions/cache@v4
@@ -59,7 +59,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: tests
+#    needs: tests
     runs-on: self-hosted
     steps:
       - name: Checkout Repository

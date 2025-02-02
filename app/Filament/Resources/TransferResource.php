@@ -9,11 +9,16 @@ use App\Filament\Resources\TransferResource\Pages;
 use App\Filament\Resources\TransferResource\RelationManagers;
 use App\Models\Transfer;
 use App\Services\TourService;
+use Filament\Forms\Components;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class TransferResource extends Resource
 {
@@ -25,7 +30,6 @@ class TransferResource extends Resource
     {
         return $form
             ->schema([
-
                 Forms\Components\Grid::make(3)->schema([
                     Forms\Components\Select::make('from_city_id')
                         ->native(false)
@@ -134,7 +138,120 @@ class TransferResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with(['fromCity', 'toCity', 'company']))
+            ->striped()
+            ->modifyQueryUsing(fn($query) => $query->with(['fromCity', 'toCity', 'company']))
+            ->filtersFormColumns(3)
+            ->filters([
+//                TernaryFilter::make('verified')
+//                    ->nullable(),
+                Tables\Filters\Filter::make('today')
+                    ->form([
+                        Components\Grid::make()->schema([
+                            Components\Checkbox::make('today')
+                                ->label('Today')
+                                ->default(false),
+                            Components\Checkbox::make('tomorrow')
+                                ->label('Tomorrow')
+                                ->default(false),
+                        ]),
+                    ])
+                    ->query(function (Builder $query, $data) {
+                        if ($data['today'] && $data['tomorrow']) {
+                            $today = Carbon::today();
+                            $tomorrow = Carbon::tomorrow();
+                            return $query->whereDate('date_time', $today)
+                                ->orWhereDate('date_time', $tomorrow);
+                        }
+
+                        if ($data['today']) {
+                            $today = Carbon::today();
+                            return $query->whereDate('date_time', $today);
+                        }
+
+                        if ($data['tomorrow']) {
+                            $tomorrow = Carbon::tomorrow();
+                            return $query->whereDate('date_time', $tomorrow);
+                        }
+
+                        return $query;
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['today'] && $data['tomorrow']) {
+                            $indicators['today'] = 'Today & Tomorrow';
+                            return $indicators;
+                        }
+
+                        if ($data['today']) {
+                            $indicators['today'] = 'Today';
+                        }
+                        if ($data['tomorrow']) {
+                            $indicators['tomorrow'] = 'Tomorrow';
+                        }
+
+                        return $indicators;
+                    }),
+                Tables\Filters\Filter::make('status')
+                    ->form([
+                        Components\Select::make('status')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(ExpenseStatus::class)
+                    ])
+                    ->query(function (Builder $query, $data) {
+                        return $query
+                            ->when(
+                                $data['status'],
+                                fn($query, $status) => $query->where('status', $status)
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['status'] ?? null) {
+                            $indicators['status'] = 'Status: ' . ExpenseStatus::from($data['status'])->getLabel();
+                        }
+
+                        return $indicators;
+                    }),
+                Tables\Filters\Filter::make('date')
+                    ->form([
+                        Components\Grid::make()->schema([
+                            Components\DatePicker::make('date_from')
+                                ->displayFormat('d.m.Y')
+                                ->native(false),
+                            Components\DatePicker::make('date_until')
+                                ->displayFormat('d.m.Y')
+                                ->native(false),
+                        ])
+                    ])
+                    ->query(function (Builder $query, $data) {
+                        return $query
+                            ->when(
+                                $data['date_from'],
+                                fn($query, $dateFrom) => $query->whereDate('date_time', '>=', $dateFrom)
+                            )
+                            ->when(
+                                $data['date_until'],
+                                fn($query, $dateUntil) => $query->whereDate('date_time', '<=', $dateUntil)
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['date_from'] ?? null) {
+                            $indicators['date_from'] = 'Order from ' . Carbon::parse(
+                                    $data['date_from']
+                                )->toFormattedDateString();
+                        }
+                        if ($data['date_until'] ?? null) {
+                            $indicators['date_until'] = 'Order until ' . Carbon::parse(
+                                    $data['date_until']
+                                )->toFormattedDateString();
+                        }
+
+                        return $indicators;
+                    }),
+            ], layout: FiltersLayout::AboveContent)
             ->defaultSort('date_time', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('company.name'),
@@ -142,7 +259,7 @@ class TransferResource extends Resource
                 Tables\Columns\TextColumn::make('date_time')
                     ->label('Date & Time')
                     ->dateTime()
-                    ->formatStateUsing(fn ($state) => $state->format('d.m.Y H:i'))
+                    ->formatStateUsing(fn($state) => $state->format('d.m.Y H:i'))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('place_of_submission')
@@ -185,9 +302,6 @@ class TransferResource extends Resource
                 //                    ->dateTime()
                 //                    ->sortable()
                 //                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
