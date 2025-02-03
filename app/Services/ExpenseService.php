@@ -86,6 +86,7 @@ class ExpenseService
     {
         return collect($data)
             ->filter(fn($value, $key) => str_starts_with($key, 'room_type_'))
-            ->mapWithKeys(fn($value, $key) => [(int)str_replace('room_type_', '', $key) => $value]);
+            ->mapWithKeys(fn($value, $key) => [(int)str_replace('room_type_', '', $key) => $value])
+            ->filter(fn($value) => $value > 0);
     }
 }

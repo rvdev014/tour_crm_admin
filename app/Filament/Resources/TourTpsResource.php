@@ -259,7 +259,7 @@ class TourTpsResource extends Resource
 
                             // Hotel
                             Components\Fieldset::make('Hotel info')->schema([
-                                Components\Grid::make(3)->schema([
+                                Components\Grid::make(4)->schema([
                                     Components\Select::make('hotel_id')
                                         ->native(false)
                                         ->searchable()
@@ -277,9 +277,9 @@ class TourTpsResource extends Resource
                                     Components\TimePicker::make('hotel_checkin_time')
                                         ->seconds(false)
                                         ->label('Check-in time'),
-                                    //                                    Components\TimePicker::make('hotel_checkout_time')
-                                    //                                        ->seconds(false)
-                                    //                                        ->label('Check-out time'),
+                                    Components\TimePicker::make('hotel_checkout_time')
+                                        ->seconds(false)
+                                        ->label('Check-out time'),
                                 ]),
                                 Components\Textarea::make('comment')
                                     ->label('Comment')

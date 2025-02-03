@@ -6,6 +6,7 @@ use App\Enums\EmployeeType;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Observers\TourDayExpenseObserver;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,10 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * @property int $id
+ * @property int $tour_id
  * @property int $tour_day_id
+ * @property Carbon $date
+ * @property int $city_id
  * @property ExpenseType $type
  *
  * Common fields
@@ -71,10 +75,13 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * Other
  * @property string $other_name
  * @property string $hotel_checkin_time
+ * @property string $hotel_checkout_time
  *
+ * @property City $city
  * @property City $fromCity
  * @property City $toCity
  * @property Show $show
+ * @property Tour $tour
  * @property TourDay $tourDay
  * @property Hotel $hotel
  * @property HotelRoomType $hotelRoomType
@@ -95,13 +102,18 @@ class TourDayExpense extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-//        'transport_time' => 'datetime',
+        'date' => 'date',
         'car_ids' => 'array',
         'type' => ExpenseType::class,
         'museum_ids' => 'array',
         'museum_item_ids' => 'array',
         'status' => ExpenseStatus::class,
     ];
+
+    public function tour(): BelongsTo
+    {
+        return $this->belongsTo(Tour::class);
+    }
 
     public function tourDay(): BelongsTo
     {

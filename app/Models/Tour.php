@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $created_by
  * @property int $city_id
  * @property int $price
- * @property int $expenses
+ * @property int $expenses_total
  * @property int $income
  * @property int $hotel_expenses_total
  * @property TourType $type
@@ -45,8 +46,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property City $city
  * @property Country $country
  * @property Collection<TourDay> $days
+ * @property Collection<TourDayExpense> $expenses
  * @property Collection<TourRoomType> $roomTypes
- * @property Collection<TourDayExpense> $daysExpenses
  * @property Collection<TourHotel> $hotels
  * @property Collection<TourPassenger> $passengers
  */
@@ -66,7 +67,7 @@ class Tour extends Model
         'leader_pax',
         'comment',
         'price',
-        'expenses',
+        'expenses_total',
         'hotel_expenses_total',
         'income',
         'status',
@@ -115,14 +116,34 @@ class Tour extends Model
         return $this->hasMany(TourDay::class);
     }
 
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(TourDayExpense::class);
+    }
+
+    public function getExpense(ExpenseType $expenseType): ?TourDayExpense
+    {
+        return $this->expenses->first(fn($expense) => $expense->type == $expenseType);
+    }
+
+    public function getExpenseByDate($date, ExpenseType $expenseType): ?TourDayExpense
+    {
+        return $this->expenses->first(fn($expense) => $expense->type == $expenseType && $expense->date == $date);
+    }
+
+    public function getExpenses(ExpenseType $expenseType): Collection
+    {
+        return $this->expenses->filter(fn($expense) => $expense->type == $expenseType);
+    }
+
+    public function getExpensesByDate($date, ExpenseType $expenseType): Collection
+    {
+        return $this->expenses->filter(fn($expense) => $expense->type == $expenseType && $expense->date == $date);
+    }
+
     public function roomTypes(): HasMany
     {
         return $this->hasMany(TourRoomType::class);
-    }
-
-    public function daysExpenses(): HasManyThrough
-    {
-        return $this->hasManyThrough(TourDayExpense::class, TourDay::class);
     }
 
     public function hotels(): HasMany

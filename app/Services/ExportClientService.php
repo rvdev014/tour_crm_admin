@@ -31,7 +31,7 @@ class ExportClientService
         /** @var Collection<TourDayExpense> $extraExpenses */
         $extraExpenses = $allExpenses->filter(fn(TourDayExpense $expense) => $expense->type == ExpenseType::Extra);
 
-        $expenseTotal = $tour->expenses;
+        $expenseTotal = $tour->expenses_total;
         $planePriceTotal = $planeExpense?->price;
         $extraPriceTotal = $extraExpenses->sum('price');
 

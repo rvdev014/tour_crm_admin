@@ -8,6 +8,7 @@ use App\Enums\TourType;
 use App\Filament\Resources\TourCorporateResource;
 use App\Models\TourRoomType;
 use App\Services\ExpenseService;
+use App\Services\TourService;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateTour extends CreateRecord
@@ -20,8 +21,7 @@ class CreateTour extends CreateRecord
         $data['type'] = TourType::Corporate;
         $data['created_by'] = auth()->id();
 
-        $days = collect($this->form->getRawState()['days'] ?? []);
-        $allExpenses = $days->flatMap(fn($day) => $day['expenses']);
+        $allExpenses = collect($this->form->getRawState()['expenses'] ?? []);
 
         $tourStatus = TourStatus::Confirmed;
         foreach ($allExpenses as $expense) {
@@ -35,9 +35,8 @@ class CreateTour extends CreateRecord
 
         $totalExpenses = $allExpenses->sum('price');
         $data['expenses'] = $totalExpenses;
-        //        $data['income'] = $data['price'] - $totalExpenses;
 
-        //        TourService::sendMails($data, $days);
+        TourService::sendMails($data, $allExpenses, isCorporate: true);
 
         return $data;
     }
