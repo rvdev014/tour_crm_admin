@@ -54,7 +54,7 @@ class TourTpsResource extends Resource
         return $form->schema([
             Components\Fieldset::make('Tour details')->schema([
                 Components\TextInput::make('group_number')
-                    ->formatStateUsing(function ($record) {
+                    ->formatStateUsing(function($record) {
                         if (!empty($record)) {
                             return $record->group_number;
                         }
@@ -125,8 +125,10 @@ class TourTpsResource extends Resource
             ]),
 
             // Add section with subtitle
-            Components\Fieldset::make('Rooming')
-                ->schema(TourService::generateRoomingSchema()),
+            Components\Section::make('Rooming')
+                ->schema(TourService::generateRoomingSchema())
+                ->collapsible()
+                ->collapsed(true),
 
             Components\Fieldset::make('Transport info')->schema([
                 Components\Select::make('transport_type')
@@ -149,7 +151,7 @@ class TourTpsResource extends Resource
                 ->addActionLabel('Add day')
                 ->columnSpanFull()
                 ->addActionAlignment('end')
-                ->afterStateUpdated(function ($state, $get, $set) {
+                ->afterStateUpdated(function($state, $get, $set) {
                     $prevDate = null;
                     foreach ($state as $uuid => $day) {
                         $date = $day['date'];
@@ -160,7 +162,7 @@ class TourTpsResource extends Resource
                         $prevDate = $date;
                     }
                 })
-                ->itemLabel(function ($get, $set, $uuid) {
+                ->itemLabel(function($get, $set, $uuid) {
                     $current = Arr::get($get('days'), $uuid);
                     $index = array_search($uuid, array_keys($get('days'))) ?? 0;
 
@@ -185,7 +187,7 @@ class TourTpsResource extends Resource
                             ->searchable()
                             ->preload()
                             ->options(fn($get) => TourService::getCities())
-                            ->afterStateUpdated(function ($get, $set) {
+                            ->afterStateUpdated(function($get, $set) {
                                 $days = $get('../');
 
                                 $hotelsData = [];
@@ -216,7 +218,7 @@ class TourTpsResource extends Resource
                         ->collapsible()
                         ->cloneable()
                         ->collapsed(fn($record, $get, $state) => !empty($record->id))
-                        ->itemLabel(function ($get, $uuid) {
+                        ->itemLabel(function($get, $uuid) {
                             $current = Arr::get($get('expenses'), $uuid);
                             $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
                             $index++;
@@ -243,7 +245,7 @@ class TourTpsResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->label('Expense Type')
-                                    ->options(function ($get) {
+                                    ->options(function($get) {
                                         $options = ExpenseType::casesOptions();
                                         unset($options[ExpenseType::Conference->value]);
                                         if ($get('../../../../guide_type') == GuideType::Escort->value) {
@@ -275,9 +277,9 @@ class TourTpsResource extends Resource
                                     Components\TimePicker::make('hotel_checkin_time')
                                         ->seconds(false)
                                         ->label('Check-in time'),
-//                                    Components\TimePicker::make('hotel_checkout_time')
-//                                        ->seconds(false)
-//                                        ->label('Check-out time'),
+                                    //                                    Components\TimePicker::make('hotel_checkout_time')
+                                    //                                        ->seconds(false)
+                                    //                                        ->label('Check-out time'),
                                 ]),
                                 Components\Textarea::make('comment')
                                     ->label('Comment')
@@ -394,7 +396,7 @@ class TourTpsResource extends Resource
                                     ->options(fn($get) => TourService::getMuseumItems($get('museum_ids')))
                                     ->multiple()
                                     ->preload()
-                                    ->disabled(function ($get) {
+                                    ->disabled(function($get) {
                                         if (empty($get('museum_ids'))) {
                                             return true;
                                         }
@@ -571,7 +573,7 @@ class TourTpsResource extends Resource
                             ])->visible(fn($get) => $get('type') == ExpenseType::Extra->value),
 
                         ])
-                        ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
+                        ->mutateRelationshipDataBeforeCreateUsing(function($data, $get) {
                             $tourData = $get('../../');
                             $data['from_city_id'] = $get('city_id');
                             return ExpenseService::mutateExpense(
@@ -580,7 +582,7 @@ class TourTpsResource extends Resource
                                 ExpenseService::getRoomingAmounts($tourData)
                             );
                         })
-                        ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
+                        ->mutateRelationshipDataBeforeSaveUsing(function($data, $get) {
                             $tourData = $get('../../');
                             $data['from_city_id'] = $get('city_id');
                             return ExpenseService::mutateExpense(
@@ -601,7 +603,7 @@ class TourTpsResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function ($query) {
+            ->modifyQueryUsing(function($query) {
                 return $query
                     ->without('days', 'days.expenses')
                     ->with('company', 'createdBy', 'country');
@@ -645,7 +647,7 @@ class TourTpsResource extends Resource
                             ->displayFormat('d.m.Y')
                             ->native(false),
                     ])
-                    ->query(function (Builder $query, $data) {
+                    ->query(function(Builder $query, $data) {
                         return $query
                             ->when(
                                 $data['country_id'],
@@ -669,7 +671,7 @@ class TourTpsResource extends Resource
                                 fn($query, $createdUntil) => $query->whereDate('start_date', '<=', $createdUntil)
                             );
                     })
-                    ->indicateUsing(function (array $data): array {
+                    ->indicateUsing(function(array $data): array {
                         $indicators = [];
                         if ($data['country_id'] ?? null) {
                             $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
@@ -712,7 +714,7 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('status')
                     ->badge(),
                 Columns\TextColumn::make('price')
-                    ->formatStateUsing(function ($record, $state) {
+                    ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney($state);
                         }
@@ -724,7 +726,7 @@ class TourTpsResource extends Resource
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(function ($record, $state) {
+                    ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney($state);
                         }
@@ -736,7 +738,7 @@ class TourTpsResource extends Resource
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color(fn(Tour $record) => $record->income > 0 ? 'success' : 'danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(function ($record, $state) {
+                    ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney($state);
                         }
