@@ -88,6 +88,16 @@ class TourTpsResource extends Resource
                     ->label('Arrival time')
                     ->native(false)
                     ->seconds(false)
+                    ->afterStateUpdated(function($get, $set) {
+                        $startDate = $get('start_date');
+                        $firstDay = $get('days') ? Arr::first($get('days')) : null;
+                        $firstDayUuid = $firstDay ? Arr::first(array_keys($get('days'))) : null;
+
+                        if (empty($firstDay['id'])) {
+                            $set("days.$firstDayUuid.date", $startDate);
+                        }
+                    })
+                    ->reactive()
                     ->required(),
                 Components\DateTimePicker::make('end_date')
                     ->displayFormat('d.m.Y H:i')
@@ -161,6 +171,8 @@ class TourTpsResource extends Resource
 
                         $prevDate = $date;
                     }
+
+                    $prevDate = null;
                 })
                 ->itemLabel(function($get, $set, $uuid) {
                     $current = Arr::get($get('days'), $uuid);
@@ -608,11 +620,6 @@ class TourTpsResource extends Resource
                     ->with('company', 'createdBy', 'country');
             })
             ->striped()
-            // CAN GROUP TABLE BY CUSTOM COLUMNS
-            //            ->groups([
-            //                Group::make('start_date')
-            //                    ->collapsible(),
-            //            ])
             ->defaultSort('start_date', 'asc')
             ->filters([
                 Tables\Filters\Filter::make('country_id')
@@ -721,7 +728,7 @@ class TourTpsResource extends Resource
                         return '-';
                     })
                     ->sortable(),
-                Columns\TextColumn::make('expenses')
+                Columns\TextColumn::make('expenses_total')
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)

@@ -101,7 +101,6 @@
                     <div class="flex-td">
                         <p>{{ $lunch?->restaurant?->name  }}</p>
                         @if ($lunch?->status)
-                            <br>
                             <x-filament::badge
                                 :color="$lunch->status->getColor()"
                                 size="sm"
@@ -116,7 +115,6 @@
                     <div class="flex-td">
                         <p>{{ $dinner?->restaurant?->name  }}</p>
                         @if ($dinner?->status)
-                            <br>
                             <x-filament::badge
                                 :color="$dinner->status->getColor()"
                                 size="sm"
@@ -131,7 +129,6 @@
                     <div class="flex-td">
                         <p>{{ $extra?->other_name }}</p>
                         @if ($extra?->status)
-                            <br>
                             <x-filament::badge
                                 :color="$extra->status->getColor()"
                                 size="sm"
