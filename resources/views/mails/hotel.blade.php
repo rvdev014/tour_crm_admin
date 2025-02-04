@@ -54,7 +54,7 @@
     </div>
     <div class="email-body">
         <p><strong>Date:</strong> {{ $date }}</p>
-        <p><strong>Pax:</strong> {{ $tourData['pax'] }}</p>
+        <p><strong>Pax:</strong> {{ $totalPax }}</p>
         <p><strong>Comment:</strong> {{ $expense['comment'] }}</p>
     </div>
 </div>

@@ -84,8 +84,13 @@ class TransferResource extends Resource
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\TextInput::make('driver')
-                        ->label('Driver'),
+//                    Forms\Components\TextInput::make('driver')
+//                        ->label('Driver'),
+                    Components\Select::make('driver_id')
+                        ->options(TourService::getDrivers())
+                        ->native(false)
+                        ->searchable()
+                        ->preload(),
 
                     Forms\Components\Select::make('transport_type')
                         ->native(false)
@@ -278,7 +283,7 @@ class TransferResource extends Resource
                         return $state . ' - ' . $record->toCity?->name;
                     }),
 
-                Tables\Columns\TextColumn::make('driver'),
+                Tables\Columns\TextColumn::make('driver.name'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()

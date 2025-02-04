@@ -22,7 +22,9 @@ class EditTour extends EditRecord
 
         ExpenseService::updateTourRoomTypes($this->record->id, $data);
 
-        TourService::sendMails($data, $allExpenses, isCorporate: true);
+        TourService::sendMails($formState, $allExpenses, isCorporate: true);
+
+        TourService::sendTelegram($formState, isCorporate: true);
 
         return $data;
     }

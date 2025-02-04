@@ -5,11 +5,14 @@ namespace App\Services;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
 use App\Enums\TourType;
+use App\Enums\TransportComfortLevel;
+use App\Enums\TransportType;
 use App\Mail\HotelMail;
 use App\Mail\RestaurantMail;
 use App\Models\City;
 use App\Models\Company;
 use App\Models\Country;
+use App\Models\Driver;
 use App\Models\Hotel;
 use App\Models\HotelRoomType;
 use App\Models\Museum;
@@ -23,6 +26,7 @@ use App\Models\TourHotel;
 use App\Models\Train;
 use App\Models\Transport;
 use App\Models\User;
+use Carbon\Carbon;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Table;
@@ -73,6 +77,17 @@ class TourService
             return $isPluck ? $result->pluck('name', 'id') : $result;
         }
         return [];
+    }
+
+    public static function getDrivers(): array|Collection
+    {
+        return CacheService::remember(
+            'drivers',
+            fn() => Driver::query()
+                ->select('name', 'id')
+                ->get()
+                ->pluck('name', 'id')
+        );
     }
 
     public static function getTrains(): array|Collection
@@ -380,9 +395,9 @@ class TourService
 
     public static function sendMails($tourData, $data, $isCorporate = false): void
     {
-//        if (app()->environment('local')) {
-//            return;
-//        }
+        if (app()->environment('local')) {
+            return;
+        }
 
         $hotelsData = [];
         $restaurantsData = [];
@@ -416,5 +431,103 @@ class TourService
                 Mail::to($restaurant->email)->send(new RestaurantMail($date, $restaurantItem['expense'], $tourData));
             }
         }
+    }
+
+    public static function sendTelegram($tourData, $isCorporate = false): void
+    {
+        if ($isCorporate) {
+            $expenses = $tourData['expenses'] ?? [];
+            foreach ($expenses as $expense) {
+                if ($expense['type'] == ExpenseType::Transport->value) {
+                    TourService::sendOneMessage([
+                        'driver_id' => $expense['transport_driver_id'],
+                        'from_city' => $expense['city_id'],
+                        'to_city' => $expense['to_city_id'],
+                        'transport_place' => $expense['transport_place'],
+                        'date' => $expense['date'],
+                        'transport_type' => $tourData['transport_type'],
+                        'comfort_level' => $tourData['transport_comfort_level'],
+                        'price' => $expense['price'],
+                        'comment' => $expense['comment'],
+                    ]);
+                }
+            }
+        } else {
+            $days = $tourData['days'] ?? [];
+            foreach ($days as $day) {
+                $expenses = $day['expenses'] ?? [];
+                foreach ($expenses as $expense) {
+                    if ($expense['type'] == ExpenseType::Transport->value) {
+                        $date = Carbon::parse($day['date'])->format('Y-m-d');
+                        $time = Carbon::parse($expense['transport_time'])->format('H:i');
+                        TourService::sendOneMessage([
+                            'driver_id' => $expense['transport_driver_id'],
+                            'from_city' => $day['city_id'],
+                            'to_city' => $expense['to_city_id'],
+                            'transport_place' => $expense['transport_place'],
+                            'date' => "{$date} {$time}",
+                            'transport_type' => $tourData['transport_type'],
+                            'comfort_level' => $tourData['transport_comfort_level'],
+                            'price' => $expense['price'],
+                            'comment' => $expense['comment'],
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    public static function sendTelegramTransfer($data): void
+    {
+        TourService::sendOneMessage([
+            'driver_id' => $data['driver_id'],
+            'from_city' => $data['from_city_id'],
+            'to_city' => $data['to_city_id'],
+            'transport_place' => $data['place_of_submission'],
+            'date' => $data['date_time'],
+            'transport_type' => $data['transport_type'],
+            'comfort_level' => $data['transport_comfort_level'],
+            'price' => $data['price'],
+            'comment' => $data['comment'],
+        ]);
+    }
+
+    public static function sendOneMessage($data): void
+    {
+        $fromCity = $data['from_city'] ? City::find($data['from_city']) : null;
+        $toCity = $data['to_city'] ? City::find($data['to_city']) : null;
+        $place = $data['transport_place'] ?? '-';
+        $comment = $data['comment'] ?? '-';
+        $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
+        $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
+        $comfortLevel = $data['comfort_level'] ? self::getEnum(TransportComfortLevel::class, $data['comfort_level']) : '-';
+        $price = $data['price'] ?? '';
+
+        /** @var Driver $driver */
+        $driver = Driver::query()->find($data['driver_id'] ?? null);
+        if ($driver?->chat_id) {
+            TelegramService::sendMessage(
+                $driver->chat_id,
+                <<<HTML
+<b>Date and time:</b> {$date}
+<b>From city:</b> {$fromCity?->name}
+<b>To city:</b> {$toCity?->name}
+<b>Pick up location:</b> {$place}
+<b>Transport:</b> {$transportType} {$comfortLevel}
+<b>Price:</b> {$price}
+<b>Comment:</b> {$comment}
+HTML,
+                ['parse_mode' => 'HTML']
+            );
+        }
+    }
+
+    public static function getEnum($enumClass, $value): string
+    {
+        if ($value instanceof $enumClass) {
+            return $value->getLabel();
+        }
+
+        return $enumClass::from($value)->getLabel();
     }
 }

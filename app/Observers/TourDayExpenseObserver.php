@@ -63,20 +63,25 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
 
     public function changedAttributes(TourDayExpense $tourDayExpense): array
     {
-        $expenseDate = $tourDayExpense->tourDay->date->format('Y-m-d');
-        $dateTime = Carbon::parse($expenseDate . ' ' . ($tourDayExpense->transport_time ?? '00:00:00'));
+        $tour = $tourDayExpense->tourDay?->tour ?? $tourDayExpense->tour;
+        $expenseDate = $tourDayExpense->tourDay?->date ?? $tourDayExpense->date;
+
+        $dateTime = null;
+        if ($expenseDate) {
+            $dateTime = Carbon::parse($expenseDate->format('Y-m-d') . ' ' . ($tourDayExpense->transport_time ?? '00:00:00'));
+        }
 
         return [
-            'from_city_id' => $tourDayExpense->tourDay->city_id,
+            'from_city_id' => $tourDayExpense->tourDay?->city_id ?? $tourDayExpense->city_id,
             'to_city_id' => $tourDayExpense->to_city_id,
             'comment' => $tourDayExpense->comment,
-            'company_id' => $tourDayExpense->tourDay->tour->company_id,
-            'group_number' => $tourDayExpense->tourDay->tour->group_number,
-            'transport_type' => $tourDayExpense->tourDay->tour->transport_type,
-            'transport_comfort_level' => $tourDayExpense->tourDay->tour->transport_comfort_level,
+            'company_id' => $tour->company_id,
+            'group_number' => $tour->group_number,
+            'transport_type' => $tour->transport_type,
+            'transport_comfort_level' => $tour->transport_comfort_level,
             'price' => $tourDayExpense->price,
             'status' => $tourDayExpense->status,
-            'pax' => $tourDayExpense->tourDay->tour->pax,
+            'pax' => $tour->getTotalPax(),
             'tour_day_expense_id' => $tourDayExpense->id,
 
             'driver' => $tourDayExpense->transport_driver,

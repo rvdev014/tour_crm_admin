@@ -28,7 +28,9 @@ class CreateTour extends CreateRecord
         $data['expenses_total'] = $totalExpenses;
         $data['income'] = $data['price'] - $totalExpenses;
 
-        TourService::sendMails($data, $formState['days'] ?? []);
+        TourService::sendMails($formState, $formState['days'] ?? []);
+
+        TourService::sendTelegram($formState);
 
         return $data;
     }
