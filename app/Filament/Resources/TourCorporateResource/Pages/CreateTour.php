@@ -27,7 +27,6 @@ class CreateTour extends CreateRecord
         $data['expenses_total'] = $allExpenses->sum('price');
 
         TourService::sendMails($formState, $allExpenses, isCorporate: true);
-
         TourService::sendTelegram($formState, isCorporate: true);
 
         return $data;
