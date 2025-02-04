@@ -18,10 +18,23 @@ class CreateTour extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $formState = $this->form->getRawState();
+
         $data['type'] = TourType::Corporate;
         $data['created_by'] = auth()->id();
 
-        $allExpenses = collect($this->form->getRawState()['expenses'] ?? []);
+
+        $passengers = collect($formState['passengers'] ?? []);
+        $allExpenses = collect($formState['expenses'] ?? []);
+
+        $allExpenses = $allExpenses->map(
+            fn($expense) => ExpenseService::mutateExpense(
+                $expense,
+                $passengers->count(),
+                ExpenseService::getRoomingAmounts($formState),
+                $data['company_id']
+            )
+        );
 
         $tourStatus = TourStatus::Confirmed;
         foreach ($allExpenses as $expense) {

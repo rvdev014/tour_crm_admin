@@ -91,9 +91,13 @@ class ExpenseService
 
                     $totalPrice = 0;
                     $prices = ExpenseService::getTrainPrices($data);
-                    dd($prices);
+                    foreach ($prices as $trainClass => $amount) {
+                        if (isset($trainTariff->$trainClass)) {
+                            $totalPrice += $trainTariff->$trainClass * $amount;
+                        }
+                    }
 
-                    $data['price'] = $train->price_per_person * $totalPax;
+                    $data['price'] = $totalPrice;
                 }
                 return $data;
 
@@ -111,9 +115,8 @@ class ExpenseService
 
     public static function getTrainPrices($data): Collection
     {
-        dd(collect($data)->filter(fn($value, $key) => str_starts_with($key, 'train_class_')));
         return collect($data)
             ->filter(fn($value, $key) => str_starts_with($key, 'train_class_'))
-            ->mapWithKeys(fn($value, $key) => [(int)str_replace('train_', '', $key) => $value]);
+            ->mapWithKeys(fn($value, $key) => [str_replace('train_', '', $key) => $value]);
     }
 }

@@ -9,6 +9,10 @@
     color: #fff !important;
 }
 
+.fi-fo-repeater-item.simple .fi-icon-btn-icon {
+    color: rgba(var(--c-500),var(--tw-text-opacity,1)) !important;
+}
+
 
 .fi-sidebar-item .fi-sidebar-item-button:hover {
     background-color: #447ca1 !important;

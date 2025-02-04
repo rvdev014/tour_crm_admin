@@ -449,15 +449,12 @@ class TourTpsResource extends Resource
                             Components\Fieldset::make('Train info')->schema([
 
                                 Components\Grid::make(3)->schema([
-                                    Components\Select::make('train_name')
+                                    Components\Select::make('train_id')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Train name')
-                                        ->options([
-                                            'sharq' => 'Sharq',
-                                            'afrosiyob' => 'Afrosiyob',
-                                        ]),
+                                        ->label('Train')
+                                        ->options(TourService::getTrains()),
 
                                     Components\Select::make('to_city_id')
                                         ->native(false)
@@ -466,10 +463,6 @@ class TourTpsResource extends Resource
                                         ->label('City to')
                                         ->options(TourService::getCities())
                                         ->reactive(),
-
-                                    Components\TextInput::make('price')
-                                        ->numeric()
-                                        ->label('Price'),
                                 ]),
 
                                 Components\Grid::make(3)->schema([
