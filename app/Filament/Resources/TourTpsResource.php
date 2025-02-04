@@ -583,7 +583,9 @@ class TourTpsResource extends Resource
                             return ExpenseService::mutateExpense(
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
-                                ExpenseService::getRoomingAmounts($tourData)
+                                ExpenseService::getRoomingAmounts($tourData),
+                                null,
+                                $get()
                             );
                         })
                         ->mutateRelationshipDataBeforeSaveUsing(function($data, $get) {
@@ -592,7 +594,9 @@ class TourTpsResource extends Resource
                             return ExpenseService::mutateExpense(
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
-                                ExpenseService::getRoomingAmounts($tourData)
+                                ExpenseService::getRoomingAmounts($tourData),
+                                null,
+                                $get()
                             );
                         })
                 ]),

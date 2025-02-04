@@ -380,9 +380,9 @@ class TourService
 
     public static function sendMails($tourData, $data, $isCorporate = false): void
     {
-        if (app()->environment('local')) {
-            return;
-        }
+//        if (app()->environment('local')) {
+//            return;
+//        }
 
         $hotelsData = [];
         $restaurantsData = [];
