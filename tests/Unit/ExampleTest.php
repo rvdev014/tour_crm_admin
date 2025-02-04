@@ -238,4 +238,35 @@ class ExampleTest extends TestCase
 
         dd($m, $r);
     }
+
+    public function test_rotate_array(): void
+    {
+        $nums = [1,2,3,4,5,6,7];
+        $exp = [5,6,7,1,2,3,4];
+
+        // 1  2  3  4  5  6  7
+        // 7  1  3  4  5  6  7 i = 0
+        // 7  1  2  4  5  6  7 i = 1
+        // 7  1  2  3  5  6  7 i = 2
+        // 7  1  2  3  4  6  7 i = 3
+        // 7  1  2  3  4  5  7 i = 4
+        // 7  1  2  3  4  5  6 i = 5
+
+        $k = 3;
+
+        $length = count($nums);
+        $prev = 0;
+        for ($i = 0; $i < $length; $i++) {
+//            $delta = $length - $k + $i;
+//            $delta = $delta === $length ? $length - $delta : $delta;
+
+            $temp = $nums[$i];
+            $next = $nums[$length - $i];
+            $nums[$i + 1] = $temp;
+            $nums[$i] = $next;
+
+        }
+
+        dd($nums);
+    }
 }

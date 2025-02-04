@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TourType;
 use App\Models\Tour;
 use App\Services\ExportClientService;
 use App\Services\ExportMuseumService;
@@ -63,7 +64,11 @@ class ExportController extends Controller
     {
         $tempDir = $this->getTempDir("hotel_reports");
 
-        $hotelsData = ExportHotelService::getHotelsData($tour);
+        if ($tour->type === TourType::Corporate) {
+            $hotelsData = ExportHotelService::getHotelsDataCorporate($tour);
+        } else {
+            $hotelsData = ExportHotelService::getHotelsData($tour);
+        }
         foreach ($hotelsData as $hotelItem) {
             $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
             $fileName = $tempDir . '/Hotel_' . $hotelName . '.docx';

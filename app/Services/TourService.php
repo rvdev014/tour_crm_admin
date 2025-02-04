@@ -20,6 +20,7 @@ use App\Models\Show;
 use App\Models\Tour;
 use App\Models\TourDayExpense;
 use App\Models\TourHotel;
+use App\Models\Train;
 use App\Models\Transport;
 use App\Models\User;
 use Filament\Forms\Components\Grid;
@@ -72,6 +73,17 @@ class TourService
             return $isPluck ? $result->pluck('name', 'id') : $result;
         }
         return [];
+    }
+
+    public static function getTrains(): array|Collection
+    {
+        return CacheService::remember(
+            "trains",
+            fn() => Train::query()
+                ->select('name', 'id')
+                ->get()
+                ->pluck('name', 'id')
+        );
     }
 
     public static function getRestaurants($localCityId): array|Collection
@@ -342,7 +354,31 @@ class TourService
         return Company::query()->select('name', 'id')->where('type', $type)->get()->pluck('name', 'id');
     }
 
-    public static function sendMails($tourData, $days): void
+    public static function processExpense(array $expense, string $date, array &$hotelsData, array &$restaurantsData): void
+    {
+        switch ($expense['type']) {
+            case ExpenseType::Hotel->value:
+                if ($hotel = Hotel::find($expense['hotel_id'])) {
+                    $hotelsData[$date] = [
+                        'hotel' => $hotel,
+                        'expense' => $expense,
+                    ];
+                }
+                break;
+
+            case ExpenseType::Lunch->value:
+            case ExpenseType::Dinner->value:
+                if ($restaurant = Restaurant::find($expense['restaurant_id'])) {
+                    $restaurantsData[$date] = [
+                        'restaurant' => $restaurant,
+                        'expense' => $expense,
+                    ];
+                }
+                break;
+        }
+    }
+
+    public static function sendMails($tourData, $data, $isCorporate = false): void
     {
         if (app()->environment('local')) {
             return;
@@ -350,28 +386,17 @@ class TourService
 
         $hotelsData = [];
         $restaurantsData = [];
-        foreach ($days as $day) {
-            foreach ($day['expenses'] as $expense) {
-                switch ($expense['type']) {
-                    case ExpenseType::Hotel->value:
-                        $hotelId = $expense['hotel_id'];
-                        if ($hotel = Hotel::find($hotelId)) {
-                            $hotelsData[$day['date']] = [
-                                'hotel' => $hotel,
-                                'expense' => $expense,
-                            ];
-                        }
-                        break;
-                    case ExpenseType::Lunch->value:
-                    case ExpenseType::Dinner->value:
-                        $restaurantId = $expense['restaurant_id'];
-                        if ($restaurant = Restaurant::find($restaurantId)) {
-                            $restaurantsData[$day['date']] = [
-                                'restaurant' => $restaurant,
-                                'expense' => $expense,
-                            ];
-                        }
-                        break;
+
+        if ($isCorporate) {
+            foreach ($data as $expense) {
+                if (isset($expense['date'])) {
+                    TourService::processExpense($expense, $expense['date'], $hotelsData, $restaurantsData);
+                }
+            }
+        } else {
+            foreach ($data as $day) {
+                foreach ($day['expenses'] as $expense) {
+                    TourService::processExpense($expense, $day['date'], $hotelsData, $restaurantsData);
                 }
             }
         }

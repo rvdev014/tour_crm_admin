@@ -35,7 +35,7 @@ class CreateTour extends CreateRecord
         $data['status'] = $tourStatus;
 
         $totalExpenses = $allExpenses->sum('price') + ($data['guide_price'] ?? 0);
-        $data['expenses'] = $totalExpenses;
+        $data['expenses_total'] = $totalExpenses;
         $data['income'] = $data['price'] - $totalExpenses;
 
         TourService::sendMails($data, $days);
