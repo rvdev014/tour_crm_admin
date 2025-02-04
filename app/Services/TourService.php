@@ -20,6 +20,7 @@ use App\Models\Show;
 use App\Models\Tour;
 use App\Models\TourDayExpense;
 use App\Models\TourHotel;
+use App\Models\Train;
 use App\Models\Transport;
 use App\Models\User;
 use Filament\Forms\Components\Grid;
@@ -72,6 +73,17 @@ class TourService
             return $isPluck ? $result->pluck('name', 'id') : $result;
         }
         return [];
+    }
+
+    public static function getTrains(): array|Collection
+    {
+        return CacheService::remember(
+            "trains",
+            fn() => Train::query()
+                ->select('name', 'id')
+                ->get()
+                ->pluck('name', 'id')
+        );
     }
 
     public static function getRestaurants($localCityId): array|Collection

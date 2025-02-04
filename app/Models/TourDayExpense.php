@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\EmployeeType;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Observers\TourDayExpenseObserver;
@@ -12,7 +11,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * @property int $id
@@ -32,7 +30,10 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * Hotel
  * @property int $hotel_id
  * @property int $hotel_room_type_id
+ * @property string $hotel_checkin_time
+ * @property string $hotel_checkout_time
  * @property int $hotel_add_percent
+ * @property int $hotel_total_nights
  *
  * Museum
  * @property int $museum_id
@@ -56,6 +57,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * Train
  * @property string $train_name
+ * @property int $train_id
  * @property int $train_class_economy
  * @property int $train_class_vip
  * @property int $train_class_second
@@ -74,9 +76,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * Other
  * @property string $other_name
- * @property string $hotel_checkin_time
- * @property string $hotel_checkout_time
  *
+ * @property Train $train
  * @property City $city
  * @property City $fromCity
  * @property City $toCity
@@ -143,6 +144,16 @@ class TourDayExpense extends Model
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
+
+    public function train(): BelongsTo
+    {
+        return $this->belongsTo(Train::class);
     }
 
     public function fromCity(): BelongsTo

@@ -172,7 +172,7 @@ class TourCorporateResource extends Resource
 
                     // Hotel
                     Components\Fieldset::make('Hotel info')->schema([
-                        Components\Grid::make(4)->schema([
+                        Components\Grid::make()->schema([
                             Components\Select::make('hotel_id')
                                 ->native(false)
                                 ->searchable()
@@ -187,12 +187,17 @@ class TourCorporateResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->label('Status'),
+                        ]),
+                        Components\Grid::make(3)->schema([
                             Components\TimePicker::make('hotel_checkin_time')
                                 ->seconds(false)
                                 ->label('Check-in time'),
                             Components\TimePicker::make('hotel_checkout_time')
                                 ->seconds(false)
                                 ->label('Check-out time'),
+                            Components\TextInput::make('hotel_total_nights')
+                                ->numeric()
+                                ->label('Total nights'),
                         ]),
                         Components\Textarea::make('comment')
                             ->label('Comment')
@@ -350,15 +355,12 @@ class TourCorporateResource extends Resource
                     Components\Fieldset::make('Train info')->schema([
 
                         Components\Grid::make(3)->schema([
-                            Components\Select::make('train_name')
+                            Components\Select::make('train_id')
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
-                                ->label('Train name')
-                                ->options([
-                                    'sharq' => 'Sharq',
-                                    'afrosiyob' => 'Afrosiyob',
-                                ]),
+                                ->label('Train')
+                                ->options(TourService::getTrains()),
 
                             Components\Select::make('to_city_id')
                                 ->native(false)
@@ -367,10 +369,6 @@ class TourCorporateResource extends Resource
                                 ->label('City to')
                                 ->options(TourService::getCities())
                                 ->reactive(),
-
-                            Components\TextInput::make('price')
-                                ->numeric()
-                                ->label('Price'),
                         ]),
 
                         Components\Grid::make(3)->schema([
@@ -645,7 +643,7 @@ class TourCorporateResource extends Resource
                 Columns\TextColumn::make('status')
                     ->badge(),
 
-                Columns\TextColumn::make('expenses')
+                Columns\TextColumn::make('expenses_total')
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)

@@ -10,6 +10,7 @@ use App\Models\Museum;
 use App\Models\MuseumItem;
 use App\Models\Restaurant;
 use App\Models\Show;
+use App\Models\Train;
 use Illuminate\Support\Collection;
 
 class ExpenseService
@@ -25,13 +26,15 @@ class ExpenseService
                 if ($hotel) {
                     $hotelTotal = 0;
                     foreach ($roomTypeAmounts as $roomTypeId => $amount) {
+                        $totalNights = $data['hotel_total_nights'] ?? 1;
+
                         /** @var HotelRoomType $hotelRoomType */
                         $hotelRoomType = $hotel->roomTypes()->where('room_type_id', $roomTypeId)->first();
-                        if (!$hotelRoomType) {
+                        if (!$hotelRoomType || empty($amount)) {
                             continue;
                         }
 
-                        $hotelTotal += $hotelRoomType->getPrice($addPercent) * $amount;
+                        $hotelTotal += $hotelRoomType->getPrice($addPercent) * $amount * $totalNights;
                     }
                     $data['price'] = $hotelTotal;
                 }
@@ -77,6 +80,23 @@ class ExpenseService
                 }
                 return $data;
 
+            case ExpenseType::Train->value:
+                /** @var Train $train */
+                $train = Train::query()->find($data['train_id']);
+                if ($train) {
+                    $trainTariff = $train->tariffs()
+                        ->where('from_city_id', $data['city_id'])
+                        ->where('to_city_id', $data['to_city_id'])
+                        ->first();
+
+                    $totalPrice = 0;
+                    $prices = ExpenseService::getTrainPrices($data);
+                    dd($prices);
+
+                    $data['price'] = $train->price_per_person * $totalPax;
+                }
+                return $data;
+
             default:
                 return $data;
         }
@@ -86,7 +106,14 @@ class ExpenseService
     {
         return collect($data)
             ->filter(fn($value, $key) => str_starts_with($key, 'room_type_'))
-            ->mapWithKeys(fn($value, $key) => [(int)str_replace('room_type_', '', $key) => $value])
-            ->filter(fn($value) => $value > 0);
+            ->mapWithKeys(fn($value, $key) => [(int)str_replace('room_type_', '', $key) => $value]);
+    }
+
+    public static function getTrainPrices($data): Collection
+    {
+        dd(collect($data)->filter(fn($value, $key) => str_starts_with($key, 'train_class_')));
+        return collect($data)
+            ->filter(fn($value, $key) => str_starts_with($key, 'train_class_'))
+            ->mapWithKeys(fn($value, $key) => [(int)str_replace('train_', '', $key) => $value]);
     }
 }

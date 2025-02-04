@@ -31,7 +31,7 @@ class EditTour extends EditRecord
         $data['status'] = $tourStatus;
 
         $totalExpenses = $allExpenses->sum('price') + ($data['guide_price'] ?? 0);
-        $data['expenses'] = $totalExpenses;
+        $data['expenses_total'] = $totalExpenses;
         $data['income'] = $data['price'] - $totalExpenses;
 
         $roomTypeAmounts = ExpenseService::getRoomingAmounts($data);
