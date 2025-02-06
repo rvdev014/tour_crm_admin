@@ -2,6 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use Illuminate\Database\QueryException;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Notifications\Notification;
+use Filament\Support\Facades\FilamentIcon;
 use App\Filament\Resources\DriverResource\Pages;
 use App\Filament\Resources\DriverResource\RelationManagers;
 use App\Models\Driver;
@@ -71,7 +75,48 @@ class DriverResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('delete')
+                        ->modalIcon(FilamentIcon::resolve('actions::delete-action.modal') ?? 'heroicon-o-trash')
+                        ->icon(FilamentIcon::resolve('actions::delete-action') ?? 'heroicon-m-trash')
+                        ->successNotificationTitle('Drivers were successfully deleted')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(function ($records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->delete());
+
+                                Notification::make()
+                                    ->title('Success')
+                                    ->body('Drivers were successfully deleted.')
+                                    ->success()
+                                    ->send();
+
+                            } catch (QueryException $e) {
+                                if ($e->getCode() === '23503') { // Foreign key violation
+
+                                    $drivers = Driver::query()->whereIn('id', $e->getBindings())->pluck('name')
+                                        ->filter()
+                                        ->map(fn ($name) => "'$name'")
+                                        ->join(', ');
+
+                                    Notification::make()
+                                        ->title('Cannot delete some drivers')
+                                        ->body("Cannot delete drivers: $drivers. They are used in tours.")
+                                        ->danger()
+                                        ->send();
+
+                                    return;
+                                }
+
+                                Notification::make()
+                                    ->title('Error')
+                                    ->body('An error occurred while deleting.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        })
+                        ->deselectRecordsAfterCompletion(),
+//                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
