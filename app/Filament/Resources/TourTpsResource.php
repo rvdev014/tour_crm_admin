@@ -371,32 +371,46 @@ class TourTpsResource extends Resource
                                     ->preload()
                                     ->multiple()
                                     ->options(fn($get) => TourService::getMuseums($get('../../city_id')))
-                                    ->createOptionForm([
-                                        Components\Grid::make()->schema([
-                                            Components\TextInput::make('name')
-                                                ->required()
-                                                ->maxLength(255),
-                                            Components\TextInput::make('inn')
-                                                ->required()
-                                                ->maxLength(255),
-                                            Components\Select::make('country_id')
-                                                ->native(false)
-                                                ->searchable()
-                                                ->preload()
-                                                ->relationship('country', 'name')
-                                                ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
-                                                ->reactive(),
-                                            Components\Select::make('city_id')
-                                                ->native(false)
-                                                ->searchable()
-                                                ->preload()
-                                                ->options(fn($get) => TourService::getCities($get('country_id')))
-                                                ->reactive(),
-                                            Components\TextInput::make('price_per_person')
-                                                ->required()
-                                                ->numeric(),
-                                        ])
-                                    ])
+//                                    ->createOptionForm([
+//                                        Components\Grid::make()->schema([
+//                                            Components\TextInput::make('name')
+//                                                ->required()
+//                                                ->maxLength(255),
+//                                            Components\TextInput::make('inn')
+//                                                ->required()
+//                                                ->maxLength(255),
+//                                            Components\Select::make('country_id')
+//                                                ->native(false)
+//                                                ->searchable()
+//                                                ->preload()
+//                                                ->relationship('country', 'name')
+//                                                ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+//                                                ->reactive(),
+//                                            Components\Select::make('city_id')
+//                                                ->native(false)
+//                                                ->searchable()
+//                                                ->preload()
+//                                                ->options(fn($get) => TourService::getCities($get('country_id')))
+//                                                ->reactive(),
+//                                            Components\TextInput::make('price_per_person')
+//                                                ->required()
+//                                                ->numeric(),
+//                                        ])
+//                                    ])
+                                    ->createOptionAction(function($get) {
+                                        return [
+                                            'url' => route('museum.create'),
+                                            'label' => 'Create museum',
+                                        ];
+                                    })
+                                    ->suffixAction(function($get) {
+                                        return [
+                                            Components\Actions\Action::make('create_museum')
+                                                ->label('Create museum')
+                                                ->icon('heroicon-o-plus')
+                                                ->url(route('filament.admin.resources.museums.create'), true),
+                                        ];
+                                    })
                                     ->preload()
                                     ->reactive(),
                                 Components\Select::make('museum_item_ids')
