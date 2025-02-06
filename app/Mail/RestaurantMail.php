@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 
 class RestaurantMail extends Mailable
 {
@@ -43,12 +44,19 @@ class RestaurantMail extends Mailable
      */
     public function content(): Content
     {
+        $passengers = Arr::get($this->tourData, 'passengers', []);
+        if (!empty($passengers)) {
+            $totalPax = count($passengers);
+        } else {
+            $totalPax = $this->tourData['pax'] + ($this->tourData['leader_pax'] ?? 0);
+        }
+
         return new Content(
             view: 'mails.restaurant',
             with: [
                 'date' => Carbon::parse($this->date)->format('d-m-Y'),
                 'expense' => $this->expense,
-                'tourData' => $this->tourData,
+                'totalPax' => $totalPax,
             ],
         );
     }

@@ -52,8 +52,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $from_city_id
  * @property int $to_city_id
  * @property string $transport_driver
+ * @property string $transport_driver_id
  * @property string $transport_time
  * @property string $transport_place
+ * @property string $send_username
  *
  * Train
  * @property string $train_name
@@ -86,6 +88,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property TourDay $tourDay
  * @property Hotel $hotel
  * @property HotelRoomType $hotelRoomType
+ * @property Driver $transportDriver
  * @property Museum $museum
  * @property Collection<Museum> $museums
  * @property MuseumItem $museumItem
@@ -129,6 +132,11 @@ class TourDayExpense extends Model
     public function hotelRoomType(): BelongsTo
     {
         return $this->belongsTo(HotelRoomType::class);
+    }
+
+    public function transportDriver(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class, 'transport_driver_id');
     }
 
     public function museum(): BelongsTo

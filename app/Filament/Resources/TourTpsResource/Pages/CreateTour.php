@@ -19,59 +19,23 @@ class CreateTour extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $formState = $this->form->getRawState();
+        $allExpenses = ExpenseService::mutateExpenses($formState);
+        $totalExpenses = $allExpenses->sum('price') + ($data['guide_price'] ?? 0);
 
         $data['type'] = TourType::TPS;
         $data['created_by'] = auth()->id();
-
-        $totalPax = $data['pax'] + ($data['leader_pax'] ?? 0);
-
-        $days = collect($formState['days'] ?? []);
-        $allExpenses = $days->flatMap(fn($day) => $day['expenses']);
-
-//        $allExpenses = $allExpenses->map(
-//            fn($expense) => ExpenseService::mutateExpense(
-//                $expense,
-//                $data,
-//                ExpenseService::getRoomingAmounts($formState),
-//                $data['company_id']
-//            )
-//        );
-
-        $tourStatus = TourStatus::Confirmed;
-        foreach ($allExpenses as $expense) {
-            $status = $expense['status'] ?? null;
-            if ($status == ExpenseStatus::New->value || $status == ExpenseStatus::Waiting->value) {
-                $tourStatus = TourStatus::NotConfirmed;
-                break;
-            }
-        }
-        $data['status'] = $tourStatus;
-
-        $totalExpenses = $allExpenses->sum('price') + ($data['guide_price'] ?? 0);
+        $data['status'] = ExpenseService::getTourStatus($allExpenses);
         $data['expenses_total'] = $totalExpenses;
         $data['income'] = $data['price'] - $totalExpenses;
 
-        TourService::sendMails($data, $days);
+        TourService::sendMails($formState, $formState['days'] ?? []);
+        TourService::sendTelegram($formState);
 
         return $data;
     }
 
     protected function afterCreate(): void
     {
-        $roomTypeAmounts = ExpenseService::getRoomingAmounts($this->form->getRawState());
-        foreach ($roomTypeAmounts as $roomTypeId => $amount) {
-            if (empty($amount)) {
-                continue;
-            }
-            TourRoomType::query()->updateOrCreate(
-                [
-                    'tour_id' => $this->record->id,
-                    'room_type_id' => $roomTypeId,
-                ],
-                [
-                    'amount' => $amount,
-                ]
-            );
-        }
+        ExpenseService::createTourRoomTypes($this->record->id, $this->form->getRawState());
     }
 }

@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $total_price
  * @property int $company_id
  * @property string $group_number
+ * @property string $send_username
  * @property int $status
  * @property int $pax
  * @property int $tour_day_expense_id
@@ -28,9 +29,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $updated_at
  * @property Carbon $date_time
  *
- * @property string $driver
+ * @property int $driver_id
  * @property string $place_of_submission
  *
+ * @property Driver $driver
  * @property TourDayExpense $tourDayExpense
  * @property Company $company
  * @property City $fromCity
@@ -49,12 +51,13 @@ class Transfer extends Model
         'price',
         'company_id',
         'group_number',
+        'send_username',
         'status',
         'pax',
         'comment',
         'tour_day_expense_id',
 
-        'driver',
+        'driver_id',
         'date_time',
         'place_of_submission',
     ];
@@ -69,6 +72,11 @@ class Transfer extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function driver(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class);
     }
 
     public function fromCity(): BelongsTo

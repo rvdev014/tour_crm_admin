@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TransferResource\Pages;
 
 use App\Filament\Resources\TransferResource;
+use App\Services\TourService;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
@@ -81,5 +82,10 @@ class CreateTransfer extends CreateRecord
         $redirectUrl = $this->getRedirectUrl();
 
         $this->redirect($redirectUrl, navigate: FilamentView::hasSpaMode() && is_app_url($redirectUrl));
+    }
+
+    protected function afterCreate(): void
+    {
+        TourService::sendTelegramTransfer($this->record);
     }
 }

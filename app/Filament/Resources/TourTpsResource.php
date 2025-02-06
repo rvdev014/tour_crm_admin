@@ -327,7 +327,13 @@ class TourTpsResource extends Resource
                             Components\Fieldset::make('Transport info')->schema([
 
                                 Components\Grid::make(3)->schema([
-                                    Components\TextInput::make('transport_driver'),
+//                                    Components\TextInput::make('transport_driver'),
+                                    Components\Select::make('transport_driver_id')
+                                        ->label('Driver')
+                                        ->options(TourService::getDrivers())
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload(),
                                     Components\TimePicker::make('transport_time')
                                         ->seconds(false),
                                     Components\TextInput::make('transport_place')
@@ -597,7 +603,9 @@ class TourTpsResource extends Resource
                             return ExpenseService::mutateExpense(
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
-                                ExpenseService::getRoomingAmounts($tourData)
+                                ExpenseService::getRoomingAmounts($tourData),
+                                null,
+                                $get()
                             );
                         })
                         ->mutateRelationshipDataBeforeSaveUsing(function($data, $get) {
@@ -606,7 +614,9 @@ class TourTpsResource extends Resource
                             return ExpenseService::mutateExpense(
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
-                                ExpenseService::getRoomingAmounts($tourData)
+                                ExpenseService::getRoomingAmounts($tourData),
+                                null,
+                                $get()
                             );
                         })
                 ]),

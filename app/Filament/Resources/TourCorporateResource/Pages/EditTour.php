@@ -2,10 +2,7 @@
 
 namespace App\Filament\Resources\TourCorporateResource\Pages;
 
-use App\Enums\ExpenseStatus;
-use App\Enums\TourStatus;
 use App\Filament\Resources\TourCorporateResource;
-use App\Models\TourRoomType;
 use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Actions;
@@ -17,46 +14,16 @@ class EditTour extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $allExpenses = collect($this->form->getRawState()['expenses'] ?? []);
+        $formState = $this->form->getRawState();
+        $allExpenses = ExpenseService::mutateExpenses($formState, isCorporate: true);
 
-        $tourStatus = TourStatus::Confirmed;
-        foreach ($allExpenses as $expense) {
-            $status = $expense['status'] ?? null;
-            if ($status == ExpenseStatus::New->value || $status == ExpenseStatus::Waiting->value) {
-                $tourStatus = TourStatus::NotConfirmed;
-                break;
-            }
-        }
-        $data['status'] = $tourStatus;
+        $data['status'] = ExpenseService::getTourStatus($allExpenses);
+        $data['expenses_total'] = $allExpenses->sum('price');
 
-        $totalExpenses = $allExpenses->sum('price');
-        $data['expenses_total'] = $totalExpenses;
+        ExpenseService::updateTourRoomTypes($this->record->id, $data);
 
-        $roomTypeAmounts = ExpenseService::getRoomingAmounts($data);
-        foreach ($roomTypeAmounts as $roomTypeId => $amount) {
-            $tourHotelRoomType = TourRoomType::query()
-                ->where('tour_id', $this->record->id)
-                ->where('room_type_id', $roomTypeId)
-                ->first();
-
-            if ($tourHotelRoomType) {
-                if (empty($amount)) {
-                    $tourHotelRoomType->delete();
-                } else {
-                    $tourHotelRoomType->update(['amount' => $amount]);
-                }
-            } else {
-                if (!empty($amount)) {
-                    TourRoomType::query()->create([
-                        'tour_id' => $this->record->id,
-                        'room_type_id' => $roomTypeId,
-                        'amount' => $amount,
-                    ]);
-                }
-            }
-        }
-
-        TourService::sendMails($data, $allExpenses, isCorporate: true);
+        TourService::sendMails($formState, $allExpenses, isCorporate: true);
+        TourService::sendTelegram($formState, isCorporate: true);
 
         return $data;
     }
