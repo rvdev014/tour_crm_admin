@@ -140,3 +140,41 @@
 .custom-table .flex-td p {
     margin-bottom: 5px;
 }
+
+
+.color-green {
+    background: #72e172!important;
+}
+.color-red {
+    background: #ff7b7b!important;
+}
+.color-light-orange {
+    background: #ffcc80!important;
+}
+
+
+@media  (min-width: 768px) {
+    /* make the header sticky*/
+    .fi-ta-table thead {
+        position: sticky !important;
+        top: 0;
+        z-index: 9;
+    }
+
+    /* opacity does not looks good in dark mode, so insert the corresponding bg color here */
+    .fi-ta-table :is(:where(.dark) .dark\:bg-white\/5){
+        background-color: rgb(36 36 39);
+    }
+
+    /* sset the height of content (table) */
+    .fi-ta-content {
+        height: calc(100vh - 20rem);
+        position: relative;
+    }
+
+    /* fix filters and columns modal */
+    .fi-dropdown-panel{
+        z-index: 40 !important;
+    }
+}
+/* Table sticky header end */

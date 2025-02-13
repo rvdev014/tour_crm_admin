@@ -147,11 +147,11 @@ class TourTpsResource extends Resource
                     ->preload()
                     ->options(TransportType::class),
 
-                Components\Select::make('transport_comfort_level')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->options(TransportComfortLevel::class),
+//                Components\Select::make('transport_comfort_level')
+//                    ->native(false)
+//                    ->searchable()
+//                    ->preload()
+//                    ->options(TransportComfortLevel::class),
             ]),
 
             Components\Repeater::make('days')

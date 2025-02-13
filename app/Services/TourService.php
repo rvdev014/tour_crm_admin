@@ -441,12 +441,10 @@ class TourService
                 if ($expense['type'] == ExpenseType::Transport->value) {
                     TourService::sendOneMessage([
                         'driver_id' => $expense['transport_driver_id'],
-                        'from_city' => $expense['city_id'],
                         'to_city' => $expense['to_city_id'],
                         'transport_place' => $expense['transport_place'],
                         'date' => $expense['date'],
                         'transport_type' => $tourData['transport_type'],
-                        'comfort_level' => $tourData['transport_comfort_level'],
                         'price' => $expense['price'],
                         'comment' => $expense['comment'],
                     ]);
@@ -462,12 +460,10 @@ class TourService
                         $time = Carbon::parse($expense['transport_time'])->format('H:i');
                         TourService::sendOneMessage([
                             'driver_id' => $expense['transport_driver_id'],
-                            'from_city' => $day['city_id'],
                             'to_city' => $expense['to_city_id'],
                             'transport_place' => $expense['transport_place'],
                             'date' => "{$date} {$time}",
                             'transport_type' => $tourData['transport_type'],
-                            'comfort_level' => $tourData['transport_comfort_level'],
                             'price' => $expense['price'],
                             'comment' => $expense['comment'],
                         ]);
@@ -481,12 +477,10 @@ class TourService
     {
         TourService::sendOneMessage([
             'driver_id' => $data['driver_id'],
-            'from_city' => $data['from_city_id'],
             'to_city' => $data['to_city_id'],
             'transport_place' => $data['place_of_submission'],
             'date' => $data['date_time'],
             'transport_type' => $data['transport_type'],
-            'comfort_level' => $data['transport_comfort_level'],
             'price' => $data['price'],
             'comment' => $data['comment'],
         ]);
@@ -494,13 +488,11 @@ class TourService
 
     public static function sendOneMessage($data): void
     {
-        $fromCity = $data['from_city'] ? City::find($data['from_city']) : null;
         $toCity = $data['to_city'] ? City::find($data['to_city']) : null;
         $place = $data['transport_place'] ?? '-';
         $comment = $data['comment'] ?? '-';
         $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
         $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
-        $comfortLevel = $data['comfort_level'] ? self::getEnum(TransportComfortLevel::class, $data['comfort_level']) : '-';
         $price = $data['price'] ?? '';
 
         /** @var Driver $driver */
@@ -510,10 +502,9 @@ class TourService
                 $driver->chat_id,
                 <<<HTML
 <b>Date and time:</b> {$date}
-<b>From city:</b> {$fromCity?->name}
-<b>To city:</b> {$toCity?->name}
+<b>City:</b> {$toCity?->name}
 <b>Pick up location:</b> {$place}
-<b>Transport:</b> {$transportType} {$comfortLevel}
+<b>Transport:</b> {$transportType}
 <b>Price:</b> {$price}
 <b>Comment:</b> {$comment}
 HTML,

@@ -21,3 +21,5 @@ yarn-error.log
 backups
 
 build.sh
+
+storage/debugbar
