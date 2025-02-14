@@ -296,6 +296,7 @@ class TourTpsResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
+                                        ->required()
                                         ->label('Status'),
                                     Components\TimePicker::make('hotel_checkin_time')
                                         ->seconds(false)
@@ -326,6 +327,7 @@ class TourTpsResource extends Resource
                                         ->searchable()
                                         ->preload()
                                         ->options(ExpenseStatus::class)
+                                        ->required()
                                         ->label('Status'),
 
                                     Components\TextInput::make('guide_price')
@@ -370,6 +372,7 @@ class TourTpsResource extends Resource
                                         ->searchable()
                                         ->preload()
                                         ->options(ExpenseStatus::class)
+                                        ->required()
                                         ->label('Status'),
 
                                     Components\TextInput::make('price')
@@ -470,6 +473,7 @@ class TourTpsResource extends Resource
 
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
+                                    ->required()
                                     ->native(false)
                                     ->searchable()
                                     ->preload()
@@ -522,6 +526,7 @@ class TourTpsResource extends Resource
                                         ->label('Arrival time'),
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
+                                        ->required()
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -548,6 +553,7 @@ class TourTpsResource extends Resource
                                         ->required(),
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
+                                        ->required()
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -585,6 +591,7 @@ class TourTpsResource extends Resource
 
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
+                                        ->required()
                                         ->native(false)
                                         ->searchable()
                                         ->preload()

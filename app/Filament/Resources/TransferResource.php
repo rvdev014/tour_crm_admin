@@ -139,6 +139,8 @@ class TransferResource extends Resource
                         ->label('Pick up Location'),
 
                     Forms\Components\DateTimePicker::make('date_time')
+                        ->displayFormat('d.m.Y H:i')
+                        ->minDate(now())
                         ->native(false)
                         ->seconds(false),
 
