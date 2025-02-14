@@ -16,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class DriverResource extends Resource
 {
@@ -32,9 +33,13 @@ class DriverResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('phone')
+                /*Forms\Components\TextInput::make('phone')
                     ->tel()
-                    ->maxLength(255),
+                    ->maxLength(255),*/
+                PhoneInput::make('phone')
+                    ->strictMode()
+                    ->onlyCountries(['UZ'])
+                    ->defaultCountry('UZ'),
 //                Forms\Components\TextInput::make('car_number')
 //                    ->maxLength(255),
 //                Forms\Components\TextInput::make('car_model')

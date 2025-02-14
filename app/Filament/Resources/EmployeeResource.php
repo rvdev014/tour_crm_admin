@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EmployeeResource extends Resource
 {
@@ -36,9 +37,13 @@ class EmployeeResource extends Resource
                     ->preload()
                     ->required()
                     ->options(EmployeeType::class),
-                Forms\Components\TextInput::make('phone')
+                /*Forms\Components\TextInput::make('phone')
                     ->tel()
-                    ->maxLength(255),
+                    ->maxLength(255),*/
+                PhoneInput::make('phone')
+                    ->strictMode()
+                    ->onlyCountries(['UZ'])
+                    ->defaultCountry('UZ'),
             ]);
     }
 

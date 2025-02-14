@@ -29,6 +29,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class TourCorporateResource extends Resource
 {
@@ -91,7 +92,11 @@ class TourCorporateResource extends Resource
 
                 Components\Grid::make(3)->schema([
                     Components\TextInput::make('guide_name'),
-                    Components\TextInput::make('guide_phone'),
+                    PhoneInput::make('guide_phone')
+                        ->strictMode()
+                        ->onlyCountries(['UZ'])
+                        ->defaultCountry('UZ'),
+//                    Components\TextInput::make('guide_phone'),
                     Components\TextInput::make('guide_price')->numeric(),
                 ])->visible(fn($get) => $get('guide_type') == GuideType::Escort->value)
             ]),
@@ -209,8 +214,12 @@ class TourCorporateResource extends Resource
                         Components\Grid::make()->schema([
                             Components\TextInput::make('guide_name')
                                 ->label('Guide name'),
-                            Components\TextInput::make('guide_phone')
-                                ->label('Guide phone'),
+                            /*Components\TextInput::make('guide_phone')
+                                ->label('Guide phone'),*/
+                            PhoneInput::make('guide_phone')
+                                ->strictMode()
+                                ->onlyCountries(['UZ'])
+                                ->defaultCountry('UZ'),
 
                             Components\Select::make('status')
                                 ->native(false)
