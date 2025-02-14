@@ -17,6 +17,11 @@ class CreateTransfer extends CreateRecord
 {
     protected static string $resource = TransferResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function fillForm(): void
     {
         $this->callHook('beforeFill');

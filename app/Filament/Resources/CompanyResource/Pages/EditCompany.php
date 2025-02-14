@@ -11,6 +11,11 @@ class EditCompany extends EditRecord
 {
     protected static string $resource = CompanyResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         if ($data['type'] == CompanyType::TPS->value) {

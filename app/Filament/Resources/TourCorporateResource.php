@@ -156,6 +156,7 @@ class TourCorporateResource extends Resource
                             ->reactive(),
                         Components\DatePicker::make('date')
                             ->displayFormat('d.m.Y')
+                            ->minDate(now())
                             ->native(false)
                             ->required()
                             ->reactive(),

@@ -88,6 +88,7 @@ class TourTpsResource extends Resource
                     ->label('Arrival time')
                     ->native(false)
                     ->seconds(false)
+                    ->minDate(now())
                     ->afterStateUpdated(function($get, $set) {
                         $startDate = $get('start_date');
                         $firstDay = $get('days') ? Arr::first($get('days')) : null;
@@ -95,6 +96,10 @@ class TourTpsResource extends Resource
 
                         if (empty($firstDay['id'])) {
                             $set("days.$firstDayUuid.date", $startDate);
+                        }
+
+                        if (Carbon::parse($get('end_date')) < Carbon::parse($startDate)) {
+                            $set('end_date', null);
                         }
                     })
                     ->reactive()
@@ -104,6 +109,8 @@ class TourTpsResource extends Resource
                     ->label('Departure time')
                     ->native(false)
                     ->seconds(false)
+                    ->minDate(fn ($get) => Carbon::parse($get('start_date'))->addDay())
+                    ->reactive()
                     ->required(),
                 Components\TextInput::make('pax')
                     ->required()
@@ -191,6 +198,7 @@ class TourTpsResource extends Resource
                     Components\Grid::make()->schema([
                         Components\DatePicker::make('date')
                             ->displayFormat('d.m.Y')
+                            ->minDate(now())
                             ->native(false)
                             ->required()
                             ->reactive(),

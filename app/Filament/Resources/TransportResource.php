@@ -57,6 +57,7 @@ class TransportResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('id', 'desc')
             ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('type')

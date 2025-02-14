@@ -241,8 +241,8 @@ class ExampleTest extends TestCase
 
     public function test_rotate_array(): void
     {
-        $nums = [1,2,3,4,5,6,7];
-        $exp = [5,6,7,1,2,3,4];
+        $nums = [1, 2, 3, 4, 5, 6, 7];
+        $exp = [5, 6, 7, 1, 2, 3, 4];
 
         // 1  2  3  4  5  6  7
         // 7  1  3  4  5  6  7 i = 0
@@ -264,9 +264,30 @@ class ExampleTest extends TestCase
             $next = $nums[$length - $i];
             $nums[$i + 1] = $temp;
             $nums[$i] = $next;
-
         }
 
         dd($nums);
+    }
+
+    public function test_jump_game_2(): void
+    {
+        $nums = [2, 3, 0, 1, 4];
+        //       0  1  2  3  4  5  6  7  8  9  10 11
+
+
+        $iterates = 0;
+
+        $jumps = 0;
+        $currentEnd = 0;
+        $farthest = 0;
+        for ($i = 0; $i < count($nums) - 1; $i++) {
+            $farthest = max($farthest, $i + $nums[$i]);
+            if ($i === $currentEnd) {
+                $jumps++;
+                $currentEnd = $farthest;
+            }
+        }
+
+        dd("Steps: $jumps");
     }
 }

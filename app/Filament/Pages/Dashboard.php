@@ -6,12 +6,12 @@ use App\Filament\Widgets\DashboardStats;
 use App\Filament\Widgets\ToursCorporateChart;
 use App\Filament\Widgets\ToursTpsChart;
 use App\Models\Country;
-use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
+use Illuminate\Support\Carbon;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
@@ -41,10 +41,18 @@ class Dashboard extends \Filament\Pages\Dashboard
                 DatePicker::make('start_date')
                     ->formatStateUsing(fn() => $startMonth->format('d-m-Y'))
                     ->displayFormat('d.m.Y')
+                    ->afterStateUpdated(function($get, $set) {
+                        if (Carbon::parse($get('end_date')) < Carbon::parse($get('start_date'))) {
+                            $set('end_date', null);
+                        }
+                    })
+                    ->reactive()
                     ->native(false),
                 DatePicker::make('end_date')
                     ->formatStateUsing(fn() => $endMonth->format('d-m-Y'))
                     ->displayFormat('d.m.Y')
+                    ->minDate(fn ($get) => $get('start_date'))
+                    ->reactive()
                     ->native(false),
                 Select::make('country')
                     ->native(false)

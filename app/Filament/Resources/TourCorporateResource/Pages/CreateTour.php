@@ -36,4 +36,9 @@ class CreateTour extends CreateRecord
     {
         ExpenseService::createTourRoomTypes($this->record->id, $this->form->getRawState());
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

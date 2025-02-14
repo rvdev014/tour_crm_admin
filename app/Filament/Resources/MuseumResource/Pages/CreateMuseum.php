@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateMuseum extends CreateRecord
 {
     protected static string $resource = MuseumResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

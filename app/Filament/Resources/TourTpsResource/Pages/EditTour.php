@@ -57,4 +57,9 @@ class EditTour extends EditRecord
                 ->icon('heroicon-o-trash'),
         ];
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

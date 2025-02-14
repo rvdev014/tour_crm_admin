@@ -10,6 +10,12 @@ class EditMuseum extends EditRecord
 {
     protected static string $resource = MuseumResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+
     protected function getHeaderActions(): array
     {
         return [
