@@ -363,8 +363,7 @@ class TransferResource extends Resource
                     ->formatStateUsing(function ($state) {
                         return <<<HTML
 <div style="text-align: center">
-    <p>{$state->format('d.m.Y')}</p>
-    <p>{$state->format('H:i')}</p>
+    <p>{$state->format('d.m.Y')} {$state->format('H:i')}</p>
 </div>
 HTML;
                     })
