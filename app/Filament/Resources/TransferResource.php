@@ -154,25 +154,6 @@ class TransferResource extends Resource
             ]);
     }
 
-    protected function getTableRecordClassUsing(): ?Closure
-    {
-        return function (Transfer $record) {
-            return match ($record->status) {
-                'draft' => 'opacity-30',
-                'reviewing' => [
-                    'border-l-solid',
-                    'border-l-2',
-                    'border-l-orange-600',
-                    'dark:border-l-orange-300' => config('filament.dark_mode'),
-                    'opacity-30',
-                ],
-                'published' => 'border-0 border-l-solid border-l-2 border-l-orange-400',
-                default => null,
-            };
-            return null;
-        };
-    }
-
     public static function table(Table $table): Table
     {
         return $table
