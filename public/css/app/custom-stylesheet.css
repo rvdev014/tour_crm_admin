@@ -182,3 +182,7 @@
 .fi-input-wrp-suffix .fi-icon-btn-icon {
     color: #f59e0b !important;
 }
+
+.fi-main {
+    max-width: 100%!important;
+}
