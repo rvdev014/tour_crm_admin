@@ -24,6 +24,13 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
 
 COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
+ARG uid
+ARG gid
+
+RUN useradd -G www-data,root -u $uid -d /home/developer developer
+RUN mkdir -p /home/developer/.composer && \
+    chown -R developer:developer /home/developer
+
 WORKDIR /app
 
-EXPOSE 9000
+USER developer
