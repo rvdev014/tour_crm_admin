@@ -7,6 +7,7 @@ use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
 use App\Filament\Resources\TransferResource\Pages;
 use App\Filament\Resources\TransferResource\RelationManagers;
+use App\Models\Company;
 use App\Models\Transfer;
 use App\Services\TourService;
 use Closure;
@@ -79,8 +80,8 @@ class TransferResource extends Resource
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\TextInput::make('group_number')
-                        ->label('Group number'),
+//                    Forms\Components\TextInput::make('group_number')
+//                        ->label('Group number'),
 
                     Forms\Components\TextInput::make('pax')
                         ->label('Pax')
@@ -196,13 +197,19 @@ class TransferResource extends Resource
                 Tables\Filters\Filter::make('today')
                     ->columnSpanFull()
                     ->form([
-                        Components\Grid::make(5)->schema([
+                        Components\Grid::make(6)->schema([
                             Components\Checkbox::make('today')
                                 ->label('Today')
                                 ->default(false),
                             Components\Checkbox::make('tomorrow')
                                 ->label('Tomorrow')
                                 ->default(false),
+                            Components\Select::make('company_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->label('Company')
+                                ->relationship('company', 'name'),
                             Components\Select::make('status')
                                 ->native(false)
                                 ->searchable()
@@ -231,6 +238,9 @@ class TransferResource extends Resource
                         }
                         if ($data['status']) {
                             $query = $query->where('status', $data['status']);
+                        }
+                        if ($data['company_id']) {
+                            $query = $query->where('company_id', $data['company_id']);
                         }
                         if ($data['date_from']) {
                             $query = $query->whereDate('date_time', '>=', $data['date_from']);
@@ -263,6 +273,11 @@ class TransferResource extends Resource
                             $query = $query->where('status', $data['status']);
                             $indicators['status'] = 'Status: ' . ExpenseStatus::from($data['status'])->getLabel(
                                 ) . " ({$query->count()})";
+                        }
+                        if ($data['company_id']) {
+                            $query = $query->where('company_id', $data['company_id']);
+                            $companyName = Company::query()->find($data['company_id'])?->name;
+                            $indicators['company_id'] = $companyName . " ({$query->count()})";
                         }
                         if ($data['date_from']) {
                             $indicators['date_from'] = 'Order from ' . Carbon::parse(
@@ -382,7 +397,7 @@ HTML;
 
 //                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
 
-                Tables\Columns\TextColumn::make('group_number')->sortable(),
+//                Tables\Columns\TextColumn::make('group_number')->sortable(),
 
                 Tables\Columns\TextColumn::make('price')
                     ->money()
