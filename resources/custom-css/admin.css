@@ -2,8 +2,15 @@
     background: #1e4e6e;
 }
 
-.fi-sidebar-item-label, .fi-sidebar-group-label, .fi-sidebar-item-icon, .fi-icon-btn-icon {
+.fi-sidebar-nav .fi-sidebar-item-label,
+.fi-sidebar-group-label, .fi-sidebar-item-icon,
+.fi-sidebar-nav .fi-icon-btn-icon,
+.fi-fo-repeater-item .fi-icon-btn-icon {
     color: #fff !important;
+}
+
+.fi-fo-repeater-item.simple .fi-icon-btn-icon {
+    color: rgba(var(--c-500),var(--tw-text-opacity,1)) !important;
 }
 
 
@@ -63,3 +70,119 @@
     transition: 0.2s ease-in-out;
 }
 
+.custom-table-wrapper {
+    width: 100%;
+    border: 1px solid rgba(var(--gray-200), 1);
+    border-radius: 10px;
+}
+.dark .custom-table-wrapper {
+    width: 100%;
+    border: 1px solid hsla(0,0%,100%,.05);
+    border-radius: 10px;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-width: 0;
+}
+
+.custom-table th {
+    border-bottom: 1px solid rgba(var(--gray-200), 1);
+}
+.dark .custom-table th {
+    border-bottom: 1px solid hsla(0,0%,100%,.05);
+}
+.custom-table td {
+    border-top: 1px solid rgba(var(--gray-200), 1);
+}
+.dark .custom-table td {
+    border-top: 1px solid hsla(0,0%,100%,.05);
+}
+
+
+.custom-table td,
+.custom-table th {
+    border-collapse: collapse;
+    font-size: .875rem;
+    text-align: center;
+    padding: 10px;
+}
+
+.custom-table th {
+    background-color: rgba(var(--gray-200), 0.3);
+}
+.custom-table tr:nth-child(even) {
+    background-color: rgba(var(--gray-200), 0.3);
+}
+.custom-table tr:hover {
+    transition: 0.2s ease;
+    background-color: rgba(var(--gray-200), 0.3);
+}
+
+.dark .custom-table th {
+    background-color: hsl(240deg 4% 14.71%);
+}
+.dark .custom-table tr:nth-child(even) {
+    background-color: hsl(240deg 4% 14.71%);
+}
+.dark .custom-table tr:hover {
+    transition: 0.2s ease;
+    background-color: hsl(240deg 4% 14.71%);
+}
+
+.custom-table .flex-td {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.custom-table .flex-td p {
+    margin-bottom: 5px;
+}
+
+
+.color-green {
+    background: #72e172!important;
+}
+.color-red {
+    background: #ff7b7b!important;
+}
+.color-light-orange {
+    background: #ffcc80!important;
+}
+
+
+@media  (min-width: 768px) {
+    /* make the header sticky*/
+    .fi-ta-table thead {
+        position: sticky !important;
+        top: 0;
+        z-index: 9;
+    }
+
+    /* opacity does not looks good in dark mode, so insert the corresponding bg color here */
+    .fi-ta-table :is(:where(.dark) .dark\:bg-white\/5){
+        background-color: rgb(36 36 39);
+    }
+
+    /* sset the height of content (table) */
+    .fi-ta-content {
+        height: calc(100vh - 20rem);
+        position: relative;
+    }
+
+    /* fix filters and columns modal */
+    .fi-dropdown-panel{
+        z-index: 40 !important;
+    }
+}
+/* Table sticky header end */
+
+.fi-input-wrp-suffix .fi-icon-btn-icon {
+    color: #f59e0b !important;
+}
+
+.fi-main {
+    max-width: 100%!important;
+}
