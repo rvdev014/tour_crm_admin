@@ -435,11 +435,13 @@ class TourService
 
     public static function sendTelegram($tourData, $isCorporate = false): void
     {
+        $transportsData = [];
+
         if ($isCorporate) {
             $expenses = $tourData['expenses'] ?? [];
             foreach ($expenses as $expense) {
                 if ($expense['type'] == ExpenseType::Transport->value) {
-                    TourService::sendOneMessage([
+                    $transportsData[$expense['transport_driver_id']][] = [
                         'driver_id' => $expense['transport_driver_id'],
                         'to_city' => $expense['to_city_id'],
                         'transport_place' => $expense['transport_place'],
@@ -447,7 +449,7 @@ class TourService
                         'transport_type' => $tourData['transport_type'],
                         'price' => $expense['price'],
                         'comment' => $expense['comment'],
-                    ]);
+                    ];
                 }
             }
         } else {
@@ -458,7 +460,7 @@ class TourService
                     if ($expense['type'] == ExpenseType::Transport->value) {
                         $date = Carbon::parse($day['date'])->format('Y-m-d');
                         $time = Carbon::parse($expense['transport_time'])->format('H:i');
-                        TourService::sendOneMessage([
+                        $transportsData[$expense['transport_driver_id']][] = [
                             'driver_id' => $expense['transport_driver_id'],
                             'to_city' => $expense['to_city_id'],
                             'transport_place' => $expense['transport_place'],
@@ -466,8 +468,23 @@ class TourService
                             'transport_type' => $tourData['transport_type'],
                             'price' => $expense['price'],
                             'comment' => $expense['comment'],
-                        ]);
+                        ];
                     }
+                }
+            }
+        }
+
+        if (!empty($transportsData)) {
+            foreach ($transportsData as $driverId => $transportItems) {
+                $driver = Driver::find($driverId);
+                if ($driver?->chat_id) {
+
+                    $message = "Tour {$tourData['group_number']}\n";
+                    foreach ($transportItems as $transportItem) {
+                        $message .= TourService::getOneMessage($transportItem);
+                    }
+
+                    TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
                 }
             }
         }
@@ -488,6 +505,19 @@ class TourService
 
     public static function sendOneMessage($data): void
     {
+        /** @var Driver $driver */
+        $driver = Driver::query()->find($data['driver_id'] ?? null);
+        if ($driver?->chat_id) {
+            TelegramService::sendMessage(
+                $driver->chat_id,
+                TourService::getOneMessage($data),
+                ['parse_mode' => 'HTML']
+            );
+        }
+    }
+
+    public static function getOneMessage($data): string
+    {
         $toCity = $data['to_city'] ? City::find($data['to_city']) : null;
         $place = $data['transport_place'] ?? '-';
         $comment = $data['comment'] ?? '-';
@@ -495,22 +525,16 @@ class TourService
         $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
         $price = $data['price'] ?? '';
 
-        /** @var Driver $driver */
-        $driver = Driver::query()->find($data['driver_id'] ?? null);
-        if ($driver?->chat_id) {
-            TelegramService::sendMessage(
-                $driver->chat_id,
-                <<<HTML
+        return <<<HTML
+
 <b>Date and time:</b> {$date}
 <b>City:</b> {$toCity?->name}
 <b>Pick up location:</b> {$place}
 <b>Transport:</b> {$transportType}
 <b>Price:</b> {$price}
 <b>Comment:</b> {$comment}
-HTML,
-                ['parse_mode' => 'HTML']
-            );
-        }
+
+HTML;
     }
 
     public static function getEnum($enumClass, $value): string

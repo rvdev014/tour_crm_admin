@@ -28,7 +28,7 @@ enum ExpenseStatus:int implements HasLabel, HasColor
     {
         return match ($this) {
             self::New       => 'info',
-            self::Confirmed => 'warning',
+            self::Confirmed => 'gray',
 //            self::Waiting   => 'warning',
             self::Rejected  => 'danger',
             self::Done      => 'success',
