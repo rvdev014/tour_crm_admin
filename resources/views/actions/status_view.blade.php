@@ -35,7 +35,7 @@
                     /** @var TourDayExpense $guide */
                     $guide = $day->expenses()->where('type', ExpenseType::Guide)->first();
                     $guideName = $guide?->guide_name;
-                    $guideStatus = $guide?->status?->getLabel();
+                    $guideStatus = $guide?->status;
                 }
 
                 /** @var TourDayExpense $plane */
