@@ -441,15 +441,18 @@ class TourService
             $expenses = $tourData['expenses'] ?? [];
             foreach ($expenses as $expense) {
                 if ($expense['type'] == ExpenseType::Transport->value) {
-                    $transportsData[$expense['transport_driver_id']][] = [
-                        'driver_id' => $expense['transport_driver_id'],
-                        'to_city' => $expense['to_city_id'],
-                        'transport_place' => $expense['transport_place'],
-                        'date' => $expense['date'],
-                        'transport_type' => $tourData['transport_type'],
-                        'price' => $expense['price'],
-                        'comment' => $expense['comment'],
-                    ];
+                    $driverId = $expense['transport_driver_id'];
+                    if (!empty($driverId)) {
+                        $transportsData[$driverId][] = [
+                            'driver_id' => $expense['transport_driver_id'],
+                            'to_city' => $expense['to_city_id'],
+                            'transport_place' => $expense['transport_place'],
+                            'date' => $expense['date'],
+                            'transport_type' => $tourData['transport_type'],
+                            'price' => $expense['price'],
+                            'comment' => $expense['comment'],
+                        ];
+                    }
                 }
             }
         } else {
@@ -460,15 +463,18 @@ class TourService
                     if ($expense['type'] == ExpenseType::Transport->value) {
                         $date = Carbon::parse($day['date'])->format('Y-m-d');
                         $time = Carbon::parse($expense['transport_time'])->format('H:i');
-                        $transportsData[$expense['transport_driver_id']][] = [
-                            'driver_id' => $expense['transport_driver_id'],
-                            'to_city' => $expense['to_city_id'],
-                            'transport_place' => $expense['transport_place'],
-                            'date' => "{$date} {$time}",
-                            'transport_type' => $tourData['transport_type'],
-                            'price' => $expense['price'],
-                            'comment' => $expense['comment'],
-                        ];
+                        $driverId = $expense['transport_driver_id'];
+                        if (!empty($driverId)) {
+                            $transportsData[$driverId][] = [
+                                'driver_id' => $expense['transport_driver_id'],
+                                'to_city' => $expense['to_city_id'],
+                                'transport_place' => $expense['transport_place'],
+                                'date' => "{$date} {$time}",
+                                'transport_type' => $tourData['transport_type'],
+                                'price' => $expense['price'],
+                                'comment' => $expense['comment'],
+                            ];
+                        }
                     }
                 }
             }
