@@ -14,15 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function(Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function() {
+    Route::get('/user', fn(Request $request) => $request->user());
+
+    Route::get('/hotels', [\App\Http\Controllers\Api\ManualController::class, 'getHotels']);
+    Route::get('/countries', [\App\Http\Controllers\Api\ManualController::class, 'getCountries']);
+    Route::get('/cities', [\App\Http\Controllers\Api\ManualController::class, 'getCities']);
 });
 
-Route::get('export/{tour}', [\App\Http\Controllers\ExportController::class, 'export'])->name('export');
-Route::get('export-client/{tour}', [\App\Http\Controllers\ExportController::class, 'exportClient'])->name(
-    'export-client'
-);
-Route::get('export-museum/{tour}', [\App\Http\Controllers\ExportController::class, 'exportMuseum'])->name(
-    'export-museum'
-);
-Route::get('export-hotel/{tour}', [\App\Http\Controllers\ExportController::class, 'exportHotelsZip'])->name('export-hotel');
+Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login'])->name('login');

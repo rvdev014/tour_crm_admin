@@ -14,7 +14,7 @@
         "filament/filament": "^3.2",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
-        "laravel/sanctum": "^3.3",
+        "laravel/sanctum": "*",
         "laravel/tinker": "^2.8",
         "phpoffice/phpspreadsheet": "^3.8",
         "phpoffice/phpword": "^1.3",

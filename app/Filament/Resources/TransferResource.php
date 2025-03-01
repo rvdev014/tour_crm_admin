@@ -3,21 +3,18 @@
 namespace App\Filament\Resources;
 
 use App\Enums\ExpenseStatus;
-use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
 use App\Filament\Resources\TransferResource\Pages;
 use App\Filament\Resources\TransferResource\RelationManagers;
 use App\Models\Company;
 use App\Models\Transfer;
 use App\Services\TourService;
-use Closure;
-use Filament\Forms\Components;
 use Filament\Forms;
+use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -160,7 +157,7 @@ class TransferResource extends Resource
             ->striped()
             ->modifyQueryUsing(fn($query) => $query->with(['toCity', 'company']))
             ->filtersFormColumns(3)
-            ->recordClasses(function($record) {
+            ->recordClasses(function ($record) {
                 if ($record->status == ExpenseStatus::Done) {
                     return ' color-green';
                 }
