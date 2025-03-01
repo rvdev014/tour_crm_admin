@@ -17,16 +17,16 @@ class HotelMail extends Mailable
 
     protected $date;
     protected $expense;
-    protected $tourData;
+    protected $totalPax;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($date, $expense, $tourData)
+    public function __construct($date, $expense, $totalPax)
     {
         $this->date = $date;
         $this->expense = $expense;
-        $this->tourData = $tourData;
+        $this->totalPax = $totalPax;
     }
 
     /**
@@ -44,19 +44,12 @@ class HotelMail extends Mailable
      */
     public function content(): Content
     {
-        $passengers = Arr::get($this->tourData, 'passengers', []);
-        if (!empty($passengers)) {
-            $totalPax = count($passengers);
-        } else {
-            $totalPax = $this->tourData['pax'] + ($this->tourData['leader_pax'] ?? 0);
-        }
-
         return new Content(
             view: 'mails.hotel',
             with: [
                 'date' => Carbon::parse($this->date)->format('d-m-Y'),
                 'expense' => $this->expense,
-                'totalPax' => $totalPax,
+                'totalPax' => $this->totalPax,
             ],
         );
     }

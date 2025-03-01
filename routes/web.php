@@ -26,4 +26,5 @@ Route::get('export-museum/{tour}', [\App\Http\Controllers\ExportController::clas
     'export-museum'
 );
 Route::get('export-hotel/{tour}', [\App\Http\Controllers\ExportController::class, 'exportHotelsZip'])->name('export-hotel');
+Route::get('export-all/{tour}', [\App\Http\Controllers\ExportController::class, 'exportAllZip'])->name('export-all');
 

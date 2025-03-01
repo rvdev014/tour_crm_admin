@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property GuideType $guide_type
  * @property string $guide_name
  * @property string $guide_phone
+ * @property string $package_name
  * @property int $guide_price
  * @property TransportType $transport_type
  * @property TransportComfortLevel $transport_comfort_level
@@ -80,6 +81,7 @@ class Tour extends Model
         'guide_name',
         'guide_phone',
         'guide_price',
+        'package_name',
 
         'transport_type',
         'transport_comfort_level',
@@ -161,9 +163,14 @@ class Tour extends Model
         return $this->hasMany(TourPassenger::class);
     }
 
+    public function isCorporate(): bool
+    {
+        return $this->type == TourType::Corporate;
+    }
+
     public function getTotalPax($withLeader = true): int
     {
-        if ($this->type == TourType::Corporate) {
+        if ($this->isCorporate()) {
             return $this->passengers()->count();
         }
 

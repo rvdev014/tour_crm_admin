@@ -17,8 +17,13 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ExportMuseumService
 {
-    public static function getExport(Tour $tour): Spreadsheet
+    public static function getExport(Tour $tour): ?Spreadsheet
     {
+        $museumsData = self::getMuseums($tour);
+        if ($museumsData->isEmpty()) {
+            return null;
+        }
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -29,7 +34,6 @@ class ExportMuseumService
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
 
         $tableStartRow = 0;
-        $museumsData = self::getMuseums($tour);
         foreach ($museumsData as $museumData) {
             $sheet = self::genTable($sheet, $museumData, $tableStartRow + 1, 'J');
             $tableStartRow = $sheet->getHighestRow();

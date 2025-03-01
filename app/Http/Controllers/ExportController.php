@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TourType;
 use App\Models\Tour;
 use App\Services\ExportClientService;
-use App\Services\ExportMuseumService;
 use App\Services\ExportHotelService;
+use App\Services\ExportMuseumService;
 use App\Services\ExportService;
-use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpWord\Exception\CopyFileException;
 use PhpOffice\PhpWord\Exception\CreateTemporaryFileException;
-use PhpOffice\PhpWord\TemplateProcessor;
 use ZipArchive;
 
 class ExportController extends Controller
@@ -64,11 +61,7 @@ class ExportController extends Controller
     {
         $tempDir = $this->getTempDir("hotel_reports");
 
-        if ($tour->type === TourType::Corporate) {
-            $hotelsData = ExportHotelService::getHotelsDataCorporate($tour);
-        } else {
-            $hotelsData = ExportHotelService::getHotelsData($tour);
-        }
+        $hotelsData = ExportHotelService::getHotelsData($tour);
         foreach ($hotelsData as $hotelItem) {
             $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
             $fileName = $tempDir . '/Hotel_' . $hotelName . '.docx';
@@ -104,23 +97,68 @@ class ExportController extends Controller
      * @throws CopyFileException
      * @throws CreateTemporaryFileException
      */
-    public function exportHotelSingle(Tour $tour): void
+    public function exportAllZip(Tour $tour): void
     {
+        $tempDir = $this->getTempDir("all_reports");
+
         $hotelsData = ExportHotelService::getHotelsData($tour);
-        $hotelsData = $hotelsData->toArray();
-        $hotelItem = reset($hotelsData);
-        $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
-        $fileName = 'Hotel_' . $hotelName . '.docx';
+        foreach ($hotelsData as $hotelItem) {
+            $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
+            $fileName = $tempDir . '/hotels/' . $hotelName . '.docx';
 
-        $templateProcessor = ExportHotelService::getReplacedTemplate($hotelItem);
+            $templateProcessor = ExportHotelService::getReplacedTemplate($hotelItem);
+            $templateProcessor->saveAs($fileName);
+        }
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header('Content-Disposition: attachment; filename="' . $fileName . '"');
-        header('Cache-Control: max-age=0');
+        $zip = new ZipArchive();
+        $zipFilename = "Tour_" . $tour->group_number . "_full.zip";
+        $zipPath = $tempDir . "/$zipFilename";
 
-        $templateProcessor->saveAs('php://output');
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            // Main report
+            $spreadsheet = ExportService::getExport($tour);
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save($filePath = $tempDir . '/Tour_' . $tour->group_number . '_main.xlsx');
+            $zip->addFile($filePath, 'Main_report.xlsx');
+
+            // Client report
+            $spreadsheet = ExportClientService::getExport($tour);
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save($filePath = $tempDir . '/Tour_' . $tour->group_number . '_client.xlsx');
+            $zip->addFile($filePath, 'Client_report.xlsx');
+
+            // Museum report
+            $spreadsheet = ExportMuseumService::getExport($tour);
+            if ($spreadsheet) {
+                $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+                $writer->save($filePath = $tempDir . '/Tour_' . $tour->group_number . '_museum.xlsx');
+                $zip->addFile($filePath, 'Museum_report.xlsx');
+            }
+
+            // Add Hotels folder
+            $zip->addEmptyDir('Hotels');
+            foreach (glob($tempDir . "/hotels/*.docx") as $file) {
+                $zip->addFile($file, 'Hotels/' . basename($file));
+            }
+
+            $zip->close();
+        } else {
+            die('Failed to create ZIP');
+        }
+
+        // Output ZIP for download
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $zipFilename . '"');
+        header('Content-Length: ' . filesize($zipPath));
+        readfile($zipPath);
+
+        // Clean up temporary files
+        array_map('unlink', glob($tempDir . '/*')); // Delete files
+        rmdir($tempDir); // Delete directory
+
+        // redirect to back
+        redirect()->back();
     }
-
 
     protected function getTempDir(string $dirName): string
     {

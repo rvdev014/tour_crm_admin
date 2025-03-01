@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources\TourTpsResource\Pages;
 
-use App\Enums\ExpenseStatus;
-use App\Enums\TourStatus;
 use App\Filament\Resources\TourTpsResource;
-use App\Models\TourRoomType;
+use App\Filament\Resources\TourTpsResource\Actions\SendMailAction;
+use App\Models\Tour;
 use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Actions;
@@ -27,7 +26,7 @@ class EditTour extends EditRecord
 
         ExpenseService::updateTourRoomTypes($this->record->id, $data);
 
-        TourService::sendMails($formState, $formState['days'] ?? []);
+//        TourService::sendMails($formState, $formState['days'] ?? []);
         TourService::sendTelegram($formState);
 
         return $data;
@@ -35,7 +34,25 @@ class EditTour extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        /** @var Tour $tour */
+        $tour = $this->record;
         return [
+            SendMailAction::make('mail_rest')
+                ->tour($tour)
+                ->type('restaurants')
+                ->label('Mail Restaurants'),
+            SendMailAction::make('mail_hotel')
+                ->tour($tour)
+                ->type('hotels')
+                ->label('Mail Hotels'),
+            Actions\Action::make('export_all')
+                ->label('Export All')
+                ->icon('heroicon-o-document-text')
+                ->url(route('export-all', $this->record)),
+            Actions\DeleteAction::make()
+                ->label('Delete')
+                ->icon('heroicon-o-trash'),
+            /*
             Actions\Action::make('export_hotel')
                 ->label('Hotels')
                 ->icon('heroicon-o-document-text')
@@ -51,10 +68,7 @@ class EditTour extends EditRecord
             Actions\Action::make('export')
                 ->label('Report')
                 ->icon('heroicon-o-document-text')
-                ->url(route('export', $this->record)),
-            Actions\DeleteAction::make()
-                ->label('Delete')
-                ->icon('heroicon-o-trash'),
+                ->url(route('export', $this->record)),*/
         ];
     }
 

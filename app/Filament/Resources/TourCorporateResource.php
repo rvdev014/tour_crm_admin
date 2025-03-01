@@ -244,7 +244,6 @@ class TourCorporateResource extends Resource
                     Components\Fieldset::make('Transport info')->schema([
 
                         Components\Grid::make(3)->schema([
-//                            Components\TextInput::make('transport_driver'),
                             Components\Select::make('transport_driver_id')
                                 ->options(TourService::getDrivers())
                                 ->native(false)

@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Enums\CompanyType;
+use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\TourType;
-use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
 use App\Mail\HotelMail;
 use App\Mail\RestaurantMail;
@@ -369,8 +369,12 @@ class TourService
         return Company::query()->select('name', 'id')->where('type', $type)->get()->pluck('name', 'id');
     }
 
-    public static function processExpense(array $expense, string $date, array &$hotelsData, array &$restaurantsData): void
-    {
+    public static function processExpense(
+        array $expense,
+        string $date,
+        array &$hotelsData,
+        array &$restaurantsData
+    ): void {
         switch ($expense['type']) {
             case ExpenseType::Hotel->value:
                 if ($hotel = Hotel::find($expense['hotel_id'])) {
@@ -393,11 +397,11 @@ class TourService
         }
     }
 
-    public static function sendMails($tourData, $data, $isCorporate = false): void
+    public static function sendMailssss($tourData, $data, $isCorporate = false): void
     {
-        if (app()->environment('local')) {
+        /*if (app()->environment('local')) {
             return;
-        }
+        }*/
 
         $hotelsData = [];
         $restaurantsData = [];
@@ -433,6 +437,38 @@ class TourService
         }
     }
 
+    public static function sendMailHotels($tourData, $data, $isCorporate = false): void
+    {
+        /*if (app()->environment('local')) {
+            return;
+        }*/
+
+        $hotelsData = [];
+        $restaurantsData = [];
+
+        if ($isCorporate) {
+            foreach ($data as $expense) {
+                if (isset($expense['date'])) {
+                    TourService::processExpense($expense, $expense['date'], $hotelsData, $restaurantsData);
+                }
+            }
+        } else {
+            foreach ($data as $day) {
+                foreach ($day['expenses'] as $expense) {
+                    TourService::processExpense($expense, $day['date'], $hotelsData, $restaurantsData);
+                }
+            }
+        }
+
+        foreach ($hotelsData as $date => $hotelItem) {
+            /** @var Hotel $hotel */
+            $hotel = $hotelItem['hotel'];
+            if (!empty($hotel->email)) {
+                Mail::to($hotel->email)->send(new HotelMail($date, $hotelItem['expense'], $tourData));
+            }
+        }
+    }
+
     public static function sendTelegram($tourData, $isCorporate = false): void
     {
         $transportsData = [];
@@ -441,17 +477,22 @@ class TourService
             $expenses = $tourData['expenses'] ?? [];
             foreach ($expenses as $expense) {
                 if ($expense['type'] == ExpenseType::Transport->value) {
-                    $driverId = $expense['transport_driver_id'];
-                    if (!empty($driverId)) {
-                        $transportsData[$driverId][] = [
-                            'driver_id' => $expense['transport_driver_id'],
-                            'to_city' => $expense['to_city_id'],
-                            'transport_place' => $expense['transport_place'],
-                            'date' => $expense['date'],
-                            'transport_type' => $tourData['transport_type'],
-                            'price' => $expense['price'],
-                            'comment' => $expense['comment'],
-                        ];
+                    if ($expense['status'] != ExpenseStatus::Confirmed->value) {
+                        continue;
+                    }
+                    $driverIds = $expense['transport_driver_ids'];
+                    if (!empty($driverIds)) {
+                        foreach ($driverIds as $driverId) {
+                            $transportsData[$driverId][] = [
+                                'driver_id' => $driverId,
+                                'to_city' => $expense['to_city_id'],
+                                'transport_place' => $expense['transport_place'],
+                                'date' => $expense['date'],
+                                'transport_type' => $tourData['transport_type'],
+                                'price' => $expense['price'],
+                                'comment' => $expense['comment'],
+                            ];
+                        }
                     }
                 }
             }
@@ -461,19 +502,24 @@ class TourService
                 $expenses = $day['expenses'] ?? [];
                 foreach ($expenses as $expense) {
                     if ($expense['type'] == ExpenseType::Transport->value) {
+                        if ($expense['status'] != ExpenseStatus::Confirmed->value) {
+                            continue;
+                        }
                         $date = Carbon::parse($day['date'])->format('Y-m-d');
                         $time = Carbon::parse($expense['transport_time'])->format('H:i');
-                        $driverId = $expense['transport_driver_id'];
-                        if (!empty($driverId)) {
-                            $transportsData[$driverId][] = [
-                                'driver_id' => $expense['transport_driver_id'],
-                                'to_city' => $expense['to_city_id'],
-                                'transport_place' => $expense['transport_place'],
-                                'date' => "{$date} {$time}",
-                                'transport_type' => $tourData['transport_type'],
-                                'price' => $expense['price'],
-                                'comment' => $expense['comment'],
-                            ];
+                        $driverIds = $expense['transport_driver_ids'];
+                        if (!empty($driverIds)) {
+                            foreach ($driverIds as $driverId) {
+                                $transportsData[$driverId][] = [
+                                    'driver_id' => $driverId,
+                                    'to_city' => $expense['to_city_id'],
+                                    'transport_place' => $expense['transport_place'],
+                                    'date' => "{$date} {$time}",
+                                    'transport_type' => $tourData['transport_type'],
+                                    'price' => $expense['price'],
+                                    'comment' => $expense['comment'],
+                                ];
+                            }
                         }
                     }
                 }
@@ -484,7 +530,6 @@ class TourService
             foreach ($transportsData as $driverId => $transportItems) {
                 $driver = Driver::find($driverId);
                 if ($driver?->chat_id) {
-
                     $message = "Tour {$tourData['group_number']}\n";
                     foreach ($transportItems as $transportItem) {
                         $message .= TourService::getOneMessage($transportItem);
@@ -498,15 +543,18 @@ class TourService
 
     public static function sendTelegramTransfer($data): void
     {
-        TourService::sendOneMessage([
-            'driver_id' => $data['driver_id'],
-            'to_city' => $data['to_city_id'],
-            'transport_place' => $data['place_of_submission'],
-            'date' => $data['date_time'],
-            'transport_type' => $data['transport_type'],
-            'price' => $data['price'],
-            'comment' => $data['comment'],
-        ]);
+        $driverIds = $data['driver_ids'] ?? [];
+        foreach ($driverIds as $driverId) {
+            TourService::sendOneMessage([
+                'driver_id' => $driverId,
+                'to_city' => $data['to_city_id'],
+                'transport_place' => $data['place_of_submission'],
+                'date' => $data['date_time'],
+                'transport_type' => $data['transport_type'],
+                'price' => $data['price'],
+                'comment' => $data['comment'],
+            ]);
+        }
     }
 
     public static function sendOneMessage($data): void

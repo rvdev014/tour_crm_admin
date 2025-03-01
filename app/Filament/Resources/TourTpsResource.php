@@ -88,7 +88,7 @@ class TourTpsResource extends Resource
                     ->label('Arrival time')
                     ->native(false)
                     ->seconds(false)
-                    ->minDate(now())
+                    ->minDate(fn ($record) => $record ? $record->start_date : now())
                     ->afterStateUpdated(function ($get, $set) {
                         $startDate = $get('start_date');
                         $firstDay = $get('days') ? Arr::first($get('days')) : null;
@@ -117,10 +117,13 @@ class TourTpsResource extends Resource
                     ->numeric(),
                 Components\TextInput::make('leader_pax')
                     ->numeric(),
-                Components\TextInput::make('price')
-                    ->numeric(),
-                Components\TextInput::make('single_supplement_price')
-                    ->numeric(),
+                Components\Grid::make(3)->schema([
+                    Components\TextInput::make('price')
+                        ->numeric(),
+                    Components\TextInput::make('single_supplement_price')
+                        ->numeric(),
+                    Components\TextInput::make('package_name'),
+                ]),
                 Components\Textarea::make('comment')
                     ->columnSpanFull(),
             ]),
@@ -202,7 +205,7 @@ class TourTpsResource extends Resource
                     Components\Grid::make()->schema([
                         Components\DatePicker::make('date')
                             ->displayFormat('d.m.Y')
-                            ->minDate(now())
+                            ->minDate(fn ($record) => $record ? $record->date : now())
                             ->native(false)
                             ->required()
                             ->reactive(),
@@ -313,14 +316,22 @@ class TourTpsResource extends Resource
                             // Guide
                             Components\Fieldset::make('Guide info')->schema([
                                 Components\Grid::make()->schema([
-                                    Components\TextInput::make('guide_name')
-                                        ->label('Guide name'),
-                                    /*Components\TextInput::make('guide_phone')
-                                        ->label('Guide phone'),*/
-                                    PhoneInput::make('guide_phone')
-                                        ->strictMode()
-                                        ->onlyCountries(['UZ'])
-                                        ->defaultCountry('UZ'),
+
+                                    Components\Repeater::make('guides')
+                                        ->extraAttributes(['class' => 'repeater-guides'])
+                                        ->columnSpanFull()
+                                        ->addActionAlignment('end')
+                                        ->relationship('guides')
+                                        ->schema([
+                                            Components\Grid::make()->schema([
+                                                Components\TextInput::make('name')
+                                                    ->label('Guide name'),
+                                                PhoneInput::make('phone')
+                                                    ->strictMode()
+                                                    ->onlyCountries(['UZ'])
+                                                    ->defaultCountry('UZ'),
+                                            ])
+                                        ]),
 
                                     Components\Select::make('status')
                                         ->native(false)
@@ -345,9 +356,9 @@ class TourTpsResource extends Resource
                             Components\Fieldset::make('Transport info')->schema([
 
                                 Components\Grid::make(3)->schema([
-//                                    Components\TextInput::make('transport_driver'),
-                                    Components\Select::make('transport_driver_id')
-                                        ->label('Driver')
+                                    Components\Select::make('transport_driver_ids')
+                                        ->label('Drivers')
+                                        ->multiple()
                                         ->options(TourService::getDrivers())
                                         ->native(false)
                                         ->searchable()
@@ -396,39 +407,13 @@ class TourTpsResource extends Resource
                                     ->preload()
                                     ->multiple()
                                     ->options(fn($get) => TourService::getMuseums($get('../../city_id')))
-//                                    ->createOptionForm([
-//                                        Components\Grid::make()->schema([
-//                                            Components\TextInput::make('name')
-//                                                ->required()
-//                                                ->maxLength(255),
-//                                            Components\TextInput::make('inn')
-//                                                ->required()
-//                                                ->maxLength(255),
-//                                            Components\Select::make('country_id')
-//                                                ->native(false)
-//                                                ->searchable()
-//                                                ->preload()
-//                                                ->relationship('country', 'name')
-//                                                ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
-//                                                ->reactive(),
-//                                            Components\Select::make('city_id')
-//                                                ->native(false)
-//                                                ->searchable()
-//                                                ->preload()
-//                                                ->options(fn($get) => TourService::getCities($get('country_id')))
-//                                                ->reactive(),
-//                                            Components\TextInput::make('price_per_person')
-//                                                ->required()
-//                                                ->numeric(),
-//                                        ])
-//                                    ])
-                                    ->createOptionAction(function ($get) {
+                                    ->createOptionAction(function () {
                                         return [
                                             'url' => route('museum.create'),
                                             'label' => 'Create museum',
                                         ];
                                     })
-                                    ->suffixAction(function ($get) {
+                                    ->suffixAction(function () {
                                         return [
                                             Components\Actions\Action::make('create_museum')
                                                 ->label('Create museum')
@@ -463,21 +448,30 @@ class TourTpsResource extends Resource
                             // Lunch and Dinner
                             Components\Fieldset::make('Lunch / Dinner info')->schema([
 
-                                Components\Select::make('restaurant_id')
-                                    ->native(false)
-                                    ->searchable()
-                                    ->preload()
-                                    ->label('Restaurant')
-                                    ->options(fn($get) => TourService::getRestaurants($get('../../city_id')))
-                                    ->reactive(),
+                                Components\Grid::make(3)->schema([
+                                    Components\Select::make('city_id')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->options(fn($get) => TourService::getCities())
+                                        ->reactive(),
 
-                                Components\Select::make('status')
-                                    ->options(ExpenseStatus::class)
-                                    ->required()
-                                    ->native(false)
-                                    ->searchable()
-                                    ->preload()
-                                    ->label('Status'),
+                                    Components\Select::make('restaurant_id')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('Restaurant')
+                                        ->options(fn($get) => TourService::getRestaurants($get('city_id') ?? $get('../../city_id')))
+                                        ->reactive(),
+
+                                    Components\Select::make('status')
+                                        ->options(ExpenseStatus::class)
+                                        ->required()
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('Status'),
+                                ]),
 
                                 Components\Textarea::make('comment')
                                     ->label('Comment')

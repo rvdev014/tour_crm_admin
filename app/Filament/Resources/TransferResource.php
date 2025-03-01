@@ -7,6 +7,7 @@ use App\Enums\TransportType;
 use App\Filament\Resources\TransferResource\Pages;
 use App\Filament\Resources\TransferResource\RelationManagers;
 use App\Models\Company;
+use App\Models\Driver;
 use App\Models\Transfer;
 use App\Services\TourService;
 use Filament\Forms;
@@ -93,11 +94,10 @@ class TransferResource extends Resource
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-//                    Forms\Components\TextInput::make('driver')
-//                        ->label('Driver'),
-                    Components\Select::make('driver_id')
+                    Components\Select::make('driver_ids')
                         ->options(TourService::getDrivers())
                         ->native(false)
+                        ->multiple()
                         ->searchable()
                         ->preload(),
 
@@ -108,28 +108,6 @@ class TransferResource extends Resource
                         ->label('Transport type')
                         ->options(TransportType::class)
                         ->reactive()
-                    /*->afterStateUpdated(function ($get, $set) {
-                        $price = TourService::getTransportPrice(
-                            $get('transport_type'),
-                            $get('transport_comfort_level'),
-                        );
-                        $set('price', $price);
-                    })*/,
-
-//                    Forms\Components\Select::make('transport_comfort_level')
-//                        ->native(false)
-//                        ->searchable()
-//                        ->preload()
-//                        ->label('Comfort level')
-//                        ->options(TransportComfortLevel::class)
-//                        ->reactive()
-//                        ->afterStateUpdated(function ($get, $set) {
-//                            $price = TourService::getTransportPrice(
-//                                $get('transport_type'),
-//                                $get('transport_comfort_level'),
-//                            );
-//                            $set('price', $price);
-//                        }),
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
@@ -270,66 +248,6 @@ class TransferResource extends Resource
 
                         return $indicators;
                     }),
-//                Tables\Filters\Filter::make('status')
-//                    ->form([
-//                        Components\Select::make('status')
-//                            ->native(false)
-//                            ->searchable()
-//                            ->preload()
-//                            ->options(ExpenseStatus::class)
-//                    ])
-//                    ->query(function (Builder $query, $data) {
-//                        return $query
-//                            ->when(
-//                                $data['status'],
-//                                fn($query, $status) => $query->where('status', $status)
-//                            );
-//                    })
-//                    ->indicateUsing(function (array $data): array {
-//                        $indicators = [];
-//                        if ($data['status'] ?? null) {
-//                            $indicators['status'] = 'Status: ' . ExpenseStatus::from($data['status'])->getLabel();
-//                        }
-//
-//                        return $indicators;
-//                    }),
-//                Tables\Filters\Filter::make('date')
-//                    ->form([
-//                        Components\Grid::make()->schema([
-//                            Components\DatePicker::make('date_from')
-//                                ->displayFormat('d.m.Y')
-//                                ->native(false),
-//                            Components\DatePicker::make('date_until')
-//                                ->displayFormat('d.m.Y')
-//                                ->native(false),
-//                        ])
-//                    ])
-//                    ->query(function (Builder $query, $data) {
-//                        return $query
-//                            ->when(
-//                                $data['date_from'],
-//                                fn($query, $dateFrom) => $query->whereDate('date_time', '>=', $dateFrom)
-//                            )
-//                            ->when(
-//                                $data['date_until'],
-//                                fn($query, $dateUntil) => $query->whereDate('date_time', '<=', $dateUntil)
-//                            );
-//                    })
-//                    ->indicateUsing(function (array $data): array {
-//                        $indicators = [];
-//                        if ($data['date_from'] ?? null) {
-//                            $indicators['date_from'] = 'Order from ' . Carbon::parse(
-//                                    $data['date_from']
-//                                )->toFormattedDateString();
-//                        }
-//                        if ($data['date_until'] ?? null) {
-//                            $indicators['date_until'] = 'Order until ' . Carbon::parse(
-//                                    $data['date_until']
-//                                )->toFormattedDateString();
-//                        }
-//
-//                        return $indicators;
-//                    }),
             ], layout: FiltersLayout::AboveContent)
             ->defaultSort('date_time', 'desc')
             ->columns([
@@ -364,7 +282,17 @@ HTML;
                     return $state . ' - ' . $record->toCity?->name;
                 })*/,
 
-                Tables\Columns\TextColumn::make('driver.name'),
+                Tables\Columns\TextColumn::make('driver_ids')
+                    ->label('Driver')
+                    ->formatStateUsing(function ($record) {
+                        if (empty($record->driver_ids)) {
+                            return '';
+                        }
+
+                        $drivers = Driver::query()->find($record->driver_ids);
+                        return $drivers->map(fn($driver) => $driver->name)->join(', ');
+                    })
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()

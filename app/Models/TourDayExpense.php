@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -43,16 +44,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $museum_inn
  *
  * Guide
- * @property string $guide_name
- * @property string $guide_phone
+// * @property string $guide_name
+// * @property string $guide_phone
  *
  * Transport
  * @property int $transport_type
  * @property int $transport_comfort_level
  * @property int $from_city_id
  * @property int $to_city_id
- * @property string $transport_driver
- * @property string $transport_driver_id
+ * @property string $transport_driver_ids
  * @property string $transport_time
  * @property string $transport_place
  * @property string $send_username
@@ -95,6 +95,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Collection<MuseumItem> $museumItems
  * @property Restaurant $restaurant
  * @property Employee $guideEmployee
+ * @property Collection<ExpenseGuide> $guides
  */
 #[ObservedBy([TourDayExpenseObserver::class])]
 class TourDayExpense extends Model
@@ -109,6 +110,7 @@ class TourDayExpense extends Model
         'date' => 'date',
         'car_ids' => 'array',
         'type' => ExpenseType::class,
+        'transport_driver_ids' => 'array',
         'museum_ids' => 'array',
         'museum_item_ids' => 'array',
         'status' => ExpenseStatus::class,
@@ -177,5 +179,10 @@ class TourDayExpense extends Model
     public function show(): BelongsTo
     {
         return $this->belongsTo(Show::class);
+    }
+
+    public function guides(): HasMany
+    {
+        return $this->hasMany(ExpenseGuide::class, 'tour_day_expense_id');
     }
 }

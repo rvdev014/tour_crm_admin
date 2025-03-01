@@ -1,3 +1,4 @@
+@php use App\Models\TourDayExpense; @endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,6 +49,9 @@
     </style>
 </head>
 <body>
+@php
+    /** @var $expense TourDayExpense */
+@endphp
 <div class="email-container">
     <div class="email-header">
         <h1>Visit Details</h1>
@@ -55,7 +59,7 @@
     <div class="email-body">
         <p><strong>Date:</strong> {{ $date }}</p>
         <p><strong>Pax:</strong> {{ $totalPax }}</p>
-        <p><strong>Comment:</strong> {{ $expense['comment'] }}</p>
+        <p><strong>Comment:</strong> {{ $expense->comment }}</p>
     </div>
 </div>
 </body>

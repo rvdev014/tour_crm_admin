@@ -44,17 +44,17 @@ services:
         depends_on:
             - db
 
-#    mailhog:
-#        image: mailhog/mailhog
-#        restart: always
-#        ports:
-#            - "${MAILHOG_PORT}:8025"
-#            - "1025:1025"
-#        volumes:
-#            - mailhog:/data
+    mailhog:
+        image: mailhog/mailhog
+        restart: always
+        ports:
+            - "${MAILHOG_PORT}:8025"
+            - "1025:1025"
+        volumes:
+            - mailhog:/data
 
-#volumes:
+volumes:
 #    postgres:
 #    pgadmin:
 #    vendor:
-#    mailhog:
+    mailhog:

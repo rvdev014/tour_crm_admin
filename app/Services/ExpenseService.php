@@ -83,9 +83,7 @@ class ExpenseService
 
             case ExpenseType::Museum->value:
 
-                $museumId = $data['museum_id'] ?? null;
                 $museumIds = $data['museum_ids'] ?? null;
-                $museumItemId = $data['museum_item_id'] ?? null;
                 $museumItemIds = $data['museum_item_ids'] ?? null;
 
                 if (!empty($museumItemIds)) {

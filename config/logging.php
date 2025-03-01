@@ -127,6 +127,13 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'dev' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/dev.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'telegram' => [
             'driver' => 'single',
             'path' => storage_path('logs/telegram.log'),

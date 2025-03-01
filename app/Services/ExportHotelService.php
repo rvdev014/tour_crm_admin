@@ -17,6 +17,15 @@ class ExportHotelService
 {
     public static function getHotelsData(Tour $tour): Collection
     {
+        if ($tour->isCorporate()) {
+            return self::getHotelsDataCorporate($tour);
+        }
+
+        return self::getHotelsDataTps($tour);
+    }
+
+    public static function getHotelsDataTps(Tour $tour): Collection
+    {
         $result = collect();
 
         $tourPax = $tour->getTotalPax();

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\TransferResource\Pages;
 
+use App\Enums\ExpenseStatus;
+use App\Enums\TourStatus;
 use App\Filament\Resources\TransferResource;
 use App\Services\TourService;
 use Filament\Actions;
@@ -19,7 +21,9 @@ class EditTransfer extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        TourService::sendTelegramTransfer($data);
+        if ($data['status'] == ExpenseStatus::Confirmed->value) {
+            TourService::sendTelegramTransfer($data);
+        }
 
         return $data;
     }

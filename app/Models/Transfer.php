@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $updated_at
  * @property Carbon $date_time
  *
- * @property int $driver_id
+ * @property int $driver_ids
  * @property string $place_of_submission
  *
  * @property Driver $driver
@@ -57,7 +57,7 @@ class Transfer extends Model
         'comment',
         'tour_day_expense_id',
 
-        'driver_id',
+        'driver_ids',
         'date_time',
         'place_of_submission',
     ];
@@ -67,6 +67,7 @@ class Transfer extends Model
         'transport_type' => TransportType::class,
         'transport_comfort_level' => TransportComfortLevel::class,
         'date_time' => 'datetime',
+        'driver_ids' => 'array',
     ];
 
     public function company(): BelongsTo

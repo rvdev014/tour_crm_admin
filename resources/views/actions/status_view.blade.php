@@ -32,10 +32,11 @@
                     $guideName = $record->guide_name;
                     $guideStatus = ExpenseStatus::Confirmed;
                 } else {
-                    /** @var TourDayExpense $guide */
-                    $guide = $day->expenses()->where('type', ExpenseType::Guide)->first();
-                    $guideName = $guide?->guide_name;
-                    $guideStatus = $guide?->status;
+                    /** @var TourDayExpense $expense */
+                    $expense = $day->expenses()->where('type', ExpenseType::Guide)->first();
+                    // TODO: Guide
+                    $guideName = $expense?->guides->map(fn($guide) => $guide->name)->join(', ');
+                    $guideStatus = $expense?->status;
                 }
 
                 /** @var TourDayExpense $plane */
