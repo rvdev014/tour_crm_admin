@@ -40,14 +40,6 @@ class TransferResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Grid::make(3)->schema([
-                    /*Forms\Components\Select::make('from_city_id')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->label('City from')
-                        ->relationship('fromCity', 'name')
-                        ->options(fn() => TourService::getCities(null, isAll: true))
-                        ->reactive(),*/
 
                     Forms\Components\Select::make('to_city_id')
                         ->native(false)
@@ -55,15 +47,6 @@ class TransferResource extends Resource
                         ->preload()
                         ->label('City')
                         ->relationship('toCity', 'name')
-                        /*->options(function ($get) {
-                            $fromCityId = $get('from_city_id');
-                            if (!empty($fromCityId)) {
-                                $cities = TourService::getCities(null, false, true);
-                                return $cities->filter(fn($city) => $city->id != $fromCityId)->pluck('name', 'id');
-                            }
-
-                            return [];
-                        })*/
                         ->options(TourService::getCities())
                         ->preload()
                         ->reactive(),
@@ -75,11 +58,16 @@ class TransferResource extends Resource
                         ->label('Company')
                         ->relationship('company', 'name')
                         ->required(),
+
+                    Forms\Components\Select::make('driver_ids')
+                        ->options(TourService::getDrivers())
+                        ->native(false)
+                        ->multiple()
+                        ->searchable()
+                        ->preload(),
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-//                    Forms\Components\TextInput::make('group_number')
-//                        ->label('Group number'),
 
                     Forms\Components\TextInput::make('pax')
                         ->label('Pax')
@@ -91,15 +79,6 @@ class TransferResource extends Resource
                         ->preload()
                         ->options(ExpenseStatus::class)
                         ->label('Status'),
-                ]),
-
-                Forms\Components\Grid::make(3)->schema([
-                    Components\Select::make('driver_ids')
-                        ->options(TourService::getDrivers())
-                        ->native(false)
-                        ->multiple()
-                        ->searchable()
-                        ->preload(),
 
                     Forms\Components\Select::make('transport_type')
                         ->native(false)
@@ -116,12 +95,22 @@ class TransferResource extends Resource
 
                     Forms\Components\DateTimePicker::make('date_time')
                         ->displayFormat('d.m.Y H:i')
-                        ->minDate(now())
+//                        ->minDate(now())
                         ->native(false)
                         ->seconds(false),
 
-                    Forms\Components\TextInput::make('price')
-                        ->numeric(),
+                    Forms\Components\TextInput::make('route'),
+                ]),
+
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('passenger'),
+                    Forms\Components\TextInput::make('nameplate'),
+                ]),
+
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('price')->numeric(),
+                    Forms\Components\TextInput::make('sell_price')->numeric(),
+                    Forms\Components\TextInput::make('buy_price')->numeric(),
                 ]),
 
                 Forms\Components\Textarea::make('comment')
@@ -133,7 +122,7 @@ class TransferResource extends Resource
     {
         return $table
             ->striped()
-            ->modifyQueryUsing(fn($query) => $query->with(['toCity', 'company']))
+            ->modifyQueryUsing(fn($query) => $query->with(['toCity', 'company', 'createdBy']))
             ->filtersFormColumns(3)
             ->recordClasses(function ($record) {
                 if ($record->status == ExpenseStatus::Done) {
@@ -148,8 +137,6 @@ class TransferResource extends Resource
                 };
             })
             ->filters([
-//                TernaryFilter::make('verified')
-//                    ->nullable(),
                 Tables\Filters\Filter::make('today')
                     ->columnSpanFull()
                     ->form([
@@ -160,14 +147,16 @@ class TransferResource extends Resource
                             Components\Checkbox::make('tomorrow')
                                 ->label('Tomorrow')
                                 ->default(false),
-                            Components\Select::make('company_id')
+                            Components\Select::make('companies')
                                 ->native(false)
+                                ->multiple()
                                 ->searchable()
                                 ->preload()
                                 ->label('Company')
                                 ->relationship('company', 'name'),
-                            Components\Select::make('status')
+                            Components\Select::make('statuses')
                                 ->native(false)
+                                ->multiple()
                                 ->searchable()
                                 ->preload()
                                 ->options(ExpenseStatus::class),
@@ -192,11 +181,11 @@ class TransferResource extends Resource
                             $tomorrow = Carbon::tomorrow();
                             $query = $query->whereDate('date_time', $tomorrow);
                         }
-                        if ($data['status']) {
-                            $query = $query->where('status', $data['status']);
+                        if ($data['statuses']) {
+                            $query = $query->whereIn('status', $data['statuses']);
                         }
-                        if ($data['company_id']) {
-                            $query = $query->where('company_id', $data['company_id']);
+                        if ($data['companies']) {
+                            $query = $query->whereIn('company_id', $data['companies']);
                         }
                         if ($data['date_from']) {
                             $query = $query->whereDate('date_time', '>=', $data['date_from']);
@@ -225,15 +214,16 @@ class TransferResource extends Resource
                             $query = $query->whereDate('date_time', Carbon::tomorrow());
                             $indicators['tomorrow'] = "Tomorrow ({$query->count()})";
                         }
-                        if ($data['status']) {
-                            $query = $query->where('status', $data['status']);
-                            $indicators['status'] = 'Status: ' . ExpenseStatus::from($data['status'])->getLabel(
-                                ) . " ({$query->count()})";
+                        if ($data['statuses']) {
+                            $query = $query->whereIn('status', $data['statuses']);
+                            $statuses = collect($data['statuses'])->map(fn($status) => ExpenseStatus::from($status)->getLabel())->join(', ');
+                            $indicators['statuses'] = 'Status: ' . $statuses . " ({$query->count()})";
                         }
-                        if ($data['company_id']) {
-                            $query = $query->where('company_id', $data['company_id']);
-                            $companyName = Company::query()->find($data['company_id'])?->name;
-                            $indicators['company_id'] = $companyName . " ({$query->count()})";
+                        if ($data['companies']) {
+                            $query = $query->whereIn('company_id', $data['companies']);
+                            $companies = Company::query()->whereIn('id', $data['companies'])->get();
+                            $companyNames = $companies->map(fn($company) => $company->name)->join(', ');
+                            $indicators['company_id'] = $companyNames . " ({$query->count()})";
                         }
                         if ($data['date_from']) {
                             $indicators['date_from'] = 'Order from ' . Carbon::parse(
@@ -297,6 +287,8 @@ HTML;
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('createdBy.name'),
 
                 Tables\Columns\TextColumn::make('transport_type')->sortable(),
 

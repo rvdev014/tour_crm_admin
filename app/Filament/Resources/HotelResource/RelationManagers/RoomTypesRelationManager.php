@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\HotelResource\RelationManagers;
 
+use App\Enums\RoomPersonType;
+use App\Enums\RoomSeasonType;
 use App\Models\Hotel;
 use Closure;
 use Filament\Forms;
@@ -37,6 +39,12 @@ class RoomTypesRelationManager extends RelationManager
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('season_type')
+                    ->required()
+                    ->options(RoomSeasonType::class),
+                Forms\Components\Select::make('person_type')
+                    ->required()
+                    ->options(RoomPersonType::class),
             ]);
     }
 

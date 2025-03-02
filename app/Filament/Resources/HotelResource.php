@@ -28,25 +28,32 @@ class HotelResource extends Resource
                     Forms\Components\TextInput::make('name')
                         ->required()
                         ->maxLength(255),
+
                     Forms\Components\TextInput::make('email')
                         ->email()
                         ->required()
                         ->unique(ignoreRecord: true),
+
                     Forms\Components\TextInput::make('inn'),
                 ]),
-                Forms\Components\Select::make('country_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->relationship('country', 'name')
-                    ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
-                    ->reactive(),
-                Forms\Components\Select::make('city_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->relationship('city', 'name')
-                    ->options(fn($get) => TourService::getCities($get('country_id'))),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\Select::make('country_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->relationship('country', 'name')
+                        ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+                        ->reactive(),
+
+                    Forms\Components\Select::make('city_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->relationship('city', 'name')
+                        ->options(fn($get) => TourService::getCities($get('country_id'))),
+
+                    Forms\Components\TextInput::make('booking_cancellation_days')->numeric(),
+                ]),
             ]);
     }
 
@@ -67,6 +74,9 @@ class HotelResource extends Resource
                 Tables\Columns\TextColumn::make('city.name')
                     ->label('City')
                     ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('booking_cancellation_days')
+                    ->label('Booking days')
                     ->sortable(),
             ])
             ->filters([

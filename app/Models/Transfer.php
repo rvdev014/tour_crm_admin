@@ -5,7 +5,9 @@ namespace App\Models;
 use App\Enums\ExpenseStatus;
 use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
+use App\Observers\TransferObserver;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,15 +31,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $updated_at
  * @property Carbon $date_time
  *
- * @property int $driver_ids
+ * @property int $created_by
+ * @property array $driver_ids
  * @property string $place_of_submission
+ * @property string $route
+ * @property string $passenger
+ * @property numeric $sell_price
+ * @property numeric $buy_price
+ * @property string $nameplate
  *
+ * @property User $createdBy
  * @property Driver $driver
  * @property TourDayExpense $tourDayExpense
  * @property Company $company
  * @property City $fromCity
  * @property City $toCity
  */
+//#[ObservedBy(TransferObserver::class)]
 class Transfer extends Model
 {
     use HasFactory;
@@ -60,6 +70,13 @@ class Transfer extends Model
         'driver_ids',
         'date_time',
         'place_of_submission',
+
+        'route',
+        'passenger',
+        'sell_price',
+        'buy_price',
+        'nameplate',
+        'created_by',
     ];
 
     protected $casts = [
@@ -69,6 +86,13 @@ class Transfer extends Model
         'date_time' => 'datetime',
         'driver_ids' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Transfer $transfer) {
+            $transfer->created_by = auth()->id();
+        });
+    }
 
     public function company(): BelongsTo
     {
@@ -93,5 +117,10 @@ class Transfer extends Model
     public function tourDayExpense(): BelongsTo
     {
         return $this->belongsTo(TourDayExpense::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

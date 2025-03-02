@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $hotel_room_type_id
  * @property string $hotel_checkin_time
  * @property string $hotel_checkout_time
+ * @property string $hotel_checkout_date_time
  * @property int $hotel_add_percent
  * @property int $hotel_total_nights
  *
@@ -56,6 +57,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $transport_time
  * @property string $transport_place
  * @property string $send_username
+ * @property string $plane_route
  *
  * Train
  * @property string $train_name
@@ -108,8 +110,8 @@ class TourDayExpense extends Model
 
     protected $casts = [
         'date' => 'date',
-        'car_ids' => 'array',
         'type' => ExpenseType::class,
+        'car_ids' => 'array',
         'transport_driver_ids' => 'array',
         'museum_ids' => 'array',
         'museum_item_ids' => 'array',

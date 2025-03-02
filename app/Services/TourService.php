@@ -532,8 +532,15 @@ class TourService
                 if ($driver?->chat_id) {
                     $message = "Tour {$tourData['group_number']}\n";
                     foreach ($transportItems as $transportItem) {
-                        $message .= TourService::getOneMessage($transportItem);
+                        $message .= TourService::getOneMessage($transportItem, false);
                     }
+
+                    $message .= <<<HTML
+$message
+
+Office phone: +998333377754
+HTML;
+
 
                     TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
                 }
@@ -570,7 +577,7 @@ class TourService
         }
     }
 
-    public static function getOneMessage($data): string
+    public static function getOneMessage($data, bool $withPhone = true): string
     {
         $toCity = $data['to_city'] ? City::find($data['to_city']) : null;
         $place = $data['transport_place'] ?? '-';
@@ -579,7 +586,7 @@ class TourService
         $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
         $price = $data['price'] ?? '';
 
-        return <<<HTML
+        $result = <<<HTML
 
 <b>Date and time:</b> {$date}
 <b>City:</b> {$toCity?->name}
@@ -587,8 +594,17 @@ class TourService
 <b>Transport:</b> {$transportType}
 <b>Price:</b> {$price}
 <b>Comment:</b> {$comment}
-
 HTML;
+
+        if ($withPhone) {
+            $result .= <<<HTML
+$result
+
+Office phone: +998333377754
+HTML;
+        }
+
+        return $result;
     }
 
     public static function getEnum($enumClass, $value): string
@@ -598,5 +614,25 @@ HTML;
         }
 
         return $enumClass::from($value)->getLabel();
+    }
+
+    public static function calculateHotelNights(string $date, string $checkIn, string $checkOutDateTime): float
+    {
+        $date = \Illuminate\Support\Carbon::parse($date);
+        $hotelCheckinDateTime = Carbon::parse($date->format('Y-m-d') . ' ' . $checkIn);
+        $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);
+
+        $diffInDays = $hotelCheckinDateTime->clone()->startOfDay()->diffInDays(
+            $hotelCheckoutDateTime->clone()->startOfDay()
+        );
+
+        if ($hotelCheckinDateTime->format('H:i') < '14:00') {
+            $diffInDays += 0.5;
+        }
+        if ($hotelCheckoutDateTime->format('H:i') > '12:00') {
+            $diffInDays += 0.5;
+        }
+
+        return $diffInDays;
     }
 }

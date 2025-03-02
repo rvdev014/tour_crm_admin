@@ -566,13 +566,7 @@ class TourTpsResource extends Resource
                                     ->numeric()
                                     ->label('Price'),
 
-                                Components\Select::make('to_city_id')
-                                    ->native(false)
-                                    ->searchable()
-                                    ->preload()
-                                    ->label('City to')
-                                    ->options(TourService::getCities())
-                                    ->reactive(),
+                                Components\TextInput::make('plane_route'),
 
                                 Components\Grid::make(3)->schema([
                                     Components\TimePicker::make('departure_time')

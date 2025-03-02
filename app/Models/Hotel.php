@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $email
  * @property int $country_id
  * @property int $city_id
+ * @property int $booking_cancellation_days
  * @property string $inn
  *
  * @property City $city
@@ -31,6 +32,7 @@ class Hotel extends Model
         'email',
         'country_id',
         'city_id',
+        'booking_cancellation_days',
         'inn',
     ];
 

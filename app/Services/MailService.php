@@ -24,24 +24,14 @@ class MailService
 
     public static function getExpensesDataForMail(Tour $tour, $type = 'restaurants', $isCorporate = false): array
     {
+        /** @var Collection<TourDayExpense> $expenses */
+        $expenses = $tour->expenses->filter(fn($expense) => self::checkExpenseType($expense, $type));
+
         $expensesData = [];
-        if ($isCorporate) {
-            /** @var \Illuminate\Database\Eloquent\Collection<TourDayExpense> $restaurantExpenses */
-            $restaurantExpenses = $tour->days->flatMap(
-                fn($day) => $day->expenses->filter(fn($expense) => self::checkExpenseType($expense, $type))
-            );
-            foreach ($restaurantExpenses as $expense) {
-                if (isset($expense->date)) {
-                    $expensesData[$expense->date->format('Y-m-d')] = $expense;
-                }
-            }
-        } else {
-            foreach ($tour->days as $day) {
-                foreach ($day->expenses as $expense) {
-                    if (self::checkExpenseType($expense, $type)) {
-                        $expensesData[$day->date->format('Y-m-d')] = $expense;
-                    }
-                }
+        foreach ($expenses as $expense) {
+            $date = $isCorporate ? $expense->date : $expense->tourDay->date;
+            if (isset($expense->date)) {
+                $expensesData[$date->format('Y-m-d')] = $expense;
             }
         }
 
