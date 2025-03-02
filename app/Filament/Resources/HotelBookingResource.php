@@ -41,8 +41,8 @@ class HotelBookingResource extends Resource
                     ->where('type', ExpenseType::Hotel);
             })
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->formatStateUsing(function (TourDayExpense $record) {
+                Tables\Columns\TextColumn::make('tour_id')
+                    ->getStateUsing(function (TourDayExpense $record) {
                         $tour = $record->tour ?? $record->tourDay->tour;
                         if ($tour->isCorporate()) {
                             $link = "/admin/tour-corporate/$tour->id/edit";
@@ -62,21 +62,20 @@ class HotelBookingResource extends Resource
                 Tables\Columns\TextColumn::make('hotel.booking_cancellation_days')
                     ->label('Expiry period')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('hotel.id')
+                Tables\Columns\TextColumn::make('expires_at')
                     ->label('Expires at')
-                    ->formatStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function (TourDayExpense $record) {
                         $bookingDate = $record->tourDay?->date ?? $record->date;
                         $diff = $bookingDate->diffInDays(now());
-                        return $bookingDate->gt(now()) ? $diff : 0;
-                    })
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('hotel.inn')
+                        return 'in ' . ($bookingDate->gt(now()) ? $diff : 0) . ' days';
+                    }),
+
+                Tables\Columns\TextColumn::make('tour_pax')
                     ->label('Pax')
-                    ->formatStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function (TourDayExpense $record) {
                         $tour = $record->tour ?? $record->tourDay->tour;
                         return $tour->getTotalPax();
-                    })
-                    ->sortable(),
+                    }),
             ])
             ->filters([
                 //

@@ -803,7 +803,7 @@ class TourTpsResource extends Resource
             ->recordUrl(null)
             ->recordAction(StatusAction::class)
             ->actions([
-                Tables\Actions\ActionGroup::make([
+                /*Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('export_hotel')
                         ->label('Hotels')
                         ->icon('heroicon-o-document-text')
@@ -820,7 +820,11 @@ class TourTpsResource extends Resource
                         ->label('Report')
                         ->icon('heroicon-o-document-text')
                         ->url(fn(Tour $record) => route('export', $record)),
-                ]),
+                ]),*/
+                Tables\Actions\Action::make('export_all')
+                    ->label('Reports')
+                    ->icon('heroicon-o-document-text')
+                    ->url(fn(Tour $record) => route('export-all', $record)),
                 Tables\Actions\EditAction::make(),
                 StatusAction::make()->label('')->icon(''),
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
