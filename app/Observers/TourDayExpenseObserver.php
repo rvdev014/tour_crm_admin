@@ -87,6 +87,7 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             'driver_ids' => $tourDayExpense->transport_driver_ids,
             'date_time' => $dateTime,
             'place_of_submission' => $tourDayExpense->transport_place,
+            'route' => $tourDayExpense->transport_route,
         ];
     }
 }

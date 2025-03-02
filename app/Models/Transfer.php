@@ -36,7 +36,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $place_of_submission
  * @property string $route
  * @property string $passenger
- * @property numeric $sell_price
+// * @property numeric $sell_price
  * @property numeric $buy_price
  * @property string $nameplate
  *
@@ -73,7 +73,7 @@ class Transfer extends Model
 
         'route',
         'passenger',
-        'sell_price',
+//        'sell_price',
         'buy_price',
         'nameplate',
         'created_by',

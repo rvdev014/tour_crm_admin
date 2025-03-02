@@ -55,6 +55,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $to_city_id
  * @property string $transport_driver_ids
  * @property string $transport_time
+ * @property string $transport_route
  * @property string $transport_place
  * @property string $send_username
  * @property string $plane_route

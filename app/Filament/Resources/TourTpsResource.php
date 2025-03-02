@@ -365,8 +365,13 @@ class TourTpsResource extends Resource
                                         ->preload(),
                                     Components\TimePicker::make('transport_time')
                                         ->seconds(false),
-                                    Components\TextInput::make('transport_place')
-                                        ->label('Place of submission'),
+                                ]),
+
+                                Components\Grid::make(2)->schema([
+                                    Components\TextInput::make('transport_route')
+                                        ->label('Pickup location'),
+                                    Components\TextInput::make('transport_route')
+                                        ->label('Route'),
                                 ]),
 
                                 Components\Grid::make(3)->schema([
@@ -374,7 +379,7 @@ class TourTpsResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('City to')
+                                        ->label('City')
                                         ->options(TourService::getCities())
                                         ->reactive(),
 
@@ -388,7 +393,7 @@ class TourTpsResource extends Resource
 
                                     Components\TextInput::make('price')
                                         ->numeric()
-                                        ->label('Price'),
+                                        ->label('Sell price'),
                                 ]),
 
                                 Components\Textarea::make('comment')
@@ -494,7 +499,7 @@ class TourTpsResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('City to')
+                                        ->label('City')
                                         ->options(TourService::getCities())
                                         ->reactive(),
                                 ]),

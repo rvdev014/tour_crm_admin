@@ -60,6 +60,7 @@ class TransferResource extends Resource
                         ->required(),
 
                     Forms\Components\Select::make('driver_ids')
+                        ->label('Drivers')
                         ->options(TourService::getDrivers())
                         ->native(false)
                         ->multiple()
@@ -91,7 +92,7 @@ class TransferResource extends Resource
 
                 Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('place_of_submission')
-                        ->label('Pick up Location'),
+                        ->label('Pickup Location'),
 
                     Forms\Components\DateTimePicker::make('date_time')
                         ->displayFormat('d.m.Y H:i')
@@ -104,12 +105,15 @@ class TransferResource extends Resource
 
                 Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('passenger'),
-                    Forms\Components\TextInput::make('nameplate'),
+                    Forms\Components\TextInput::make('nameplate')
+                        ->label('Табличка'),
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\TextInput::make('price')->numeric(),
-                    Forms\Components\TextInput::make('sell_price')->numeric(),
+                    Forms\Components\TextInput::make('price')
+                        ->label('Sell price')
+                        ->numeric(),
+//                    Forms\Components\TextInput::make('sell_price')->numeric(),
                     Forms\Components\TextInput::make('buy_price')->numeric(),
                 ]),
 
@@ -257,7 +261,7 @@ HTML;
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('place_of_submission')
-                    ->label('Pick up Location'),
+                    ->label('Pickup location'),
 
                 Tables\Columns\TextColumn::make('pax')
                     ->formatStateUsing(function ($record, $state) {
@@ -273,7 +277,7 @@ HTML;
                 })*/,
 
                 Tables\Columns\TextColumn::make('driver_ids')
-                    ->label('Driver')
+                    ->label('Drivers')
                     ->formatStateUsing(function ($record) {
                         if (empty($record->driver_ids)) {
                             return '';

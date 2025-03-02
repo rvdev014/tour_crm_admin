@@ -234,7 +234,7 @@ class TourCorporateResource extends Resource
                             Components\TimePicker::make('transport_time')
                                 ->seconds(false),
                             Components\TextInput::make('transport_place')
-                                ->label('Place of submission'),
+                                ->label('Pickup location'),
                         ]),
 
                         Components\Grid::make(3)->schema([
@@ -242,7 +242,7 @@ class TourCorporateResource extends Resource
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
-                                ->label('City to')
+                                ->label('City')
                                 ->options(TourService::getCities())
                                 ->reactive(),
 
@@ -280,7 +280,7 @@ class TourCorporateResource extends Resource
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
-                                ->label('City to')
+                                ->label('City')
                                 ->options(TourService::getCities())
                                 ->reactive(),
                         ]),
