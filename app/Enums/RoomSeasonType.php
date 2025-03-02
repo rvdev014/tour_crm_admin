@@ -12,6 +12,15 @@ enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
     case Seasonal = 2;
     case Standard = 3;
 
+    public static function getValues(): array
+    {
+        return [
+            self::OffSeasonal,
+            self::Seasonal,
+            self::Standard,
+        ];
+    }
+
     public function getColor(): string|array|null
     {
         return match ($this) {

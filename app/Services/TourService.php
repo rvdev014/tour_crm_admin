@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
+use App\Enums\RoomPersonType;
+use App\Enums\RoomSeasonType;
 use App\Enums\TourType;
 use App\Enums\TransportType;
 use App\Mail\HotelMail;
@@ -27,7 +29,9 @@ use App\Models\Train;
 use App\Models\Transport;
 use App\Models\User;
 use Carbon\Carbon;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
@@ -344,6 +348,32 @@ class TourService
 
     public static function generateRoomingSchema(): array
     {
+        $roomTypes = RoomType::all();
+        $personTypes = collect(RoomPersonType::getValues());
+
+        return collect(RoomSeasonType::getValues())->map(function(RoomSeasonType $seasonType) use ($roomTypes, $personTypes) {
+            return Section::make("Rooming {$seasonType->getLabel()}")->schema(
+                $roomTypes->map(function (RoomType $roomType) use ($seasonType, $personTypes) {
+                    return Grid::make($personTypes->count())->schema(
+                        $personTypes->map(function (RoomPersonType $personType) use ($roomType, $seasonType) {
+                            return TextInput::make("room_type_{$roomType->id}_{$seasonType->value}_{$personType->value}")
+                                ->label("$roomType->name ({$seasonType->getLabel()} - {$personType->getLabel()})")
+                                ->formatStateUsing(function ($record) use ($roomType) {
+                                    if (!$record) {
+                                        return 0;
+                                    }
+                                    $tourRoomType = $record->roomTypes->first(
+                                        fn($item) => $item->room_type_id == $roomType->id
+                                    );
+                                    return $tourRoomType?->amount ?? 0;
+                                })
+                                ->numeric();
+                        })->toArray()
+                    );
+                })->toArray()
+            )->collapsible()->collapsed();
+        })->toArray();
+
         return [
             Grid::make(3)->schema(
                 RoomType::all()->map(function (RoomType $roomType) {

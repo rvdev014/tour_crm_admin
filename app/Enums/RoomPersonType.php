@@ -11,6 +11,14 @@ enum RoomPersonType: int implements HasLabel, HasColor, HasIcon
     case Uzbek = 1;
     case Foreign = 2;
 
+    public static function getValues(): array
+    {
+        return [
+            self::Uzbek,
+            self::Foreign,
+        ];
+    }
+
     public function getColor(): string|array|null
     {
         return match ($this) {

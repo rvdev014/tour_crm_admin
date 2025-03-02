@@ -149,10 +149,11 @@ class TourTpsResource extends Resource
             ]),
 
             // Add section with subtitle
-            Components\Section::make('Rooming')
+            ...TourService::generateRoomingSchema(),
+            /*Components\Section::make('Rooming')
                 ->schema(TourService::generateRoomingSchema())
                 ->collapsible()
-                ->collapsed(true),
+                ->collapsed(true)*/
 
             Components\Fieldset::make('Transport info')->schema([
                 Components\Select::make('transport_type')
