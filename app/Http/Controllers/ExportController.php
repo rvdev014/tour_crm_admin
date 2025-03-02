@@ -104,7 +104,7 @@ class ExportController extends Controller
         $hotelsData = ExportHotelService::getHotelsData($tour);
         foreach ($hotelsData as $hotelItem) {
             $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
-            $fileName = $tempDir . '/hotels/' . $hotelName . '.docx';
+            $fileName = $this->getTempDir("all_reports/hotels") . '/' . $hotelName . '.docx';
 
             $templateProcessor = ExportHotelService::getReplacedTemplate($hotelItem);
             $templateProcessor->saveAs($fileName);
@@ -162,7 +162,8 @@ class ExportController extends Controller
 
     protected function getTempDir(string $dirName): string
     {
-        $tempDir = sys_get_temp_dir() . '/' . $dirName;
+//        $tempDir = sys_get_temp_dir() . '/' . $dirName;
+        $tempDir = storage_path('app/temp/' . $dirName);
         if (!is_dir($tempDir)) {
             mkdir($tempDir, 0777, true);
         }
