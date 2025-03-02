@@ -35,15 +35,15 @@ class ExportClientService
         $planePriceTotal = $planeExpense?->price;
         $extraPriceTotal = $extraExpenses->sum('price');
 
-        $pax = $tour->pax + $tour->leader_pax;
+        $pax = max(1, $tour->pax + $tour->leader_pax);
         $paxPriceTotal = $expenseTotal - $planePriceTotal;
-        $paxPrice = ceil($paxPriceTotal / ($pax ?? 1));
+        $paxPrice = ceil($paxPriceTotal / $pax);
 
-        $planePax = $pax;
-        $planePrice = ceil($planePriceTotal / ($planePax ?? 1));
+        $planePax = max(1, $pax ?? 1);
+        $planePrice = ceil($planePriceTotal / $planePax);
 
-        $extraPax = $tour->leader_pax;
-        $extraPrice = ceil($extraPriceTotal / ($extraPax ?? 1));
+        $extraPax = max(1, $tour->leader_pax ?? 1);
+        $extraPrice = ceil($extraPriceTotal / $extraPax);
 
         $tourLeadersPrice = $paxPrice + $planePrice;
         $tourLeadersPriceTotal = $tourLeadersPrice * $tour->leader_pax;
