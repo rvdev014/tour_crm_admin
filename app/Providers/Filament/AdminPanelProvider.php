@@ -55,6 +55,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            /*->plugins([
+                StickyHeaderPlugin::make(),
+            ])*/;
     }
 }

@@ -513,10 +513,14 @@ class TourService
                     $driverIds = $expense['transport_driver_ids'];
                     if (!empty($driverIds)) {
                         foreach ($driverIds as $driverId) {
+                            $totalPax = count($tourData['passengers'] ?? []);
                             $transportsData[$driverId][] = [
                                 'driver_id' => $driverId,
+                                'pax' => $totalPax,
+                                'driver_ids' => $driverIds,
                                 'to_city' => $expense['to_city_id'],
                                 'transport_place' => $expense['transport_place'],
+                                'route' => $expense['transport_route'],
                                 'date' => $expense['date'],
                                 'transport_type' => $tourData['transport_type'],
                                 'price' => $expense['price'],
@@ -539,11 +543,15 @@ class TourService
                         $time = Carbon::parse($expense['transport_time'])->format('H:i');
                         $driverIds = $expense['transport_driver_ids'];
                         if (!empty($driverIds)) {
+                            $totalPax = ($tourData['pax'] ?? 0) + ($tourData['leader_pax'] ?? 0);
                             foreach ($driverIds as $driverId) {
                                 $transportsData[$driverId][] = [
                                     'driver_id' => $driverId,
+                                    'pax' => $totalPax,
+                                    'driver_ids' => $driverIds,
                                     'to_city' => $expense['to_city_id'],
                                     'transport_place' => $expense['transport_place'],
+                                    'route' => $expense['transport_route'],
                                     'date' => "{$date} {$time}",
                                     'transport_type' => $tourData['transport_type'],
                                     'price' => $expense['price'],
@@ -560,17 +568,18 @@ class TourService
             foreach ($transportsData as $driverId => $transportItems) {
                 $driver = Driver::find($driverId);
                 if ($driver?->chat_id) {
-                    $message = "Tour {$tourData['group_number']}\n";
+                    $title = "Tour {$tourData['group_number']}\n";
+
+                    $message = '';
                     foreach ($transportItems as $transportItem) {
                         $message .= TourService::getOneMessage($transportItem, false);
                     }
 
-                    $message .= <<<HTML
-$message
+                    $message = <<<HTML
+$title$message
 
 Office phone: +998333377754
 HTML;
-
 
                     TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
                 }
@@ -582,33 +591,38 @@ HTML;
     {
         $driverIds = $data['driver_ids'] ?? [];
         foreach ($driverIds as $driverId) {
-            TourService::sendOneMessage([
-                'driver_id' => $driverId,
-                'to_city' => $data['to_city_id'],
-                'transport_place' => $data['place_of_submission'],
-                'date' => $data['date_time'],
-                'transport_type' => $data['transport_type'],
-                'price' => $data['price'],
-                'comment' => $data['comment'],
-            ]);
-        }
-    }
-
-    public static function sendOneMessage($data): void
-    {
-        /** @var Driver $driver */
-        $driver = Driver::query()->find($data['driver_id'] ?? null);
-        if ($driver?->chat_id) {
-            TelegramService::sendMessage(
-                $driver->chat_id,
-                TourService::getOneMessage($data),
-                ['parse_mode' => 'HTML']
-            );
+            /** @var Driver $driver */
+            $driver = Driver::query()->find($driverId ?? null);
+            if ($driver?->chat_id) {
+                TelegramService::sendMessage(
+                    $driver->chat_id,
+                    TourService::getOneMessage([
+                        'driver_id' => $driverId,
+                        'pax' => $data['pax'],
+                        'driver_ids' => $driverIds,
+                        'to_city' => $data['to_city_id'],
+                        'transport_place' => $data['place_of_submission'],
+                        'route' => $data['route'],
+                        'passenger' => $data['passenger'],
+                        'nameplate' => $data['nameplate'],
+                        'date' => $data['date_time'],
+                        'transport_type' => $data['transport_type'],
+                        'price' => $data['price'],
+                        'comment' => $data['comment'],
+                    ]),
+                    ['parse_mode' => 'HTML']
+                );
+            }
         }
     }
 
     public static function getOneMessage($data, bool $withPhone = true): string
     {
+        $drivers = Driver::query()->whereIn('id', $data['driver_ids'] ?? [])->get()->map(fn(Driver $driver) => $driver->name)->implode(', ');
+        $pax = $data['pax'] ?? 0;
+        $route = $data['route'] ?? '-';
+        $passenger = $data['passenger'] ?? '-';
+        $nameplate = $data['nameplate'] ?? '-';
         $toCity = $data['to_city'] ? City::find($data['to_city']) : null;
         $place = $data['transport_place'] ?? '-';
         $comment = $data['comment'] ?? '-';
@@ -618,17 +632,21 @@ HTML;
 
         $result = <<<HTML
 
+<b>Drivers:</b> {$drivers}
+<b>Pax:</b> {$pax}
 <b>Date and time:</b> {$date}
 <b>City:</b> {$toCity?->name}
 <b>Pickup location:</b> {$place}
 <b>Transport:</b> {$transportType}
-<b>Price:</b> {$price}
+<b>Route:</b> {$route}
+<b>Passenger:</b> {$passenger}
+<b>Табличка:</b> {$nameplate}
 <b>Comment:</b> {$comment}
 HTML;
 
         if ($withPhone) {
             $result .= <<<HTML
-$result
+
 
 Office phone: +998333377754
 HTML;

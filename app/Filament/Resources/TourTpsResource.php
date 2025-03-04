@@ -368,8 +368,8 @@ class TourTpsResource extends Resource
                                         ->seconds(false),
                                 ]),
 
-                                Components\Grid::make(2)->schema([
-                                    Components\TextInput::make('transport_route')
+                                Components\Grid::make()->schema([
+                                    Components\TextInput::make('transport_place')
                                         ->label('Pickup location'),
                                     Components\TextInput::make('transport_route')
                                         ->label('Route'),
