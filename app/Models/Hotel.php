@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property City $city
  * @property Country $country
  * @property Collection<HotelRoomType> $roomTypes
+ * @property Collection<HotelPeriod> $periods
  */
 class Hotel extends Model
 {
@@ -49,5 +50,10 @@ class Hotel extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function periods(): HasMany
+    {
+        return $this->hasMany(HotelPeriod::class)->orderBy('id');
     }
 }

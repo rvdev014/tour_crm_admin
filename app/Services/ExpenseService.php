@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
+use App\Models\Driver;
+use App\Models\HotelPeriod;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\TourStatus;
@@ -14,6 +17,7 @@ use App\Models\Restaurant;
 use App\Models\Show;
 use App\Models\TourRoomType;
 use App\Models\Train;
+use App\Enums\RoomSeasonType;
 use Illuminate\Support\Collection;
 
 class ExpenseService
@@ -57,26 +61,36 @@ class ExpenseService
         return $allExpenses;
     }
 
-    public static function mutateExpense(array $data, $totalPax, $roomTypeAmounts, $companyId = null, $day = null): array
+    public static function mutateExpense(array $data, $totalPax, $roomAmounts, $companyId = null, $day = null): array
     {
         switch ($data['type']) {
             case ExpenseType::Hotel->value:
                 /** @var Hotel $hotel */
                 $hotel = Hotel::query()->find($data['hotel_id']);
                 if ($hotel) {
+                    $seasonType = self::getSeasonType($hotel, $day ? $day['date'] : $data['date']);
                     $addPercent = TourService::getCompanyAddPercent($companyId);
                     $hotelTotal = 0;
-                    foreach ($roomTypeAmounts as $roomTypeId => $amount) {
+                    foreach ($roomAmounts as $roomTypeKey => $amount) {
+                        if (empty($amount)) {
+                            continue;
+                        }
+
                         $totalNights = $data['hotel_total_nights'] ?? 1;
+                        [$roomTypeId, $personType] = explode('_', $roomTypeKey);
 
                         /** @var HotelRoomType $hotelRoomType */
-                        $hotelRoomType = $hotel->roomTypes()->where('room_type_id', $roomTypeId)->first();
-                        if (!$hotelRoomType || empty($amount)) {
+                        $hotelRoomType = $hotel->roomTypes()
+                            ->where('room_type_id', $roomTypeId)
+                            ->where('person_type', $personType)
+                            ->first();
+                        if (!$hotelRoomType) {
                             continue;
                         }
 
                         $hotelTotal += $hotelRoomType->getPrice($addPercent) * $amount * $totalNights;
                     }
+                    dd($hotelTotal);
                     $data['price'] = $hotelTotal;
                 }
                 return $data;
@@ -145,6 +159,26 @@ class ExpenseService
         }
     }
 
+    public static function getSeasonType(Hotel $hotel, $date): ?RoomSeasonType
+    {
+        /** @var RoomSeasonType $seasonType */
+        $seasonType = CacheService::remember(
+            'season_type',
+            function() use ($date, $hotel) {
+                $hotelDate = Carbon::parse($date);
+                /** @var HotelPeriod $currentSeason */
+                $currentSeason = $hotel->periods()
+                    ->where('start_date', '<=', $hotelDate)
+                    ->where('end_date', '>=', $hotelDate)
+                    ->first();
+
+                return $currentSeason?->season_type;
+            }
+        );
+
+        return $seasonType;
+    }
+
     public static function createTourRoomTypes($tourId, $formState): void
     {
         $roomTypeAmounts = ExpenseService::getRoomingAmounts($formState);
@@ -209,7 +243,7 @@ class ExpenseService
     {
         return collect($data)
             ->filter(fn($value, $key) => str_starts_with($key, 'room_type_'))
-            ->mapWithKeys(fn($value, $key) => [(int)str_replace('room_type_', '', $key) => $value]);
+            ->mapWithKeys(fn($value, $key) => [str_replace('room_type_', '', $key) => $value]);
     }
 
     public static function getTrainPrices($data): Collection

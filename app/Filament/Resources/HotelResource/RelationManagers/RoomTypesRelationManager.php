@@ -31,7 +31,13 @@ class RoomTypesRelationManager extends RelationManager
                         fn(Get $get): Closure => function(string $attribute, $value, $fail) use ($get) {
                             /** @var Hotel $hotel */
                             $hotel = $this->getOwnerRecord();
-                            if ($hotel->roomTypes->contains('room_type_id', $value)) {
+                            if (
+                                $hotel->roomTypes()
+                                    ->where('room_type_id', $value)
+                                    ->where('season_type', $get('season_type'))
+                                    ->where('person_type', $get('person_type'))
+                                    ->exists()
+                            ) {
                                 $fail('The selected room type is already associated with the hotel.');
                             }
                         },
@@ -55,6 +61,8 @@ class RoomTypesRelationManager extends RelationManager
             ->recordTitleAttribute('roomType.name')
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),
+                Tables\Columns\TextColumn::make('season_type')->badge(),
+                Tables\Columns\TextColumn::make('person_type')->badge(),
                 Tables\Columns\TextColumn::make('price')
                     ->money()
                     ->numeric(),

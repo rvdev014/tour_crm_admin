@@ -204,7 +204,7 @@ class TourService
         $totalExpense = TourDayExpense::query()
             ->whereHas(
                 'tourDay',
-                fn($query) => $query->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
+                fn($query) => $query->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
                     $q->whereBetween('created_at', [$startDate, $endDate])
                         ->where('type', TourType::TPS)
                         ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
@@ -219,7 +219,7 @@ class TourService
     public static function getCorporateTotalIncome($startDate, $endDate, $countryId): float|int
     {
         $totalExpense = TourHotel::query()
-            ->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
+            ->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate])
                     ->where('type', TourType::Corporate)
                     ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
@@ -351,14 +351,14 @@ class TourService
         $roomTypes = RoomType::all();
         $personTypes = collect(RoomPersonType::getValues());
 
-        return collect(RoomSeasonType::getValues())->map(function(RoomSeasonType $seasonType) use ($roomTypes, $personTypes) {
-            return Section::make("Rooming {$seasonType->getLabel()}")->schema(
-                $roomTypes->map(function (RoomType $roomType) use ($seasonType, $personTypes) {
+        return [
+            Section::make("Roomings")->schema(
+                $roomTypes->map(function(RoomType $roomType) use ($personTypes) {
                     return Grid::make($personTypes->count())->schema(
-                        $personTypes->map(function (RoomPersonType $personType) use ($roomType, $seasonType) {
-                            return TextInput::make("room_type_{$roomType->id}_{$seasonType->value}_{$personType->value}")
-                                ->label("$roomType->name ({$seasonType->getLabel()} - {$personType->getLabel()})")
-                                ->formatStateUsing(function ($record) use ($roomType) {
+                        $personTypes->map(function(RoomPersonType $personType) use ($roomType) {
+                            return TextInput::make("room_type_{$roomType->id}_$personType->value")
+                                ->label("$roomType->name ({$personType->getLabel()})")
+                                ->formatStateUsing(function($record) use ($roomType) {
                                     if (!$record) {
                                         return 0;
                                     }
@@ -371,15 +371,15 @@ class TourService
                         })->toArray()
                     );
                 })->toArray()
-            )->collapsible()->collapsed();
-        })->toArray();
+            )->collapsible()->collapsed()
+        ];
 
         return [
             Grid::make(3)->schema(
-                RoomType::all()->map(function (RoomType $roomType) {
+                RoomType::all()->map(function(RoomType $roomType) {
                     return TextInput::make("room_type_{$roomType->id}")
                         ->label($roomType->name)
-                        ->formatStateUsing(function ($record) use ($roomType) {
+                        ->formatStateUsing(function($record) use ($roomType) {
                             if (!$record) {
                                 return 0;
                             }
@@ -618,7 +618,9 @@ HTML;
 
     public static function getOneMessage($data, bool $withPhone = true): string
     {
-        $drivers = Driver::query()->whereIn('id', $data['driver_ids'] ?? [])->get()->map(fn(Driver $driver) => $driver->name)->implode(', ');
+        $drivers = Driver::query()->whereIn('id', $data['driver_ids'] ?? [])->get()->map(
+            fn(Driver $driver) => $driver->name
+        )->implode(', ');
         $pax = $data['pax'] ?? 0;
         $route = $data['route'] ?? '-';
         $passenger = $data['passenger'] ?? '-';

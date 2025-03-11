@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\RoomSeasonType;
 use App\Filament\Resources\HotelResource\Pages;
 use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
 use App\Models\Hotel;
@@ -54,6 +55,27 @@ class HotelResource extends Resource
 
                     Forms\Components\TextInput::make('booking_cancellation_days')->numeric(),
                 ]),
+
+                Forms\Components\Repeater::make('periods')
+                    ->relationship('periods')
+                    ->columnSpanFull()
+                    ->addActionAlignment('end')
+                    ->schema([
+                        Forms\Components\Grid::make(3)->schema([
+                            Forms\Components\DatePicker::make('start_date')
+                                ->required(),
+                            Forms\Components\DatePicker::make('end_date')
+                                ->minDate(fn($get) => $get('start_date'))
+                                ->required(),
+                            Forms\Components\Select::make('season_type')
+                                ->options(function() {
+                                    return [
+                                        RoomSeasonType::Seasonal->value => RoomSeasonType::Seasonal->getLabel(),
+                                        RoomSeasonType::OffSeasonal->value => RoomSeasonType::OffSeasonal->getLabel(),
+                                    ];
+                                }),
+                        ]),
+                    ]),
             ]);
     }
 
