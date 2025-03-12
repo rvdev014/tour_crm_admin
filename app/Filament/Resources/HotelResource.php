@@ -63,8 +63,10 @@ class HotelResource extends Resource
                     ->schema([
                         Forms\Components\Grid::make(3)->schema([
                             Forms\Components\DatePicker::make('start_date')
+                                ->native(false)
                                 ->required(),
                             Forms\Components\DatePicker::make('end_date')
+                                ->native(false)
                                 ->minDate(fn($get) => $get('start_date'))
                                 ->required(),
                             Forms\Components\Select::make('season_type')

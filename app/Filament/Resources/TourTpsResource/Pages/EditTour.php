@@ -37,10 +37,10 @@ class EditTour extends EditRecord
         /** @var Tour $tour */
         $tour = $this->record;
         return [
-            SendMailAction::make('mail_rest')
+            /*SendMailAction::make('mail_rest')
                 ->tour($tour)
                 ->type('restaurants')
-                ->label('Mail Restaurants'),
+                ->label('Mail Restaurants'),*/
             SendMailAction::make('mail_hotel')
                 ->tour($tour)
                 ->type('hotels')

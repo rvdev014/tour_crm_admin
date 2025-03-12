@@ -352,18 +352,18 @@ class TourService
         $personTypes = collect(RoomPersonType::getValues());
 
         return [
-            Section::make("Roomings")->schema(
+            Section::make("Rooming amounts")->schema(
                 $roomTypes->map(function(RoomType $roomType) use ($personTypes) {
                     return Grid::make($personTypes->count())->schema(
                         $personTypes->map(function(RoomPersonType $personType) use ($roomType) {
                             return TextInput::make("room_type_{$roomType->id}_$personType->value")
                                 ->label("$roomType->name ({$personType->getLabel()})")
-                                ->formatStateUsing(function($record) use ($roomType) {
+                                ->formatStateUsing(function($record) use ($roomType, $personType) {
                                     if (!$record) {
                                         return 0;
                                     }
                                     $tourRoomType = $record->roomTypes->first(
-                                        fn($item) => $item->room_type_id == $roomType->id
+                                        fn($item) => $item->room_type_id == $roomType->id && $item->person_type == $personType
                                     );
                                     return $tourRoomType?->amount ?? 0;
                                 })
@@ -666,8 +666,12 @@ HTML;
         return $enumClass::from($value)->getLabel();
     }
 
-    public static function calculateHotelNights(string $date, string $checkIn, string $checkOutDateTime): float
+    public static function calculateHotelNights(?string $date, ?string $checkIn, ?string $checkOutDateTime): float
     {
+        if (!$date || !$checkIn || !$checkOutDateTime) {
+            return 0;
+        }
+
         $date = \Illuminate\Support\Carbon::parse($date);
         $hotelCheckinDateTime = Carbon::parse($date->format('Y-m-d') . ' ' . $checkIn);
         $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);

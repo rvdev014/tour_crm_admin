@@ -78,8 +78,9 @@ class TourCorporateResource extends Resource
             ]),
 
             // Add section with subtitle
-            Components\Fieldset::make('Rooming')
-                ->schema(TourService::generateRoomingSchema()),
+            ...TourService::generateRoomingSchema(),
+            /*Components\Fieldset::make('Rooming')
+                ->schema(TourService::generateRoomingSchema()),*/
 
             Components\Fieldset::make('Transport info')->schema([
                 Components\Select::make('transport_type')
