@@ -607,7 +607,7 @@ HTML;
                         'nameplate' => $data['nameplate'],
                         'date' => $data['date_time'],
                         'transport_type' => $data['transport_type'],
-                        'price' => $data['price'],
+                        'price' => $data['price'] ?? '',
                         'comment' => $data['comment'],
                     ]),
                     ['parse_mode' => 'HTML']
