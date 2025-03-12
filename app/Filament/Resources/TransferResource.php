@@ -110,15 +110,15 @@ class TransferResource extends Resource
                     Forms\Components\TextInput::make('passenger'),
                     Forms\Components\TextInput::make('nameplate')
                         ->label('Табличка'),
-                    Forms\Components\TextInput::make('buy_price')->numeric(),
+//                    Forms\Components\TextInput::make('buy_price')->numeric(),
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
                     /*Forms\Components\TextInput::make('price')
                         ->label('Sell price')
                         ->numeric(),*/
-//                    Forms\Components\TextInput::make('sell_price')->numeric(),
-//                    Forms\Components\TextInput::make('buy_price')->numeric(),
+                    Forms\Components\TextInput::make('sell_price')->numeric(),
+                    Forms\Components\TextInput::make('buy_price')->numeric(),
                 ]),
 
                 Forms\Components\Textarea::make('comment')
