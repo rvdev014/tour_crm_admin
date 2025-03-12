@@ -18,14 +18,16 @@ class ListCompanyExpenses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            ExportAction::make()->exports([
-                ExcelExport::make()->fromTable()->withColumns([
-                    Column::make('group_number')->heading('Group number')->getStateUsing(function (TourDayExpense $record) {
-                        $tour = $record->tour ?? $record->tourDay->tour;
-                        return $tour->group_number;
-                    }),
-                ])
-            ]),
+            ExportAction::make()
+                ->requiresConfirmation()
+                ->exports([
+                    ExcelExport::make()->fromTable()->withColumns([
+                        Column::make('group_number')->heading('Group number')->getStateUsing(function (TourDayExpense $record) {
+                            $tour = $record->tour ?? $record->tourDay->tour;
+                            return $tour->group_number;
+                        }),
+                    ])
+                ]),
             Actions\CreateAction::make(),
         ];
     }
