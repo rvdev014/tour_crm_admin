@@ -20,6 +20,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class TransferResource extends Resource
 {
@@ -107,14 +110,15 @@ class TransferResource extends Resource
                     Forms\Components\TextInput::make('passenger'),
                     Forms\Components\TextInput::make('nameplate')
                         ->label('Табличка'),
+                    Forms\Components\TextInput::make('buy_price')->numeric(),
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\TextInput::make('price')
+                    /*Forms\Components\TextInput::make('price')
                         ->label('Sell price')
-                        ->numeric(),
+                        ->numeric(),*/
 //                    Forms\Components\TextInput::make('sell_price')->numeric(),
-                    Forms\Components\TextInput::make('buy_price')->numeric(),
+//                    Forms\Components\TextInput::make('buy_price')->numeric(),
                 ]),
 
                 Forms\Components\Textarea::make('comment')
@@ -220,7 +224,9 @@ class TransferResource extends Resource
                         }
                         if ($data['statuses']) {
                             $query = $query->whereIn('status', $data['statuses']);
-                            $statuses = collect($data['statuses'])->map(fn($status) => ExpenseStatus::from($status)->getLabel())->join(', ');
+                            $statuses = collect($data['statuses'])->map(
+                                fn($status) => ExpenseStatus::from($status)->getLabel()
+                            )->join(', ');
                             $indicators['statuses'] = 'Status: ' . $statuses . " ({$query->count()})";
                         }
                         if ($data['companies']) {
@@ -245,7 +251,8 @@ class TransferResource extends Resource
             ], layout: FiltersLayout::AboveContent)
             ->defaultSort('date_time', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('company.name'),
+                Tables\Columns\TextColumn::make('company.name')
+                    ->label('Company'),
 
                 Tables\Columns\TextColumn::make('date_time')
                     ->label('Date & Time')

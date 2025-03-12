@@ -153,6 +153,7 @@ class ExportService
     {
         $addPercent = TourService::getCompanyAddPercent($tour->company_id);
 
+        // TODO: person_type, season_type added
         $tourRoomTypes = $tour->roomTypes->map(fn(TourRoomType $roomType) => [
             'id' => $roomType->roomType->id,
             'name' => $roomType->roomType->name,

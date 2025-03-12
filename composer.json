@@ -16,9 +16,9 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "*",
         "laravel/tinker": "^2.8",
-        "phpoffice/phpspreadsheet": "^3.8",
         "phpoffice/phpword": "^1.3",
-        "ysfkaya/filament-phone-input": "^3.1"
+        "ysfkaya/filament-phone-input": "^3.1",
+        "pxlrbt/filament-excel": "^2.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.14",

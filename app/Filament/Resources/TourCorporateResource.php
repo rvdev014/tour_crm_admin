@@ -227,15 +227,22 @@ class TourCorporateResource extends Resource
                     Components\Fieldset::make('Transport info')->schema([
 
                         Components\Grid::make(3)->schema([
-                            Components\Select::make('transport_driver_id')
+                            Components\Select::make('transport_driver_ids')
+                                ->label('Drivers')
+                                ->multiple()
                                 ->options(TourService::getDrivers())
                                 ->native(false)
                                 ->searchable()
                                 ->preload(),
                             Components\TimePicker::make('transport_time')
                                 ->seconds(false),
+                        ]),
+
+                        Components\Grid::make()->schema([
                             Components\TextInput::make('transport_place')
                                 ->label('Pickup location'),
+                            Components\TextInput::make('transport_route')
+                                ->label('Route'),
                         ]),
 
                         Components\Grid::make(3)->schema([
