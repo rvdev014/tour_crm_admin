@@ -75,7 +75,7 @@ class RoomTypesRelationManager extends RelationManager
                     ->label('Price Foreign')
                     ->money()
                     ->numeric(),
-                Tables\Columns\TextColumn::make('person_type')->badge(),
+//                Tables\Columns\TextColumn::make('person_type')->badge(),
             ])
             ->filters([
                 //
