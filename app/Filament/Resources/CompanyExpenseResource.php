@@ -146,11 +146,11 @@ class CompanyExpenseResource extends Resource
                     ->label('Expense Name')
                     ->getStateUsing(function (TourDayExpense $record) {
                         return match ($record->type) {
-                            ExpenseType::Hotel => $record->hotel->name,
+                            ExpenseType::Hotel => $record->hotel?->name,
                             ExpenseType::Museum => TourService::getMuseumsByIds([1, 2])->values()->join(', '),
-                            ExpenseType::Lunch, ExpenseType::Dinner => $record->restaurant->name,
-                            ExpenseType::Train => $record->train->name,
-                            ExpenseType::Show => $record->show->name,
+                            ExpenseType::Lunch, ExpenseType::Dinner => $record->restaurant?->name,
+                            ExpenseType::Train => $record->train?->name,
+                            ExpenseType::Show => $record->show?->name,
                             default => '',
                         };
                     })
