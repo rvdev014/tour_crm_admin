@@ -17,21 +17,23 @@ class ListTransfers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            ExportAction::make()->exports([
-                ExcelExport::make()->fromTable()->withColumns([
-                    Column::make('date_time')->heading('Date & Time')->formatStateUsing(function ($state) {
-                        return $state->format('d.m.Y H:i');
-                    }),
-                    Column::make('driver_ids')->heading('Drivers')->formatStateUsing(function ($state) {
-                        if (empty($state)) {
-                            return '-';
-                        }
+            ExportAction::make()
+                ->requiresConfirmation()
+                ->exports([
+                    ExcelExport::make()->fromTable()->withColumns([
+                        Column::make('date_time')->heading('Date & Time')->formatStateUsing(function ($state) {
+                            return $state->format('d.m.Y H:i');
+                        }),
+                        Column::make('driver_ids')->heading('Drivers')->formatStateUsing(function ($state) {
+                            if (empty($state)) {
+                                return '-';
+                            }
 
-                        $driver = Driver::query()->find($state);
-                        return $driver?->name ?? '-';
-                    }),
-                ])
-            ]),
+                            $driver = Driver::query()->find($state);
+                            return $driver?->name ?? '-';
+                        }),
+                    ])
+                ]),
             Actions\CreateAction::make(),
         ];
     }
