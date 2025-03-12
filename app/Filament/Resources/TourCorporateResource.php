@@ -7,6 +7,7 @@ use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\TourType;
 use App\Enums\TransportType;
+use Filament\Forms\Components\Section;
 use App\Filament\Resources\TourCorporateResource\Pages;
 use App\Filament\Resources\TourCorporateResource\RelationManagers;
 use App\Models\City;
@@ -77,10 +78,15 @@ class TourCorporateResource extends Resource
                 Components\Textarea::make('comment'),
             ]),
 
-            // Add section with subtitle
-            ...TourService::generateRoomingSchema(),
-            /*Components\Fieldset::make('Rooming')
-                ->schema(TourService::generateRoomingSchema()),*/
+            Components\Fieldset::make('Rooming info')->schema([
+
+                ...TourService::generateRoomingSchema(true),
+
+                Section::make("Other rooming")
+                    ->schema(TourService::generateRoomingSchema())
+                    ->collapsible()
+                    ->collapsed(),
+            ]),
 
             Components\Fieldset::make('Transport info')->schema([
                 Components\Select::make('transport_type')

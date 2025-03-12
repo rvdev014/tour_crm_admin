@@ -346,65 +346,46 @@ class TourService
         return Number::currency($money, Table::$defaultCurrency);
     }
 
-    public static function generateRoomingSchema(): array
+    public static function generateRoomingSchema($firstThree = false): array
     {
-        $roomTypes = RoomType::all();
+        if ($firstThree) {
+            $roomTypes = RoomType::query()->limit(3)->get();
+        } else {
+            $roomTypes = RoomType::query()->skip(3)->get();
+        }
         $personTypes = collect(RoomPersonType::getValues());
 
-        return [
-            Section::make("Rooming amounts")->schema(
-                $roomTypes->map(function(RoomType $roomType) use ($personTypes) {
-                    return Grid::make($personTypes->count())->schema([
+        return $roomTypes->map(function(RoomType $roomType) use ($personTypes) {
+            return Grid::make($personTypes->count())->schema([
 
-                        TextInput::make("room_type_{$roomType->id}_uz")
-                            ->label("$roomType->name (Uzbek)")
-                            ->formatStateUsing(function($record) use ($roomType) {
-                                if (!$record) {
-                                    return 0;
-                                }
-                                $tourRoomType = $record->roomTypes->first(
-                                    fn($item) => $item->room_type_id == $roomType->id && $item->person_type == RoomPersonType::Uzbek
-                                );
-                                return $tourRoomType?->amount ?? 0;
-                            })
-                            ->numeric(),
+                TextInput::make("room_type_{$roomType->id}_uz")
+                    ->label("$roomType->name (Uzbek)")
+                    ->formatStateUsing(function($record) use ($roomType) {
+                        if (!$record) {
+                            return 0;
+                        }
+                        $tourRoomType = $record->roomTypes->first(
+                            fn($item) => $item->room_type_id == $roomType->id && $item->person_type == RoomPersonType::Uzbek
+                        );
+                        return $tourRoomType?->amount ?? 0;
+                    })
+                    ->numeric(),
 
-                        TextInput::make("room_type_{$roomType->id}_foreign")
-                            ->label("$roomType->name (Foreign)")
-                            ->formatStateUsing(function($record) use ($roomType) {
-                                if (!$record) {
-                                    return 0;
-                                }
-                                $tourRoomType = $record->roomTypes->first(
-                                    fn($item) => $item->room_type_id == $roomType->id && $item->person_type == RoomPersonType::Foreign
-                                );
-                                return $tourRoomType?->amount ?? 0;
-                            })
-                            ->numeric(),
+                TextInput::make("room_type_{$roomType->id}_foreign")
+                    ->label("$roomType->name (Foreign)")
+                    ->formatStateUsing(function($record) use ($roomType) {
+                        if (!$record) {
+                            return 0;
+                        }
+                        $tourRoomType = $record->roomTypes->first(
+                            fn($item) => $item->room_type_id == $roomType->id && $item->person_type == RoomPersonType::Foreign
+                        );
+                        return $tourRoomType?->amount ?? 0;
+                    })
+                    ->numeric(),
 
-                    ]);
-                })->toArray()
-            )->collapsible()->collapsed()
-        ];
-
-        return [
-            Grid::make(3)->schema(
-                RoomType::all()->map(function(RoomType $roomType) {
-                    return TextInput::make("room_type_{$roomType->id}")
-                        ->label($roomType->name)
-                        ->formatStateUsing(function($record) use ($roomType) {
-                            if (!$record) {
-                                return 0;
-                            }
-                            $tourRoomType = $record->roomTypes->first(
-                                fn($item) => $item->room_type_id == $roomType->id
-                            );
-                            return $tourRoomType?->amount ?? 0;
-                        })
-                        ->numeric();
-                })->toArray()
-            )
-        ];
+            ]);
+        })->toArray();
     }
 
     public static function getCompanies(CompanyType $type)
