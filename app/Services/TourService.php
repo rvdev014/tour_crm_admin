@@ -354,22 +354,35 @@ class TourService
         return [
             Section::make("Rooming amounts")->schema(
                 $roomTypes->map(function(RoomType $roomType) use ($personTypes) {
-                    return Grid::make($personTypes->count())->schema(
-                        $personTypes->map(function(RoomPersonType $personType) use ($roomType) {
-                            return TextInput::make("room_type_{$roomType->id}_$personType->value")
-                                ->label("$roomType->name ({$personType->getLabel()})")
-                                ->formatStateUsing(function($record) use ($roomType, $personType) {
-                                    if (!$record) {
-                                        return 0;
-                                    }
-                                    $tourRoomType = $record->roomTypes->first(
-                                        fn($item) => $item->room_type_id == $roomType->id && $item->person_type == $personType
-                                    );
-                                    return $tourRoomType?->amount ?? 0;
-                                })
-                                ->numeric();
-                        })->toArray()
-                    );
+                    return Grid::make($personTypes->count())->schema([
+
+                        TextInput::make("room_type_{$roomType->id}_uz")
+                            ->label("$roomType->name (Uzbek)")
+                            ->formatStateUsing(function($record) use ($roomType) {
+                                if (!$record) {
+                                    return 0;
+                                }
+                                $tourRoomType = $record->roomTypes->first(
+                                    fn($item) => $item->room_type_id == $roomType->id && $item->person_type == RoomPersonType::Uzbek
+                                );
+                                return $tourRoomType?->amount ?? 0;
+                            })
+                            ->numeric(),
+
+                        TextInput::make("room_type_{$roomType->id}_foreign")
+                            ->label("$roomType->name (Foreign)")
+                            ->formatStateUsing(function($record) use ($roomType) {
+                                if (!$record) {
+                                    return 0;
+                                }
+                                $tourRoomType = $record->roomTypes->first(
+                                    fn($item) => $item->room_type_id == $roomType->id && $item->person_type == RoomPersonType::Foreign
+                                );
+                                return $tourRoomType?->amount ?? 0;
+                            })
+                            ->numeric(),
+
+                    ]);
                 })->toArray()
             )->collapsible()->collapsed()
         ];

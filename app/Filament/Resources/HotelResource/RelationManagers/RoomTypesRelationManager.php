@@ -33,24 +33,29 @@ class RoomTypesRelationManager extends RelationManager
                             $hotel = $this->getOwnerRecord();
                             if (
                                 $hotel->roomTypes()
+                                    ->when(
+                                        $get('id'),
+                                        fn($query) => $query->whereNot('id', $get('id'))
+                                    )
                                     ->where('room_type_id', $value)
                                     ->where('season_type', $get('season_type'))
-                                    ->where('person_type', $get('person_type'))
                                     ->exists()
                             ) {
                                 $fail('The selected room type is already associated with the hotel.');
                             }
                         },
                     ]),
-                Forms\Components\TextInput::make('price')
-                    ->required()
-                    ->maxLength(255),
                 Forms\Components\Select::make('season_type')
                     ->required()
                     ->options(RoomSeasonType::class),
-                Forms\Components\Select::make('person_type')
+                Forms\Components\TextInput::make('price')
+                    ->label('Price Uz')
                     ->required()
-                    ->options(RoomPersonType::class),
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('price_foreign')
+                    ->label('Price Foreign')
+                    ->required()
+                    ->maxLength(255),
             ]);
     }
 
@@ -62,10 +67,15 @@ class RoomTypesRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),
                 Tables\Columns\TextColumn::make('season_type')->badge(),
-                Tables\Columns\TextColumn::make('person_type')->badge(),
                 Tables\Columns\TextColumn::make('price')
+                    ->label('Price Uz')
                     ->money()
                     ->numeric(),
+                Tables\Columns\TextColumn::make('price_foreign')
+                    ->label('Price Foreign')
+                    ->money()
+                    ->numeric(),
+                Tables\Columns\TextColumn::make('person_type')->badge(),
             ])
             ->filters([
                 //
