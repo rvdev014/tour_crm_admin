@@ -18,6 +18,7 @@ use App\Models\Show;
 use App\Models\TourRoomType;
 use App\Models\Train;
 use App\Enums\RoomSeasonType;
+use App\Enums\RoomPersonType;
 use Illuminate\Support\Collection;
 
 class ExpenseService
@@ -82,15 +83,13 @@ class ExpenseService
                         /** @var HotelRoomType $hotelRoomType */
                         $hotelRoomType = $hotel->roomTypes()
                             ->where('room_type_id', $roomTypeId)
-                            ->where('person_type', $personType)
                             ->where('season_type', $seasonType)
                             ->first();
-
                         if (!$hotelRoomType) {
                             continue;
                         }
 
-                        $hotelTotal += $hotelRoomType->getPrice($addPercent) * $amount * $totalNights;
+                        $hotelTotal += $hotelRoomType->getPrice($addPercent, $personType) * $amount * $totalNights;
                     }
 
                     $data['price'] = $hotelTotal;
@@ -190,6 +189,8 @@ class ExpenseService
             }
 
             [$roomTypeId, $personType] = explode('_', $roomTypeKey);
+            $personType = $personType === 'uz' ? RoomPersonType::Uzbek : RoomPersonType::Foreign;
+
             TourRoomType::query()->updateOrCreate(
                 [
                     'tour_id' => $tourId,
@@ -208,6 +209,7 @@ class ExpenseService
         $roomAmounts = ExpenseService::getRoomingAmounts($tourData);
         foreach ($roomAmounts as $roomTypeKey => $amount) {
             [$roomTypeId, $personType] = explode('_', $roomTypeKey);
+            $personType = $personType === 'uz' ? RoomPersonType::Uzbek : RoomPersonType::Foreign;
 
             $tourHotelRoomType = TourRoomType::query()
                 ->where('tour_id', $tourId)
@@ -226,6 +228,7 @@ class ExpenseService
                     TourRoomType::query()->create([
                         'tour_id' => $tourId,
                         'room_type_id' => $roomTypeId,
+                        'person_type' => $personType,
                         'amount' => $amount,
                     ]);
                 }

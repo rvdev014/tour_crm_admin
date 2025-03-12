@@ -57,6 +57,7 @@ class HotelResource extends Resource
                 ]),
 
                 Forms\Components\Repeater::make('periods')
+                    ->extraAttributes(['class' => 'repeater-guides'])
                     ->relationship('periods')
                     ->columnSpanFull()
                     ->addActionAlignment('end')
@@ -70,12 +71,7 @@ class HotelResource extends Resource
                                 ->minDate(fn($get) => $get('start_date'))
                                 ->required(),
                             Forms\Components\Select::make('season_type')
-                                ->options(function() {
-                                    return [
-                                        RoomSeasonType::Seasonal->value => RoomSeasonType::Seasonal->getLabel(),
-                                        RoomSeasonType::OffSeasonal->value => RoomSeasonType::OffSeasonal->getLabel(),
-                                    ];
-                                }),
+                                ->options(RoomSeasonType::class),
                         ]),
                     ]),
             ]);

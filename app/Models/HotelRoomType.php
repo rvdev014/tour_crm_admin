@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property RoomSeasonType $season_type
  * @property RoomPersonType $person_type
  * @property float $price
+ * @property float $price_foreign
  *
  * @property RoomType $roomType
  * @property Hotel $hotel
@@ -29,6 +30,7 @@ class HotelRoomType extends Model
         'hotel_id',
         'room_type_id',
         'price',
+        'price_foreign',
         'season_type',
         'person_type',
     ];
@@ -48,9 +50,9 @@ class HotelRoomType extends Model
         return $this->belongsTo(RoomType::class)->orderBy('id');
     }
 
-    public function getPrice($addPercent): int|float
+    public function getPrice($addPercent, $personType = 'uz'): int|float
     {
-        $hotelPrice = $this->price;
+        $hotelPrice = $personType === 'uz' ? $this->price : $this->price_foreign;
         if ($addPercent) {
             $hotelPrice += $hotelPrice * $addPercent / 100;
         }

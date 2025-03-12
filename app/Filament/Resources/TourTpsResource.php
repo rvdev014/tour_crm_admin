@@ -8,6 +8,7 @@ use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Enums\TourType;
 use App\Enums\TransportType;
+use Filament\Forms\Components\Section;
 use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
 use App\Filament\Resources\TourTpsResource\Pages;
 use App\Filament\Resources\TourTpsResource\RelationManagers;
@@ -148,12 +149,15 @@ class TourTpsResource extends Resource
                 ])->visible(fn($get) => $get('guide_type') == GuideType::Escort->value)
             ]),
 
-            // Add section with subtitle
-            ...TourService::generateRoomingSchema(),
-            /*Components\Section::make('Rooming')
-                ->schema(TourService::generateRoomingSchema())
-                ->collapsible()
-                ->collapsed(true)*/
+            Components\Fieldset::make('Rooming info')->schema([
+
+                ...TourService::generateRoomingSchema(true),
+
+                Section::make("Other rooming")
+                    ->schema(TourService::generateRoomingSchema())
+                    ->collapsible()
+                    ->collapsed(),
+            ]),
 
             Components\Fieldset::make('Transport info')->schema([
                 Components\Select::make('transport_type')
