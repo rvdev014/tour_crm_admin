@@ -37,7 +37,7 @@ class ExpenseService
                         $expense,
                         $totalPax,
                         $roomingAmounts,
-                        $formState['country_id'],
+                        null,
                         $formState['company_id']
                     )
                 );

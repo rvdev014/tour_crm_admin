@@ -412,7 +412,7 @@ class TourCorporateResource extends Resource
                         $data,
                         count($passengers),
                         ExpenseService::getRoomingAmounts($tourData),
-                        $tourData['country_id'],
+                        null,
                         $tourData['company_id']
                     );
                 })
@@ -423,7 +423,7 @@ class TourCorporateResource extends Resource
                         $data,
                         count($passengers),
                         ExpenseService::getRoomingAmounts($tourData),
-                        $tourData['country_id'],
+                        null,
                         $tourData['company_id'],
                     );
                 })

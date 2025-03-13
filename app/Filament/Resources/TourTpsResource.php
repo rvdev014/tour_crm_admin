@@ -89,7 +89,7 @@ class TourTpsResource extends Resource
                     ->label('Arrival time')
                     ->native(false)
                     ->seconds(false)
-                    ->minDate(fn ($record) => $record ? $record->start_date : now())
+                    ->minDate(fn ($record) => $record ? $record->start_date : null)
                     ->afterStateUpdated(function ($get, $set) {
                         $startDate = $get('start_date');
                         $firstDay = $get('days') ? Arr::first($get('days')) : null;
@@ -210,7 +210,7 @@ class TourTpsResource extends Resource
                     Components\Grid::make()->schema([
                         Components\DatePicker::make('date')
                             ->displayFormat('d.m.Y')
-                            ->minDate(fn ($record) => $record ? $record->date : now())
+                            ->minDate(fn ($record) => $record ? $record->date : null)
                             ->native(false)
                             ->required()
                             ->reactive(),

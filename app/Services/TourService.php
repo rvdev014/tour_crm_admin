@@ -220,7 +220,11 @@ class TourService
 
     public static function tourNextId(): int
     {
-        $toursTableSequence = DB::selectOne('SELECT last_value + 1 AS next_id FROM tours_id_seq;');
+        if (DB::table('tours')->count() == 0) {
+            return 1;
+        }
+
+        $toursTableSequence = DB::selectOne("SELECT last_value + 1 AS next_id FROM tours_id_seq;");
         return ($toursTableSequence?->next_id ?? 1);
     }
 
@@ -415,7 +419,7 @@ HTML;
                 'to_city' => $data['to_city_id'],
                 'transport_place' => $data['place_of_submission'],
                 'route' => $data['route'],
-                'passenger' => $data['passenger'],
+                'mark' => $data['mark'],
                 'nameplate' => $data['nameplate'],
                 'date' => $data['date_time'],
                 'transport_type' => $data['transport_type'],
@@ -437,7 +441,7 @@ HTML;
 
         $pax = $data['pax'] ?? 0;
         $route = $data['route'] ?? '-';
-        $passenger = $data['passenger'] ?? '-';
+        $mark = $data['mark'] ?? '-';
         $nameplate = $data['nameplate'] ?? '-';
         $toCity = $data['to_city'] ? City::find($data['to_city']) : null;
         $place = $data['transport_place'] ?? '-';
@@ -455,7 +459,7 @@ HTML;
 <b>Pickup location:</b> {$place}
 <b>Transport:</b> {$transportType}
 <b>Route:</b> {$route}
-<b>Passenger:</b> {$passenger}
+<b>Marka:</b> {$mark}
 <b>Табличка:</b> {$nameplate}
 <b>Comment:</b> {$comment}
 HTML;
