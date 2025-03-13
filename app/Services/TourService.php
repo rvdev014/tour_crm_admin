@@ -350,11 +350,6 @@ class TourService
                         continue;
                     }
 
-                    $driverIds = $expense['transport_driver_ids'];
-                    if (empty($driverIds)) {
-                        continue;
-                    }
-
                     $date = Carbon::parse($day['date'])->format('Y-m-d');
                     $time = Carbon::parse($expense['transport_time'])->format('H:i');
                     $totalPax = ($tourData['pax'] ?? 0) + ($tourData['leader_pax'] ?? 0);
@@ -424,7 +419,7 @@ HTML;
                 'nameplate' => $data['nameplate'],
                 'date' => $data['date_time'],
                 'transport_type' => $data['transport_type'],
-                'price' => $data['price'],
+                'price' => $data['price'] ?? '',
                 'comment' => $data['comment'],
             ]);
 
