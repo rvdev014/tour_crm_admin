@@ -152,6 +152,7 @@ class ExportService
     public static function genSecondTable(int $startRow, Worksheet $sheet, Tour $tour): array
     {
         $addPercent = TourService::getCompanyAddPercent($tour->company_id);
+        $personType = ExpenseService::getPersonType($tour->country_id);
 
         // TODO: person_type, season_type added
         $tourRoomTypes = $tour->roomTypes->map(fn(TourRoomType $roomType) => [
@@ -255,14 +256,21 @@ class ExportService
 
             // Room types, Amount, Price, Total
             foreach ($tourRoomTypes as $roomType) {
+                if (!$hotelExpense) {
+                    continue;
+                }
+
+                $hotel = $hotelExpense->hotel;
+                $seasonType = ExpenseService::getSeasonType($hotel, $tourDay->date);
+
                 /** @var HotelRoomType $hotelRoomType */
-                $hotelRoomType = HotelRoomType::query()
-                    ->where('hotel_id', $hotelExpense?->hotel_id)
+                $hotelRoomType = $hotel->roomTypes()
                     ->where('room_type_id', $roomType['id'])
+                    ->where('season_type', $seasonType)
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
-                $price = $hotelRoomType?->getPrice($addPercent) ?? 0;
+                $price = $hotelRoomType?->getPrice($addPercent, $personType) ?? 0;
                 $hotelTotal = $amount * $price;
 
                 $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];
@@ -407,6 +415,7 @@ class ExportService
     public static function genSecondTableCorporate(int $startRow, Worksheet $sheet, Tour $tour): array
     {
         $addPercent = TourService::getCompanyAddPercent($tour->company_id);
+        $personType = ExpenseService::getPersonType($tour->country_id);
 
         $tourRoomTypes = $tour->roomTypes->map(fn(TourRoomType $roomType) => [
             'id' => $roomType->roomType->id,
@@ -523,14 +532,17 @@ class ExportService
 
             // Room types, Amount, Price, Total
             foreach ($tourRoomTypes as $roomType) {
+                $hotel = $hotelExpense->hotel;
+                $seasonType = ExpenseService::getSeasonType($hotel, $hotelExpense->date);
+
                 /** @var HotelRoomType $hotelRoomType */
-                $hotelRoomType = HotelRoomType::query()
-                    ->where('hotel_id', $hotelExpense?->hotel_id)
+                $hotelRoomType = $hotel->roomTypes()
                     ->where('room_type_id', $roomType['id'])
+                    ->where('season_type', $seasonType)
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
-                $price = $hotelRoomType?->getPrice($addPercent) ?? 0;
+                $price = $hotelRoomType?->getPrice($addPercent, $personType) ?? 0;
                 $hotelTotal = $amount * $price;
 
                 $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];

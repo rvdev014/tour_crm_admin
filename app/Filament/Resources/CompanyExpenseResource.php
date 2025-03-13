@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\CompanyType;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Filament\Resources\CompanyExpenseResource\Pages;
@@ -38,6 +39,11 @@ class CompanyExpenseResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->whereHas('tour');
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -53,7 +59,11 @@ class CompanyExpenseResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->label('Company')
-                                ->options(fn() => Company::all()->pluck('name', 'id')),
+                                ->options(
+                                    fn() => Company::all()
+                                    ->where('type', CompanyType::Corporate)
+                                    ->pluck('name', 'id')
+                                ),
                             Forms\Components\Select::make('expense_types')
                                 ->native(false)
                                 ->multiple()

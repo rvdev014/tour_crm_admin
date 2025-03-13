@@ -148,7 +148,6 @@ class TourCorporateResource extends Resource
                             ->reactive(),
                         Components\DatePicker::make('date')
                             ->displayFormat('d.m.Y')
-                            ->minDate(now())
                             ->native(false)
                             ->required()
                             ->afterStateUpdated(function($get, $set) {
@@ -413,6 +412,7 @@ class TourCorporateResource extends Resource
                         $data,
                         count($passengers),
                         ExpenseService::getRoomingAmounts($tourData),
+                        $tourData['country_id'],
                         $tourData['company_id']
                     );
                 })
@@ -423,7 +423,8 @@ class TourCorporateResource extends Resource
                         $data,
                         count($passengers),
                         ExpenseService::getRoomingAmounts($tourData),
-                        $tourData['company_id']
+                        $tourData['country_id'],
+                        $tourData['company_id'],
                     );
                 })
         ]);

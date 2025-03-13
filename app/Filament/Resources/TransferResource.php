@@ -2,27 +2,27 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Driver;
+use App\Models\Company;
+use App\Models\Transfer;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
 use App\Enums\ExpenseStatus;
 use App\Enums\TransportType;
-use App\Filament\Resources\TransferResource\Pages;
-use App\Filament\Resources\TransferResource\RelationManagers;
-use App\Models\Company;
-use App\Models\Driver;
-use App\Models\Transfer;
 use App\Services\TourService;
-use Filament\Forms;
 use Filament\Forms\Components;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Enums\FiltersLayout;
 use pxlrbt\FilamentExcel\Columns\Column;
+use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use App\Filament\Resources\TransferResource\Pages;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use App\Filament\Resources\TransferResource\RelationManagers;
 
 class TransferResource extends Resource
 {
@@ -99,7 +99,6 @@ class TransferResource extends Resource
 
                     Forms\Components\DateTimePicker::make('date_time')
                         ->displayFormat('d.m.Y H:i')
-//                        ->minDate(now())
                         ->native(false)
                         ->seconds(false),
 
@@ -107,10 +106,12 @@ class TransferResource extends Resource
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\TextInput::make('passenger'),
+                    Forms\Components\TextInput::make('mark')
+                        ->label('Marka'),
+                    //                    Forms\Components\TextInput::make('passenger'),
                     Forms\Components\TextInput::make('nameplate')
                         ->label('Табличка'),
-//                    Forms\Components\TextInput::make('buy_price')->numeric(),
+                    //                    Forms\Components\TextInput::make('buy_price')->numeric(),
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
@@ -132,16 +133,16 @@ class TransferResource extends Resource
             ->striped()
             ->modifyQueryUsing(fn($query) => $query->with(['toCity', 'company', 'createdBy']))
             ->filtersFormColumns(3)
-            ->recordClasses(function ($record) {
+            ->recordClasses(function($record) {
                 if ($record->status == ExpenseStatus::Done) {
                     return ' color-green';
                 }
 
                 return match ($record->status) {
-                    ExpenseStatus::Done => 'color-green',
-                    ExpenseStatus::Rejected => 'color-red',
+                    ExpenseStatus::Done      => 'color-green',
+                    ExpenseStatus::Rejected  => 'color-red',
                     ExpenseStatus::Confirmed => 'color-light-orange',
-                    default => null,
+                    default                  => null,
                 };
             })
             ->filters([
@@ -176,7 +177,7 @@ class TransferResource extends Resource
                                 ->native(false),
                         ])
                     ])
-                    ->query(function (Builder $query, $data) {
+                    ->query(function(Builder $query, $data) {
                         if ($data['today'] && $data['tomorrow']) {
                             $query = $query
                                 ->whereDate('date_time', Carbon::today())
@@ -203,7 +204,7 @@ class TransferResource extends Resource
                         }
                         return $query;
                     })
-                    ->indicateUsing(function (array $data): array {
+                    ->indicateUsing(function(array $data): array {
                         $query = Transfer::query();
 
                         $indicators = [];
@@ -257,7 +258,7 @@ class TransferResource extends Resource
                 Tables\Columns\TextColumn::make('date_time')
                     ->label('Date & Time')
                     ->dateTime()
-                    ->formatStateUsing(function ($state) {
+                    ->formatStateUsing(function($state) {
                         return <<<HTML
 <div style="text-align: center">
     <p>{$state->format('d.m.Y')} {$state->format('H:i')}</p>
@@ -271,7 +272,7 @@ HTML;
                     ->label('Pickup location'),
 
                 Tables\Columns\TextColumn::make('pax')
-                    ->formatStateUsing(function ($record, $state) {
+                    ->formatStateUsing(function($record, $state) {
                         return $state . ' pax';
                     })
                     ->numeric()
@@ -285,7 +286,7 @@ HTML;
 
                 Tables\Columns\TextColumn::make('driver_ids')
                     ->label('Drivers')
-                    ->formatStateUsing(function ($record) {
+                    ->formatStateUsing(function($record) {
                         if (empty($record->driver_ids)) {
                             return '';
                         }
@@ -303,9 +304,9 @@ HTML;
 
                 Tables\Columns\TextColumn::make('transport_type')->sortable(),
 
-//                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
+                //                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
 
-//                Tables\Columns\TextColumn::make('group_number')->sortable(),
+                //                Tables\Columns\TextColumn::make('group_number')->sortable(),
 
                 Tables\Columns\TextColumn::make('price')
                     ->money()

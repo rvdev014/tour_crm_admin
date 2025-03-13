@@ -625,6 +625,7 @@ class TourTpsResource extends Resource
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
                                 ExpenseService::getRoomingAmounts($tourData),
+                                $tourData['country_id'],
                                 null,
                                 $get()
                             );
@@ -636,6 +637,7 @@ class TourTpsResource extends Resource
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
                                 ExpenseService::getRoomingAmounts($tourData),
+                                $tourData['country_id'],
                                 null,
                                 $get()
                             );

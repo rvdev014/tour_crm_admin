@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // * @property numeric $sell_price
  * @property numeric $buy_price
  * @property string $nameplate
+ * @property string $mark
  *
  * @property User $createdBy
  * @property Driver $driver
@@ -71,6 +72,7 @@ class Transfer extends Model
         'date_time',
         'place_of_submission',
 
+        'mark',
         'route',
         'passenger',
 //        'sell_price',

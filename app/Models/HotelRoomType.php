@@ -50,9 +50,9 @@ class HotelRoomType extends Model
         return $this->belongsTo(RoomType::class)->orderBy('id');
     }
 
-    public function getPrice($addPercent, $personType = 'uz'): int|float
+    public function getPrice($addPercent, $personType): int|float
     {
-        $hotelPrice = $personType === 'uz' ? $this->price : $this->price_foreign;
+        $hotelPrice = $personType === RoomPersonType::Uzbek ? $this->price : $this->price_foreign;
         if ($addPercent) {
             $hotelPrice += $hotelPrice * $addPercent / 100;
         }

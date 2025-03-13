@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use App\Models\Driver;
+use App\Models\Country;
 use App\Models\HotelPeriod;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
@@ -36,6 +37,7 @@ class ExpenseService
                         $expense,
                         $totalPax,
                         $roomingAmounts,
+                        $formState['country_id'],
                         $formState['company_id']
                     )
                 );
@@ -51,6 +53,7 @@ class ExpenseService
                             $expense,
                             $totalPax,
                             $roomingAmounts,
+                            $formState['country_id'],
                             null,
                             $day
                         )
@@ -62,7 +65,7 @@ class ExpenseService
         return $allExpenses;
     }
 
-    public static function mutateExpense(array $data, $totalPax, $roomAmounts, $companyId = null, $day = null): array
+    public static function mutateExpense(array $data, $totalPax, $roomAmounts, $countryId, $companyId = null, $day = null): array
     {
         switch ($data['type']) {
             case ExpenseType::Hotel->value:
@@ -70,15 +73,16 @@ class ExpenseService
                 $hotel = Hotel::query()->find($data['hotel_id']);
                 if ($hotel) {
                     $seasonType = ExpenseService::getSeasonType($hotel, $day ? $day['date'] : $data['date']);
+                    $personType = ExpenseService::getPersonType($countryId);
+
                     $addPercent = TourService::getCompanyAddPercent($companyId);
                     $hotelTotal = 0;
-                    foreach ($roomAmounts as $roomTypeKey => $amount) {
+                    foreach ($roomAmounts as $roomTypeId => $amount) {
                         if (empty($amount)) {
                             continue;
                         }
 
                         $totalNights = $data['hotel_total_nights'] ?? 1;
-                        [$roomTypeId, $personType] = explode('_', $roomTypeKey);
 
                         /** @var HotelRoomType $hotelRoomType */
                         $hotelRoomType = $hotel->roomTypes()
@@ -180,22 +184,33 @@ class ExpenseService
         return $seasonType;
     }
 
+    public static function getPersonType($countryId): ?RoomPersonType
+    {
+        if (!$countryId) {
+            return RoomPersonType::Uzbek;
+        }
+
+        /** @var Country $country */
+        $country = Country::query()->find($countryId);
+        if (!$country) {
+            return null;
+        }
+
+        return $country->name === 'Uzbekistan' ? RoomPersonType::Uzbek : RoomPersonType::Foreign;
+    }
+
     public static function createTourRoomTypes($tourId, $formState): void
     {
         $roomAmounts = ExpenseService::getRoomingAmounts($formState);
-        foreach ($roomAmounts as $roomTypeKey => $amount) {
+        foreach ($roomAmounts as $roomTypeId => $amount) {
             if (empty($amount)) {
                 continue;
             }
 
-            [$roomTypeId, $personType] = explode('_', $roomTypeKey);
-            $personType = $personType === 'uz' ? RoomPersonType::Uzbek : RoomPersonType::Foreign;
-
             TourRoomType::query()->updateOrCreate(
                 [
                     'tour_id' => $tourId,
-                    'room_type_id' => $roomTypeId,
-                    'person_type' => $personType,
+                    'room_type_id' => $roomTypeId
                 ],
                 [
                     'amount' => $amount,
@@ -207,14 +222,11 @@ class ExpenseService
     public static function updateTourRoomTypes($tourId, $tourData): void
     {
         $roomAmounts = ExpenseService::getRoomingAmounts($tourData);
-        foreach ($roomAmounts as $roomTypeKey => $amount) {
-            [$roomTypeId, $personType] = explode('_', $roomTypeKey);
-            $personType = $personType === 'uz' ? RoomPersonType::Uzbek : RoomPersonType::Foreign;
+        foreach ($roomAmounts as $roomTypeId => $amount) {
 
             $tourHotelRoomType = TourRoomType::query()
                 ->where('tour_id', $tourId)
                 ->where('room_type_id', $roomTypeId)
-                ->where('person_type', $personType)
                 ->first();
 
             if ($tourHotelRoomType) {
@@ -228,7 +240,6 @@ class ExpenseService
                     TourRoomType::query()->create([
                         'tour_id' => $tourId,
                         'room_type_id' => $roomTypeId,
-                        'person_type' => $personType,
                         'amount' => $amount,
                     ]);
                 }
