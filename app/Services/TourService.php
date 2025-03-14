@@ -395,7 +395,7 @@ class TourService
             $message = <<<HTML
 $title$message
 
-Office phone: +998333377754
+Office phone: +998333377752
 HTML;
 
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
@@ -468,7 +468,7 @@ HTML;
             $result .= <<<HTML
 
 
-Office phone: +998333377754
+Office phone: +998333377752
 HTML;
         }
 
