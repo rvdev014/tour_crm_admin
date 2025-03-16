@@ -12,6 +12,7 @@ enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
     case Mid = 2;
     case High = 3;
     case Yearly = 4;
+    case Exhibition = 5;
 
     public static function getValues(): array
     {
@@ -20,6 +21,7 @@ enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
             self::Mid,
             self::High,
             self::Yearly,
+            self::Exhibition,
         ];
     }
 
@@ -30,6 +32,7 @@ enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
             self::Mid => 'info',
             self::High => 'success',
             self::Yearly => 'warning',
+            self::Exhibition => 'warning',
         };
     }
 
@@ -40,6 +43,7 @@ enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
             self::Mid => 'heroicon-o-sun',
             self::High => 'heroicon-o-sun',
             self::Yearly => 'heroicon-o-sun',
+            self::Exhibition => 'heroicon-o-sun',
         };
     }
 
@@ -50,6 +54,7 @@ enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
             self::Mid => 'Mid season',
             self::High => 'High season',
             self::Yearly => now()->year,
+            self::Exhibition => 'Exhibition period',
         };
     }
 }
