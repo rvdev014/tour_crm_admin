@@ -56,6 +56,6 @@ class HotelRoomType extends Model
         if ($addPercent) {
             $hotelPrice += $hotelPrice * $addPercent / 100;
         }
-        return $hotelPrice;
+        return $hotelPrice ?? 0;
     }
 }
