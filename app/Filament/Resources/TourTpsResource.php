@@ -309,9 +309,17 @@ class TourTpsResource extends Resource
                                     })
                                     ->required()
                                     ->reactive(),
+                                Components\Select::make('city_id')
+                                    ->native(false)
+                                    ->searchable()
+                                    ->preload()
+                                    ->options(fn($get) => TourService::getCities())
+                                    ->reactive()
+                                    ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
                             ]),
 
                             // Hotel
+
                             Components\Fieldset::make('Hotel info')->schema([
                                 Components\Grid::make(4)->schema([
                                     Components\Select::make('hotel_id')
@@ -319,7 +327,7 @@ class TourTpsResource extends Resource
                                         ->searchable()
                                         ->preload()
                                         ->label('Hotel')
-                                        ->options(fn($get) => TourService::getHotels($get('../../city_id')))
+                                        ->options(fn($get) => TourService::getHotels($get('city_id') ?? $get('../../city_id')))
                                         ->preload()
                                         ->reactive(),
                                     Components\Select::make('status')
