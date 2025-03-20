@@ -15,6 +15,7 @@ use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
 use Filament\Tables\Table;
 use Illuminate\Support\Arr;
+use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseStatus;
 use App\Enums\TransportType;
 use Filament\Tables\Columns;
@@ -127,7 +128,7 @@ class TourTpsResource extends Resource
                             Components\Actions\Action::make('toggle-currency')
                                 ->icon('heroicon-o-banknotes')
                                 ->iconSize('md')
-                                ->action(function ($get, $set) {
+                                ->action(function($get, $set) {
                                     $set('price_currency', $get('price_currency') == 'USD' ? 'UZS' : 'USD');
                                 })
                         )
@@ -162,7 +163,7 @@ class TourTpsResource extends Resource
                             Components\Actions\Action::make('toggle-currency')
                                 ->icon('heroicon-o-banknotes')
                                 ->iconSize('md')
-                                ->action(function ($get, $set) {
+                                ->action(function($get, $set) {
                                     $set('guide_price_currency', $get('guide_price_currency') == 'USD' ? 'UZS' : 'USD');
                                 })
                         )
@@ -671,7 +672,7 @@ class TourTpsResource extends Resource
                 Components\Actions\Action::make('toggle-currency')
                     ->icon('heroicon-o-banknotes')
                     ->iconSize('md')
-                    ->action(function ($get, $set) {
+                    ->action(function($get, $set) {
                         $set('price_currency', $get('price_currency') == 'USD' ? 'UZS' : 'USD');
                     })
             )
@@ -794,6 +795,12 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('price')
                     ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
+                            if ($record->price_currency == 'USD') {
+                                $currency = ExpenseService::getCurrency(CurrencyEnum::USD);
+                                if ($currency) {
+                                    $state = $state * $currency->rate;
+                                }
+                            }
                             return TourService::formatMoney($state);
                         }
 

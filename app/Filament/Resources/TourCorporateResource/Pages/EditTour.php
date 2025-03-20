@@ -22,7 +22,7 @@ class EditTour extends EditRecord
         $allExpenses = ExpenseService::mutateExpenses($formState, isCorporate: true);
 
         $data['status'] = ExpenseService::getTourStatus($allExpenses);
-        $data['expenses_total'] = $allExpenses->sum('price');
+        $data['expenses_total'] = ExpenseService::calculateAllExpensesPrice($allExpenses);
 
         ExpenseService::updateTourRoomTypes($this->record->id, $data);
 

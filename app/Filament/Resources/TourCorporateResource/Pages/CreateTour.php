@@ -24,7 +24,7 @@ class CreateTour extends CreateRecord
         $data['type'] = TourType::Corporate;
         $data['created_by'] = auth()->id();
         $data['status'] = ExpenseService::getTourStatus($allExpenses);
-        $data['expenses_total'] = $allExpenses->sum('price');
+        $data['expenses_total'] = ExpenseService::calculateAllExpensesPrice($allExpenses);
 
 //        TourService::sendMails($formState, $allExpenses, isCorporate: true);
         TourService::sendTelegram($formState, isCorporate: true);

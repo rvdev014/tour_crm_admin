@@ -18,11 +18,15 @@ class EditTour extends EditRecord
     {
         $formState = $this->form->getRawState();
         $allExpenses = ExpenseService::mutateExpenses($formState);
-        $totalExpenses = $allExpenses->sum('price') + ($data['guide_price'] ?? 0);
 
+        ExpenseService::convertExpensePrice($data, 'price');
+        ExpenseService::convertExpensePrice($data, 'guide_price');
+        $totalExpenses = ExpenseService::calculateAllExpensesPrice($allExpenses) + ($data['guide_price_converted'] ?? $data['guide_price'] ?? 0);
+
+        $price = $data['price_converted'] ?? $data['price'] ?? 0;
         $data['status'] = ExpenseService::getTourStatus($allExpenses);
         $data['expenses_total'] = $totalExpenses;
-        $data['income'] = $data['price'] - $totalExpenses;
+        $data['income'] = $price - $totalExpenses;
 
         ExpenseService::updateTourRoomTypes($this->record->id, $data);
 

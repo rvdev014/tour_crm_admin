@@ -5,7 +5,9 @@ namespace App\Services;
 use Carbon\Carbon;
 use App\Models\Driver;
 use App\Models\Country;
+use App\Models\Currency;
 use App\Models\HotelPeriod;
+use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\TourStatus;
@@ -24,6 +26,15 @@ use Illuminate\Support\Collection;
 
 class ExpenseService
 {
+    public static function calculateAllExpensesPrice(Collection $allExpenses): float
+    {
+        $result = 0;
+        foreach ($allExpenses as $expense) {
+            $result += $expense['price_converted'] ?? $expense['price'];
+        }
+        return $result;
+    }
+
     public static function mutateExpenses($formState, $isCorporate = false): Collection
     {
         $allExpenses = collect();
@@ -67,6 +78,8 @@ class ExpenseService
 
     public static function mutateExpense(array $data, $totalPax, $roomAmounts, $countryId, $companyId = null, $day = null): array
     {
+        ExpenseService::convertExpensePrice($data, 'price');
+
         switch ($data['type']) {
             case ExpenseType::Hotel->value:
                 /** @var Hotel $hotel */
@@ -182,6 +195,31 @@ class ExpenseService
         );
 
         return $seasonType;
+    }
+
+    public static function convertExpensePrice(&$data, $attribute): void
+    {
+        $currency = ExpenseService::getCurrency(CurrencyEnum::USD);
+        if ($currency) {
+            if ($data["{$attribute}_currency"] == CurrencyEnum::USD->value) {
+                $data["{$attribute}_converted"] = $data[$attribute] * $currency->rate;
+            }
+        }
+    }
+
+    public static function getCurrency(CurrencyEnum $from): ?Currency
+    {
+        /** @var Currency $currency */
+        $currency = CacheService::remember(
+            'currency_usd',
+            function() use ($from) {
+                /** @var Currency $currency */
+                $currency = Currency::query()->where('from', $from->value)->first();
+                return $currency;
+            }
+        );
+
+        return $currency;
     }
 
     public static function getPersonType($countryId): ?RoomPersonType

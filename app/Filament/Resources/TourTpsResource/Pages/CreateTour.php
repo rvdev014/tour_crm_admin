@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TourTpsResource\Pages;
 
+use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseStatus;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
@@ -20,13 +21,18 @@ class CreateTour extends CreateRecord
     {
         $formState = $this->form->getRawState();
         $allExpenses = ExpenseService::mutateExpenses($formState);
-        $totalExpenses = $allExpenses->sum('price') + ($data['guide_price'] ?? 0);
+
+        ExpenseService::convertExpensePrice($data, 'price');
+        ExpenseService::convertExpensePrice($data, 'guide_price');
+        $totalExpenses = ExpenseService::calculateAllExpensesPrice($allExpenses) + ($data['guide_price_converted'] ?? $data['guide_price'] ?? 0);
 
         $data['type'] = TourType::TPS;
         $data['created_by'] = auth()->id();
         $data['status'] = ExpenseService::getTourStatus($allExpenses);
+
+        $price = $data['price_converted'] ?? $data['price'] ?? 0;
         $data['expenses_total'] = $totalExpenses;
-        $data['income'] = $data['price'] - $totalExpenses;
+        $data['income'] = $price - $totalExpenses;
 
 //        TourService::sendMails($formState, $formState['days'] ?? []);
         TourService::sendTelegram($formState);
