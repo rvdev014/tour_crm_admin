@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $created_by
  * @property int $city_id
  * @property int $price
+ * @property string $price_currency
  * @property int $expenses_total
  * @property int $income
  * @property int $hotel_expenses_total
@@ -39,6 +40,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property string $guide_phone
  * @property string $package_name
  * @property int $guide_price
+ * @property string $guide_price_currency
  * @property TransportType $transport_type
  * @property TransportComfortLevel $transport_comfort_level
  * @property int $single_supplement_price
@@ -57,37 +59,7 @@ class Tour extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'company_id',
-        'group_number',
-        'start_date',
-        'end_date',
-        'arrival',
-        'departure',
-        'rooming',
-        'pax',
-        'leader_pax',
-        'comment',
-        'price',
-        'expenses_total',
-        'hotel_expenses_total',
-        'income',
-        'status',
-        'country_id',
-        'city_id',
-        'type',
-        'created_by',
-
-        'guide_type',
-        'guide_name',
-        'guide_phone',
-        'guide_price',
-        'package_name',
-
-        'transport_type',
-        'transport_comfort_level',
-        'single_supplement_price',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'start_date' => 'datetime',

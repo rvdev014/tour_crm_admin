@@ -2,15 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Company;
+use Filament\Forms\Form;
 use App\Enums\CompanyType;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
 use App\Filament\Resources\CompanyResource\Pages;
 use App\Filament\Resources\CompanyResource\RelationManagers;
-use App\Models\Company;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 
 class CompanyResource extends Resource
 {
@@ -24,25 +24,33 @@ class CompanyResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Select::make('type')
-                    ->options(CompanyType::class)
-                    ->afterStateUpdated(function($get, $set) {
-                        if ($get('type') == CompanyType::TPS->value) {
-                            $set('inn', null);
-                            $set('additional_percent', null);
-                        }
-                    })
-                    ->reactive()
-                    ->required(),
+
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\Select::make('type')
+                        ->options(CompanyType::class)
+                        ->afterStateUpdated(function($get, $set) {
+                            if ($get('type') == CompanyType::TPS->value) {
+                                $set('inn', null);
+                                $set('additional_percent', null);
+                            }
+                        })
+                        ->reactive()
+                        ->required(),
+                    Forms\Components\TextInput::make('email')
+                        ->email(255),
+                ]),
+
                 Forms\Components\TextInput::make('inn')
                     ->maxLength(255)
                     ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
+
                 Forms\Components\TextInput::make('additional_percent')
                     ->numeric()
                     ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
+
                 Forms\Components\Textarea::make('comment'),
             ]);
     }
@@ -57,6 +65,8 @@ class CompanyResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
                     ->badge(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('inn')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('additional_percent')

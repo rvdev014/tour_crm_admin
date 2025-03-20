@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $name
  * @property string $inn
+ * @property string $email
  * @property string $comment
  * @property CompanyType $type
  * @property int $additional_percent
@@ -23,6 +24,7 @@ class Company extends Model
     protected $fillable = [
         'name',
         'inn',
+        'email',
         'type',
         'comment',
         'additional_percent'

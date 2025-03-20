@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * Common fields
  * @property float $price
+ * @property float $price_currency
  * @property float $total_price
  * @property int $pax
  * @property ExpenseStatus $status

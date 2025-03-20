@@ -2,31 +2,31 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\CompanyType;
-use App\Enums\ExpenseStatus;
-use App\Enums\ExpenseType;
-use App\Enums\TourType;
-use App\Enums\TransportType;
-use Filament\Forms\Components\Section;
-use App\Filament\Resources\TourCorporateResource\Pages;
-use App\Filament\Resources\TourCorporateResource\RelationManagers;
 use App\Models\City;
-use App\Models\Company;
-use App\Models\Country;
 use App\Models\Tour;
 use App\Models\User;
-use App\Services\ExpenseService;
+use Filament\Tables;
+use App\Enums\TourType;
+use App\Models\Company;
+use App\Models\Country;
+use Filament\Forms\Form;
+use App\Enums\CompanyType;
+use App\Enums\ExpenseType;
+use Filament\Tables\Table;
+use Illuminate\Support\Arr;
+use App\Enums\ExpenseStatus;
+use App\Enums\TransportType;
+use Filament\Tables\Columns;
 use App\Services\TourService;
 use Filament\Forms\Components;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use App\Services\ExpenseService;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\TourCorporateResource\Pages;
+use App\Filament\Resources\TourCorporateResource\RelationManagers;
 
 class TourCorporateResource extends Resource
 {
@@ -61,7 +61,7 @@ class TourCorporateResource extends Resource
                     ->searchable()
                     ->preload()
                     ->relationship('company', 'name')
-                    ->options(TourService::getCompanies(CompanyType::Corporate))
+                    ->options(TourService::getCompanies([CompanyType::Corporate]))
                     ->reactive()
                     ->required(),
 
@@ -88,19 +88,19 @@ class TourCorporateResource extends Resource
                     ->collapsed(),
             ]),
 
-            Components\Fieldset::make('Transport info')->schema([
-                Components\Select::make('transport_type')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->options(TransportType::class),
-
-//                Components\Select::make('transport_comfort_level')
-//                    ->native(false)
-//                    ->searchable()
-//                    ->preload()
-//                    ->options(TransportComfortLevel::class),
-            ]),
+            //            Components\Fieldset::make('Transport info')->schema([
+            //                Components\Select::make('transport_type')
+            //                    ->native(false)
+            //                    ->searchable()
+            //                    ->preload()
+            //                    ->options(TransportType::class),
+            //
+            //                Components\Select::make('transport_comfort_level')
+            //                    ->native(false)
+            //                    ->searchable()
+            //                    ->preload()
+            //                    ->options(TransportComfortLevel::class),
+            //            ]),
 
             Components\Repeater::make('expenses')
                 ->extraAttributes(['class' => 'repeater-expenses'])
@@ -128,6 +128,7 @@ class TourCorporateResource extends Resource
                 ->schema([
                     Components\Grid::make(3)->schema([
                         Hidden::make('index'),
+                        Hidden::make('price_currency'),
                         Components\Select::make('type')
                             ->native(false)
                             ->searchable()
@@ -241,6 +242,11 @@ class TourCorporateResource extends Resource
                                 ->preload(),
                             Components\TimePicker::make('transport_time')
                                 ->seconds(false),
+                            Components\Select::make('transport_type')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(TransportType::class),
                         ]),
 
                         Components\Grid::make()->schema([
@@ -267,9 +273,7 @@ class TourCorporateResource extends Resource
                                 ->required()
                                 ->label('Status'),
 
-                            Components\TextInput::make('price')
-                                ->numeric()
-                                ->label('Price'),
+                            self::getExpensePriceInput(),
                         ]),
 
                         Components\Textarea::make('comment')
@@ -335,8 +339,7 @@ class TourCorporateResource extends Resource
                     // Plane
                     Components\Fieldset::make('Plane info')->schema([
 
-                        Components\TextInput::make('price')
-                            ->label('Price'),
+                        self::getExpensePriceInput(),
 
                         Components\TextInput::make('plane_route'),
 
@@ -370,8 +373,7 @@ class TourCorporateResource extends Resource
                         Components\TextInput::make('other_name')
                             ->label('Name'),
 
-                        Components\TextInput::make('price')
-                            ->label('Price'),
+                        self::getExpensePriceInput(),
 
                         Components\Textarea::make('comment')
                             ->label('Comment')
@@ -384,8 +386,7 @@ class TourCorporateResource extends Resource
                         Components\TextInput::make('conference_name')
                             ->label('Conference name'),
 
-                        Components\TextInput::make('price')
-                            ->label('Price'),
+                        self::getExpensePriceInput(),
 
                         Components\TextInput::make('coffee_break')
                             ->suffix('%')
@@ -430,9 +431,19 @@ class TourCorporateResource extends Resource
         ]);
     }
 
-    public static function isLunch($expenseType): bool
+    public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput
     {
-        return in_array($expenseType, [ExpenseType::Lunch->value, ExpenseType::Dinner->value]);
+        return Components\TextInput::make('price')
+            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'UZS') . ")")
+            ->suffixAction(
+                Components\Actions\Action::make('toggle-currency')
+                    ->icon('heroicon-o-banknotes')
+                    ->iconSize('md')
+                    ->action(function ($get, $set) {
+                        $set('price_currency', $get('price_currency') == 'USD' ? 'UZS' : 'USD');
+                    })
+            )
+            ->numeric();
     }
 
     public static function table(Table $table): Table

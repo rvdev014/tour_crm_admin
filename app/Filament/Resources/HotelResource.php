@@ -2,16 +2,18 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\RoomSeasonType;
-use App\Filament\Resources\HotelResource\Pages;
-use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
-use App\Models\Hotel;
-use App\Services\TourService;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Hotel;
+use App\Enums\RateEnum;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Enums\RoomSeasonType;
+use App\Services\TourService;
+use Filament\Resources\Resource;
+use App\Filament\Resources\HotelResource\Pages;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
 
 class HotelResource extends Resource
 {
@@ -55,6 +57,32 @@ class HotelResource extends Resource
 
                     Forms\Components\TextInput::make('booking_cancellation_days')->numeric(),
                 ]),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('company_name')->maxLength(255),
+                    Forms\Components\TextInput::make('address')->maxLength(255),
+                    Forms\Components\Select::make('rate')
+                        ->options(function() {
+                            $options = [];
+                            foreach (RateEnum::cases() as $rate) {
+                                $options[$rate->value] = $rate->getLabel();
+                            }
+                            return $options;
+                        }),
+                ]),
+                Forms\Components\Grid::make(3)->schema([
+                    PhoneInput::make('phone')
+                        ->suffixAction(function ($record) {
+                            if (!$record?->phone) {
+                                return [];
+                            }
+                            return [
+                                Forms\Components\Actions\Action::make('create_museum')
+                                    ->icon('heroicon-o-paper-airplane')
+                                    ->url("https://t.me/{$record->phone}", true)
+                            ];
+                        }),
+                    Forms\Components\Textarea::make('comment')->maxLength(255),
+                ]),
 
                 Forms\Components\Repeater::make('periods')
                     ->extraAttributes(['class' => 'repeater-guides'])
@@ -85,8 +113,10 @@ class HotelResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('inn'),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('inn')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('country.name')
                     ->label('Country')
                     ->searchable()
@@ -94,6 +124,16 @@ class HotelResource extends Resource
                 Tables\Columns\TextColumn::make('city.name')
                     ->label('City')
                     ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('Phone')
+                    ->url(fn($record) => $record->phone ? "https://t.me/{$record->phone}" : null, true)
+                    ->color('info')
+                    ->searchable()
+                    ->html(),
+                Tables\Columns\TextColumn::make('rate')
+                    ->label('Rate')
+                    ->getStateUsing(fn($record) => RateEnum::tryFrom($record->rate)?->getLabel())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('booking_cancellation_days')
                     ->label('Booking days')

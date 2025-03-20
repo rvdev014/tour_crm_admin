@@ -2,26 +2,22 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\CompanyType;
-use App\Enums\ExpenseStatus;
-use App\Enums\ExpenseType;
-use App\Filament\Resources\CompanyExpenseResource\Pages;
-use App\Filament\Resources\CompanyExpenseResource\RelationManagers;
+use Filament\Forms;
+use Filament\Tables;
 use App\Models\Company;
+use Filament\Forms\Form;
+use App\Enums\CompanyType;
+use App\Enums\ExpenseType;
+use Filament\Tables\Table;
+use App\Services\TourService;
 use App\Models\CompanyExpense;
 use App\Models\TourDayExpense;
-use App\Models\Transfer;
-use App\Services\TourService;
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Carbon;
+use Filament\Tables\Enums\FiltersLayout;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\CompanyExpenseResource\Pages;
+use App\Filament\Resources\CompanyExpenseResource\RelationManagers;
 
 class CompanyExpenseResource extends Resource
 {
@@ -61,8 +57,8 @@ class CompanyExpenseResource extends Resource
                                 ->label('Company')
                                 ->options(
                                     fn() => Company::all()
-                                    ->where('type', CompanyType::Corporate)
-                                    ->pluck('name', 'id')
+                                        ->where('type', CompanyType::Corporate)
+                                        ->pluck('name', 'id')
                                 ),
                             Forms\Components\Select::make('expense_types')
                                 ->native(false)
@@ -72,9 +68,9 @@ class CompanyExpenseResource extends Resource
                                 ->options(ExpenseType::class),
                         ])
                     ])
-                    ->query(function (Builder $query, $data) {
+                    ->query(function(Builder $query, $data) {
                         if ($companyIds = $data['companies']) {
-                            $query = $query->where(function ($query) use ($companyIds) {
+                            $query = $query->where(function($query) use ($companyIds) {
                                 $query
                                     ->whereHas('tour', fn($q) => $q->whereIn('company_id', $companyIds))
                                     ->orWhereHas(
@@ -88,12 +84,12 @@ class CompanyExpenseResource extends Resource
                         }
                         return $query;
                     })
-                    ->indicateUsing(function (array $data): array {
+                    ->indicateUsing(function(array $data): array {
                         $query = TourDayExpense::query();
 
                         $indicators = [];
                         if ($companyIds = $data['companies']) {
-                            $query = $query->where(function ($query) use ($companyIds) {
+                            $query = $query->where(function($query) use ($companyIds) {
                                 $query
                                     ->whereHas('tour', fn($q) => $q->whereIn('company_id', $companyIds))
                                     ->orWhereHas(
@@ -120,7 +116,7 @@ class CompanyExpenseResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('group_number')
                     ->label('Group number')
-                    ->getStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function(TourDayExpense $record) {
                         $tour = $record->tour ?? $record->tourDay->tour;
                         if ($tour->isCorporate()) {
                             $link = "/admin/tour-corporate/$tour->id/edit";
@@ -133,60 +129,77 @@ class CompanyExpenseResource extends Resource
                     ->html(),
 
                 Tables\Columns\TextColumn::make('company')
-                    ->getStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function(TourDayExpense $record) {
                         $tour = $record->tour ?? $record->tourDay->tour;
                         return $tour->company->name;
                     })
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('expense_date')
-                    ->getStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function(TourDayExpense $record) {
                         $date = $record->tourDay->date ?? $record->date;
                         return $date->format('d/m/Y');
                     })
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('expense_type')
-                    ->getStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function(TourDayExpense $record) {
                         return $record->type->getLabel();
                     })
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('expense_name')
                     ->label('Expense Name')
-                    ->getStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function(TourDayExpense $record) {
                         return match ($record->type) {
-                            ExpenseType::Hotel => $record->hotel?->name,
-                            ExpenseType::Museum => TourService::getMuseumsByIds([1, 2])->values()->join(', '),
+                            ExpenseType::Hotel                      => $record->hotel?->name,
+                            ExpenseType::Museum                     => TourService::getMuseumsByIds([1, 2])->values(
+                            )->join(', '),
                             ExpenseType::Lunch, ExpenseType::Dinner => $record->restaurant?->name,
-                            ExpenseType::Train => $record->train?->name,
-                            ExpenseType::Show => $record->show?->name,
-                            default => '',
+                            ExpenseType::Train                      => $record->train?->name,
+                            ExpenseType::Show                       => $record->show?->name,
+                            default                                 => '',
                         };
                     })
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('tour_pax')
                     ->label('Pax')
-                    ->getStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function(TourDayExpense $record) {
                         $tour = $record->tour ?? $record->tourDay->tour;
                         return $tour->getTotalPax();
                     }),
 
                 Tables\Columns\TextColumn::make('route')
                     ->label('Route')
-                    ->getStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function(TourDayExpense $record) {
                         $fromCity = $record->tourDay?->city?->name ?? $record->city?->name;
 
                         return match ($record->type) {
                             ExpenseType::Transport => $record->transport_route,
-                            ExpenseType::Plane => $record->plane_route,
-                            ExpenseType::Train => "$fromCity - {$record->toCity?->name}",
-                            default => '',
+                            ExpenseType::Plane     => $record->plane_route,
+                            ExpenseType::Train     => "$fromCity - {$record->toCity?->name}",
+                            default                => '',
                         };
                     }),
 
                 Tables\Columns\TextColumn::make('price'),
+
+                Tables\Columns\TextColumn::make('inn')
+                    ->label('Company Inn')
+                    ->getStateUsing(function(TourDayExpense $record) {
+                        $tour = $record->tour ?? $record->tourDay->tour;
+                        return $tour->company->inn;
+                    })
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('passengers')
+                    ->label('Passengers FIO')
+                    ->getStateUsing(function(TourDayExpense $record) {
+                        $tour = $record->tour ?? $record->tourDay->tour;
+                        return $tour->passengers?->map(fn($passenger) => $passenger->name)->join(', ');
+                    })
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

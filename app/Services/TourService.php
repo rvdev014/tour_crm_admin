@@ -274,7 +274,7 @@ class TourService
         if ($divideBy) {
             $money /= $divideBy;
         }
-        return Number::currency($money, Table::$defaultCurrency);
+        return Number::format($money);
     }
 
     public static function generateRoomingSchema($firstThree = false): array
@@ -303,9 +303,9 @@ class TourService
         ];
     }
 
-    public static function getCompanies(CompanyType $type)
+    public static function getCompanies(array $types)
     {
-        return Company::query()->select('name', 'id')->where('type', $type)->get()->pluck('name', 'id');
+        return Company::query()->select('name', 'id')->whereIn('type', $types)->get()->pluck('name', 'id');
     }
 
     public static function sendTelegram($tourData, $isCorporate = false): void
