@@ -272,7 +272,8 @@ HTML;
                     ->label('Pickup location'),
 
                 Tables\Columns\TextColumn::make('route')
-                    ->label('Route'),
+                    ->label('Route')
+                    ->limit(50),
 
                 Tables\Columns\TextColumn::make('pax')
                     ->formatStateUsing(function($record, $state) {
