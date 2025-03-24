@@ -283,7 +283,7 @@ HTML;
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('toCity.name')
-                    ->label('Routes')
+                    ->label('Location')
                 /*->formatStateUsing(function ($record, $state) {
                     return $state . ' - ' . $record->toCity?->name;
                 })*/,
