@@ -271,6 +271,9 @@ HTML;
                 Tables\Columns\TextColumn::make('place_of_submission')
                     ->label('Pickup location'),
 
+                Tables\Columns\TextColumn::make('route')
+                    ->label('Route'),
+
                 Tables\Columns\TextColumn::make('pax')
                     ->formatStateUsing(function($record, $state) {
                         return $state . ' pax';
@@ -279,7 +282,7 @@ HTML;
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('toCity.name')
-                    ->label('Route')
+                    ->label('Routes')
                 /*->formatStateUsing(function ($record, $state) {
                     return $state . ' - ' . $record->toCity?->name;
                 })*/,
