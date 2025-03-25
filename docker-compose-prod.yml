@@ -41,6 +41,8 @@ services:
     #    image: ravshan014/tour-crm-php:1
     env_file:
       - .env
+    volumes:
+      - ./public:/app/public
     depends_on:
       db:
         condition: service_healthy
