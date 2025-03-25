@@ -53,7 +53,7 @@ services:
     ports:
       - "${APP_PORT}:80"
     volumes:
-      - ./public /app/public
+      - ./public:/app/public
     depends_on:
       - php
 
