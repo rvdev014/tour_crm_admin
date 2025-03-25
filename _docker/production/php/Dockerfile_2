@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libzip-dev \
     libkrb5-dev \
+    nodejs \
+    npm \
     zip && \
     rm -rf /var/lib/apt/lists/*
 
@@ -28,8 +30,12 @@ COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
 
-COPY ./composer.* .
+COPY ./package.json .
+COPY ./package-lock.json .
+RUN npm install
+RUN npm run build
 
+COPY ./composer.* .
 RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
 
 COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
