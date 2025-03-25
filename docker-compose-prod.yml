@@ -52,6 +52,8 @@ services:
     #    image: ravshan014/tour-crm-nginx:1
     ports:
       - "${APP_PORT}:80"
+    volumes:
+      - ./public /app/public
     depends_on:
       - php
 
