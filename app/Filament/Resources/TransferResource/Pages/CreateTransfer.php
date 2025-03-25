@@ -88,12 +88,12 @@ class CreateTransfer extends CreateRecord
         $this->redirect($redirectUrl, navigate: FilamentView::hasSpaMode() && is_app_url($redirectUrl));
     }
 
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function afterCreate(): void
     {
+        $data = $this->record;
+        dd($data);
         if ($data['status'] == ExpenseStatus::Confirmed->value) {
             TourService::sendTelegramTransfer($data);
         }
-
-        return $data;
     }
 }

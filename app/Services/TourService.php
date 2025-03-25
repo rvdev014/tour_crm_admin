@@ -15,6 +15,7 @@ use App\Enums\TourType;
 use App\Models\Company;
 use App\Models\Country;
 use App\Models\RoomType;
+use App\Models\Transfer;
 use App\Models\TourHotel;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
@@ -308,7 +309,7 @@ class TourService
         return Company::query()->select('name', 'id')->whereIn('type', $types)->get()->pluck('name', 'id');
     }
 
-    public static function sendTelegram($tourData, $isCorporate = false): void
+    public static function sendTelegram($tourData, $isCorporate = false, $isUpdated = false): void
     {
         $transportsData = [];
 
@@ -327,6 +328,7 @@ class TourService
                 foreach ($driverIds as $driverId) {
                     $totalPax = count($tourData['passengers'] ?? []);
                     $transportsData[$driverId][] = [
+                        'transfer_id' => self::getTransferByExpense($expense)?->getNumber(),
                         'driver_id' => $driverId,
                         'pax' => $totalPax,
                         'driver_ids' => $driverIds,
@@ -360,6 +362,7 @@ class TourService
 
                     foreach ($driverIds as $driverId) {
                         $transportsData[$driverId][] = [
+                            'transfer_id' => self::getTransferByExpense($expense)?->getNumber(),
                             'driver_id' => $driverId,
                             'pax' => $totalPax,
                             'driver_ids' => $driverIds,
@@ -389,20 +392,25 @@ class TourService
             $title = "Tour {$tourData['group_number']}\n";
             $message = '';
             foreach ($transportItems as $transportItem) {
-                $message .= TourService::getOneMessage($transportItem, false);
+                $message .= TourService::getOneMessage($transportItem, false) . "\n";
             }
 
             $message = <<<HTML
-$title$message
+$title
+$message
 
 Office phone: +998333377752
 HTML;
+
+            if ($isUpdated) {
+                $message = "<b>***Updated***</b>\n\n" . $message;
+            }
 
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
         }
     }
 
-    public static function sendTelegramTransfer($data): void
+    public static function sendTelegramTransfer($data, $isUpdated = false): void
     {
         $driverIds = $data['driver_ids'] ?? [];
         foreach ($driverIds as $driverId) {
@@ -413,7 +421,7 @@ HTML;
             }
 
             $message = TourService::getOneMessage([
-                'transfer_id' => $data['id'],
+                'transfer_id' => 1000 + $data['id'],
                 'driver_id' => $driverId,
                 'pax' => $data['pax'],
                 'driver_ids' => $driverIds,
@@ -427,6 +435,10 @@ HTML;
                 'price' => $data['price'] ?? '',
                 'comment' => $data['comment'],
             ]);
+
+            if ($isUpdated) {
+                $message = "<b>***Updated***</b>\n" . $message;
+            }
 
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
         }
@@ -453,6 +465,7 @@ HTML;
 
         $result = <<<HTML
 
+<b>ID:</b> {$data['transfer_id']}
 <b>Drivers:</b> {$drivers}
 <b>Pax:</b> {$pax}
 <b>Date and time:</b> {$date}
@@ -507,5 +520,14 @@ HTML;
         }
 
         return $diffInDays;
+    }
+
+    public static function getTransferByExpense($expense)
+    {
+        if (!isset($expense['id'])) {
+            return null;
+        }
+
+        return Transfer::query()->where('tour_day_expense_id', $expense['id'])->first();
     }
 }

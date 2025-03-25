@@ -27,7 +27,6 @@ class CreateTour extends CreateRecord
         $data['expenses_total'] = ExpenseService::calculateAllExpensesPrice($allExpenses);
 
 //        TourService::sendMails($formState, $allExpenses, isCorporate: true);
-        TourService::sendTelegram($formState, isCorporate: true);
 
         return $data;
     }
@@ -35,6 +34,7 @@ class CreateTour extends CreateRecord
     protected function afterCreate(): void
     {
         ExpenseService::createTourRoomTypes($this->record->id, $this->form->getRawState());
+        TourService::sendTelegram($this->form->getRawState(), isCorporate: true);
     }
 
     protected function getRedirectUrl(): string

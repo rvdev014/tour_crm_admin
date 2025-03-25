@@ -37,7 +37,7 @@ class EditTour extends EditRecord
 
     protected function afterSave(): void
     {
-        TourService::sendTelegram($this->form->getRawState());
+        TourService::sendTelegram($this->form->getRawState(), isUpdated: true);
     }
 
     protected function getHeaderActions(): array

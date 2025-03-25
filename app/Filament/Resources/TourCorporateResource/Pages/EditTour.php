@@ -2,15 +2,13 @@
 
 namespace App\Filament\Resources\TourCorporateResource\Pages;
 
-use App\Enums\ExpenseStatus;
-use App\Enums\TourStatus;
+use App\Models\Tour;
+use Filament\Actions;
+use App\Services\TourService;
+use App\Services\ExpenseService;
+use Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\TourCorporateResource;
 use App\Filament\Resources\TourTpsResource\Actions\SendMailAction;
-use App\Models\Tour;
-use App\Services\ExpenseService;
-use App\Services\TourService;
-use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
 
 class EditTour extends EditRecord
 {
@@ -26,10 +24,15 @@ class EditTour extends EditRecord
 
         ExpenseService::updateTourRoomTypes($this->record->id, $data);
 
-//        TourService::sendMails($formState, $allExpenses, isCorporate: true);
-        TourService::sendTelegram($formState, isCorporate: true);
+        //        TourService::sendMails($formState, $allExpenses, isCorporate: true);
+        //        TourService::sendTelegram($formState, isCorporate: true);
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        TourService::sendTelegram($this->form->getRawState(), isCorporate: true, isUpdated: true);
     }
 
     protected function getHeaderActions(): array

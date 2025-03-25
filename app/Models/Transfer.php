@@ -98,7 +98,7 @@ class Transfer extends Model
 
     public function getNumber(): float|string
     {
-        return 100 + $this->id;
+        return 1000 + $this->id;
     }
 
     public function company(): BelongsTo

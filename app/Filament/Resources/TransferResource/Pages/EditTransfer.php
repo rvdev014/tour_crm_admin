@@ -18,14 +18,11 @@ class EditTransfer extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
-
-    protected function mutateFormDataBeforeSave(array $data): array
+    protected function afterSave(): void
     {
-        if ($data['status'] == ExpenseStatus::Confirmed->value) {
-            TourService::sendTelegramTransfer($data);
+        if ($this->record->status == ExpenseStatus::Confirmed) {
+            TourService::sendTelegramTransfer($this->record->toArray(), true);
         }
-
-        return $data;
     }
 
     protected function getHeaderActions(): array
