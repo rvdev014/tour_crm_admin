@@ -57,71 +57,75 @@ class TourTpsResource extends Resource
             Components\Fieldset::make('Tour details')->schema([
                 Hidden::make('price_currency'),
                 Hidden::make('guide_price_currency'),
-                Components\TextInput::make('group_number')
-                    ->formatStateUsing(function($record) {
-                        if (!empty($record)) {
-                            return $record->group_number;
-                        }
-                        return TourService::getGroupNumber(TourType::TPS);
-                    })
-                    ->readOnly(),
-                Components\Select::make('company_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->options(TourService::getCompanies([CompanyType::TPS, CompanyType::Private]))
-                    ->reactive()
-                    ->required(),
-                Components\Select::make('country_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->relationship('country', 'name')
-                    ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
-                    ->reactive()
-                    ->required(),
-                Components\Select::make('city_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->options(fn($get) => TourService::getCities($get('country_id')))
-                    ->preload()
-                    ->reactive(),
-                Components\DateTimePicker::make('start_date')
-                    ->displayFormat('d.m.Y H:i')
-                    ->label('Arrival time')
-                    ->native(false)
-                    ->seconds(false)
-                    ->minDate(fn($record) => $record ? $record->start_date : null)
-                    ->afterStateUpdated(function($get, $set) {
-                        $startDate = $get('start_date');
-                        $firstDay = $get('days') ? Arr::first($get('days')) : null;
-                        $firstDayUuid = $firstDay ? Arr::first(array_keys($get('days'))) : null;
+                Components\Grid::make(4)->schema([
+                    Components\TextInput::make('group_number')
+                        ->formatStateUsing(function($record) {
+                            if (!empty($record)) {
+                                return $record->group_number;
+                            }
+                            return TourService::getGroupNumber(TourType::TPS);
+                        })
+                        ->readOnly(),
+                    Components\Select::make('company_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(TourService::getCompanies([CompanyType::TPS, CompanyType::Private]))
+                        ->reactive()
+                        ->required(),
+                    Components\Select::make('country_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->relationship('country', 'name')
+                        ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
+                        ->reactive()
+                        ->required(),
+                    Components\Select::make('city_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(fn($get) => TourService::getCities($get('country_id')))
+                        ->preload()
+                        ->reactive(),
+                ]),
+                Components\Grid::make(4)->schema([
+                    Components\DateTimePicker::make('start_date')
+                        ->displayFormat('d.m.Y H:i')
+                        ->label('Arrival time')
+                        ->native(false)
+                        ->seconds(false)
+                        ->minDate(fn($record) => $record ? $record->start_date : null)
+                        ->afterStateUpdated(function($get, $set) {
+                            $startDate = $get('start_date');
+                            $firstDay = $get('days') ? Arr::first($get('days')) : null;
+                            $firstDayUuid = $firstDay ? Arr::first(array_keys($get('days'))) : null;
 
-                        if (empty($firstDay['id'])) {
-                            $set("days.$firstDayUuid.date", $startDate);
-                        }
+                            if (empty($firstDay['id'])) {
+                                $set("days.$firstDayUuid.date", $startDate);
+                            }
 
-                        if (Carbon::parse($get('end_date')) < Carbon::parse($startDate)) {
-                            $set('end_date', null);
-                        }
-                    })
-                    ->reactive()
-                    ->required(),
-                Components\DateTimePicker::make('end_date')
-                    ->displayFormat('d.m.Y H:i')
-                    ->label('Departure time')
-                    ->native(false)
-                    ->seconds(false)
-                    ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay())
-                    ->reactive()
-                    ->required(),
-                Components\TextInput::make('pax')
-                    ->required()
-                    ->numeric(),
-                Components\TextInput::make('leader_pax')
-                    ->numeric(),
-                Components\Grid::make(3)->schema([
+                            if (Carbon::parse($get('end_date')) < Carbon::parse($startDate)) {
+                                $set('end_date', null);
+                            }
+                        })
+                        ->reactive()
+                        ->required(),
+                    Components\DateTimePicker::make('end_date')
+                        ->displayFormat('d.m.Y H:i')
+                        ->label('Departure time')
+                        ->native(false)
+                        ->seconds(false)
+                        ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay())
+                        ->reactive()
+                        ->required(),
+                    Components\TextInput::make('pax')
+                        ->required()
+                        ->numeric(),
+                    Components\TextInput::make('leader_pax')
+                        ->numeric(),
+                ]),
+                Components\Grid::make(4)->schema([
                     Components\TextInput::make('price')
                         ->label(fn($get) => 'Price (' . ($get('price_currency') ?? 'UZS') . ')')
                         ->suffixAction(
@@ -136,9 +140,8 @@ class TourTpsResource extends Resource
                     Components\TextInput::make('single_supplement_price')
                         ->numeric(),
                     Components\TextInput::make('package_name'),
+                    Components\Textarea::make('comment'),
                 ]),
-                Components\Textarea::make('comment')
-                    ->columnSpanFull(),
             ]),
 
             Components\Fieldset::make('Guide info')->schema([
@@ -149,6 +152,11 @@ class TourTpsResource extends Resource
                     ->options(GuideType::class)
                     ->reactive()
                     ->required(),
+                Components\Select::make('transport_type')
+                    ->native(false)
+                    ->searchable()
+                    ->preload()
+                    ->options(TransportType::class),
 
                 Components\Grid::make(3)->schema([
                     Components\TextInput::make('guide_name'),
@@ -179,20 +187,6 @@ class TourTpsResource extends Resource
                     ->schema(TourService::generateRoomingSchema())
                     ->collapsible()
                     ->collapsed(),
-            ]),
-
-            Components\Fieldset::make('Transport info')->schema([
-                Components\Select::make('transport_type')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->options(TransportType::class),
-
-                //                Components\Select::make('transport_comfort_level')
-                //                    ->native(false)
-                //                    ->searchable()
-                //                    ->preload()
-                //                    ->options(TransportComfortLevel::class),
             ]),
 
             Components\Repeater::make('days')

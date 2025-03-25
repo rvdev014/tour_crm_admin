@@ -106,7 +106,7 @@
     border-collapse: collapse;
     font-size: .875rem;
     text-align: center;
-    padding: 10px;
+    padding: 6px;
 }
 
 .custom-table th {
@@ -138,6 +138,7 @@
 }
 
 .custom-table .flex-td p {
+    font-size: 14px;
     margin-bottom: 5px;
 }
 

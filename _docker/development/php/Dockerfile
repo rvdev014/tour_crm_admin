@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libzip-dev \
     libkrb5-dev \
+    nodejs \
+    npm \
     zip && \
     rm -rf /var/lib/apt/lists/*
 

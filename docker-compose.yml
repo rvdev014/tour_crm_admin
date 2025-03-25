@@ -18,6 +18,8 @@ services:
             dockerfile: php/Dockerfile
         volumes:
             - ./:/app
+        ports:
+            - "5173:5173"
         depends_on:
             - db
 

@@ -30,7 +30,7 @@ class StatusAction extends Action
         $this->modalSubmitAction(fn (StaticAction $action, $record) => $action->url(route('filament.admin.resources.tour-tps.edit', $record->id))->label('Edit'));
         $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('filament-actions::view.single.modal.actions.close.label')));
 
-        $this->modalWidth(MaxWidth::ScreenTwoExtraLarge);
+        $this->modalWidth(MaxWidth::ScreenExtraLarge);
 
         $this->modalContent(function (Model $record, Table $table) {
             return view('actions.status_view', [
