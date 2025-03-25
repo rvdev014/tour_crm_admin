@@ -38,6 +38,8 @@ services:
     build:
       context: .
       dockerfile: _docker/production/php/Dockerfile_2
+    volumes:
+      - ./public:/app/public
     #    image: ravshan014/tour-crm-php:1
     env_file:
       - .env
@@ -52,6 +54,8 @@ services:
     #    image: ravshan014/tour-crm-nginx:1
     ports:
       - "${APP_PORT}:80"
+    volumes:
+      - ./public:/app/public
     depends_on:
       - php
 

@@ -25,7 +25,7 @@ class CompanyResource extends Resource
         return $form
             ->schema([
 
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('name')
                         ->required()
                         ->maxLength(255),
@@ -39,19 +39,21 @@ class CompanyResource extends Resource
                         })
                         ->reactive()
                         ->required(),
-                    Forms\Components\TextInput::make('email')
-                        ->email(255),
+
+                    Forms\Components\TextInput::make('inn')
+                        ->maxLength(255)
+                        ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
+
+                    Forms\Components\TextInput::make('additional_percent')
+                        ->numeric()
+                        ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
                 ]),
 
-                Forms\Components\TextInput::make('inn')
-                    ->maxLength(255)
-                    ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
-
-                Forms\Components\TextInput::make('additional_percent')
-                    ->numeric()
-                    ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
-
-                Forms\Components\Textarea::make('comment'),
+                Forms\Components\Grid::make(4)->schema([
+                    Forms\Components\TextInput::make('email')
+                        ->email(255),
+                    Forms\Components\Textarea::make('comment'),
+                ]),
             ]);
     }
 

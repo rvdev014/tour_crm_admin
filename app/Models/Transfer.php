@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use App\Enums\ExpenseStatus;
-use App\Enums\TransportComfortLevel;
-use App\Enums\TransportType;
-use App\Observers\TransferObserver;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enums\TransportType;
+use App\Enums\ExpenseStatus;
+use App\Observers\TransferObserver;
+use App\Enums\TransportComfortLevel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 /**
  * @property int $id
@@ -36,7 +36,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $place_of_submission
  * @property string $route
  * @property string $passenger
-// * @property numeric $sell_price
+ * // * @property numeric $sell_price
  * @property numeric $buy_price
  * @property string $nameplate
  * @property string $mark
@@ -48,7 +48,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property City $fromCity
  * @property City $toCity
  */
-//#[ObservedBy(TransferObserver::class)]
+#[ObservedBy(TransferObserver::class)]
 class Transfer extends Model
 {
     use HasFactory;
@@ -75,7 +75,7 @@ class Transfer extends Model
         'mark',
         'route',
         'passenger',
-//        'sell_price',
+        //        'sell_price',
         'buy_price',
         'nameplate',
         'created_by',
@@ -91,9 +91,14 @@ class Transfer extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (Transfer $transfer) {
+        static::creating(function(Transfer $transfer) {
             $transfer->created_by = auth()->id();
         });
+    }
+
+    public function getNumber(): float|string
+    {
+        return 100 + $this->id;
     }
 
     public function company(): BelongsTo

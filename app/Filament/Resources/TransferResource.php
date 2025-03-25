@@ -17,11 +17,8 @@ use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Enums\FiltersLayout;
-use pxlrbt\FilamentExcel\Columns\Column;
 use Illuminate\Database\Eloquent\Builder;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use App\Filament\Resources\TransferResource\Pages;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use App\Filament\Resources\TransferResource\RelationManagers;
 
 class TransferResource extends Resource
@@ -42,7 +39,7 @@ class TransferResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\Select::make('to_city_id')
                         ->native(false)
@@ -69,13 +66,13 @@ class TransferResource extends Resource
                         ->multiple()
                         ->searchable()
                         ->preload(),
-                ]),
-
-                Forms\Components\Grid::make(3)->schema([
 
                     Forms\Components\TextInput::make('pax')
                         ->label('Pax')
                         ->numeric(),
+                ]),
+
+                Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\Select::make('status')
                         ->native(false)
@@ -90,10 +87,8 @@ class TransferResource extends Resource
                         ->preload()
                         ->label('Transport type')
                         ->options(TransportType::class)
-                        ->reactive()
-                ]),
+                        ->reactive(),
 
-                Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('place_of_submission')
                         ->label('Pickup Location'),
 
@@ -101,29 +96,25 @@ class TransferResource extends Resource
                         ->displayFormat('d.m.Y H:i')
                         ->native(false)
                         ->seconds(false),
+                ]),
+
+                Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\TextInput::make('route'),
-                ]),
-
-                Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('mark')
                         ->label('Marka'),
-                    //                    Forms\Components\TextInput::make('passenger'),
                     Forms\Components\TextInput::make('nameplate')
                         ->label('Табличка'),
-                    //                    Forms\Components\TextInput::make('buy_price')->numeric(),
+                    Forms\Components\TextInput::make('sell_price')->numeric(),
                 ]),
 
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     /*Forms\Components\TextInput::make('price')
                         ->label('Sell price')
                         ->numeric(),*/
-                    Forms\Components\TextInput::make('sell_price')->numeric(),
                     Forms\Components\TextInput::make('buy_price')->numeric(),
+                    Forms\Components\Textarea::make('comment'),
                 ]),
-
-                Forms\Components\Textarea::make('comment')
-                    ->columnSpanFull(),
             ]);
     }
 
@@ -252,6 +243,12 @@ class TransferResource extends Resource
             ], layout: FiltersLayout::AboveContent)
             ->defaultSort('date_time', 'desc')
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('Number')
+                    ->formatStateUsing(function($record) {
+                        return $record->getNumber();
+                    }),
+
                 Tables\Columns\TextColumn::make('company.name')
                     ->label('Company'),
 

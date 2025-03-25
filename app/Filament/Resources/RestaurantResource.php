@@ -25,7 +25,7 @@ class RestaurantResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('name')
                         ->required()
                         ->maxLength(255),
@@ -34,10 +34,10 @@ class RestaurantResource extends Resource
                         ->required(),
                     Forms\Components\TextInput::make('inn')
                         ->required(),
-                ]),
-                Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('company_name')
                         ->label('Legal name'),
+                ]),
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\Select::make('country_id')
                         ->native(false)
                         ->searchable()
@@ -51,8 +51,7 @@ class RestaurantResource extends Resource
                         ->preload()
                         ->relationship('city', 'name')
                         ->options(fn($get) => TourService::getCities($get('country_id'))),
-                ]),
-                Forms\Components\Grid::make(3)->schema([
+
                     Forms\Components\TextInput::make('price_per_person')
                         ->required()
                         ->numeric(),
@@ -67,19 +66,6 @@ class RestaurantResource extends Resource
                                     ->url("https://t.me/{$record->phone}", true)
                             ];
                         }),
-                    /*Forms\Components\FileUpload::make('media')
-                        ->label('Media')
-                        ->multiple()
-                        ->formatStateUsing(function($record) {
-                            $media = $record?->media ? collect($record->media) : null;
-                            if (!$media) {
-                                return [];
-                            }
-                            $value = $media->map(fn($path) => $path);
-                            return $value->toArray();
-                        })
-                        ->image()
-                        ->columnSpanFull(),*/
                 ]),
             ]);
     }

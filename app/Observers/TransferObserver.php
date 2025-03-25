@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Transfer;
+use App\Enums\ExpenseStatus;
+use App\Services\TourService;
 
 class TransferObserver
 {
@@ -11,7 +13,9 @@ class TransferObserver
      */
     public function created(Transfer $transfer): void
     {
-        //
+//        if ($transfer->status == ExpenseStatus::Confirmed) {
+//            TourService::sendTelegramTransfer($transfer->toArray());
+//        }
     }
 
     /**
@@ -19,7 +23,9 @@ class TransferObserver
      */
     public function updated(Transfer $transfer): void
     {
-        //
+//        if ($transfer->status == ExpenseStatus::Confirmed) {
+//            TourService::sendTelegramTransfer($transfer->toArray());
+//        }
     }
 
     /**

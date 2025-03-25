@@ -27,19 +27,20 @@ class HotelResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('name')
                         ->required()
                         ->maxLength(255),
 
                     Forms\Components\TextInput::make('email')
                         ->email()
-                        ->required()
-                        ->unique(ignoreRecord: true),
+                        ->required(),
 
                     Forms\Components\TextInput::make('inn'),
+
+                    Forms\Components\TextInput::make('booking_cancellation_days')->numeric(),
                 ]),
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\Select::make('country_id')
                         ->native(false)
                         ->searchable()
@@ -55,11 +56,10 @@ class HotelResource extends Resource
                         ->relationship('city', 'name')
                         ->options(fn($get) => TourService::getCities($get('country_id'))),
 
-                    Forms\Components\TextInput::make('booking_cancellation_days')->numeric(),
-                ]),
-                Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('company_name')->maxLength(255),
                     Forms\Components\TextInput::make('address')->maxLength(255),
+                ]),
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\Select::make('rate')
                         ->options(function() {
                             $options = [];
@@ -68,8 +68,7 @@ class HotelResource extends Resource
                             }
                             return $options;
                         }),
-                ]),
-                Forms\Components\Grid::make(3)->schema([
+
                     PhoneInput::make('phone')
                         ->suffixAction(function ($record) {
                             if (!$record?->phone) {
@@ -85,6 +84,7 @@ class HotelResource extends Resource
                 ]),
 
                 Forms\Components\Repeater::make('periods')
+                    ->grid(2)
                     ->extraAttributes(['class' => 'repeater-guides'])
                     ->relationship('periods')
                     ->columnSpanFull()

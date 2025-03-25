@@ -413,6 +413,7 @@ HTML;
             }
 
             $message = TourService::getOneMessage([
+                'transfer_id' => $data['id'],
                 'driver_id' => $driverId,
                 'pax' => $data['pax'],
                 'driver_ids' => $driverIds,

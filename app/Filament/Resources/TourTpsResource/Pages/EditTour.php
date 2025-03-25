@@ -31,9 +31,13 @@ class EditTour extends EditRecord
         ExpenseService::updateTourRoomTypes($this->record->id, $data);
 
 //        TourService::sendMails($formState, $formState['days'] ?? []);
-        TourService::sendTelegram($formState);
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        TourService::sendTelegram($this->form->getRawState());
     }
 
     protected function getHeaderActions(): array
