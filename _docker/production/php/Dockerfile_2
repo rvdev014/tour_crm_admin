@@ -30,12 +30,10 @@ COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
 
-COPY ./public ./public
-COPY ./package.json .
-COPY ./package-lock.json .
+#COPY ./public ./public
+#COPY ./package.json .
+#COPY ./package-lock.json .
 
-RUN npm install
-RUN npm run build
 
 COPY ./composer.* .
 RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
@@ -43,6 +41,9 @@ RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
 COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
 
 COPY . .
+
+RUN npm install
+RUN npm run build
 
 RUN chown -R $USER:www-data storage
 RUN chown -R $USER:www-data bootstrap/cache
