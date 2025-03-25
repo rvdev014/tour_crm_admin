@@ -10,8 +10,6 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libzip-dev \
     libkrb5-dev \
-    nodejs \
-    npm \
     zip && \
     rm -rf /var/lib/apt/lists/*
 
@@ -38,8 +36,8 @@ COPY ./_docker/production/php/php.ini /usr/local/etc/php/conf.d/php.ini
 
 COPY . .
 
-RUN npm install
-RUN npm run build
+#RUN npm install
+#RUN npm run build
 
 RUN chown -R $USER:www-data storage
 RUN chown -R $USER:www-data bootstrap/cache
