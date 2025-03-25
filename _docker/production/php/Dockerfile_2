@@ -30,11 +30,6 @@ COPY --from=composer:2.4.4 /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
 
-COPY ./package.json .
-COPY ./package-lock.json .
-RUN npm install
-RUN npm run build
-
 COPY ./composer.* .
 RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
 
