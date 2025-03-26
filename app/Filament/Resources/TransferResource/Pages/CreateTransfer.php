@@ -91,7 +91,6 @@ class CreateTransfer extends CreateRecord
     protected function afterCreate(): void
     {
         $data = $this->record;
-        dd($data);
         if ($data['status'] == ExpenseStatus::Confirmed->value) {
             TourService::sendTelegramTransfer($data);
         }
