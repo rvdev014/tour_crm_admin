@@ -99,7 +99,8 @@ class HotelResource extends Resource
                                 ->minDate(fn($get) => $get('start_date'))
                                 ->required(),
                             Forms\Components\Select::make('season_type')
-                                ->options(RoomSeasonType::class),
+                                ->options(RoomSeasonType::class)
+                                ->required(),
                         ]),
                     ]),
             ]);
