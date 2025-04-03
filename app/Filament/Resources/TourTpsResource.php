@@ -46,7 +46,7 @@ class TourTpsResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with('days.expenses')
+            ->with('days.expenses.guides')
             ->where('type', TourType::TPS->value);
     }
 
@@ -198,6 +198,7 @@ class TourTpsResource extends Resource
                 ->relationship('days')
                 ->addActionLabel('Add day')
                 ->columnSpanFull()
+                ->cloneable()
                 ->addActionAlignment('end')
                 ->afterStateUpdated(function ($state, $get, $set) {
                     $prevDate = null;

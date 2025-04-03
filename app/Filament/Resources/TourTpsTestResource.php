@@ -891,7 +891,8 @@ class TourTpsTestResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\DaysRelationManager::class,
+//            RelationManagers\DaysRelationManager::class,
+            RelationManagers\ExpensesRelationManager::class,
         ];
     }
 
