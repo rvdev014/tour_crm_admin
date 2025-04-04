@@ -27,6 +27,20 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                 Components\Grid::make()->schema([
                     Components\Hidden::make('index'),
                     Components\Hidden::make('price_currency'),
+                    Components\Select::make('tour_day_id')
+                        ->label('Day')
+                        ->options(function ($get) {
+                            $options = [];
+                            foreach ($this->ownerRecord->days as $day) {
+                                $options[$day->id] = $day->date->format('d.m.Y');
+                            }
+                            return $options;
+                        })
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->reactive(),
                     Components\Select::make('type')
                         ->native(false)
                         ->searchable()
@@ -399,7 +413,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
         return $table
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
-            ->recordTitleAttribute('type,status')
+            ->recordTitleAttribute('tourDay.date')
             ->defaultGroup(
                 Tables\Grouping\Group::make('tourDay.date')
                     ->label('Day')
@@ -424,7 +438,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
