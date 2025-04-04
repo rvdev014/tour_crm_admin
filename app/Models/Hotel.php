@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Country $country
  * @property Collection<HotelRoomType> $roomTypes
  * @property Collection<HotelPeriod> $periods
+ * @property Collection<HotelPhone> $phones
  */
 class Hotel extends Model
 {
@@ -65,5 +66,10 @@ class Hotel extends Model
     public function periods(): HasMany
     {
         return $this->hasMany(HotelPeriod::class)->orderBy('id');
+    }
+
+    public function phones(): HasMany
+    {
+        return $this->hasMany(HotelPhone::class)->orderBy('id');
     }
 }

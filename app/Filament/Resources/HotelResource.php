@@ -13,6 +13,8 @@ use App\Services\TourService;
 use Filament\Resources\Resource;
 use App\Filament\Resources\HotelResource\Pages;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
+use App\Filament\Resources\HotelResource\Actions\HotelPeriodsAction;
 use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
 
 class HotelResource extends Resource
@@ -34,6 +36,16 @@ class HotelResource extends Resource
 
                     Forms\Components\TextInput::make('email')
                         ->email()
+                        ->suffixAction(function ($record) {
+                            if (!$record?->email) {
+                                return [];
+                            }
+                            return [
+                                Forms\Components\Actions\Action::make('hotel_email')
+                                    ->icon('heroicon-o-paper-airplane')
+                                    ->url("mailto:{$record->email}", true)
+                            ];
+                        })
                         ->required(),
 
                     Forms\Components\TextInput::make('inn'),
@@ -60,6 +72,28 @@ class HotelResource extends Resource
                     Forms\Components\TextInput::make('address')->maxLength(255),
                 ]),
                 Forms\Components\Grid::make(4)->schema([
+
+                    Forms\Components\Repeater::make('phones')
+                        ->relationship('phones')
+                        ->addActionLabel('Add phone')
+                        ->minItems(1)
+                        ->simple(
+                            PhoneInput::make('phone_number')
+                                ->strictMode()
+                                ->onlyCountries(['UZ'])
+                                ->defaultCountry('UZ')
+                                ->suffixAction(function ($record) {
+                                    if (!$record?->phone_number) {
+                                        return [];
+                                    }
+                                    return [
+                                        Forms\Components\Actions\Action::make('hotel_phone')
+                                            ->icon('heroicon-o-paper-airplane')
+                                            ->url("https://t.me/{$record->phone}", true)
+                                    ];
+                                }),
+                        ),
+
                     Forms\Components\Select::make('rate')
                         ->options(function() {
                             $options = [];
@@ -69,17 +103,17 @@ class HotelResource extends Resource
                             return $options;
                         }),
 
-                    PhoneInput::make('phone')
+                    /*PhoneInput::make('phone')
                         ->suffixAction(function ($record) {
                             if (!$record?->phone) {
                                 return [];
                             }
                             return [
-                                Forms\Components\Actions\Action::make('create_museum')
+                                Forms\Components\Actions\Action::make('hotel_phone')
                                     ->icon('heroicon-o-paper-airplane')
                                     ->url("https://t.me/{$record->phone}", true)
                             ];
-                        }),
+                        }),*/
                     Forms\Components\Textarea::make('comment')->maxLength(255),
                 ]),
 
@@ -115,7 +149,10 @@ class HotelResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
+                    ->url(fn($record) => $record->email ? "mailto:{$record->email}" : null, true)
+                    ->color('info')
+                    ->searchable()
+                    ->html(),
                 Tables\Columns\TextColumn::make('inn')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('country.name')
@@ -143,8 +180,11 @@ class HotelResource extends Resource
             ->filters([
                 //
             ])
+            ->recordUrl(null)
+            ->recordAction(HotelPeriodsAction::class)
             ->actions([
                 Tables\Actions\EditAction::make(),
+                HotelPeriodsAction::make()->label('')->icon(''),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

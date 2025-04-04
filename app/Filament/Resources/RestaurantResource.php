@@ -56,6 +56,9 @@ class RestaurantResource extends Resource
                         ->required()
                         ->numeric(),
                     PhoneInput::make('phone')
+                        ->strictMode()
+                        ->onlyCountries(['UZ'])
+                        ->defaultCountry('UZ')
                         ->suffixAction(function($record) {
                             if (!$record?->phone) {
                                 return [];

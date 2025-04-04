@@ -892,7 +892,8 @@ class TourTpsTestResource extends Resource
     {
         return [
 //            RelationManagers\DaysRelationManager::class,
-            RelationManagers\ExpensesRelationManager::class,
+//            RelationManagers\ExpensesRelationManager::class,
+            RelationManagers\ExpensesThroughDaysRelationManager::class,
         ];
     }
 

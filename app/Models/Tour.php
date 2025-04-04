@@ -96,6 +96,18 @@ class Tour extends Model
         return $this->hasMany(TourDayExpense::class);
     }
 
+    public function expensesThroughDays(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            TourDayExpense::class,
+            TourDay::class,
+            'tour_id',
+            'tour_day_id',
+            'id',
+            'id'
+        );
+    }
+
     public function getExpense(ExpenseType $expenseType): ?TourDayExpense
     {
         return $this->expenses->first(fn($expense) => $expense->type == $expenseType);
