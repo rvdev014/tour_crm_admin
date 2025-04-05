@@ -21,6 +21,7 @@ class EditTour extends EditRecord
 
         ExpenseService::convertExpensePrice($data, 'price');
         ExpenseService::convertExpensePrice($data, 'guide_price');
+        ExpenseService::convertExpensePrice($data, 'transport_price');
         $totalExpenses = ExpenseService::calculateAllExpensesPrice($allExpenses) + ($data['guide_price_converted'] ?? $data['guide_price'] ?? 0);
 
         $price = $data['price_converted'] ?? $data['price'] ?? 0;

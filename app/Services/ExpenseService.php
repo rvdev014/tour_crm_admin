@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\TourDayExpenseRoomType;
 use Carbon\Carbon;
 use App\Models\Driver;
 use App\Models\Country;
@@ -90,6 +91,8 @@ class ExpenseService
 
                     $addPercent = TourService::getCompanyAddPercent($companyId);
                     $hotelTotal = 0;
+
+                    $roomAmounts = ExpenseService::getRoomingAmounts($data);
                     foreach ($roomAmounts as $roomTypeId => $amount) {
                         if (empty($amount)) {
                             continue;
@@ -111,6 +114,7 @@ class ExpenseService
 
                     $data['price'] = $hotelTotal;
                 }
+
                 return $data;
 
             case ExpenseType::Museum->value:
@@ -237,6 +241,26 @@ class ExpenseService
         return $country->name === 'Uzbekistan' ? RoomPersonType::Uzbek : RoomPersonType::Foreign;
     }
 
+    public static function createTourDayExpenseRoomTypes($tourDayExpenseId, $formState): void
+    {
+        $roomAmounts = ExpenseService::getRoomingAmounts($formState);
+        foreach ($roomAmounts as $roomTypeId => $amount) {
+            if (empty($amount)) {
+                continue;
+            }
+
+            TourDayExpenseRoomType::query()->updateOrCreate(
+                [
+                    'tour_day_expense_id' => $tourDayExpenseId,
+                    'room_type_id' => $roomTypeId
+                ],
+                [
+                    'amount' => $amount,
+                ]
+            );
+        }
+    }
+
     public static function createTourRoomTypes($tourId, $formState): void
     {
         $roomAmounts = ExpenseService::getRoomingAmounts($formState);
@@ -254,6 +278,34 @@ class ExpenseService
                     'amount' => $amount,
                 ]
             );
+        }
+    }
+
+    public static function updateTourDayExpenseRoomTypes($tourDayExpenseId, $tourData): void
+    {
+        $roomAmounts = ExpenseService::getRoomingAmounts($tourData);
+        foreach ($roomAmounts as $roomTypeId => $amount) {
+
+            $tourHotelRoomType = TourDayExpenseRoomType::query()
+                ->where('tour_day_expense_id', $tourDayExpenseId)
+                ->where('room_type_id', $roomTypeId)
+                ->first();
+
+            if ($tourHotelRoomType) {
+                if (empty($amount)) {
+                    $tourHotelRoomType->delete();
+                } else {
+                    $tourHotelRoomType->update(['amount' => $amount]);
+                }
+            } else {
+                if (!empty($amount)) {
+                    TourDayExpenseRoomType::query()->create([
+                        'tour_day_expense_id' => $tourDayExpenseId,
+                        'room_type_id' => $roomTypeId,
+                        'amount' => $amount,
+                    ]);
+                }
+            }
         }
     }
 

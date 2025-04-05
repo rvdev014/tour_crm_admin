@@ -24,6 +24,7 @@ class CreateTour extends CreateRecord
 
         ExpenseService::convertExpensePrice($data, 'price');
         ExpenseService::convertExpensePrice($data, 'guide_price');
+        ExpenseService::convertExpensePrice($data, 'transport_price');
         $totalExpenses = ExpenseService::calculateAllExpensesPrice($allExpenses) + ($data['guide_price_converted'] ?? $data['guide_price'] ?? 0);
 
         $data['type'] = TourType::TPS;

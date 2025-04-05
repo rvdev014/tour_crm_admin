@@ -42,6 +42,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $guide_price
  * @property string $guide_price_currency
  * @property TransportType $transport_type
+ * @property float $transport_price
  * @property TransportComfortLevel $transport_comfort_level
  * @property int $single_supplement_price
  *

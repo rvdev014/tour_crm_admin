@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TourCorporateResource\Pages;
 
 use App\Enums\ExpenseStatus;
+use App\Enums\ExpenseType;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
 use App\Filament\Resources\TourCorporateResource;
@@ -19,6 +20,7 @@ class CreateTour extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $formState = $this->form->getRawState();
+
         $allExpenses = ExpenseService::mutateExpenses($formState, isCorporate: true);
 
         $data['type'] = TourType::Corporate;
@@ -33,7 +35,12 @@ class CreateTour extends CreateRecord
 
     protected function afterCreate(): void
     {
-        ExpenseService::createTourRoomTypes($this->record->id, $this->form->getRawState());
+//        $formState = $this->form->getRawState();
+//        foreach ($formState['expenses'] as $expense) {
+//            if ($expense['type'] == ExpenseType::Hotel->value) {
+//                ExpenseService::createTourDayExpenseRoomTypes($expense['id'], $expense);
+//            }
+//        }
         TourService::sendTelegram($this->form->getRawState(), isCorporate: true);
     }
 

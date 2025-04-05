@@ -46,8 +46,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $museum_inn
  *
  * Guide
-// * @property string $guide_name
-// * @property string $guide_phone
+ * // * @property string $guide_name
+ * // * @property string $guide_phone
  *
  * Transport
  * @property int $transport_type
@@ -100,6 +100,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Restaurant $restaurant
  * @property Employee $guideEmployee
  * @property Collection<ExpenseGuide> $guides
+ * @property Collection<TourDayExpenseRoomType> $roomTypes
  */
 #[ObservedBy([TourDayExpenseObserver::class])]
 class TourDayExpense extends Model
@@ -188,5 +189,10 @@ class TourDayExpense extends Model
     public function guides(): HasMany
     {
         return $this->hasMany(ExpenseGuide::class, 'tour_day_expense_id');
+    }
+
+    public function roomTypes(): HasMany
+    {
+        return $this->hasMany(TourDayExpenseRoomType::class);
     }
 }

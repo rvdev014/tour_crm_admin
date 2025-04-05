@@ -2,31 +2,31 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\City;
-use App\Models\Tour;
-use App\Models\User;
-use Filament\Tables;
-use App\Enums\TourType;
-use App\Models\Company;
-use App\Models\Country;
-use Filament\Forms\Form;
 use App\Enums\CompanyType;
-use App\Enums\ExpenseType;
-use Filament\Tables\Table;
-use Illuminate\Support\Arr;
 use App\Enums\ExpenseStatus;
+use App\Enums\ExpenseType;
+use App\Enums\TourType;
 use App\Enums\TransportType;
-use Filament\Tables\Columns;
-use App\Services\TourService;
-use Filament\Forms\Components;
-use Illuminate\Support\Carbon;
-use App\Services\ExpenseService;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Section;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\TourCorporateResource\Pages;
 use App\Filament\Resources\TourCorporateResource\RelationManagers;
+use App\Models\City;
+use App\Models\Company;
+use App\Models\Country;
+use App\Models\RoomType;
+use App\Models\Tour;
+use App\Models\User;
+use App\Services\ExpenseService;
+use App\Services\TourService;
+use Filament\Forms\Components;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 class TourCorporateResource extends Resource
 {
@@ -48,7 +48,7 @@ class TourCorporateResource extends Resource
             Components\Fieldset::make('Tour details')->schema([
 
                 Components\TextInput::make('group_number')
-                    ->formatStateUsing(function($record) {
+                    ->formatStateUsing(function ($record) {
                         if (!empty($record)) {
                             return $record->group_number;
                         }
@@ -78,16 +78,6 @@ class TourCorporateResource extends Resource
                 Components\Textarea::make('comment'),
             ]),
 
-            Components\Fieldset::make('Rooming info')->schema([
-
-                ...TourService::generateRoomingSchema(true),
-
-                Section::make("Other rooming")
-                    ->schema(TourService::generateRoomingSchema())
-                    ->collapsible()
-                    ->collapsed(),
-            ]),
-
             //            Components\Fieldset::make('Transport info')->schema([
             //                Components\Select::make('transport_type')
             //                    ->native(false)
@@ -107,7 +97,7 @@ class TourCorporateResource extends Resource
                 ->collapsed(fn($record) => !empty($record->id))
                 ->columnSpanFull()
                 ->collapsible()
-                ->itemLabel(function($get, $uuid) {
+                ->itemLabel(function ($get, $uuid) {
                     $current = Arr::get($get('expenses'), $uuid);
                     $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
                     $index++;
@@ -134,7 +124,7 @@ class TourCorporateResource extends Resource
                             ->searchable()
                             ->preload()
                             ->label('Expense Type')
-                            ->options(function() {
+                            ->options(function () {
                                 $options = ExpenseType::casesOptions();
                                 return collect($options)->filter(fn($value) => in_array($value, [
                                     ExpenseType::Hotel->getLabel(),
@@ -151,7 +141,7 @@ class TourCorporateResource extends Resource
                             ->displayFormat('d.m.Y')
                             ->native(false)
                             ->required()
-                            ->afterStateUpdated(function($get, $set) {
+                            ->afterStateUpdated(function ($get, $set) {
                                 $set(
                                     'hotel_total_nights',
                                     TourService::calculateHotelNights(
@@ -186,7 +176,7 @@ class TourCorporateResource extends Resource
                             Components\TimePicker::make('hotel_checkin_time')
                                 ->seconds(false)
                                 ->reactive()
-                                ->afterStateUpdated(function($get, $set) {
+                                ->afterStateUpdated(function ($get, $set) {
                                     $set(
                                         'hotel_total_nights',
                                         TourService::calculateHotelNights(
@@ -199,7 +189,7 @@ class TourCorporateResource extends Resource
                                 ->label('Check-in time'),
                             Components\DateTimePicker::make('hotel_checkout_date_time')
                                 ->seconds(false)
-                                ->afterStateUpdated(function($get, $set) {
+                                ->afterStateUpdated(function ($get, $set) {
                                     $set(
                                         'hotel_total_nights',
                                         TourService::calculateHotelNights(
@@ -212,6 +202,7 @@ class TourCorporateResource extends Resource
                                 ->reactive()
                                 ->label('Check-out date & time'),
                         ]),
+
                         Components\Grid::make(3)->schema([
                             Components\Select::make('status')
                                 ->options(ExpenseStatus::class)
@@ -225,6 +216,35 @@ class TourCorporateResource extends Resource
                                 ->label('Total nights'),
                             Components\Textarea::make('comment')->label('Comment'),
                         ]),
+
+//                        ...TourService::generateRoomingSchema(true),
+//
+//                        Section::make("Other rooming")
+//                            ->schema(TourService::generateRoomingSchema())
+//                            ->collapsible()
+//                            ->collapsed(),
+
+                        Components\Repeater::make('roomTypes')
+                            ->grid(2)
+                            ->columnSpanFull()
+                            ->relationship('roomTypes')
+                            ->addActionLabel('Add room type')
+                            ->schema([
+                                Components\Grid::make()->schema([
+                                    Components\Select::make('room_type_id')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('Room type')
+                                        ->options(RoomType::query()->pluck('name', 'id')->toArray())
+                                        ->reactive(),
+
+                                    Components\TextInput::make('amount')
+                                        ->numeric()
+                                        ->label('Amount'),
+                                ])
+                            ])
+
                     ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
 
                     // Transport
@@ -401,7 +421,7 @@ class TourCorporateResource extends Resource
 
                     ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
                 ])
-                ->mutateRelationshipDataBeforeCreateUsing(function($data, $get) {
+                ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
                     $tourData = $get();
                     $passengers = $tourData['passengers'] ?? [];
                     return ExpenseService::mutateExpense(
@@ -412,7 +432,7 @@ class TourCorporateResource extends Resource
                         $tourData['company_id']
                     );
                 })
-                ->mutateRelationshipDataBeforeSaveUsing(function($data, $get) {
+                ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
                     $tourData = $get();
                     $passengers = $tourData['passengers'] ?? [];
                     return ExpenseService::mutateExpense(
@@ -483,7 +503,7 @@ class TourCorporateResource extends Resource
                             ->displayFormat('d.m.Y')
                             ->native(false),
                     ])
-                    ->query(function(Builder $query, $data) {
+                    ->query(function (Builder $query, $data) {
                         return $query
                             ->when(
                                 $data['country_id'],
@@ -507,7 +527,7 @@ class TourCorporateResource extends Resource
                                 fn($query, $createdUntil) => $query->whereDate('created_at', '<=', $createdUntil)
                             );
                     })
-                    ->indicateUsing(function(array $data): array {
+                    ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['country_id'] ?? null) {
                             $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
@@ -550,7 +570,7 @@ class TourCorporateResource extends Resource
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(function($record, $state) {
+                    ->formatStateUsing(function ($record, $state) {
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney($state);
                         }

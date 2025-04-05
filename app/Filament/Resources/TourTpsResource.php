@@ -56,6 +56,7 @@ class TourTpsResource extends Resource
             Components\Fieldset::make('Tour details')->schema([
                 Hidden::make('price_currency'),
                 Hidden::make('guide_price_currency'),
+                Hidden::make('transport_price_currency'),
                 Components\Grid::make(4)->schema([
                     Components\TextInput::make('group_number')
                         ->formatStateUsing(function ($record) {
@@ -144,8 +145,7 @@ class TourTpsResource extends Resource
             ]),
 
             Components\Fieldset::make('Guide info')->schema([
-
-                Components\Grid::make(3)->schema([
+                Components\Grid::make(4)->schema([
                     Components\Select::make('guide_type')
                         ->native(false)
                         ->searchable()
@@ -153,19 +153,14 @@ class TourTpsResource extends Resource
                         ->options(GuideType::class)
                         ->reactive()
                         ->required(),
-                    Components\Select::make('transport_type')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->options(TransportType::class),
-                ]),
 
-                Components\Grid::make(3)->schema([
-                    Components\TextInput::make('guide_name'),
+                    Components\TextInput::make('guide_name')
+                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
                     PhoneInput::make('guide_phone')
                         ->strictMode()
                         ->onlyCountries(['UZ'])
-                        ->defaultCountry('UZ'),
+                        ->defaultCountry('UZ')
+                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
                     //                    Components\TextInput::make('guide_phone'),
                     Components\TextInput::make('guide_price')
                         ->label(fn($get) => 'Price (' . ($get('guide_price_currency') ?? 'UZS') . ')')
@@ -177,8 +172,28 @@ class TourTpsResource extends Resource
                                     $set('guide_price_currency', $get('guide_price_currency') == 'USD' ? 'UZS' : 'USD');
                                 })
                         )
-                        ->numeric(),
-                ])->visible(fn($get) => $get('guide_type') == GuideType::Escort->value)
+                        ->numeric()
+                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
+                ])
+            ]),
+
+            Components\Fieldset::make('Transport info')->schema([
+                Components\Select::make('transport_type')
+                    ->native(false)
+                    ->searchable()
+                    ->preload()
+                    ->options(TransportType::class),
+                Components\TextInput::make('transport_price')
+                    ->label(fn($get) => 'Price (' . ($get('transport_price_currency') ?? 'UZS') . ')')
+                    ->suffixAction(
+                        Components\Actions\Action::make('toggle-currency')
+                            ->icon('heroicon-o-banknotes')
+                            ->iconSize('md')
+                            ->action(function ($get, $set) {
+                                $set('transport_price_currency', $get('transport_price_currency') == 'USD' ? 'UZS' : 'USD');
+                            })
+                    )
+                    ->numeric(),
             ]),
 
             Components\Fieldset::make('Rooming info')->schema([
@@ -421,7 +436,7 @@ class TourTpsResource extends Resource
                                         ->required()
                                         ->label('Status'),
 
-                                    self::getExpensePriceInput('Sell price'),
+//                                    self::getExpensePriceInput('Sell price'),
 
                                     Components\Textarea::make('comment')
                                         ->label('Comment'),
@@ -641,6 +656,10 @@ class TourTpsResource extends Resource
                         ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
                             $tourData = $get('../../');
                             $data['from_city_id'] = $get('city_id');
+                            if ($data['type'] == ExpenseType::Transport) {
+                                $data['price'] = $tourData['transport_price'] ?? 0;
+                            }
+
                             return ExpenseService::mutateExpense(
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
@@ -653,6 +672,10 @@ class TourTpsResource extends Resource
                         ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
                             $tourData = $get('../../');
                             $data['from_city_id'] = $get('city_id');
+                            if ($data['type'] == ExpenseType::Transport) {
+                                $data['price'] = $tourData['transport_price'] ?? 0;
+                            }
+
                             return ExpenseService::mutateExpense(
                                 $data,
                                 $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
