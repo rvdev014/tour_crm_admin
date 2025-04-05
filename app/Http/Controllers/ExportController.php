@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tour;
+use App\Models\Transfer;
 use App\Services\ExportClientService;
 use App\Services\ExportHotelService;
 use App\Services\ExportMuseumService;
@@ -158,6 +159,29 @@ class ExportController extends Controller
 
         // redirect to back
         redirect()->back();
+    }
+
+    /**
+     * @throws CopyFileException
+     * @throws CreateTemporaryFileException
+     */
+    public function exportTransfer(Transfer $transfer): void
+    {
+        $tempDir = $this->getTempDir("transfer_reports");
+
+        $fileName = $tempDir . '/Transfer_' . $transfer->id . '.docx';
+        $templateProcessor = ExportHotelService::getReplacedTemplateForTransfer($transfer);
+        $templateProcessor->saveAs($fileName);
+
+        // Output file for download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        header('Content-Disposition: attachment; filename="Transfer_' . $transfer->id . '.docx"');
+        header('Content-Length: ' . filesize($fileName));
+        readfile($fileName);
+
+        // Clean up temporary files
+        unlink($fileName); // Delete file
+        rmdir($tempDir); // Delete directory
     }
 
     protected function getTempDir(string $dirName): string

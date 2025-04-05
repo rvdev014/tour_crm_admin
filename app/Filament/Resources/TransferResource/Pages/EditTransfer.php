@@ -28,6 +28,11 @@ class EditTransfer extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('export_all')
+                ->label('Export voucher')
+                ->icon('heroicon-o-document-text')
+                ->visible($this->record->status == ExpenseStatus::Confirmed)
+                ->url(route('export-transfer', $this->record)),
             Actions\DeleteAction::make(),
         ];
     }

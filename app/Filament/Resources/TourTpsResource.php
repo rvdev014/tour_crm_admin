@@ -156,12 +156,13 @@ class TourTpsResource extends Resource
 
                     Components\TextInput::make('guide_name')
                         ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
+
                     PhoneInput::make('guide_phone')
                         ->strictMode()
                         ->onlyCountries(['UZ'])
                         ->defaultCountry('UZ')
                         ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
-                    //                    Components\TextInput::make('guide_phone'),
+
                     Components\TextInput::make('guide_price')
                         ->label(fn($get) => 'Price (' . ($get('guide_price_currency') ?? 'UZS') . ')')
                         ->suffixAction(

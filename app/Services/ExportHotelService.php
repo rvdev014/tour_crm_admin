@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Enums\ExpenseType;
+use App\Models\Driver;
 use App\Models\Tour;
 use App\Models\TourDay;
 use App\Models\TourDayExpense;
 use App\Models\TourRoomType;
+use App\Models\Transfer;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use PhpOffice\PhpWord\Exception\CopyFileException;
@@ -200,6 +202,40 @@ class ExportHotelService
     public static function getTemplatePath(): string
     {
         return __DIR__ . '/Templates/Report_hotel.docx';
+    }
+
+    /**
+     * @throws CopyFileException
+     * @throws CreateTemporaryFileException
+     */
+    public static function getReplacedTemplateForTransfer(Transfer $transfer): TemplateProcessor
+    {
+        $templateProcessor = new TemplateProcessor(__DIR__ . '/Templates/Transfer_voucher.docx');
+
+        $driversNames = '';
+        $driversPhones = '';
+        if (!empty($transfer->driver_ids)) {
+            $drivers = Driver::query()->find($transfer->driver_ids);
+            $driversNames = $drivers->map(fn($driver) => $driver->name)->join(', ');
+            $driversPhones = $drivers->map(fn($driver) => $driver->phone)->join(', ');
+        }
+
+        $placeholders = [
+            'transfer_number' => 1000 + $transfer->id,
+            'created_at' => Carbon::parse($transfer->created_at)->format('d-M Y H:i'),
+            'hotel_name' => '-',
+            'route' => $transfer->route,
+            'driver' => $driversNames,
+            'driver_phone' => $driversPhones,
+            'passenger' => $transfer->passenger,
+            'comment' => $transfer->comment,
+            'pax' => $transfer->pax,
+        ];
+        foreach ($placeholders as $placeholder => $value) {
+            $templateProcessor->setValue($placeholder, $value);
+        }
+
+        return $templateProcessor;
     }
 
     /**
