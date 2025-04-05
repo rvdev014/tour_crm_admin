@@ -71,6 +71,8 @@ class ExportClientService
             '{departureDate}' => $tour->end_date->format('m/d/Y'),
             '{expensesList}' => $expensesList->implode("\n"),
 
+            '{company}' => $tour->company->name,
+            '{package}' => $tour->package_name,
             '{flightInfo}' => $flightInfo,
             '{cityFrom}' => $planeExpense?->fromCity->name,
             '{cityTo}' => $planeExpense?->toCity->name,
