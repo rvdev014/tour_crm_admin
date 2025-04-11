@@ -93,7 +93,7 @@ class TourTpsTestResource extends Resource
                     Components\DateTimePicker::make('start_date')
                         ->displayFormat('d.m.Y H:i')
                         ->label('Arrival time')
-                        ->native(false)
+//                        ->native(false)
                         ->seconds(false)
                         ->minDate(fn($record) => $record ? $record->start_date : null)
                         ->afterStateUpdated(function($get, $set) {
@@ -114,7 +114,7 @@ class TourTpsTestResource extends Resource
                     Components\DateTimePicker::make('end_date')
                         ->displayFormat('d.m.Y H:i')
                         ->label('Departure time')
-                        ->native(false)
+//                        ->native(false)
                         ->seconds(false)
                         ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay())
                         ->reactive()

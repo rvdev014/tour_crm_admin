@@ -46,9 +46,9 @@ class CompanyExpenseResource extends Resource
             ->defaultSort('date', 'desc')
             ->filters([
                 Tables\Filters\Filter::make('company')
-                    ->columnSpan(2)
+                    ->columnSpanFull()
                     ->form([
-                        Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\Grid::make(4)->schema([
                             Forms\Components\Select::make('companies')
                                 ->native(false)
                                 ->multiple()
@@ -66,6 +66,13 @@ class CompanyExpenseResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->options(ExpenseType::class),
+
+                            Forms\Components\DatePicker::make('date_from')
+                                ->displayFormat('d.m.Y')
+                                ->native(false),
+                            Forms\Components\DatePicker::make('date_until')
+                                ->displayFormat('d.m.Y')
+                                ->native(false),
                         ])
                     ])
                     ->query(function(Builder $query, $data) {
@@ -81,6 +88,24 @@ class CompanyExpenseResource extends Resource
                         }
                         if ($data['expense_types']) {
                             $query = $query->whereIn('type', $data['expense_types']);
+                        }
+                        if ($data['date_from']) {
+                            $query = $query->where(function($subQuery) use ($data) {
+                                $subQuery
+                                    ->whereDate('date', '>=', $data['date_from'])
+                                    ->orWhereHas('tourDay', function($q) use ($data) {
+                                        $q->whereDate('date', '>=', $data['date_from']);
+                                    });
+                            });
+                        }
+                        if ($data['date_until']) {
+                            $query = $query->where(function($subQuery) use ($data) {
+                                $subQuery
+                                    ->whereDate('date', '<=', $data['date_until'])
+                                    ->orWhereHas('tourDay', function($q) use ($data) {
+                                        $q->whereDate('date', '<=', $data['date_until']);
+                                    });
+                            });
                         }
                         return $query;
                     })

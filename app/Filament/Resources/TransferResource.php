@@ -94,7 +94,7 @@ class TransferResource extends Resource
 
                     Forms\Components\DateTimePicker::make('date_time')
                         ->displayFormat('d.m.Y H:i')
-                        ->native(false)
+//                        ->native(false)
                         ->seconds(false),
                 ]),
 

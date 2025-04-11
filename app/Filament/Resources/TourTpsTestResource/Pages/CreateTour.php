@@ -43,9 +43,9 @@ class CreateTour extends CreateRecord
         TourService::sendTelegram($this->form->getRawState());
     }
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
+//    protected function getRedirectUrl(): string
+//    {
+//        return $this->getResource()::getUrl('index');
+//    }
 
 }
