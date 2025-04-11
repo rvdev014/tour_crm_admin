@@ -18,6 +18,14 @@ class TransferObserver
 //        }
     }
 
+    public function updating(Transfer $transfer): void
+    {
+        // save all fields except old_values
+        $oldValues = $transfer->getOriginal();
+        unset($oldValues['old_values']);
+        $transfer->old_values = $oldValues;
+    }
+
     /**
      * Handle the Transfer "updated" event.
      */

@@ -17,14 +17,11 @@ use App\Models\Country;
 use App\Models\RoomType;
 use App\Models\Transfer;
 use App\Models\TourHotel;
-use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
 use App\Models\MuseumItem;
 use App\Models\Restaurant;
-use Filament\Tables\Table;
 use App\Enums\ExpenseStatus;
 use App\Enums\TransportType;
-use App\Enums\RoomPersonType;
 use App\Models\TourDayExpense;
 use Illuminate\Support\Number;
 use Illuminate\Support\Collection;
@@ -328,7 +325,8 @@ class TourService
                 foreach ($driverIds as $driverId) {
                     $totalPax = count($tourData['passengers'] ?? []);
                     $transportsData[$driverId][] = [
-                        'transfer_id' => self::getTransferByExpense($expense)?->getNumber(),
+                        'transfer_id' => self::getTransferByExpense($expense)?->id,
+                        'transfer_number' => self::getTransferByExpense($expense)?->getNumber(),
                         'driver_id' => $driverId,
                         'pax' => $totalPax,
                         'driver_ids' => $driverIds,
@@ -362,7 +360,8 @@ class TourService
 
                     foreach ($driverIds as $driverId) {
                         $transportsData[$driverId][] = [
-                            'transfer_id' => self::getTransferByExpense($expense)?->getNumber(),
+                            'transfer_id' => self::getTransferByExpense($expense)?->id,
+                            'transfer_number' => self::getTransferByExpense($expense)?->getNumber(),
                             'driver_id' => $driverId,
                             'pax' => $totalPax,
                             'driver_ids' => $driverIds,
@@ -421,7 +420,8 @@ HTML;
             }
 
             $message = TourService::getOneMessage([
-                'transfer_id' => 1000 + $data['id'],
+                'transfer_id' => $data['id'],
+                'transfer_number' => 1000 + $data['id'],
                 'driver_id' => $driverId,
                 'pax' => $data['pax'],
                 'driver_ids' => $driverIds,
@@ -446,6 +446,10 @@ HTML;
 
     public static function getOneMessage($data, bool $withPhone = true): string
     {
+        /** @var Transfer|null $transfer */
+        $transfer = Transfer::query()->find($data['transfer_id']);
+        $oldValues = $transfer?->old_values ?? [];
+
         $drivers = Driver::query()
             ->whereIn('id', $data['driver_ids'] ?? [])
             ->get()
@@ -456,20 +460,40 @@ HTML;
         $route = $data['route'] ?? '-';
         $mark = $data['mark'] ?? '-';
         $nameplate = $data['nameplate'] ?? '-';
-        $toCity = $data['to_city'] ? City::find($data['to_city']) : null;
+        $toCity = $data['to_city'] ? City::find($data['to_city'])?->name : null;
         $place = $data['transport_place'] ?? '-';
         $comment = $data['comment'] ?? '-';
+
+        if ($transfer && !empty($oldValues)) {
+            $oldDrivers = Driver::query()
+                ->whereIn('id', $oldValues['driver_ids'] ?? [])
+                ->get()
+                ->map(fn(Driver $driver) => $driver->name)
+                ->implode(', ');
+
+            $drivers = self::getChangedField($oldDrivers, $drivers);
+
+            $pax = self::getChangedField($oldValues['pax'] ?? null, $pax);
+            $route = self::getChangedField($oldValues['route'] ?? null, $route);
+            $mark = self::getChangedField($oldValues['mark'] ?? null, $mark);
+            $nameplate = self::getChangedField($oldValues['nameplate'] ?? null, $nameplate);
+            $toCity = self::getChangedField(City::find($oldValues['to_city_id'] ?? null)?->name, $toCity);
+            $place = self::getChangedField($oldValues['place_of_submission'] ?? null, $place);
+            $comment = self::getChangedField($oldValues['comment'] ?? null, $comment);
+        }
+
         $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
+
         $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
         $price = $data['price'] ?? '';
 
         $result = <<<HTML
 
-<b>ID:</b> {$data['transfer_id']}
+<b>ID:</b> {$data['transfer_number']}
 <b>Drivers:</b> {$drivers}
 <b>Pax:</b> {$pax}
 <b>Date and time:</b> {$date}
-<b>City:</b> {$toCity?->name}
+<b>City:</b> {$toCity}
 <b>Pickup location:</b> {$place}
 <b>Transport:</b> {$transportType}
 <b>Route:</b> {$route}
@@ -486,7 +510,24 @@ Office phone: +998333377752
 HTML;
         }
 
+        $oldValues = $transfer->getOriginal();
+        unset($oldValues['old_values']);
+        $transfer->update(['old_values' => $oldValues]);
+
         return $result;
+    }
+
+    public static function getChangedField($value1, $value2): ?string
+    {
+        if ($value1 == $value2) {
+            return $value2;
+        }
+
+        if (!$value2) {
+            return $value1;
+        }
+
+        return $value2 . ' <strike>' . $value1 . '</strike>';
     }
 
     public static function getEnum($enumClass, $value): string

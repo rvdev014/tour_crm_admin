@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property int $pax
  * @property int $tour_day_expense_id
  * @property string $comment
+ * @property array $old_values
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon $date_time
@@ -53,33 +54,7 @@ class Transfer extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'transport_type',
-        'transport_comfort_level',
-        'from_city_id',
-        'to_city_id',
-        'total_price',
-        'price',
-        'company_id',
-        'group_number',
-        'send_username',
-        'status',
-        'pax',
-        'comment',
-        'tour_day_expense_id',
-
-        'driver_ids',
-        'date_time',
-        'place_of_submission',
-
-        'mark',
-        'route',
-        'passenger',
-        //        'sell_price',
-        'buy_price',
-        'nameplate',
-        'created_by',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'status' => ExpenseStatus::class,
@@ -87,6 +62,7 @@ class Transfer extends Model
         'transport_comfort_level' => TransportComfortLevel::class,
         'date_time' => 'datetime',
         'driver_ids' => 'array',
+        'old_values' => 'array',
     ];
 
     protected static function booted(): void

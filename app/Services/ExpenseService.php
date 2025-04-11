@@ -206,7 +206,7 @@ class ExpenseService
         $currency = ExpenseService::getCurrency(CurrencyEnum::USD);
         if ($currency) {
             if ($data["{$attribute}_currency"] == CurrencyEnum::USD->value) {
-                $data["{$attribute}_converted"] = $data[$attribute] * $currency->rate;
+                $data["{$attribute}_converted"] = ($data[$attribute] ?? 0) * $currency->rate;
             }
         }
     }
