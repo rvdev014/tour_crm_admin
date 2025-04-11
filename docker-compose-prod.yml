@@ -64,6 +64,8 @@ services:
       - tour-crm-pgadmin:/root/.pgadmin
     ports:
       - "${PGADMIN_PORT}:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy
