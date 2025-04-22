@@ -10,7 +10,7 @@ use Filament\Resources\Pages\ListRecords;
 class ListTours extends ListRecords
 {
     protected static string $resource = TourTpsTestResource::class;
-    protected static ?string $title = 'Tours TPS (test)';
+    protected static ?string $title = 'TPS';
 
     protected function getHeaderActions(): array
     {

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentType;
 use App\Models\City;
 use App\Models\Tour;
 use App\Models\User;
@@ -40,7 +42,7 @@ class TourTpsTestResource extends Resource
     protected static ?string $model = Tour::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationLabel = 'TPS (test)';
+    protected static ?string $navigationLabel = 'TPS';
     protected static ?string $slug = 'tour-tps-test';
     protected static ?int $navigationSort = 1;
 
@@ -141,6 +143,20 @@ class TourTpsTestResource extends Resource
                         ->numeric(),
                     Components\TextInput::make('package_name'),
                     Components\Textarea::make('comment'),
+                ]),
+                Components\Grid::make(4)->schema([
+                    Components\Select::make('payment_type')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(PaymentType::class)
+                        ->reactive(),
+                    Components\Select::make('payment_status')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(PaymentStatus::class)
+                        ->reactive(),
                 ]),
             ]),
 
