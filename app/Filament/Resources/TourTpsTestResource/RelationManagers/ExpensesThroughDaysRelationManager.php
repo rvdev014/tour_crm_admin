@@ -138,23 +138,23 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                 // Transport
                 Components\Fieldset::make('Transport info')->schema([
 
-                    Components\Grid::make(4)->schema([
-                        Components\Select::make('transport_driver_ids')
+                    Components\Grid::make(3)->schema([
+                        /*Components\Select::make('transport_driver_ids')
                             ->label('Drivers')
                             ->multiple()
                             ->options(TourService::getDrivers())
                             ->native(false)
                             ->searchable()
-                            ->preload(),
+                            ->preload(),*/
                         Components\TimePicker::make('transport_time')
                             ->seconds(false),
                         Components\TextInput::make('transport_place')
                             ->label('Pickup location'),
                         Components\TextInput::make('transport_route')
-                            ->label('Route'),
+                            ->label('Destination'),
                     ]),
 
-                    Components\Grid::make(4)->schema([
+                    Components\Grid::make(3)->schema([
                         Components\Select::make('to_city_id')
                             ->native(false)
                             ->searchable()
@@ -172,7 +172,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->required()
                             ->label('Status'),
 
-                        self::getExpensePriceInput('Sell price'),
+//                        self::getExpensePriceInput('Sell price'),
 
                         Components\Textarea::make('comment')
                             ->label('Comment'),
