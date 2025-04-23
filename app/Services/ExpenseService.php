@@ -26,11 +26,22 @@ use Illuminate\Support\Collection;
 
 class ExpenseService
 {
-    public static function getAllExpenses(Tour $tour): Collection
+    public static function getAllExpensesTps(Tour $tour): Collection
     {
         $allExpenses = collect();
         foreach ($tour->days as $day) {
             foreach ($day->expenses as $expense) {
+                $allExpenses->push($expense);
+            }
+        }
+        return $allExpenses;
+    }
+
+    public static function getAllExpensesCorporate(Tour $tour): Collection
+    {
+        $allExpenses = collect();
+        foreach ($tour->groups as $group) {
+            foreach ($group->expenses as $expense) {
                 $allExpenses->push($expense);
             }
         }
