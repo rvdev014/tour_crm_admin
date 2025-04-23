@@ -21,7 +21,7 @@ class CreateTour extends CreateRecord
     {
         $formState = $this->form->getRawState();
 
-        $allExpenses = ExpenseService::mutateExpenses($formState, isCorporate: true);
+        $allExpenses = ExpenseService::mutateExpensesCorporate($formState, isCorporate: true);
 
         $data['type'] = TourType::Corporate;
         $data['created_by'] = auth()->id();

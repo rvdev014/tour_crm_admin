@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\ExpenseType;
 use App\Models\TourDayExpense;
 use App\Models\Transfer;
+use App\Services\ExpenseService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
@@ -18,6 +19,16 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
         if ($tourDayExpense->type === ExpenseType::Transport) {
             Transfer::create($this->changedAttributes($tourDayExpense));
         }
+
+        $tour = $tourDayExpense->tourDay?->tour;
+        $tour?->update([
+            'expenses_total' => ExpenseService::updateExpensesPricesTps(
+                $tour,
+                roomingAmounts: $tour->roomTypes->mapWithKeys(
+                    fn($roomType) => [$roomType->room_type_id => $roomType->amount]
+                )
+            )
+        ]);
     }
 
     /**
@@ -33,6 +44,16 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
                 Transfer::create($this->changedAttributes($tourDayExpense));
             }
         }
+
+        $tour = $tourDayExpense->tourDay?->tour;
+        $tour?->update([
+            'expenses_total' => ExpenseService::updateExpensesPricesTps(
+                $tour,
+                roomingAmounts: $tour->roomTypes->mapWithKeys(
+                    fn($roomType) => [$roomType->room_type_id => $roomType->amount]
+                )
+            )
+        ]);
     }
 
     /**
@@ -43,6 +64,16 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
         if ($tourDayExpense->type === ExpenseType::Transport) {
             Transfer::where('tour_day_expense_id', $tourDayExpense->id)->delete();
         }
+
+        $tour = $tourDayExpense->tourDay?->tour;
+        $tour?->update([
+            'expenses_total' => ExpenseService::updateExpensesPricesTps(
+                $tour,
+                roomingAmounts: $tour->roomTypes->mapWithKeys(
+                    fn($roomType) => [$roomType->room_type_id => $roomType->amount]
+                )
+            )
+        ]);
     }
 
     /**
@@ -68,7 +99,9 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
 
         $dateTime = null;
         if ($expenseDate) {
-            $dateTime = Carbon::parse($expenseDate->format('Y-m-d') . ' ' . ($tourDayExpense->transport_time ?? '00:00:00'));
+            $dateTime = Carbon::parse(
+                $expenseDate->format('Y-m-d') . ' ' . ($tourDayExpense->transport_time ?? '00:00:00')
+            );
         }
 
         return [

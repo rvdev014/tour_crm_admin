@@ -17,14 +17,16 @@ class EditTour extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $formState = $this->form->getRawState();
+        ExpenseService::updateTourRoomTypes($this->record->id, $data);
 
         ExpenseService::convertExpensePrice($data, 'price');
         ExpenseService::convertExpensePrice($data, 'guide_price');
 
-        ExpenseService::updateTourRoomTypes($this->record->id, $data);
+        $data['price'] = $data['price_converted'] ?? $data['price'] ?? 0;
+        $data['expenses_total'] = ExpenseService::updateExpensesPricesTps($this->record, $data);
 
-//        TourService::sendMails($formState, $formState['days'] ?? []);
+        $guidePrice = $data['guide_price_converted'] ?? $data['guide_price'] ?? 0;
+        $data['income'] = ($data['price'] + $guidePrice) - $data['expenses_total'];
 
         return $data;
     }
@@ -74,8 +76,8 @@ class EditTour extends EditRecord
         ];
     }
 
-    protected function getRedirectUrl(): string
+    /*protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
-    }
+    }*/
 }

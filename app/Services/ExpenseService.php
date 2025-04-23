@@ -2,31 +2,70 @@
 
 namespace App\Services;
 
-use App\Models\TourDayExpenseRoomType;
-use Carbon\Carbon;
-use App\Models\Driver;
-use App\Models\Country;
-use App\Models\Currency;
-use App\Models\HotelPeriod;
 use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
+use App\Enums\RoomPersonType;
+use App\Enums\RoomSeasonType;
 use App\Enums\TourStatus;
-use App\Models\Company;
+use App\Models\Country;
+use App\Models\Currency;
 use App\Models\Hotel;
+use App\Models\HotelPeriod;
 use App\Models\HotelRoomType;
 use App\Models\Museum;
 use App\Models\MuseumItem;
 use App\Models\Restaurant;
 use App\Models\Show;
+use App\Models\Tour;
+use App\Models\TourDayExpenseRoomType;
 use App\Models\TourRoomType;
 use App\Models\Train;
-use App\Enums\RoomSeasonType;
-use App\Enums\RoomPersonType;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class ExpenseService
 {
+    public static function getAllExpenses(Tour $tour): Collection
+    {
+        $allExpenses = collect();
+        foreach ($tour->days as $day) {
+            foreach ($day->expenses as $expense) {
+                $allExpenses->push($expense);
+            }
+        }
+        return $allExpenses;
+    }
+
+    public static function updateExpensesPricesTps(Tour $tour, $updatedData = [], $roomingAmounts = null): float
+    {
+        $expensesTotal = 0;
+        $updatedData = array_merge($tour->getAttributes(), $updatedData);
+
+        $totalPax = $updatedData['pax'] + ($updatedData['leader_pax'] ?? 0);
+        $roomingAmounts = $roomingAmounts ?: ExpenseService::getRoomingAmounts($updatedData);
+
+        foreach ($tour->days as $day) {
+            foreach ($day->expenses as $expense) {
+                $updatedExpense = ExpenseService::mutateExpense(
+                    data: $expense->toArray(),
+                    totalPax: $totalPax,
+                    countryId: $updatedData['country_id'],
+                    roomAmounts: $roomingAmounts,
+                    day: $day
+                );
+
+                $expensesTotal += $updatedExpense['price'] ?? 0;
+                $expense::withoutEvents(function () use ($expense, $updatedExpense) {
+                    $expense->update($updatedExpense);
+                });
+            }
+        }
+
+        return $expensesTotal;
+    }
+
+
     public static function calculateAllExpensesPrice(Collection $allExpenses): float
     {
         $result = 0;
@@ -36,7 +75,7 @@ class ExpenseService
         return $result;
     }
 
-    public static function mutateExpenses($formState, $isCorporate = false): Collection
+    public static function mutateExpensesCorporate($formState, $isCorporate = false): Collection
     {
         $allExpenses = collect();
         $roomingAmounts = ExpenseService::getRoomingAmounts($formState);
@@ -46,11 +85,11 @@ class ExpenseService
             foreach ($formState['expenses'] ?? [] as $expense) {
                 $allExpenses->push(
                     ExpenseService::mutateExpense(
-                        $expense,
-                        $totalPax,
-                        $roomingAmounts,
-                        null,
-                        $formState['company_id']
+                        data: $expense,
+                        totalPax: $totalPax,
+                        countryId: null,
+                        roomAmounts: $roomingAmounts,
+                        companyId: $formState['company_id']
                     )
                 );
             }
@@ -62,12 +101,11 @@ class ExpenseService
                 foreach ($day['expenses'] ?? [] as $expense) {
                     $allExpenses->push(
                         ExpenseService::mutateExpense(
-                            $expense,
-                            $totalPax,
-                            $roomingAmounts,
-                            $formState['country_id'],
-                            null,
-                            $day
+                            data: $expense,
+                            totalPax: $totalPax,
+                            countryId: $formState['country_id'],
+                            roomAmounts: $roomingAmounts,
+                            day: $day
                         )
                     );
                 }
@@ -77,8 +115,14 @@ class ExpenseService
         return $allExpenses;
     }
 
-    public static function mutateExpense(array $data, $totalPax, $roomAmounts, $countryId, $companyId = null, $day = null): array
-    {
+    public static function mutateExpense(
+        array $data,
+        $totalPax,
+        $countryId,
+        $roomAmounts = null,
+        $companyId = null,
+        $day = null
+    ): array {
         ExpenseService::convertExpensePrice($data, 'price');
 
         switch ($data['type']) {
@@ -92,7 +136,7 @@ class ExpenseService
                     $addPercent = TourService::getCompanyAddPercent($companyId);
                     $hotelTotal = 0;
 
-                    $roomAmounts = ExpenseService::getRoomingAmounts($data);
+                    $roomAmounts = $roomAmounts ?: ExpenseService::getRoomingAmounts($data);
                     foreach ($roomAmounts as $roomTypeId => $amount) {
                         if (empty($amount)) {
                             continue;
@@ -186,7 +230,7 @@ class ExpenseService
         /** @var RoomSeasonType $seasonType */
         $seasonType = CacheService::remember(
             'season_type',
-            function() use ($date, $hotel) {
+            function () use ($date, $hotel) {
                 $hotelDate = Carbon::parse($date);
                 /** @var HotelPeriod $currentSeason */
                 $currentSeason = $hotel->periods()
@@ -216,7 +260,7 @@ class ExpenseService
         /** @var Currency $currency */
         $currency = CacheService::remember(
             'currency_usd',
-            function() use ($from) {
+            function () use ($from) {
                 /** @var Currency $currency */
                 $currency = Currency::query()->where('from', $from->value)->first();
                 return $currency;
@@ -285,7 +329,6 @@ class ExpenseService
     {
         $roomAmounts = ExpenseService::getRoomingAmounts($tourData);
         foreach ($roomAmounts as $roomTypeId => $amount) {
-
             $tourHotelRoomType = TourDayExpenseRoomType::query()
                 ->where('tour_day_expense_id', $tourDayExpenseId)
                 ->where('room_type_id', $roomTypeId)
@@ -313,7 +356,6 @@ class ExpenseService
     {
         $roomAmounts = ExpenseService::getRoomingAmounts($tourData);
         foreach ($roomAmounts as $roomTypeId => $amount) {
-
             $tourHotelRoomType = TourRoomType::query()
                 ->where('tour_id', $tourId)
                 ->where('room_type_id', $roomTypeId)

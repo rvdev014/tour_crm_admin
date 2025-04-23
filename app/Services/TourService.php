@@ -297,7 +297,7 @@ class TourService
         });
 
         return [
-            Grid::make(3)->schema($result->toArray())
+            Grid::make(4)->schema($result->toArray())
         ];
     }
 

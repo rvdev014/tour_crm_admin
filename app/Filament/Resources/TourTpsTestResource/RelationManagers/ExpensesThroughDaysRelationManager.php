@@ -80,6 +80,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->reactive(),
                         Components\Select::make('status')
                             ->options(ExpenseStatus::class)
+                            ->default(ExpenseStatus::New->value)
                             ->native(false)
                             ->searchable()
                             ->preload()
@@ -123,6 +124,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                                 ->searchable()
                                 ->preload()
                                 ->options(ExpenseStatus::class)
+                                ->default(ExpenseStatus::New->value)
                                 ->required()
                                 ->label('Status'),
 
@@ -166,6 +168,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->searchable()
                             ->preload()
                             ->options(ExpenseStatus::class)
+                            ->default(ExpenseStatus::New->value)
                             ->required()
                             ->label('Status'),
 
@@ -250,6 +253,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
                         Components\Select::make('status')
                             ->options(ExpenseStatus::class)
+                            ->default(ExpenseStatus::New->value)
                             ->required()
                             ->native(false)
                             ->searchable()
@@ -302,6 +306,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
                         Components\Select::make('status')
                             ->options(ExpenseStatus::class)
+                            ->default(ExpenseStatus::New->value)
                             ->required()
                             ->native(false)
                             ->searchable()
@@ -330,6 +335,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
                         Components\Select::make('status')
                             ->options(ExpenseStatus::class)
+                            ->default(ExpenseStatus::New->value)
                             ->required()
                             ->native(false)
                             ->searchable()
@@ -351,6 +357,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
                         Components\Select::make('status')
                             ->options(ExpenseStatus::class)
+                            ->default(ExpenseStatus::New->value)
                             ->required()
                             ->native(false)
                             ->searchable()

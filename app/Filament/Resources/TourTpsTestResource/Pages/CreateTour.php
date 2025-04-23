@@ -20,19 +20,16 @@ class CreateTour extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $formState = $this->form->getRawState();
-        $allExpenses = ExpenseService::mutateExpenses($formState);
+        $data['type'] = TourType::TPS;
+        $data['created_by'] = auth()->id();
+        $data['status'] = TourStatus::NotConfirmed;
 
         ExpenseService::convertExpensePrice($data, 'price');
         ExpenseService::convertExpensePrice($data, 'guide_price');
 
-        $data['type'] = TourType::TPS;
-        $data['created_by'] = auth()->id();
-        $data['status'] = ExpenseService::getTourStatus($allExpenses);
-
         $price = $data['price_converted'] ?? $data['price'] ?? 0;
-
-//        TourService::sendMails($formState, $formState['days'] ?? []);
+        $guidePrice = $data['guide_price_converted'] ?? $data['guide_price'] ?? 0;
+        $data['price'] = $price + $guidePrice;
 
         return $data;
     }
@@ -42,10 +39,4 @@ class CreateTour extends CreateRecord
         ExpenseService::createTourRoomTypes($this->record->id, $this->form->getRawState());
         TourService::sendTelegram($this->form->getRawState());
     }
-
-//    protected function getRedirectUrl(): string
-//    {
-//        return $this->getResource()::getUrl('index');
-//    }
-
 }

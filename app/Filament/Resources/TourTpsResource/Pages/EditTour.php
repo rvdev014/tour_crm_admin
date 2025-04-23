@@ -17,7 +17,7 @@ class EditTour extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $formState = $this->form->getRawState();
-        $allExpenses = ExpenseService::mutateExpenses($formState);
+        $allExpenses = ExpenseService::mutateExpensesCorporate($formState);
 
         ExpenseService::convertExpensePrice($data, 'price');
         ExpenseService::convertExpensePrice($data, 'guide_price');

@@ -348,6 +348,7 @@ class TourTpsResource extends Resource
                                         ->reactive(),
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
+                                        ->default(ExpenseStatus::New->value)
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -391,6 +392,7 @@ class TourTpsResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->options(ExpenseStatus::class)
+                                            ->default(ExpenseStatus::New->value)
                                             ->required()
                                             ->label('Status'),
 
@@ -662,12 +664,11 @@ class TourTpsResource extends Resource
                             }
 
                             return ExpenseService::mutateExpense(
-                                $data,
-                                $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
-                                ExpenseService::getRoomingAmounts($tourData),
-                                $tourData['country_id'],
-                                null,
-                                $get()
+                                data: $data,
+                                totalPax: $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
+                                countryId: $tourData['country_id'],
+                                roomAmounts: ExpenseService::getRoomingAmounts($tourData),
+                                day: $get()
                             );
                         })
                         ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
@@ -678,12 +679,11 @@ class TourTpsResource extends Resource
                             }
 
                             return ExpenseService::mutateExpense(
-                                $data,
-                                $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
-                                ExpenseService::getRoomingAmounts($tourData),
-                                $tourData['country_id'],
-                                null,
-                                $get()
+                                data: $data,
+                                totalPax: $tourData['pax'] + ($tourData['leader_pax'] ?? 0),
+                                countryId: $tourData['country_id'],
+                                roomAmounts: ExpenseService::getRoomingAmounts($tourData),
+                                day: $get()
                             );
                         })
                 ]),

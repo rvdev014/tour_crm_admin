@@ -211,3 +211,7 @@
     background: #1e4e6e !important;
     transition: 0.2s ease-in-out;
 }
+
+.fi-fo-repeater-item-header h4 {
+    color: #fff !important;
+}

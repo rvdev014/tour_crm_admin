@@ -6,6 +6,7 @@ use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Models\Tour;
+use App\Models\TourDay;
 use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Forms\Components;
@@ -30,6 +31,19 @@ class DaysRelationManager extends RelationManager
                     Components\DatePicker::make('date')
                         ->displayFormat('d.m.Y')
                         ->minDate(fn($record) => $record ? $record->date : null)
+                        ->formatStateUsing(function ($record) {
+                            if ($record) {
+                                return $record->date;
+                            }
+
+                            /** @var TourDay $lastDay */
+                            $lastDay = $this->ownerRecord->days()->latest('date')->first();
+                            if ($lastDay) {
+                                return $lastDay->date->addDay();
+                            }
+
+                            return $this->ownerRecord->start_date;
+                        })
                         ->native(false)
                         ->required()
                         ->reactive(),
@@ -111,6 +125,7 @@ class DaysRelationManager extends RelationManager
                                     ->reactive(),
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
+                                    ->default(ExpenseStatus::New->value)
                                     ->native(false)
                                     ->searchable()
                                     ->preload()
@@ -154,6 +169,7 @@ class DaysRelationManager extends RelationManager
                                         ->searchable()
                                         ->preload()
                                         ->options(ExpenseStatus::class)
+                                        ->default(ExpenseStatus::New->value)
                                         ->required()
                                         ->label('Status'),
 
@@ -197,6 +213,7 @@ class DaysRelationManager extends RelationManager
                                     ->searchable()
                                     ->preload()
                                     ->options(ExpenseStatus::class)
+                                    ->default(ExpenseStatus::New->value)
                                     ->required()
                                     ->label('Status'),
 
@@ -281,6 +298,7 @@ class DaysRelationManager extends RelationManager
 
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
+                                    ->default(ExpenseStatus::New->value)
                                     ->required()
                                     ->native(false)
                                     ->searchable()
@@ -333,6 +351,7 @@ class DaysRelationManager extends RelationManager
 
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
+                                    ->default(ExpenseStatus::New->value)
                                     ->required()
                                     ->native(false)
                                     ->searchable()
@@ -361,6 +380,7 @@ class DaysRelationManager extends RelationManager
 
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
+                                    ->default(ExpenseStatus::New->value)
                                     ->required()
                                     ->native(false)
                                     ->searchable()
@@ -382,6 +402,7 @@ class DaysRelationManager extends RelationManager
 
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
+                                    ->default(ExpenseStatus::New->value)
                                     ->required()
                                     ->native(false)
                                     ->searchable()
@@ -422,29 +443,28 @@ class DaysRelationManager extends RelationManager
                         $tour = $this->getOwnerRecord();
                         $data['from_city_id'] = $get('city_id');
                         return ExpenseService::mutateExpense(
-                            $data,
-                            $tour->getTotalPax(),
-                            $tour->roomTypes->mapWithKeys(
+                            data: $data,
+                            totalPax: $tour->getTotalPax(),
+                            countryId: $tour->country_id,
+                            roomAmounts: $tour->roomTypes->mapWithKeys(
                                 fn($roomType) => [$roomType->room_type_id => $roomType->amount]
                             ),
-                            $tour->country_id,
-                            null,
-                            $get()
+                            day: $get()
                         );
                     })
                     ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
                         /** @var Tour $tour */
                         $tour = $this->getOwnerRecord();
                         $data['from_city_id'] = $get('city_id');
+
                         return ExpenseService::mutateExpense(
-                            $data,
-                            $tour->getTotalPax(),
-                            $tour->roomTypes->mapWithKeys(
+                            data: $data,
+                            totalPax: $tour->getTotalPax(),
+                            countryId: $tour->country_id,
+                            roomAmounts: $tour->roomTypes->mapWithKeys(
                                 fn($roomType) => [$roomType->room_type_id => $roomType->amount]
                             ),
-                            $tour->country_id,
-                            null,
-                            $get()
+                            day: $get()
                         );
                     })
             ]);

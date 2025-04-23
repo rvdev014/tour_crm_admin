@@ -206,6 +206,7 @@ class TourCorporateResource extends Resource
                         Components\Grid::make(3)->schema([
                             Components\Select::make('status')
                                 ->options(ExpenseStatus::class)
+                                ->default(ExpenseStatus::New->value)
                                 ->required()
                                 ->native(false)
                                 ->searchable()
@@ -285,6 +286,7 @@ class TourCorporateResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->options(ExpenseStatus::class)
+                                ->default(ExpenseStatus::New->value)
                                 ->required()
                                 ->label('Status'),
 
@@ -337,6 +339,7 @@ class TourCorporateResource extends Resource
                                 ->numeric(),
                             Components\Select::make('status')
                                 ->options(ExpenseStatus::class)
+                                ->default(ExpenseStatus::New->value)
                                 ->required()
                                 ->native(false)
                                 ->searchable()
@@ -360,6 +363,7 @@ class TourCorporateResource extends Resource
 
                             Components\Select::make('status')
                                 ->options(ExpenseStatus::class)
+                                ->default(ExpenseStatus::New->value)
                                 ->required()
                                 ->native(false)
                                 ->searchable()
@@ -408,6 +412,7 @@ class TourCorporateResource extends Resource
 
                             Components\Select::make('status')
                                 ->options(ExpenseStatus::class)
+                                ->default(ExpenseStatus::New->value)
                                 ->required()
                                 ->native(false)
                                 ->searchable()
@@ -425,22 +430,22 @@ class TourCorporateResource extends Resource
                     $tourData = $get();
                     $passengers = $tourData['passengers'] ?? [];
                     return ExpenseService::mutateExpense(
-                        $data,
-                        count($passengers),
-                        ExpenseService::getRoomingAmounts($tourData),
-                        null,
-                        $tourData['company_id']
+                        data: $data,
+                        totalPax: count($passengers),
+                        countryId: null,
+                        roomAmounts: ExpenseService::getRoomingAmounts($tourData),
+                        companyId: $tourData['company_id']
                     );
                 })
                 ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
                     $tourData = $get();
                     $passengers = $tourData['passengers'] ?? [];
                     return ExpenseService::mutateExpense(
-                        $data,
-                        count($passengers),
-                        ExpenseService::getRoomingAmounts($tourData),
-                        null,
-                        $tourData['company_id'],
+                        data: $data,
+                        totalPax: count($passengers),
+                        countryId: null,
+                        roomAmounts: ExpenseService::getRoomingAmounts($tourData),
+                        companyId: $tourData['company_id']
                     );
                 })
         ]);

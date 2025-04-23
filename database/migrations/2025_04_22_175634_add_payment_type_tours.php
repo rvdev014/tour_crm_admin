@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::table('tours', function (Blueprint $table) {
             $table->integer('payment_type')->nullable()->comment('Cash, Bank');
             $table->integer('payment_status')->nullable()->comment('Paid, Waiting, Cancelled, Refunded');
-            $table->double('transfer_price')->nullable()->comment('Transfer price');
         });
     }
 
@@ -26,7 +25,6 @@ return new class extends Migration
         Schema::table('tours', function (Blueprint $table) {
             $table->dropColumn('payment_type');
             $table->dropColumn('payment_status');
-            $table->dropColumn('transfer_price');
         });
     }
 };
