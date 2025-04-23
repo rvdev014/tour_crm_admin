@@ -90,6 +90,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Show $show
  * @property Tour $tour
  * @property TourDay $tourDay
+ * @property TourGroup $tourGroup
  * @property Hotel $hotel
  * @property HotelRoomType $hotelRoomType
  * @property Driver $transportDriver
@@ -129,6 +130,11 @@ class TourDayExpense extends Model
     public function tourDay(): BelongsTo
     {
         return $this->belongsTo(TourDay::class);
+    }
+
+    public function tourGroup(): BelongsTo
+    {
+        return $this->belongsTo(TourGroup::class);
     }
 
     public function hotel(): BelongsTo

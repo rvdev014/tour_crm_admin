@@ -215,3 +215,7 @@
 .fi-fo-repeater-item-header h4 {
     color: #fff !important;
 }
+
+.fi-fo-repeater-item.simple {
+    border: none!important;
+}

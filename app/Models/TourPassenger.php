@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $tour_id
+ * @property int $tour_group_id
  * @property string $name
  *
  * @property Tour $tour
+ * @property TourGroup $tourGroup
  */
 class TourPassenger extends Model
 {
@@ -20,12 +22,18 @@ class TourPassenger extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'tour_id',
         'name',
+        'tour_id',
+        'tour_group_id',
     ];
 
     public function tour(): BelongsTo
     {
         return $this->belongsTo(Tour::class);
+    }
+
+    public function tourGroup(): BelongsTo
+    {
+        return $this->belongsTo(TourGroup::class);
     }
 }

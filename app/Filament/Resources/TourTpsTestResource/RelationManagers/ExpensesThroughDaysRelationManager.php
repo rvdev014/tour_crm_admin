@@ -46,10 +46,10 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                         ->searchable()
                         ->preload()
                         ->label('Expense Type')
-                        ->options(function($get) {
+                        ->options(function ($get) {
                             $options = ExpenseType::casesOptions();
                             unset($options[ExpenseType::Conference->value]);
-                            if ($get('../../../../guide_type') == GuideType::Escort->value) {
+                            if ($this->ownerRecord->guide_type == GuideType::Escort) {
                                 unset($options[ExpenseType::Guide->value]);
                             }
                             return $options;
@@ -191,13 +191,13 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->preload()
                             ->multiple()
                             ->options(fn($get) => TourService::getMuseums($get('../../city_id')))
-                            ->createOptionAction(function() {
+                            ->createOptionAction(function () {
                                 return [
                                     'url' => route('museum.create'),
                                     'label' => 'Create museum',
                                 ];
                             })
-                            ->suffixAction(function() {
+                            ->suffixAction(function () {
                                 return [
                                     Components\Actions\Action::make('create_museum')
                                         ->label('Create museum')
@@ -215,7 +215,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->options(fn($get) => TourService::getMuseumItems($get('museum_ids')))
                             ->multiple()
                             ->preload()
-                            ->disabled(function($get) {
+                            ->disabled(function ($get) {
                                 if (empty($get('museum_ids'))) {
                                     return true;
                                 }
@@ -424,7 +424,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
             ->defaultGroup(
                 Tables\Grouping\Group::make('tourDay.date')
                     ->label('Day')
-                    ->getTitleFromRecordUsing(function(TourDayExpense $record) {
+                    ->getTitleFromRecordUsing(function (TourDayExpense $record) {
                         return $record->tourDay->date->format('d.m.Y');
                     })
                     ->collapsible(),
@@ -435,11 +435,30 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                 //                        return $record->tourDay->date->format('d.m.Y');
                 //                    }),
                 Tables\Columns\TextColumn::make('type')
-                    ->formatStateUsing(function(TourDayExpense $record) {
+                    ->formatStateUsing(function (TourDayExpense $record) {
                         return $record->type->getLabel();
+                    }),
+                Tables\Columns\TextColumn::make('name')
+                    ->getStateUsing(function (TourDayExpense $record) {
+                        return match ($record->type) {
+                            ExpenseType::Hotel => $record->hotel?->name,
+                            ExpenseType::Guide => $record->guides->map(fn($guide) => $guide->name)->join(', '),
+                            ExpenseType::Transport => $record->transport_place,
+                            ExpenseType::Lunch,
+                            ExpenseType::Dinner => $record->restaurant?->name,
+                            ExpenseType::Train => $record->train?->name,
+                            ExpenseType::Plane => $record->plane_route,
+                            ExpenseType::Show => $record->show?->name,
+                            default => $record->other_name,
+                        };
                     }),
                 Tables\Columns\TextColumn::make('status')->badge(),
                 Tables\Columns\TextColumn::make('price'),
+                Tables\Columns\TextColumn::make('comment')
+                    ->width('250px')
+                    ->limit(50)
+                    ->wrap()
+                    ->tooltip(fn($record) => $record->comment),
             ])
             ->filters([
                 //

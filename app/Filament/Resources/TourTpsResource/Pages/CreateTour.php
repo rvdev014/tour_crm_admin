@@ -16,39 +16,4 @@ class CreateTour extends CreateRecord
 {
     protected static string $resource = TourTpsResource::class;
     protected static ?string $title = 'Create Tour TPS';
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        $formState = $this->form->getRawState();
-        $allExpenses = ExpenseService::mutateExpensesCorporate($formState);
-
-        ExpenseService::convertExpensePrice($data, 'price');
-        ExpenseService::convertExpensePrice($data, 'guide_price');
-        ExpenseService::convertExpensePrice($data, 'transport_price');
-        $totalExpenses = ExpenseService::calculateAllExpensesPrice($allExpenses) + ($data['guide_price_converted'] ?? $data['guide_price'] ?? 0);
-
-        $data['type'] = TourType::TPS;
-        $data['created_by'] = auth()->id();
-        $data['status'] = ExpenseService::getTourStatus($allExpenses);
-
-        $price = $data['price_converted'] ?? $data['price'] ?? 0;
-        $data['expenses_total'] = $totalExpenses;
-        $data['income'] = $price - $totalExpenses;
-
-//        TourService::sendMails($formState, $formState['days'] ?? []);
-
-        return $data;
-    }
-
-    protected function afterCreate(): void
-    {
-        ExpenseService::createTourRoomTypes($this->record->id, $this->form->getRawState());
-        TourService::sendTelegram($this->form->getRawState());
-    }
-
-//    protected function getRedirectUrl(): string
-//    {
-//        return $this->getResource()::getUrl('index');
-//    }
-
 }

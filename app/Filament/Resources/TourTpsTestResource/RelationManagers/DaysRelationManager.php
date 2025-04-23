@@ -7,6 +7,7 @@ use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Models\Tour;
 use App\Models\TourDay;
+use App\Models\TourDayExpense;
 use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Forms\Components;
@@ -103,7 +104,7 @@ class DaysRelationManager extends RelationManager
                                 ->options(function ($get) {
                                     $options = ExpenseType::casesOptions();
                                     unset($options[ExpenseType::Conference->value]);
-                                    if ($get('../../../../guide_type') == GuideType::Escort->value) {
+                                    if ($this->ownerRecord->guide_type == GuideType::Escort) {
                                         unset($options[ExpenseType::Guide->value]);
                                     }
                                     return $options;
@@ -513,6 +514,87 @@ class DaysRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('date')
                     ->formatStateUsing(fn($state) => $state ? $state->format('d.m.Y') : null),
                 Tables\Columns\TextColumn::make('city.name'),
+
+                Tables\Columns\TextColumn::make('hotel')
+                    ->label('Hotel')
+                    ->getStateUsing(function ($record) {
+                        /** @var TourDayExpense $hotelExpense */
+                        $hotelExpense = $record->expenses()->where('type', ExpenseType::Hotel)->first();
+
+                        return view('filament.columns.status-column', [
+                            'name' => $hotelExpense?->hotel?->name,
+                            'status' => $hotelExpense?->status,
+                        ]);
+                    }),
+
+                Tables\Columns\TextColumn::make('guide')
+                    ->label('Guide')
+                    ->getStateUsing(function ($record) {
+
+                        if ($record->tour->guide_type == GuideType::Escort) {
+                            $guideName = $record->tour->guide_name;
+                            $guideStatus = ExpenseStatus::Confirmed;
+                        } else {
+                            /** @var TourDayExpense $expense */
+                            $expense = $record->expenses()->where('type', ExpenseType::Guide)->first();
+                            // TODO: Guide
+                            $guideName = $expense?->guides->map(fn($guide) => $guide->name)->join(', ');
+                            $guideStatus = $expense?->status;
+                        }
+
+                        return view('filament.columns.status-column', [
+                            'name' => $guideName,
+                            'status' => $guideStatus,
+                        ]);
+                    }),
+
+                Tables\Columns\TextColumn::make('plane')
+                    ->label('Plane')
+                    ->getStateUsing(function ($record) {
+                        /** @var TourDayExpense $planeExpense */
+                        $planeExpense = $record->expenses()->where('type', ExpenseType::Plane)->first();
+
+                        return view('filament.columns.status-column', [
+                            'name' => '',
+                            'status' => $planeExpense?->status,
+                        ]);
+                    }),
+
+                Tables\Columns\TextColumn::make('lunch')
+                    ->label('Lunch')
+                    ->getStateUsing(function ($record) {
+                        /** @var TourDayExpense $lunchExpense */
+                        $lunchExpense = $record->expenses()->where('type', ExpenseType::Lunch)->first();
+
+                        return view('filament.columns.status-column', [
+                            'name' => $lunchExpense?->restaurant?->name,
+                            'status' => $lunchExpense?->status,
+                        ]);
+                    }),
+
+                Tables\Columns\TextColumn::make('dinner')
+                    ->label('Dinner')
+                    ->getStateUsing(function ($record) {
+                        /** @var TourDayExpense $lunchExpense */
+                        $lunchExpense = $record->expenses()->where('type', ExpenseType::Dinner)->first();
+
+                        return view('filament.columns.status-column', [
+                            'name' => $lunchExpense?->restaurant?->name,
+                            'status' => $lunchExpense?->status,
+                        ]);
+                    }),
+
+                Tables\Columns\TextColumn::make('extra')
+                    ->label('Extra')
+                    ->getStateUsing(function ($record) {
+                        /** @var TourDayExpense $extraExpense */
+                        $extraExpense = $record->expenses()->where('type', ExpenseType::Extra)->first();
+
+                        return view('filament.columns.status-column', [
+                            'name' => $extraExpense?->other_name,
+                            'status' => $extraExpense?->status,
+                        ]);
+                    }),
             ])
             ->filters([
                 //

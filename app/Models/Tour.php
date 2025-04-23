@@ -51,6 +51,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property City $city
  * @property Country $country
  * @property Collection<TourDay> $days
+ * @property Collection<TourGroup> $groups
  * @property Collection<TourDayExpense> $expenses
  * @property Collection<TourRoomType> $roomTypes
  * @property Collection<TourHotel> $hotels
@@ -90,6 +91,11 @@ class Tour extends Model
     public function days(): HasMany
     {
         return $this->hasMany(TourDay::class);
+    }
+
+    public function groups(): HasMany
+    {
+        return $this->hasMany(TourGroup::class);
     }
 
     public function expenses(): HasMany

@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentType;
 use App\Enums\TourType;
 use App\Enums\TransportType;
 use App\Filament\Resources\TourCorporateResource\Pages;
@@ -47,33 +49,48 @@ class TourCorporateResource extends Resource
         return $form->schema([
             Components\Fieldset::make('Tour details')->schema([
 
-                Components\TextInput::make('group_number')
-                    ->formatStateUsing(function ($record) {
-                        if (!empty($record)) {
-                            return $record->group_number;
-                        }
-                        return TourService::getGroupNumber(TourType::Corporate);
-                    })
-                    ->readOnly(),
+                Components\Grid::make(4)->schema([
+                    Components\TextInput::make('group_number')
+                        ->formatStateUsing(function ($record) {
+                            if (!empty($record)) {
+                                return $record->group_number;
+                            }
+                            return TourService::getGroupNumber(TourType::Corporate);
+                        })
+                        ->readOnly(),
 
-                Components\Select::make('company_id')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->relationship('company', 'name')
-                    ->options(TourService::getCompanies([CompanyType::Corporate]))
-                    ->reactive()
-                    ->required(),
+                    Components\Select::make('company_id')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->relationship('company', 'name')
+                        ->options(TourService::getCompanies([CompanyType::Corporate]))
+                        ->reactive()
+                        ->required(),
 
-                Components\Repeater::make('passengers')
-                    ->relationship('passengers')
-                    ->addActionLabel('Add passenger')
-                    ->minItems(1)
-                    ->simple(
-                        Components\TextInput::make('name')
-                            ->label('Passenger name')
-                            ->required(),
-                    ),
+                    Components\Select::make('payment_type')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(PaymentType::class)
+                        ->reactive(),
+                    Components\Select::make('payment_status')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(PaymentStatus::class)
+                        ->reactive(),
+
+                    /*Components\Repeater::make('passengers')
+                        ->relationship('passengers')
+                        ->addActionLabel('Add passenger')
+                        ->minItems(1)
+                        ->simple(
+                            Components\TextInput::make('name')
+                                ->label('Passenger name')
+                                ->required(),
+                        ),*/
+                ]),
 
                 Components\Textarea::make('comment'),
             ]),
@@ -92,362 +109,383 @@ class TourCorporateResource extends Resource
             //                    ->options(TransportComfortLevel::class),
             //            ]),
 
-            Components\Repeater::make('expenses')
-                ->extraAttributes(['class' => 'repeater-expenses'])
+            Components\Repeater::make('groups')
+                ->extraAttributes(['class' => 'repeater-days'])
                 ->collapsed(fn($record) => !empty($record->id))
                 ->columnSpanFull()
                 ->collapsible()
                 ->itemLabel(function ($get, $uuid) {
-                    $current = Arr::get($get('expenses'), $uuid);
-                    $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
+                    $current = Arr::get($get('groups'), $uuid);
+                    $index = array_search($uuid, array_keys($get('groups'))) ?? 0;
                     $index++;
-
-                    $expenseType = $current['type'] ?? null;
-                    if ($expenseType) {
-                        $expenseTypeLabel = ExpenseType::from($expenseType)->getLabel();
-                        $currentStatus = $current['status'] ?? null;
-                        $status = ($currentStatus ? " - " . ExpenseStatus::from($currentStatus)->getLabel() : '');
-                        return "Expense for $expenseTypeLabel ($index)" . strtoupper($status);
-                    }
-
-                    return "Expense $index";
+                    return "Group $index";
                 })
-                ->relationship('expenses')
-                ->addActionLabel('Add expense')
+                ->relationship('groups')
+                ->addActionLabel('Add group')
                 ->addActionAlignment('end')
                 ->schema([
                     Components\Grid::make(3)->schema([
-                        Hidden::make('index'),
-                        Hidden::make('price_currency'),
-                        Components\Select::make('type')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->label('Expense Type')
-                            ->options(function () {
-                                $options = ExpenseType::casesOptions();
-                                return collect($options)->filter(fn($value) => in_array($value, [
-                                    ExpenseType::Hotel->getLabel(),
-                                    ExpenseType::Transport->getLabel(),
-                                    ExpenseType::Train->getLabel(),
-                                    ExpenseType::Plane->getLabel(),
-                                    ExpenseType::Extra->getLabel(),
-                                    ExpenseType::Conference->getLabel(),
-                                ]))->toArray();
-                            })
-                            ->required()
-                            ->reactive(),
-                        Components\DatePicker::make('date')
-                            ->displayFormat('d.m.Y')
-                            ->native(false)
-                            ->required()
-                            ->afterStateUpdated(function ($get, $set) {
-                                $set(
-                                    'hotel_total_nights',
-                                    TourService::calculateHotelNights(
-                                        $get('date'),
-                                        $get('hotel_checkin_time'),
-                                        $get('hotel_checkout_date_time')
-                                    )
-                                );
-                            })
-                            ->reactive(),
-                        Components\Select::make('city_id')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->options(fn($get) => TourService::getCities())
-                            ->reactive()
-                            ->preload()
-                            ->required(),
+                        Components\Repeater::make('passengers')
+                            ->relationship('passengers')
+                            ->addActionLabel('Add passenger')
+                            ->minItems(1)
+                            ->simple(
+                                Components\TextInput::make('name')
+                                    ->label('Passenger name')
+                                    ->required(),
+                            ),
                     ]),
 
-                    // Hotel
-                    Components\Fieldset::make('Hotel info')->schema([
-                        Components\Grid::make(3)->schema([
-                            Components\Select::make('hotel_id')
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->label('Hotel')
-                                ->options(fn($get) => TourService::getHotels($get('city_id')))
-                                ->preload()
-                                ->reactive(),
-                            Components\TimePicker::make('hotel_checkin_time')
-                                ->seconds(false)
-                                ->reactive()
-                                ->afterStateUpdated(function ($get, $set) {
-                                    $set(
-                                        'hotel_total_nights',
-                                        TourService::calculateHotelNights(
-                                            $get('date'),
-                                            $get('hotel_checkin_time'),
-                                            $get('hotel_checkout_date_time')
-                                        )
-                                    );
-                                })
-                                ->label('Check-in time'),
-                            Components\DateTimePicker::make('hotel_checkout_date_time')
-                                ->seconds(false)
-                                ->afterStateUpdated(function ($get, $set) {
-                                    $set(
-                                        'hotel_total_nights',
-                                        TourService::calculateHotelNights(
-                                            $get('date'),
-                                            $get('hotel_checkin_time'),
-                                            $get('hotel_checkout_date_time')
-                                        )
-                                    );
-                                })
-                                ->reactive()
-                                ->label('Check-out date & time'),
-                        ]),
+                    Components\Repeater::make('expenses')
+                        ->extraAttributes(['class' => 'repeater-expenses'])
+                        ->collapsed(fn($record) => !empty($record->id))
+                        ->columnSpanFull()
+                        ->collapsible()
+                        ->itemLabel(function ($get, $uuid) {
+                            $current = Arr::get($get('expenses'), $uuid);
+                            $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
+                            $index++;
 
-                        Components\Grid::make(3)->schema([
-                            Components\Select::make('status')
-                                ->options(ExpenseStatus::class)
-                                ->default(ExpenseStatus::New->value)
-                                ->required()
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->label('Status'),
-                            Components\TextInput::make('hotel_total_nights')
-                                ->numeric()
-                                ->label('Total nights'),
-                            Components\Textarea::make('comment')->label('Comment'),
-                        ]),
+                            $expenseType = $current['type'] ?? null;
+                            if ($expenseType) {
+                                $expenseTypeLabel = ExpenseType::from($expenseType)->getLabel();
+                                $currentStatus = $current['status'] ?? null;
+                                $status = ($currentStatus ? " - " . ExpenseStatus::from($currentStatus)->getLabel() : '');
+                                return "Expense for $expenseTypeLabel ($index)" . strtoupper($status);
+                            }
 
-//                        ...TourService::generateRoomingSchema(true),
-//
-//                        Section::make("Other rooming")
-//                            ->schema(TourService::generateRoomingSchema())
-//                            ->collapsible()
-//                            ->collapsed(),
+                            return "Expense $index";
+                        })
+                        ->relationship('expenses')
+                        ->addActionLabel('Add expense')
+                        ->addActionAlignment('end')
+                        ->schema([
+                            Components\Grid::make(3)->schema([
+                                Hidden::make('index'),
+                                Hidden::make('price_currency'),
+                                Components\Select::make('type')
+                                    ->native(false)
+                                    ->searchable()
+                                    ->preload()
+                                    ->label('Expense Type')
+                                    ->options(function () {
+                                        $options = ExpenseType::casesOptions();
+                                        return collect($options)->filter(fn($value) => in_array($value, [
+                                            ExpenseType::Hotel->getLabel(),
+                                            ExpenseType::Transport->getLabel(),
+                                            ExpenseType::Train->getLabel(),
+                                            ExpenseType::Plane->getLabel(),
+                                            ExpenseType::Extra->getLabel(),
+                                            ExpenseType::Conference->getLabel(),
+                                        ]))->toArray();
+                                    })
+                                    ->required()
+                                    ->reactive(),
+                                Components\DatePicker::make('date')
+                                    ->displayFormat('d.m.Y')
+                                    ->native(false)
+                                    ->required()
+                                    ->afterStateUpdated(function ($get, $set) {
+                                        $set(
+                                            'hotel_total_nights',
+                                            TourService::calculateHotelNights(
+                                                $get('date'),
+                                                $get('hotel_checkin_time'),
+                                                $get('hotel_checkout_date_time')
+                                            )
+                                        );
+                                    })
+                                    ->reactive(),
+                                Components\Select::make('city_id')
+                                    ->native(false)
+                                    ->searchable()
+                                    ->preload()
+                                    ->options(fn($get) => TourService::getCities())
+                                    ->reactive()
+                                    ->preload()
+                                    ->required(),
+                            ]),
 
-                        Components\Repeater::make('roomTypes')
-                            ->grid(2)
-                            ->columnSpanFull()
-                            ->relationship('roomTypes')
-                            ->addActionLabel('Add room type')
-                            ->schema([
-                                Components\Grid::make()->schema([
-                                    Components\Select::make('room_type_id')
+                            // Hotel
+                            Components\Fieldset::make('Hotel info')->schema([
+                                Components\Grid::make(3)->schema([
+                                    Components\Select::make('hotel_id')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Room type')
-                                        ->options(RoomType::query()->pluck('name', 'id')->toArray())
+                                        ->label('Hotel')
+                                        ->options(fn($get) => TourService::getHotels($get('city_id')))
+                                        ->preload()
+                                        ->reactive(),
+                                    Components\TimePicker::make('hotel_checkin_time')
+                                        ->seconds(false)
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($get, $set) {
+                                            $set(
+                                                'hotel_total_nights',
+                                                TourService::calculateHotelNights(
+                                                    $get('date'),
+                                                    $get('hotel_checkin_time'),
+                                                    $get('hotel_checkout_date_time')
+                                                )
+                                            );
+                                        })
+                                        ->label('Check-in time'),
+                                    Components\DateTimePicker::make('hotel_checkout_date_time')
+                                        ->seconds(false)
+                                        ->afterStateUpdated(function ($get, $set) {
+                                            $set(
+                                                'hotel_total_nights',
+                                                TourService::calculateHotelNights(
+                                                    $get('date'),
+                                                    $get('hotel_checkin_time'),
+                                                    $get('hotel_checkout_date_time')
+                                                )
+                                            );
+                                        })
+                                        ->reactive()
+                                        ->label('Check-out date & time'),
+                                ]),
+
+                                Components\Grid::make(3)->schema([
+                                    Components\Select::make('status')
+                                        ->options(ExpenseStatus::class)
+                                        ->default(ExpenseStatus::New->value)
+                                        ->required()
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('Status'),
+                                    Components\TextInput::make('hotel_total_nights')
+                                        ->numeric()
+                                        ->label('Total nights'),
+                                    Components\Textarea::make('comment')->label('Comment'),
+                                ]),
+
+                                Components\Repeater::make('roomTypes')
+                                    ->grid(2)
+                                    ->columnSpanFull()
+                                    ->relationship('roomTypes')
+                                    ->addActionLabel('Add room type')
+                                    ->schema([
+                                        Components\Grid::make()->schema([
+                                            Components\Select::make('room_type_id')
+                                                ->native(false)
+                                                ->searchable()
+                                                ->preload()
+                                                ->label('Room type')
+                                                ->options(RoomType::query()->pluck('name', 'id')->toArray())
+                                                ->reactive(),
+
+                                            Components\TextInput::make('amount')
+                                                ->numeric()
+                                                ->label('Amount'),
+                                        ])
+                                    ])
+
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
+
+                            // Transport
+                            Components\Fieldset::make('Transport info')->schema([
+
+                                Components\Grid::make(3)->schema([
+                                    /*Components\Select::make('transport_driver_ids')
+                                        ->label('Drivers')
+                                        ->multiple()
+                                        ->options(TourService::getDrivers())
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload(),*/
+                                    Components\TimePicker::make('transport_time')
+                                        ->seconds(false),
+                                    Components\Select::make('transport_type')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->options(TransportType::class),
+                                    Components\TextInput::make('transport_place')
+                                        ->label('Pickup location'),
+                                ]),
+
+                                Components\Grid::make(3)->schema([
+                                    Components\TextInput::make('transport_route')
+                                        ->label('Destination'),
+                                    Components\Select::make('to_city_id')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('City')
+                                        ->options(TourService::getCities())
                                         ->reactive(),
 
-                                    Components\TextInput::make('amount')
-                                        ->numeric()
-                                        ->label('Amount'),
-                                ])
-                            ])
-
-                    ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
-
-                    // Transport
-                    Components\Fieldset::make('Transport info')->schema([
-
-                        Components\Grid::make(3)->schema([
-                            /*Components\Select::make('transport_driver_ids')
-                                ->label('Drivers')
-                                ->multiple()
-                                ->options(TourService::getDrivers())
-                                ->native(false)
-                                ->searchable()
-                                ->preload(),*/
-                            Components\TimePicker::make('transport_time')
-                                ->seconds(false),
-                            Components\Select::make('transport_type')
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->options(TransportType::class),
-                            Components\TextInput::make('transport_place')
-                                ->label('Pickup location'),
-                        ]),
-
-                        Components\Grid::make(3)->schema([
-                            Components\TextInput::make('transport_route')
-                                ->label('Destination'),
-                            Components\Select::make('to_city_id')
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->label('City')
-                                ->options(TourService::getCities())
-                                ->reactive(),
-
-                            Components\Select::make('status')
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->options(ExpenseStatus::class)
-                                ->default(ExpenseStatus::New->value)
-                                ->required()
-                                ->label('Status'),
+                                    Components\Select::make('status')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->options(ExpenseStatus::class)
+                                        ->default(ExpenseStatus::New->value)
+                                        ->required()
+                                        ->label('Status'),
 
 //                            self::getExpensePriceInput(),
-                        ]),
+                                ]),
 
-                        Components\Textarea::make('comment')
-                            ->label('Comment')
-                            ->columnSpanFull(),
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
 
-                    ])->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
 
-                    // Train
-                    Components\Fieldset::make('Train info')->schema([
+                            // Train
+                            Components\Fieldset::make('Train info')->schema([
 
-                        Components\Grid::make(4)->schema([
-                            Components\Select::make('train_id')
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->label('Train')
-                                ->options(TourService::getTrains()),
+                                Components\Grid::make(4)->schema([
+                                    Components\Select::make('train_id')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('Train')
+                                        ->options(TourService::getTrains()),
 
-                            Components\Select::make('to_city_id')
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->label('City')
-                                ->options(TourService::getCities())
-                                ->reactive(),
+                                    Components\Select::make('to_city_id')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('City')
+                                        ->options(TourService::getCities())
+                                        ->reactive(),
 
-                            Components\TimePicker::make('departure_time')
-                                ->seconds(false)
-                                ->label('Departure time'),
+                                    Components\TimePicker::make('departure_time')
+                                        ->seconds(false)
+                                        ->label('Departure time'),
 
-                            Components\TimePicker::make('arrival_time')
-                                ->seconds(false)
-                                ->label('Arrival time'),
-                        ]),
+                                    Components\TimePicker::make('arrival_time')
+                                        ->seconds(false)
+                                        ->label('Arrival time'),
+                                ]),
 
-                        Components\Grid::make(4)->schema([
-                            Components\TextInput::make('train_class_second')
-                                ->label('Second')
-                                ->numeric(),
-                            Components\TextInput::make('train_class_business')
-                                ->label('Business')
-                                ->numeric(),
-                            Components\TextInput::make('train_class_vip')
-                                ->label('VIP')
-                                ->numeric(),
-                            Components\Select::make('status')
-                                ->options(ExpenseStatus::class)
-                                ->default(ExpenseStatus::New->value)
-                                ->required()
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->label('Status'),
-                        ]),
+                                Components\Grid::make(4)->schema([
+                                    Components\TextInput::make('train_class_second')
+                                        ->label('Second')
+                                        ->numeric(),
+                                    Components\TextInput::make('train_class_business')
+                                        ->label('Business')
+                                        ->numeric(),
+                                    Components\TextInput::make('train_class_vip')
+                                        ->label('VIP')
+                                        ->numeric(),
+                                    Components\Select::make('status')
+                                        ->options(ExpenseStatus::class)
+                                        ->default(ExpenseStatus::New->value)
+                                        ->required()
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('Status'),
+                                ]),
 
-                        Components\Textarea::make('comment')
-                            ->label('Comment')
-                            ->columnSpanFull(),
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
 
-                    ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
 
-                    // Plane
-                    Components\Fieldset::make('Plane info')->schema([
+                            // Plane
+                            Components\Fieldset::make('Plane info')->schema([
 
-                        Components\Grid::make(3)->schema([
-                            self::getExpensePriceInput(),
+                                Components\Grid::make(3)->schema([
+                                    self::getExpensePriceInput(),
 
-                            Components\TextInput::make('plane_route'),
+                                    Components\TextInput::make('plane_route'),
 
-                            Components\Select::make('status')
-                                ->options(ExpenseStatus::class)
-                                ->default(ExpenseStatus::New->value)
-                                ->required()
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->label('Status'),
-                        ]),
+                                    Components\Select::make('status')
+                                        ->options(ExpenseStatus::class)
+                                        ->default(ExpenseStatus::New->value)
+                                        ->required()
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('Status'),
+                                ]),
 
-                        Components\Grid::make(3)->schema([
-                            Components\TimePicker::make('departure_time')
-                                ->seconds(false)
-                                ->label('Departure time'),
+                                Components\Grid::make(3)->schema([
+                                    Components\TimePicker::make('departure_time')
+                                        ->seconds(false)
+                                        ->label('Departure time'),
 
-                            Components\TimePicker::make('arrival_time')
-                                ->seconds(false)
-                                ->label('Arrival time'),
+                                    Components\TimePicker::make('arrival_time')
+                                        ->seconds(false)
+                                        ->label('Arrival time'),
 
-                            Components\Textarea::make('comment')->label('Comment'),
-                        ]),
+                                    Components\Textarea::make('comment')->label('Comment'),
+                                ]),
 
-                    ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
 
-                    // Extra
-                    Components\Fieldset::make('Extra info')->schema([
-                        Components\Grid::make(3)->schema([
-                            Components\TextInput::make('other_name')
-                                ->label('Name'),
+                            // Extra
+                            Components\Fieldset::make('Extra info')->schema([
+                                Components\Grid::make(3)->schema([
+                                    Components\TextInput::make('other_name')
+                                        ->label('Name'),
 
-                            self::getExpensePriceInput(),
+                                    self::getExpensePriceInput(),
 
-                            Components\Textarea::make('comment')->label('Comment'),
-                        ]),
-                    ])->visible(fn($get) => $get('type') == ExpenseType::Extra->value),
+                                    Components\Textarea::make('comment')->label('Comment'),
+                                ]),
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Extra->value),
 
-                    // Conference
-                    Components\Fieldset::make('Conference info')->schema([
+                            // Conference
+                            Components\Fieldset::make('Conference info')->schema([
 
-                        Components\Grid::make(4)->schema([
-                            Components\TextInput::make('conference_name')
-                                ->label('Conference name'),
+                                Components\Grid::make(4)->schema([
+                                    Components\TextInput::make('conference_name')
+                                        ->label('Conference name'),
 
-                            self::getExpensePriceInput(),
+                                    self::getExpensePriceInput(),
 
-                            Components\TextInput::make('coffee_break')
-                                ->suffix('%')
-                                ->label('Coffee break'),
+                                    Components\TextInput::make('coffee_break')
+                                        ->suffix('%')
+                                        ->label('Coffee break'),
 
-                            Components\Select::make('status')
-                                ->options(ExpenseStatus::class)
-                                ->default(ExpenseStatus::New->value)
-                                ->required()
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->label('Status'),
-                        ]),
+                                    Components\Select::make('status')
+                                        ->options(ExpenseStatus::class)
+                                        ->default(ExpenseStatus::New->value)
+                                        ->required()
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->label('Status'),
+                                ]),
 
-                        Components\Textarea::make('comment')
-                            ->label('Comment')
-                            ->columnSpanFull(),
+                                Components\Textarea::make('comment')
+                                    ->label('Comment')
+                                    ->columnSpanFull(),
 
-                    ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
-                ])
-                ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
-                    $tourData = $get();
-                    $passengers = $tourData['passengers'] ?? [];
-                    return ExpenseService::mutateExpense(
-                        data: $data,
-                        totalPax: count($passengers),
-                        countryId: null,
-                        roomAmounts: ExpenseService::getRoomingAmounts($tourData),
-                        companyId: $tourData['company_id']
-                    );
-                })
-                ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
-                    $tourData = $get();
-                    $passengers = $tourData['passengers'] ?? [];
-                    return ExpenseService::mutateExpense(
-                        data: $data,
-                        totalPax: count($passengers),
-                        countryId: null,
-                        roomAmounts: ExpenseService::getRoomingAmounts($tourData),
-                        companyId: $tourData['company_id']
-                    );
-                })
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
+                        ])
+                        ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
+                            $tourData = $get('../../');
+                            $passengers = $tourData['passengers'] ?? [];
+                            return ExpenseService::mutateExpense(
+                                data: $data,
+                                totalPax: count($passengers),
+                                countryId: null,
+                                roomAmounts: ExpenseService::getRoomingAmounts($tourData),
+                                companyId: $tourData['company_id']
+                            );
+                        })
+                        ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
+                            $tourData = $get('../../');
+                            $passengers = $tourData['passengers'] ?? [];
+                            return ExpenseService::mutateExpense(
+                                data: $data,
+                                totalPax: count($passengers),
+                                countryId: null,
+                                roomAmounts: ExpenseService::getRoomingAmounts($tourData),
+                                companyId: $tourData['company_id']
+                            );
+                        })
+                ]),
         ]);
     }
 
