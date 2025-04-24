@@ -2,14 +2,15 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\PaymentStatus;
 use Filament\Forms;
 use Filament\Tables;
+use App\Enums\TourType;
 use App\Models\Company;
 use Filament\Forms\Form;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
 use Filament\Tables\Table;
+use App\Enums\PaymentStatus;
 use App\Services\TourService;
 use App\Models\CompanyExpense;
 use App\Models\TourDayExpense;
@@ -49,7 +50,15 @@ class CompanyExpenseResource extends Resource
                 Tables\Filters\Filter::make('company')
                     ->columnSpanFull()
                     ->form([
-                        Forms\Components\Grid::make(4)->schema([
+                        Forms\Components\Grid::make(6)->schema([
+                            Forms\Components\Select::make('tour_type')
+                                ->native(false)
+                                ->label('Tour Type')
+                                ->options([
+                                    TourType::TPS->value => TourType::TPS->getLabel(),
+                                    TourType::Corporate->value => TourType::Corporate->getLabel(),
+                                ]),
+
                             Forms\Components\Select::make('companies')
                                 ->native(false)
                                 ->multiple()
@@ -88,18 +97,42 @@ class CompanyExpenseResource extends Resource
                         if ($companyIds = $data['companies']) {
                             $query = $query->where(function($query) use ($companyIds) {
                                 $query
-                                    ->whereHas('tour', fn($q) => $q->whereIn('company_id', $companyIds))
+                                    ->whereHas(
+                                        'tourGroup',
+                                        fn($q) => $q->whereHas('tour', fn($q) => $q->whereIn('company_id', $companyIds))
+                                    )
                                     ->orWhereHas(
                                         'tourDay',
                                         fn($q) => $q->whereHas('tour', fn($q) => $q->whereIn('company_id', $companyIds))
                                     );
                             });
                         }
+                        if ($tourType = $data['tour_type']) {
+                            $query = $query
+                                ->whereHas(
+                                    'tourGroup',
+                                    fn($q) => $q->whereHas('tour', fn($q) => $q->where('type', $tourType))
+                                )
+                                ->orWhereHas(
+                                    'tourDay',
+                                    fn($q) => $q->whereHas('tour', fn($q) => $q->where('type', $tourType))
+                                );
+                        }
                         if ($data['expense_types']) {
                             $query = $query->whereIn('type', $data['expense_types']);
                         }
                         if ($paymentStatus = $data['payment_status']) {
-                            $query = $query->where('payment_status', $paymentStatus);
+                            $query = $query
+                                ->whereHas(
+                                    'tourGroup',
+                                    fn($q) => $q->whereHas('tour', fn($q) => $q->where('payment_status', $paymentStatus)
+                                    )
+                                )
+                                ->orWhereHas(
+                                    'tourDay',
+                                    fn($q) => $q->whereHas('tour', fn($q) => $q->where('payment_status', $paymentStatus)
+                                    )
+                                );
                         }
                         if ($data['date_from']) {
                             $query = $query->where(function($subQuery) use ($data) {
@@ -228,7 +261,13 @@ class CompanyExpenseResource extends Resource
                         };
                     }),
 
-                Tables\Columns\TextColumn::make('price'),
+                Tables\Columns\TextColumn::make('price')
+                    ->formatStateUsing(function(TourDayExpense $record) {
+                        return TourService::formatMoney($record->price) . ' ' . ($record->price_currency?->getSymbol(
+                            ) ?? '$');
+                    })
+                    ->label('Price')
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('payment_status')
                     ->getStateUsing(function(TourDayExpense $record) {
@@ -248,8 +287,8 @@ class CompanyExpenseResource extends Resource
                         }
                         return collect($passengers)->join(', ');
                     })
-//                    ->width('300px')
-//                    ->wrap()
+                    //                    ->width('300px')
+                    //                    ->wrap()
                     ->searchable(),
             ])
             ->actions([

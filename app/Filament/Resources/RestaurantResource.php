@@ -8,6 +8,7 @@ use Filament\Forms\Form;
 use App\Models\Restaurant;
 use Filament\Tables\Table;
 use App\Services\TourService;
+use App\Models\TourDayExpense;
 use Filament\Resources\Resource;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Filament\Resources\RestaurantResource\Pages;
@@ -30,8 +31,7 @@ class RestaurantResource extends Resource
                         ->required()
                         ->maxLength(255),
                     Forms\Components\TextInput::make('email')
-                        ->email()
-                        ->required(),
+                        ->email(),
                     Forms\Components\TextInput::make('inn')
                         ->required(),
                     Forms\Components\TextInput::make('company_name')
@@ -55,20 +55,26 @@ class RestaurantResource extends Resource
                     Forms\Components\TextInput::make('price_per_person')
                         ->required()
                         ->numeric(),
-                    PhoneInput::make('phone')
-                        ->strictMode()
-                        ->onlyCountries(['UZ'])
-                        ->defaultCountry('UZ')
-                        ->suffixAction(function($record) {
-                            if (!$record?->phone) {
-                                return [];
-                            }
-                            return [
-                                Forms\Components\Actions\Action::make('create_museum')
-                                    ->icon('heroicon-o-paper-airplane')
-                                    ->url("https://t.me/{$record->phone}", true)
-                            ];
-                        }),
+                    Forms\Components\Repeater::make('phones')
+                        ->relationship('phones')
+                        ->addActionLabel('Add phone')
+                        ->simple(
+                            PhoneInput::make('phone_number')
+                                ->strictMode()
+                                ->onlyCountries(['UZ'])
+                                ->defaultCountry('UZ')
+                                ->suffixAction(function($record) {
+                                    if (!$record?->phone_number) {
+                                        return [];
+                                    }
+                                    return [
+                                        Forms\Components\Actions\Action::make('hotel_phone')
+                                            ->icon('heroicon-o-paper-airplane')
+                                            ->url("https://t.me/{$record->phone}", true)
+                                    ];
+                                })
+                                ->required(),
+                        ),
                 ]),
             ]);
     }
@@ -91,11 +97,17 @@ class RestaurantResource extends Resource
                 Tables\Columns\TextColumn::make('city.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('Phone')
-                    ->url(fn($record) => $record->phone ? "https://t.me/{$record->phone}" : null, true)
+
+                Tables\Columns\TextColumn::make('phone_list')
+                    ->label('Phones')
+                    ->getStateUsing(function($record) {
+                        return $record->phones->map(function($phone) {
+                            return "<a href='https://t.me/{$phone->phone_number}' target='_blank'>{$phone->phone_number}</a>";
+                        })->implode('<br/>');
+                    })
                     ->color('info')
                     ->html(),
+
                 Tables\Columns\TextColumn::make('price_per_person'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -106,6 +118,7 @@ class RestaurantResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->recordUrl(null)
             ->filters([
                 //
             ])

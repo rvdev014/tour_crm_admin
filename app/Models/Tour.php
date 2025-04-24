@@ -9,6 +9,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
+use App\Services\ExpenseService;
 use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
 use Carbon\Carbon;
@@ -53,6 +54,10 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  *
  * @property TransportComfortLevel $transport_comfort_level
  * @property int $single_supplement_price
+ *
+ * @property float $price_result
+ * @property float $guide_price_result
+ * @property float $transport_price_result
  *
  * @property Company $company
  * @property User $createdBy
@@ -189,5 +194,17 @@ class Tour extends Model
         }
 
         return $this->pax + $this->leader_pax;
+    }
+
+    public function saveExpensesTotal(): void
+    {
+        // Only for TPS
+        if (!$this->isCorporate()) {
+            $total = ExpenseService::updateExpensesPricesTps($this);
+            $this->update([
+                'expenses_total' => $total,
+                'income' => $this->price_result + $this->guide_price_result - $total,
+            ]);
+        }
     }
 }

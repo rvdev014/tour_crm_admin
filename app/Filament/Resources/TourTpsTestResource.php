@@ -130,13 +130,13 @@ class TourTpsTestResource extends Resource
                 ]),
                 Components\Grid::make(4)->schema([
                     Components\TextInput::make('price')
-                        ->label(fn($get) => 'Price (' . ($get('price_currency') ?? 'UZS') . ')')
+                        ->label(fn($get) => 'Price (' . ($get('price_currency') ?? 'USD') . ')')
                         ->suffixAction(
                             Components\Actions\Action::make('toggle-currency')
                                 ->icon('heroicon-o-banknotes')
                                 ->iconSize('md')
                                 ->action(function($get, $set) {
-                                    $set('price_currency', $get('price_currency') == 'USD' ? 'UZS' : 'USD');
+                                    $set('price_currency', $get('price_currency') != 'UZS' ? 'UZS' : 'USD');
                                 })
                         )
                         ->numeric(),
@@ -231,13 +231,13 @@ class TourTpsTestResource extends Resource
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput
     {
         return Components\TextInput::make('price')
-            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'UZS') . ")")
+            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'USD') . ")")
             ->suffixAction(
                 Components\Actions\Action::make('toggle-currency')
                     ->icon('heroicon-o-banknotes')
                     ->iconSize('md')
                     ->action(function($get, $set) {
-                        $set('price_currency', $get('price_currency') == 'USD' ? 'UZS' : 'USD');
+                        $set('price_currency', $get('price_currency') != 'UZS' ? 'UZS' : 'USD');
                     })
             )
             ->numeric();
@@ -360,7 +360,8 @@ class TourTpsTestResource extends Resource
                     ->formatStateUsing(function($record, $state) {
                         /** @var Tour $record */
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($state) . ' ' . $record->price_currency?->getSymbol();
+                            return TourService::formatMoney($record->price_result) . ' ' . ExpenseService::getMainCurrency()?->to?->getSymbol();
+//                            return TourService::formatMoney($state) . ' ' . $record->price_currency?->getSymbol();
                         }
 
                         return '-';
@@ -372,7 +373,7 @@ class TourTpsTestResource extends Resource
                     ->size(Columns\TextColumn\TextColumnSize::Large)
                     ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($state);
+                            return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency()?->to?->getSymbol();
                         }
 
                         return '-';
@@ -384,7 +385,7 @@ class TourTpsTestResource extends Resource
                     ->size(Columns\TextColumn\TextColumnSize::Large)
                     ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($state);
+                            return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency()?->to?->getSymbol();
                         }
 
                         return '-';

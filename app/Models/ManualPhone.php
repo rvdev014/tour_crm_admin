@@ -2,28 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
- * @property int $hotel_id
+ * @property int $manual_id
+ * @property string $manual_type
  * @property string $phone_number
  *
- * @property Hotel $hotel
+ * @property Hotel|Restaurant $manual
  */
-class HotelPhone extends Model
+class ManualPhone extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'hotel_id',
+        'manual_id',
+        'manual_type',
         'phone_number',
     ];
 
-    public function hotel(): BelongsTo
+    public function manual(): MorphTo
     {
-        return $this->belongsTo(Hotel::class);
+        return $this->morphTo('manual');
     }
 }

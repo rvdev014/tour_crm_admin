@@ -19,10 +19,11 @@ class EditTour extends EditRecord
     {
         $formState = $this->form->getRawState();
 
-        $allExpenses = ExpenseService::getAllExpensesCorporate($this->record);
-
+        $allExpenses = ExpenseService::getAllExpensesCorporateBasic($formState);
         $data['status'] = ExpenseService::getTourStatus($allExpenses);
-        $data['expenses_total'] = ExpenseService::calculateAllExpensesPrice($allExpenses);
+
+        $expensesTotal = ExpenseService::calculateAllExpensesPrice($allExpenses);
+        $data['expenses_total'] = $expensesTotal;
 
         return $data;
     }
@@ -47,8 +48,8 @@ class EditTour extends EditRecord
         ];
     }
 
-    protected function getRedirectUrl(): string
+    /*protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
-    }
+    }*/
 }

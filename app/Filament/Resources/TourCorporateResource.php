@@ -95,20 +95,6 @@ class TourCorporateResource extends Resource
                 Components\Textarea::make('comment'),
             ]),
 
-            //            Components\Fieldset::make('Transport info')->schema([
-            //                Components\Select::make('transport_type')
-            //                    ->native(false)
-            //                    ->searchable()
-            //                    ->preload()
-            //                    ->options(TransportType::class),
-            //
-            //                Components\Select::make('transport_comfort_level')
-            //                    ->native(false)
-            //                    ->searchable()
-            //                    ->preload()
-            //                    ->options(TransportComfortLevel::class),
-            //            ]),
-
             Components\Repeater::make('groups')
                 ->extraAttributes(['class' => 'repeater-days'])
                 ->collapsed(fn($record) => !empty($record->id))
@@ -479,28 +465,28 @@ class TourCorporateResource extends Resource
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
                         ])
-                        ->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
+                        /*->mutateRelationshipDataBeforeCreateUsing(function ($data, $get) {
                             $tourData = $get('../../');
-                            $passengers = $tourData['passengers'] ?? [];
+                            $groups = collect($tourData['groups'] ?? []);
+                            $passengersCount = $groups->sum(fn($group) => count($group['passengers'] ?? []));
                             return ExpenseService::mutateExpense(
                                 data: $data,
-                                totalPax: count($passengers),
-                                countryId: null,
-                                roomAmounts: ExpenseService::getRoomingAmounts($tourData),
+                                totalPax: $passengersCount,
+                                roomAmounts: ExpenseService::getRoomingAmountsForExpense($data),
                                 companyId: $tourData['company_id']
                             );
                         })
                         ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
                             $tourData = $get('../../');
-                            $passengers = $tourData['passengers'] ?? [];
+                            $groups = collect($tourData['groups'] ?? []);
+                            $passengersCount = $groups->sum(fn($group) => count($group['passengers'] ?? []));
                             return ExpenseService::mutateExpense(
                                 data: $data,
-                                totalPax: count($passengers),
-                                countryId: null,
-                                roomAmounts: ExpenseService::getRoomingAmounts($tourData),
+                                totalPax: $passengersCount,
+                                roomAmounts: ExpenseService::getRoomingAmountsForExpense($data),
                                 companyId: $tourData['company_id']
                             );
-                        })
+                        })*/
                 ]),
         ]);
     }
@@ -508,13 +494,13 @@ class TourCorporateResource extends Resource
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput
     {
         return Components\TextInput::make('price')
-            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'UZS') . ")")
+            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'USD') . ")")
             ->suffixAction(
                 Components\Actions\Action::make('toggle-currency')
                     ->icon('heroicon-o-banknotes')
                     ->iconSize('md')
                     ->action(function ($get, $set) {
-                        $set('price_currency', $get('price_currency') == 'USD' ? 'UZS' : 'USD');
+                        $set('price_currency', $get('price_currency') != 'UZS' ? 'UZS' : 'USD');
                     })
             )
             ->numeric();
@@ -625,7 +611,7 @@ class TourCorporateResource extends Resource
                 Columns\TextColumn::make('status')
                     ->badge(),
 
-                /*Columns\TextColumn::make('expenses_total')
+                Columns\TextColumn::make('expenses_total')
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
@@ -636,7 +622,7 @@ class TourCorporateResource extends Resource
 
                         return '-';
                     })
-                    ->sortable(),*/
+                    ->sortable(),
 
                 Columns\TextColumn::make('createdBy.name')
                     ->sortable(),

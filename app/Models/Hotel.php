@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -26,7 +27,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Country $country
  * @property Collection<HotelRoomType> $roomTypes
  * @property Collection<HotelPeriod> $periods
- * @property Collection<HotelPhone> $phones
+ * @property Collection<ManualPhone> $phones
  */
 class Hotel extends Model
 {
@@ -68,8 +69,8 @@ class Hotel extends Model
         return $this->hasMany(HotelPeriod::class)->orderBy('id');
     }
 
-    public function phones(): HasMany
+    public function phones(): MorphMany
     {
-        return $this->hasMany(HotelPhone::class)->orderBy('id');
+        return $this->morphMany(ManualPhone::class, 'manual');
     }
 }

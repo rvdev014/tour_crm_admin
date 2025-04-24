@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property int $id
@@ -19,8 +21,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $created_at
  * @property string $updated_at
  *
- * @property Country $country
  * @property City $city
+ * @property Country $country
+ * @property Collection<ManualPhone> $phones
  */
 class Restaurant extends Model
 {
@@ -50,5 +53,10 @@ class Restaurant extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function phones(): MorphMany
+    {
+        return $this->morphMany(ManualPhone::class, 'manual');
     }
 }

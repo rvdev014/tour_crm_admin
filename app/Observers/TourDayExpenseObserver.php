@@ -19,16 +19,6 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
         if ($tourDayExpense->type === ExpenseType::Transport) {
             Transfer::create($this->changedAttributes($tourDayExpense));
         }
-
-        $tour = $tourDayExpense->tourDay?->tour;
-        $tour?->update([
-            'expenses_total' => ExpenseService::updateExpensesPricesTps(
-                $tour,
-                roomingAmounts: $tour->roomTypes->mapWithKeys(
-                    fn($roomType) => [$roomType->room_type_id => $roomType->amount]
-                )
-            )
-        ]);
     }
 
     /**
@@ -44,16 +34,6 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
                 Transfer::create($this->changedAttributes($tourDayExpense));
             }
         }
-
-        $tour = $tourDayExpense->tourDay?->tour;
-        $tour?->update([
-            'expenses_total' => ExpenseService::updateExpensesPricesTps(
-                $tour,
-                roomingAmounts: $tour->roomTypes->mapWithKeys(
-                    fn($roomType) => [$roomType->room_type_id => $roomType->amount]
-                )
-            )
-        ]);
     }
 
     /**
@@ -64,16 +44,6 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
         if ($tourDayExpense->type === ExpenseType::Transport) {
             Transfer::where('tour_day_expense_id', $tourDayExpense->id)->delete();
         }
-
-        $tour = $tourDayExpense->tourDay?->tour;
-        $tour?->update([
-            'expenses_total' => ExpenseService::updateExpensesPricesTps(
-                $tour,
-                roomingAmounts: $tour->roomTypes->mapWithKeys(
-                    fn($roomType) => [$roomType->room_type_id => $roomType->amount]
-                )
-            )
-        ]);
     }
 
     /**

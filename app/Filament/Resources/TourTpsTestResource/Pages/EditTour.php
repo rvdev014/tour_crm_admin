@@ -27,7 +27,7 @@ class EditTour extends EditRecord
         $data['guide_price_result'] = $data['guide_price_converted'] ?? $data['guide_price'] ?? 0;
         $data['transport_price_result'] = $data['transport_price_converted'] ?? $data['transport_price'] ?? 0;
 
-        $data['expenses_total'] = ExpenseService::updateExpensesPricesTps($this->record, $data);
+        $data['expenses_total'] = ExpenseService::updateExpensesPricesTps($this->record, $data, true);
         $data['income'] = $data['price_result'] + $data['guide_price_result'] - $data['expenses_total'];
 
         return $data;

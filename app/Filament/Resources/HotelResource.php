@@ -11,6 +11,7 @@ use Filament\Tables\Table;
 use App\Enums\RoomSeasonType;
 use App\Services\TourService;
 use Filament\Resources\Resource;
+use App\Tables\Columns\PeriodsColumn;
 use App\Filament\Resources\HotelResource\Pages;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
@@ -36,7 +37,7 @@ class HotelResource extends Resource
 
                     Forms\Components\TextInput::make('email')
                         ->email()
-                        ->suffixAction(function ($record) {
+                        ->suffixAction(function($record) {
                             if (!$record?->email) {
                                 return [];
                             }
@@ -45,8 +46,7 @@ class HotelResource extends Resource
                                     ->icon('heroicon-o-paper-airplane')
                                     ->url("mailto:{$record->email}", true)
                             ];
-                        })
-                        ->required(),
+                        }),
 
                     Forms\Components\TextInput::make('inn'),
 
@@ -76,13 +76,12 @@ class HotelResource extends Resource
                     Forms\Components\Repeater::make('phones')
                         ->relationship('phones')
                         ->addActionLabel('Add phone')
-                        ->minItems(1)
                         ->simple(
                             PhoneInput::make('phone_number')
                                 ->strictMode()
                                 ->onlyCountries(['UZ'])
                                 ->defaultCountry('UZ')
-                                ->suffixAction(function ($record) {
+                                ->suffixAction(function($record) {
                                     if (!$record?->phone_number) {
                                         return [];
                                     }
@@ -91,7 +90,8 @@ class HotelResource extends Resource
                                             ->icon('heroicon-o-paper-airplane')
                                             ->url("https://t.me/{$record->phone}", true)
                                     ];
-                                }),
+                                })
+                                ->required(),
                         ),
 
                     Forms\Components\Select::make('rate')
@@ -163,28 +163,37 @@ class HotelResource extends Resource
                     ->label('City')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('Phone')
-                    ->url(fn($record) => $record->phone ? "https://t.me/{$record->phone}" : null, true)
+                Tables\Columns\TextColumn::make('phone_list')
+                    ->label('Phones')
+                    ->getStateUsing(function($record) {
+                        return $record->phones->map(function($phone) {
+                            return "<a href='https://t.me/{$phone->phone_number}' target='_blank'>{$phone->phone_number}</a>";
+                        })->implode('<br/>');
+                    })
                     ->color('info')
-                    ->searchable()
                     ->html(),
+
                 Tables\Columns\TextColumn::make('rate')
                     ->label('Rate')
                     ->getStateUsing(fn($record) => RateEnum::tryFrom($record->rate)?->getLabel())
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('booking_cancellation_days')
                     ->label('Booking days')
                     ->sortable(),
+
+                PeriodsColumn::make('room_prices')
+                    ->label('Room prices')
+                    ->getStateUsing(fn($record) => $record),
             ])
             ->filters([
                 //
             ])
             ->recordUrl(null)
-            ->recordAction(HotelPeriodsAction::class)
+            //            ->recordAction(HotelPeriodsAction::class)
             ->actions([
                 Tables\Actions\EditAction::make(),
-                HotelPeriodsAction::make()->label('')->icon(''),
+                //                HotelPeriodsAction::make()->label('')->icon(''),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

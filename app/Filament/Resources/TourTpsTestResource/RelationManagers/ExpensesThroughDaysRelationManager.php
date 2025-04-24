@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\TourTpsTestResource\RelationManagers;
 
+use App\Models\Tour;
+use App\Models\TourDay;
 use App\Services\ExpenseService;
 use Filament\Tables;
 use Filament\Forms\Form;
@@ -30,7 +32,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                     Components\Hidden::make('price_currency'),
                     Components\Select::make('tour_day_id')
                         ->label('Day')
-                        ->options(function ($get) {
+                        ->options(function($get) {
                             $options = [];
                             foreach ($this->ownerRecord->days as $day) {
                                 $options[$day->id] = $day->date->format('d.m.Y');
@@ -47,7 +49,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                         ->searchable()
                         ->preload()
                         ->label('Expense Type')
-                        ->options(function ($get) {
+                        ->options(function($get) {
                             $options = ExpenseType::casesOptions();
                             unset($options[ExpenseType::Conference->value]);
                             if ($this->ownerRecord->guide_type == GuideType::Escort) {
@@ -173,7 +175,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->required()
                             ->label('Status'),
 
-//                        self::getExpensePriceInput('Sell price'),
+                        //                        self::getExpensePriceInput('Sell price'),
 
                         Components\Textarea::make('comment')
                             ->label('Comment'),
@@ -192,13 +194,13 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->preload()
                             ->multiple()
                             ->options(fn($get) => TourService::getMuseums($get('../../city_id')))
-                            ->createOptionAction(function () {
+                            ->createOptionAction(function() {
                                 return [
                                     'url' => route('museum.create'),
                                     'label' => 'Create museum',
                                 ];
                             })
-                            ->suffixAction(function () {
+                            ->suffixAction(function() {
                                 return [
                                     Components\Actions\Action::make('create_museum')
                                         ->label('Create museum')
@@ -216,7 +218,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->options(fn($get) => TourService::getMuseumItems($get('museum_ids')))
                             ->multiple()
                             ->preload()
-                            ->disabled(function ($get) {
+                            ->disabled(function($get) {
                                 if (empty($get('museum_ids'))) {
                                     return true;
                                 }
@@ -404,13 +406,13 @@ class ExpensesThroughDaysRelationManager extends RelationManager
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput
     {
         return Components\TextInput::make('price')
-            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'UZS') . ")")
+            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'USD') . ")")
             ->suffixAction(
                 Components\Actions\Action::make('toggle-currency')
                     ->icon('heroicon-o-banknotes')
                     ->iconSize('md')
-                    ->action(function ($get, $set) {
-                        $set('price_currency', $get('price_currency') == 'USD' ? 'UZS' : 'USD');
+                    ->action(function($get, $set) {
+                        $set('price_currency', $get('price_currency') != 'UZS' ? 'UZS' : 'USD');
                     })
             )
             ->numeric();
@@ -419,13 +421,14 @@ class ExpensesThroughDaysRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->defaultSort('id', 'asc')
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
             ->recordTitleAttribute('tourDay.date')
             ->defaultGroup(
                 Tables\Grouping\Group::make('tourDay.date')
                     ->label('Day')
-                    ->getTitleFromRecordUsing(function (TourDayExpense $record) {
+                    ->getTitleFromRecordUsing(function(TourDayExpense $record) {
                         return $record->tourDay->date->format('d.m.Y');
                     })
                     ->collapsible(),
@@ -436,31 +439,31 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                 //                        return $record->tourDay->date->format('d.m.Y');
                 //                    }),
                 Tables\Columns\TextColumn::make('type')
-                    ->formatStateUsing(function (TourDayExpense $record) {
+                    ->formatStateUsing(function(TourDayExpense $record) {
                         return $record->type->getLabel();
                     }),
                 Tables\Columns\TextColumn::make('name')
-                    ->getStateUsing(function (TourDayExpense $record) {
+                    ->getStateUsing(function(TourDayExpense $record) {
                         return match ($record->type) {
-                            ExpenseType::Hotel => $record->hotel?->name,
-                            ExpenseType::Guide => $record->guides->map(fn($guide) => $guide->name)->join(', '),
+                            ExpenseType::Hotel     => $record->hotel?->name,
+                            ExpenseType::Guide     => $record->guides->map(fn($guide) => $guide->name)->join(', '),
                             ExpenseType::Transport => $record->transport_place,
                             ExpenseType::Lunch,
-                            ExpenseType::Dinner => $record->restaurant?->name,
-                            ExpenseType::Train => $record->train?->name,
-                            ExpenseType::Plane => $record->plane_route,
-                            ExpenseType::Show => $record->show?->name,
-                            default => $record->other_name,
+                            ExpenseType::Dinner    => $record->restaurant?->name,
+                            ExpenseType::Train     => $record->train?->name,
+                            ExpenseType::Plane     => $record->plane_route,
+                            ExpenseType::Show      => $record->show?->name,
+                            default                => $record->other_name,
                         };
                     }),
                 Tables\Columns\TextColumn::make('status')->badge(),
                 Tables\Columns\TextColumn::make('price')
-                    ->formatStateUsing(function (TourDayExpense $record) {
+                    ->formatStateUsing(function(TourDayExpense $record) {
                         $symbol = $record->price_currency?->getSymbol();
                         if (!$symbol) {
                             $symbol = ExpenseService::getMainCurrency()?->to?->getSymbol();
                         }
-                        return $record->price . ' ' . $symbol;
+                        return TourService::formatMoney($record->price) . ' ' . $symbol;
                     })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('comment')
@@ -474,10 +477,25 @@ class ExpensesThroughDaysRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->after(function() {
+                        /** @var Tour $tour */
+                        $tour = $this->getOwnerRecord();
+                        $tour->saveExpensesTotal();
+                    })
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->after(function () {
+                        /** @var Tour $tour */
+                        $tour = $this->getOwnerRecord();
+                        $tour->saveExpensesTotal();
+                    }),
+                Tables\Actions\DeleteAction::make()
+                    ->after(function () {
+                        /** @var Tour $tour */
+                        $tour = $this->getOwnerRecord();
+                        $tour->saveExpensesTotal();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
