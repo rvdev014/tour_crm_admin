@@ -59,6 +59,7 @@ class TourTpsTestResource extends Resource
             Components\Fieldset::make('Tour details')->schema([
                 Hidden::make('price_currency'),
                 Hidden::make('guide_price_currency'),
+                Hidden::make('transport_price_currency'),
                 Components\Grid::make(4)->schema([
                     Components\TextInput::make('group_number')
                         ->formatStateUsing(function($record) {
@@ -357,14 +358,9 @@ class TourTpsTestResource extends Resource
                     ->badge(),
                 Columns\TextColumn::make('price')
                     ->formatStateUsing(function($record, $state) {
+                        /** @var Tour $record */
                         if (TourService::isVisible($record)) {
-                            if ($record->price_currency == 'USD') {
-                                $currency = ExpenseService::getCurrency(CurrencyEnum::USD);
-                                if ($currency) {
-                                    $state = $state * $currency->rate;
-                                }
-                            }
-                            return TourService::formatMoney($state);
+                            return TourService::formatMoney($state) . ' ' . $record->price_currency?->getSymbol();
                         }
 
                         return '-';

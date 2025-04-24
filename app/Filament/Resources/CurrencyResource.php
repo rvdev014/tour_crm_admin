@@ -2,15 +2,17 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use App\Models\Currency;
-use Filament\Tables\Table;
 use App\Enums\CurrencyEnum;
-use Filament\Resources\Resource;
 use App\Filament\Resources\CurrencyResource\Pages;
 use App\Filament\Resources\CurrencyResource\RelationManagers;
+use App\Models\Currency;
+use Closure;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class CurrencyResource extends Resource
 {
@@ -35,6 +37,25 @@ class CurrencyResource extends Resource
                 Forms\Components\TextInput::make('rate')
                     ->required()
                     ->numeric(),
+                Forms\Components\Checkbox::make('is_main')
+                    ->rules([
+                        fn(Get $get): Closure => function (string $attribute, $value, $fail) use ($get) {
+                            if (!$get('is_main')) {
+                                return;
+                            }
+
+                            $exists = Currency::query()
+                                ->where('is_main', true)
+                                ->when($get('id'), function ($query) use ($get) {
+                                    $query->where('id', '!=', $get('id'));
+                                })
+                                ->exists();
+                            if ($exists) {
+                                $fail('The main currency already exists.');
+                            }
+                        },
+                    ])
+                    ->inline(false),
             ]);
     }
 
@@ -49,6 +70,8 @@ class CurrencyResource extends Resource
                 Tables\Columns\TextColumn::make('rate')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\IconColumn::make('is_main')
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

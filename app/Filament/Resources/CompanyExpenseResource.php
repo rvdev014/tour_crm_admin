@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\PaymentStatus;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Company;
@@ -37,7 +38,7 @@ class CompanyExpenseResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->whereHas('tour');
+        return parent::getEloquentQuery();
     }
 
     public static function table(Table $table): Table
@@ -60,6 +61,7 @@ class CompanyExpenseResource extends Resource
                                         ->where('type', CompanyType::Corporate)
                                         ->pluck('name', 'id')
                                 ),
+
                             Forms\Components\Select::make('expense_types')
                                 ->native(false)
                                 ->multiple()
@@ -67,9 +69,16 @@ class CompanyExpenseResource extends Resource
                                 ->preload()
                                 ->options(ExpenseType::class),
 
+                            Forms\Components\Select::make('payment_status')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(PaymentStatus::class),
+
                             Forms\Components\DatePicker::make('date_from')
                                 ->displayFormat('d.m.Y')
                                 ->native(false),
+
                             Forms\Components\DatePicker::make('date_until')
                                 ->displayFormat('d.m.Y')
                                 ->native(false),
@@ -88,6 +97,9 @@ class CompanyExpenseResource extends Resource
                         }
                         if ($data['expense_types']) {
                             $query = $query->whereIn('type', $data['expense_types']);
+                        }
+                        if ($paymentStatus = $data['payment_status']) {
+                            $query = $query->where('payment_status', $paymentStatus);
                         }
                         if ($data['date_from']) {
                             $query = $query->where(function($subQuery) use ($data) {
@@ -142,11 +154,11 @@ class CompanyExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('group_number')
                     ->label('Group number')
                     ->getStateUsing(function(TourDayExpense $record) {
-                        $tour = $record->tour ?? $record->tourDay->tour;
+                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         if ($tour->isCorporate()) {
                             $link = "/admin/tour-corporate/$tour->id/edit";
                         } else {
-                            $link = "/admin/tour-tps/$tour->id/edit";
+                            $link = "/admin/tour-tps-test/$tour->id/edit";
                         }
                         return "<a href='{$link}' target='_blank'>$tour->group_number</a>";
                     })
@@ -155,8 +167,16 @@ class CompanyExpenseResource extends Resource
 
                 Tables\Columns\TextColumn::make('company')
                     ->getStateUsing(function(TourDayExpense $record) {
-                        $tour = $record->tour ?? $record->tourDay->tour;
+                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         return $tour->company->name;
+                    })
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('inn')
+                    ->label('Company Inn')
+                    ->getStateUsing(function(TourDayExpense $record) {
+                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
+                        return $tour->company->inn;
                     })
                     ->searchable(),
 
@@ -191,7 +211,7 @@ class CompanyExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('tour_pax')
                     ->label('Pax')
                     ->getStateUsing(function(TourDayExpense $record) {
-                        $tour = $record->tour ?? $record->tourDay->tour;
+                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         return $tour->getTotalPax();
                     }),
 
@@ -210,20 +230,26 @@ class CompanyExpenseResource extends Resource
 
                 Tables\Columns\TextColumn::make('price'),
 
-                Tables\Columns\TextColumn::make('inn')
-                    ->label('Company Inn')
+                Tables\Columns\TextColumn::make('payment_status')
                     ->getStateUsing(function(TourDayExpense $record) {
-                        $tour = $record->tour ?? $record->tourDay->tour;
-                        return $tour->company->inn;
-                    })
-                    ->searchable(),
+                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
+                        return $tour->payment_status?->getLabel();
+                    }),
 
                 Tables\Columns\TextColumn::make('passengers')
                     ->label('Passengers FIO')
                     ->getStateUsing(function(TourDayExpense $record) {
-                        $tour = $record->tour ?? $record->tourDay->tour;
-                        return $tour->passengers?->map(fn($passenger) => $passenger->name)->join(', ');
+                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
+                        $passengers = [];
+                        foreach ($tour->groups as $group) {
+                            foreach ($group->passengers as $passenger) {
+                                $passengers[] = $passenger->name;
+                            }
+                        }
+                        return collect($passengers)->join(', ');
                     })
+//                    ->width('300px')
+//                    ->wrap()
                     ->searchable(),
             ])
             ->actions([

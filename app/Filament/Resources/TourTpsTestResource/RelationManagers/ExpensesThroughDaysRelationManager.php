@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TourTpsTestResource\RelationManagers;
 
+use App\Services\ExpenseService;
 use Filament\Tables;
 use Filament\Forms\Form;
 use App\Enums\GuideType;
@@ -453,7 +454,15 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                         };
                     }),
                 Tables\Columns\TextColumn::make('status')->badge(),
-                Tables\Columns\TextColumn::make('price'),
+                Tables\Columns\TextColumn::make('price')
+                    ->formatStateUsing(function (TourDayExpense $record) {
+                        $symbol = $record->price_currency?->getSymbol();
+                        if (!$symbol) {
+                            $symbol = ExpenseService::getMainCurrency()?->to?->getSymbol();
+                        }
+                        return $record->price . ' ' . $symbol;
+                    })
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('comment')
                     ->width('250px')
                     ->limit(50)

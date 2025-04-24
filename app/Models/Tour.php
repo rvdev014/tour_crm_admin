@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseType;
 use App\Enums\GuideType;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentType;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
 use App\Enums\TransportComfortLevel;
@@ -29,20 +32,25 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $country_id
  * @property int $created_by
  * @property int $city_id
- * @property int $price
- * @property string $price_currency
- * @property int $expenses_total
- * @property int $income
  * @property int $hotel_expenses_total
  * @property TourType $type
  * @property GuideType $guide_type
  * @property string $guide_name
  * @property string $guide_phone
  * @property string $package_name
- * @property int $guide_price
- * @property string $guide_price_currency
  * @property TransportType $transport_type
+ * @property PaymentType $payment_type
+ * @property PaymentStatus $payment_status
+ *
+ * @property float $expenses_total
+ * @property float $income
+ * @property float $price
+ * @property float $guide_price
  * @property float $transport_price
+ * @property CurrencyEnum $price_currency
+ * @property CurrencyEnum $guide_price_currency
+ * @property CurrencyEnum $transport_price_currency
+ *
  * @property TransportComfortLevel $transport_comfort_level
  * @property int $single_supplement_price
  *
@@ -71,6 +79,11 @@ class Tour extends Model
         'guide_type' => GuideType::class,
         'transport_type' => TransportType::class,
         'transport_comfort_level' => TransportComfortLevel::class,
+        'price_currency' => CurrencyEnum::class,
+        'guide_price_currency' => CurrencyEnum::class,
+        'transport_price_currency' => CurrencyEnum::class,
+        'payment_type' => PaymentType::class,
+        'payment_status' => PaymentStatus::class,
     ];
 
     public function company(): BelongsTo
@@ -163,7 +176,12 @@ class Tour extends Model
     public function getTotalPax($withLeader = true): int
     {
         if ($this->isCorporate()) {
-            return $this->passengers()->count();
+            $totalPax = 0;
+            $groups = $this->groups;
+            foreach ($groups as $group) {
+                $totalPax += $group->passengers()->count();
+            }
+            return $totalPax;
         }
 
         if (!$withLeader) {

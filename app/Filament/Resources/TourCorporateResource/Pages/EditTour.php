@@ -19,20 +19,10 @@ class EditTour extends EditRecord
     {
         $formState = $this->form->getRawState();
 
-        $allExpenses = ExpenseService::mutateExpensesCorporate($formState, isCorporate: true);
+        $allExpenses = ExpenseService::getAllExpensesCorporate($this->record);
 
         $data['status'] = ExpenseService::getTourStatus($allExpenses);
         $data['expenses_total'] = ExpenseService::calculateAllExpensesPrice($allExpenses);
-
-//        foreach ($allExpenses as $expense) {
-//            if ($expense['type'] == ExpenseType::Hotel->value) {
-//                ExpenseService::updateTourDayExpenseRoomTypes($expense['id'], $expense);
-//            }
-//        }
-//        ExpenseService::updateTourRoomTypes($this->record->id, $data);
-
-//        TourService::sendMails($formState, $allExpenses, isCorporate: true);
-//        TourService::sendTelegram($formState, isCorporate: true);
 
         return $data;
     }

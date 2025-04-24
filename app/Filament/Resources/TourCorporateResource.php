@@ -150,7 +150,8 @@ class TourCorporateResource extends Resource
                             if ($expenseType) {
                                 $expenseTypeLabel = ExpenseType::from($expenseType)->getLabel();
                                 $currentStatus = $current['status'] ?? null;
-                                $status = ($currentStatus ? " - " . ExpenseStatus::from($currentStatus)->getLabel() : '');
+                                $status = ($currentStatus ? " - " . ExpenseStatus::from($currentStatus)->getLabel(
+                                    ) : '');
                                 return "Expense for $expenseTypeLabel ($index)" . strtoupper($status);
                             }
 
@@ -182,6 +183,13 @@ class TourCorporateResource extends Resource
                                     ->required()
                                     ->reactive(),
                                 Components\DatePicker::make('date')
+                                    ->label(function ($get) {
+                                        $label = 'Date';
+                                        if ($get('type') == ExpenseType::Plane->value) {
+                                            $label = 'Flight date';
+                                        }
+                                        return $label;
+                                    })
                                     ->displayFormat('d.m.Y')
                                     ->native(false)
                                     ->required()
@@ -203,7 +211,10 @@ class TourCorporateResource extends Resource
                                     ->options(fn($get) => TourService::getCities())
                                     ->reactive()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->hidden(fn($get) => in_array($get('type'), [
+                                        ExpenseType::Plane->value,
+                                    ])),
                             ]),
 
                             // Hotel
@@ -417,6 +428,11 @@ class TourCorporateResource extends Resource
                                         ->seconds(false)
                                         ->label('Arrival time'),
 
+                                    Components\Select::make('supplier_id')
+                                        ->native(false)
+                                        ->relationship('supplier', 'name')
+                                        ->label('Postavshik'),
+
                                     Components\Textarea::make('comment')->label('Comment'),
                                 ]),
 
@@ -609,7 +625,7 @@ class TourCorporateResource extends Resource
                 Columns\TextColumn::make('status')
                     ->badge(),
 
-                Columns\TextColumn::make('expenses_total')
+                /*Columns\TextColumn::make('expenses_total')
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
@@ -620,7 +636,7 @@ class TourCorporateResource extends Resource
 
                         return '-';
                     })
-                    ->sortable(),
+                    ->sortable(),*/
 
                 Columns\TextColumn::make('createdBy.name')
                     ->sortable(),

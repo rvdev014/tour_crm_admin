@@ -14,4 +14,12 @@ enum CurrencyEnum:string
             self::USD => 'USD',
         };
     }
+
+    public function getSymbol(): string
+    {
+        return match ($this) {
+            self::UZS => 'sum',
+            self::USD => '$',
+        };
+    }
 }

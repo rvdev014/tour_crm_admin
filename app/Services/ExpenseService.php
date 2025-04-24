@@ -66,10 +66,13 @@ class ExpenseService
                     day: $day
                 );
 
-                $expensesTotal += $updatedExpense['price'] ?? 0;
-                $expense::withoutEvents(function () use ($expense, $updatedExpense) {
-                    $expense->update($updatedExpense);
+                $expensePrice = $updatedExpense['price_converted'] ?? $updatedExpense['price'] ?? 0;
+
+                $expense::withoutEvents(function () use ($expense, $updatedExpense, $expensePrice) {
+                    $expense->update(array_merge($updatedExpense, ['price_result' => $expensePrice]));
                 });
+
+                $expensesTotal += $expensePrice;
             }
         }
 
@@ -258,10 +261,11 @@ class ExpenseService
 
     public static function convertExpensePrice(&$data, $attribute): void
     {
-        $currency = ExpenseService::getCurrency(CurrencyEnum::USD);
-        if ($currency) {
-            if ($data["{$attribute}_currency"] == CurrencyEnum::USD->value) {
-                $data["{$attribute}_converted"] = ($data[$attribute] ?? 0) * $currency->rate;
+        $mainCurrency = ExpenseService::getMainCurrency();
+        if ($mainCurrency) {
+            $attributeCurrency = $data["{$attribute}_currency"] ?? null;
+            if ($attributeCurrency && $attributeCurrency != $mainCurrency->to->value) {
+                $data["{$attribute}_converted"] = round(($data[$attribute] ?? 0) / $mainCurrency->rate, 2);
             }
         }
     }
@@ -274,6 +278,21 @@ class ExpenseService
             function () use ($from) {
                 /** @var Currency $currency */
                 $currency = Currency::query()->where('from', $from->value)->first();
+                return $currency;
+            }
+        );
+
+        return $currency;
+    }
+
+    public static function getMainCurrency(): ?Currency
+    {
+        /** @var Currency $currency */
+        $currency = CacheService::remember(
+            'currency_main',
+            function () {
+                /** @var Currency $currency */
+                $currency = Currency::query()->where('is_main', true)->first();
                 return $currency;
             }
         );

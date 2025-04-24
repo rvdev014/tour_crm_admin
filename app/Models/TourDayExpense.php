@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Observers\TourDayExpenseObserver;
@@ -23,7 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * Common fields
  * @property float $price
- * @property float $price_currency
+ * @property float $price_result
+ * @property CurrencyEnum $price_currency
  * @property float $total_price
  * @property int $pax
  * @property ExpenseStatus $status
@@ -80,6 +82,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Restaurant
  * @property int $restaurant_id
  *
+ * Plane
+ * @property int $supplier_id
+ *
  * Other
  * @property string $other_name
  *
@@ -91,6 +96,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Tour $tour
  * @property TourDay $tourDay
  * @property TourGroup $tourGroup
+ * @property Supplier $supplier
  * @property Hotel $hotel
  * @property HotelRoomType $hotelRoomType
  * @property Driver $transportDriver
@@ -120,6 +126,7 @@ class TourDayExpense extends Model
         'museum_ids' => 'array',
         'museum_item_ids' => 'array',
         'status' => ExpenseStatus::class,
+        'price_currency' => CurrencyEnum::class,
     ];
 
     public function tour(): BelongsTo
@@ -200,5 +207,10 @@ class TourDayExpense extends Model
     public function roomTypes(): HasMany
     {
         return $this->hasMany(TourDayExpenseRoomType::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }
