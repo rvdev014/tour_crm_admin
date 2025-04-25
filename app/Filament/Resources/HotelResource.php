@@ -194,7 +194,7 @@ class HotelResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 //                HotelPeriodsAction::make()->label('')->icon(''),
-            ])
+            ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

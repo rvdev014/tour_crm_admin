@@ -23,7 +23,7 @@ class ListCompanyExpenses extends ListRecords
                 ->exports([
                     ExcelExport::make()->fromTable()->withColumns([
                         Column::make('group_number')->heading('Group number')->getStateUsing(function (TourDayExpense $record) {
-                            $tour = $record->tour ?? $record->tourDay->tour;
+                            $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                             return $tour->group_number;
                         }),
                     ])

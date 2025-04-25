@@ -27,8 +27,9 @@ class EditTour extends EditRecord
         $data['guide_price_result'] = $data['guide_price_converted'] ?? $data['guide_price'] ?? 0;
         $data['transport_price_result'] = $data['transport_price_converted'] ?? $data['transport_price'] ?? 0;
 
-        $data['expenses_total'] = ExpenseService::updateExpensesPricesTps($this->record, $data, true);
-        $data['income'] = $data['price_result'] + $data['guide_price_result'] - $data['expenses_total'];
+        $expensesTotal = ExpenseService::updateExpensesPricesTps($this->record, $data, true);
+        $data['expenses_total'] = $expensesTotal + $data['guide_price_result'];
+        $data['income'] = $data['price_result'] - $data['expenses_total'];
 
         return $data;
     }
@@ -47,6 +48,10 @@ class EditTour extends EditRecord
                 ->tour($tour)
                 ->type('restaurants')
                 ->label('Mail Restaurants'),*/
+            Actions\Action::make('export')
+                ->label('Report')
+                ->icon('heroicon-o-document-text')
+                ->url(route('export', $this->record)),
             SendMailAction::make('mail_hotel')
                 ->tour($tour)
                 ->type('hotels')

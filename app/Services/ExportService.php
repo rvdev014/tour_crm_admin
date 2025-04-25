@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Enums\TourType;
@@ -113,7 +114,7 @@ class ExportService
     public static function getThirdTable(string $startLetter, int $startRow, Worksheet $sheet, Tour $tour): array
     {
         $operator = "-";
-        $profit = $tour->price - $tour->expenses_total;
+        $profit = $tour->price_result - $tour->expenses_total;
         $operatorProfit = 0;
         $createdBy = $tour->createdBy;
         if ($createdBy) {
@@ -153,6 +154,7 @@ class ExportService
     {
         $addPercent = TourService::getCompanyAddPercent($tour->company_id);
         $personType = ExpenseService::getPersonType($tour->country_id);
+        $currencyUzs = ExpenseService::getUzsToUsdCurrency();
 
         // TODO: person_type, season_type added
         $tourRoomTypes = $tour->roomTypes->map(fn(TourRoomType $roomType) => [
@@ -179,17 +181,38 @@ class ExportService
         $others[] = ['value' => 'Extra', 'colspan' => 1];
         $conferences[] = ['value' => 'Conference', 'colspan' => 1];
 
-        $hotelsTotal = 0;
-        $guidesTotal = 0;
-        $museumsTotal = 0;
-        $transportsTotal = 0;
-        $lunchesTotal = 0;
-        $dinnersTotal = 0;
-        $planesTotal = 0;
-        $trainsTotal = 0;
-        $showsTotal = 0;
-        $othersTotal = 0;
-        $conferencesTotal = 0;
+        $hotelsTotalSum = 0;
+        $hotelsTotalUsd = 0;
+
+        $guidesTotalSum = 0;
+        $guidesTotalUsd = 0;
+
+        $museumsTotalSum = 0;
+        $museumsTotalUsd = 0;
+
+        $transportsTotalSum = 0;
+        $transportsTotalUsd = 0;
+
+        $lunchesTotalSum = 0;
+        $lunchesTotalUsd = 0;
+
+        $dinnersTotalSum = 0;
+        $dinnersTotalUsd = 0;
+
+        $planesTotalSum = 0;
+        $planesTotalUsd = 0;
+
+        $trainsTotalSum = 0;
+        $trainsTotalUsd = 0;
+
+        $showsTotalSum = 0;
+        $showsTotalUsd = 0;
+
+        $othersTotalSum = 0;
+        $othersTotalUsd = 0;
+
+        $conferencesTotalSum = 0;
+        $conferencesTotalUsd = 0;
 
         foreach ($tour->days as $tourDay) {
             // Days
@@ -202,57 +225,73 @@ class ExportService
             // Guides
             if ($tour->guide_type == GuideType::Escort) {
                 $guides[] = ['value' => '', 'colspan' => $tourRoomTypesCount];
-                $guidesTotal = $tour->guide_price;
+
+                $guidesTotalUsd = $tour->guide_price_result;
+                if ($tour->guide_price_currency == CurrencyEnum::UZS) {
+                    $guidesTotalSum = $tour->guide_price;
+                } else {
+                    $guidesTotalSum = round($tour->guide_price_result * $currencyUzs->rate, 2);
+                }
             } else {
                 $guideExpenses = $tourDay->getExpenses(ExpenseType::Guide);
                 $guides[] = ['value' => $guideExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
-                $guidesTotal += $guideExpenses->sum('price') ?? 0;
+                $guidesTotalUsd += ExpenseService::calculateExpensesPrice($guideExpenses);
+                $guidesTotalSum += ExpenseService::calculateExpensesPrice($guideExpenses, false);
             }
 
             // Museums
-            $museumExpense = $tourDay->getExpenses(ExpenseType::Museum);
-            $museums[] = ['value' => $museumExpense->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $museumsTotal += $museumExpense->sum('price') ?? 0;
+            $museumExpenses = $tourDay->getExpenses(ExpenseType::Museum);
+            $museumsTotalUsd += ExpenseService::calculateExpensesPrice($museumExpenses);
+            $museumsTotalSum += ExpenseService::calculateExpensesPrice($museumExpenses, false);
+            $museums[] = ['value' => $museumsTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Transports
             $transportExpenses = $tourDay->getExpenses(ExpenseType::Transport);
-            $transports[] = ['value' => $transportExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $transportsTotal += $transportExpenses->sum('price') ?? 0;
+            $transportsTotalUsd += ExpenseService::calculateExpensesPrice($transportExpenses);
+            $transportsTotalSum += ExpenseService::calculateExpensesPrice($transportExpenses, false);
+            $transports[] = ['value' => $transportsTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Lunch
             $lunchExpenses = $tourDay->getExpenses(ExpenseType::Lunch);
-            $lunches[] = ['value' => $lunchExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $lunchesTotal += $lunchExpenses->sum('price') ?? 0;
+            $lunchesTotalUsd += ExpenseService::calculateExpensesPrice($lunchExpenses);
+            $lunchesTotalSum += ExpenseService::calculateExpensesPrice($lunchExpenses, false);
+            $lunches[] = ['value' => $lunchesTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Dinner
             $dinnerExpenses = $tourDay->getExpenses(ExpenseType::Dinner);
-            $dinners[] = ['value' => $dinnerExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $dinnersTotal += $dinnerExpenses->sum('price') ?? 0;
+            $dinnersTotalUsd += ExpenseService::calculateExpensesPrice($dinnerExpenses);
+            $dinnersTotalSum += ExpenseService::calculateExpensesPrice($dinnerExpenses, false);
+            $dinners[] = ['value' => $dinnersTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Plane
             $planeExpenses = $tourDay->getExpenses(ExpenseType::Plane);
-            $planes[] = ['value' => $planeExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $planesTotal += $planeExpenses->sum('price') ?? 0;
+            $planesTotalUsd += ExpenseService::calculateExpensesPrice($planeExpenses);
+            $planesTotalSum += ExpenseService::calculateExpensesPrice($planeExpenses, false);
+            $planes[] = ['value' => $planesTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Train
             $trainExpenses = $tourDay->getExpenses(ExpenseType::Train);
-            $trains[] = ['value' => $trainExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $trainsTotal += $trainExpenses->sum('price') ?? 0;
+            $trainsTotalUsd += ExpenseService::calculateExpensesPrice($trainExpenses);
+            $trainsTotalSum += ExpenseService::calculateExpensesPrice($trainExpenses, false);
+            $trains[] = ['value' => $trainsTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Show
             $showExpense = $tourDay->getExpenses(ExpenseType::Show);
-            $shows[] = ['value' => $showExpense->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $showsTotal += $showExpense->sum('price') ?? 0;
+            $showsTotalUsd += ExpenseService::calculateExpensesPrice($showExpense);
+            $showsTotalSum += ExpenseService::calculateExpensesPrice($showExpense, false);
+            $shows[] = ['value' => $showsTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Show
             $otherExpenses = $tourDay->getExpenses(ExpenseType::Extra);
-            $others[] = ['value' => $otherExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $othersTotal += $otherExpenses->sum('price') ?? 0;
+            $othersTotalUsd += ExpenseService::calculateExpensesPrice($otherExpenses);
+            $othersTotalSum += ExpenseService::calculateExpensesPrice($otherExpenses, false);
+            $others[] = ['value' => $othersTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Conference
             $confExpense = $tourDay->getExpenses(ExpenseType::Conference);
-            $conferences[] = ['value' => $confExpense->sum('price'), 'colspan' => $tourRoomTypesCount];
-            $conferencesTotal += $confExpense->sum('price') ?? 0;
+            $conferencesTotalUsd += ExpenseService::calculateExpensesPrice($confExpense);
+            $conferencesTotalSum += ExpenseService::calculateExpensesPrice($confExpense, false);
+            $conferences[] = ['value' => $conferencesTotalUsd, 'colspan' => $tourRoomTypesCount];
 
             // Room types, Amount, Price, Total
             foreach ($tourRoomTypes as $roomType) {
@@ -278,7 +317,7 @@ class ExportService
                 $prices[] = ['value' => $price, 'colspan' => 1];
                 $totals[] = ['value' => $hotelTotal, 'colspan' => 1];
 
-                $hotelsTotal += $hotelTotal;
+                $hotelsTotalUsd += $hotelTotal;
             }
         }
 
@@ -287,18 +326,34 @@ class ExportService
         $roomTypes[] = ['value' => '', 'colspan' => 1];
         $amounts[] = ['value' => '', 'colspan' => 1];
         $prices[] = ['value' => '', 'colspan' => 1];
-        $totals[] = ['value' => $hotelsTotal, 'colspan' => 1];
+        $totals[] = ['value' => $hotelsTotalSum = $hotelsTotalUsd * $currencyUzs?->rate, 'colspan' => 1];
+        $guides[] = ['value' => $guidesTotalSum, 'colspan' => 1];
+        $museums[] = ['value' => $museumsTotalSum, 'colspan' => 1];
+        $transports[] = ['value' => $transportsTotalSum, 'colspan' => 1];
+        $lunches[] = ['value' => $lunchesTotalSum, 'colspan' => 1];
+        $dinners[] = ['value' => $dinnersTotalSum, 'colspan' => 1];
+        $planes[] = ['value' => $planesTotalSum, 'colspan' => 1];
+        $trains[] = ['value' => $trainsTotalSum, 'colspan' => 1];
+        $shows[] = ['value' => $showsTotalSum, 'colspan' => 1];
+        $others[] = ['value' => $othersTotalSum, 'colspan' => 1];
+        $conferences[] = ['value' => $conferencesTotalSum, 'colspan' => 1];
 
-        $guides[] = ['value' => $guidesTotal, 'colspan' => 1];
-        $museums[] = ['value' => $museumsTotal, 'colspan' => 1];
-        $transports[] = ['value' => $transportsTotal, 'colspan' => 1];
-        $lunches[] = ['value' => $lunchesTotal, 'colspan' => 1];
-        $dinners[] = ['value' => $dinnersTotal, 'colspan' => 1];
-        $planes[] = ['value' => $planesTotal, 'colspan' => 1];
-        $trains[] = ['value' => $trainsTotal, 'colspan' => 1];
-        $shows[] = ['value' => $showsTotal, 'colspan' => 1];
-        $others[] = ['value' => $othersTotal, 'colspan' => 1];
-        $conferences[] = ['value' => $conferencesTotal, 'colspan' => 1];
+        $days[] = ['value' => '', 'colspan' => 1];
+        $hotels[] = ['value' => 'USD TOTAL', 'colspan' => 1];
+        $roomTypes[] = ['value' => '', 'colspan' => 1];
+        $amounts[] = ['value' => '', 'colspan' => 1];
+        $prices[] = ['value' => '', 'colspan' => 1];
+        $totals[] = ['value' => $hotelsTotalUsd, 'colspan' => 1];
+        $guides[] = ['value' => $guidesTotalUsd, 'colspan' => 1];
+        $museums[] = ['value' => $museumsTotalUsd, 'colspan' => 1];
+        $transports[] = ['value' => $transportsTotalUsd, 'colspan' => 1];
+        $lunches[] = ['value' => $lunchesTotalUsd, 'colspan' => 1];
+        $dinners[] = ['value' => $dinnersTotalUsd, 'colspan' => 1];
+        $planes[] = ['value' => $planesTotalUsd, 'colspan' => 1];
+        $trains[] = ['value' => $trainsTotalUsd, 'colspan' => 1];
+        $shows[] = ['value' => $showsTotalUsd, 'colspan' => 1];
+        $others[] = ['value' => $othersTotalUsd, 'colspan' => 1];
+        $conferences[] = ['value' => $conferencesTotalUsd, 'colspan' => 1];
 
         $result[] = $days;
         $result[] = $hotels;
@@ -390,9 +445,12 @@ class ExportService
             $sheet->setCellValue(self::letter($i) . $rowIndex, '');
         }
 
-        $totalAll = $hotelsTotal + $guidesTotal + $museumsTotal + $transportsTotal + $lunchesTotal + $dinnersTotal + $planesTotal + $trainsTotal + $showsTotal + $othersTotal + $conferencesTotal;
-        $sheet->setCellValue(self::letter($columnSpanSum) . $rowIndex, $totalAll);
-        $sheet->mergeCells("A$rowIndex:" . self::letter($columnSpanSum - 1) . $rowIndex);
+        $totalAllSum = $hotelsTotalSum + $guidesTotalSum + $museumsTotalSum + $transportsTotalSum + $lunchesTotalSum + $dinnersTotalSum + $planesTotalSum + $trainsTotalSum + $showsTotalSum + $othersTotalSum + $conferencesTotalSum;
+        $totalAllUsd = $hotelsTotalUsd + $guidesTotalUsd + $museumsTotalUsd + $transportsTotalUsd + $lunchesTotalUsd + $dinnersTotalUsd + $planesTotalUsd + $trainsTotalUsd + $showsTotalUsd + $othersTotalUsd + $conferencesTotalUsd;
+
+        $sheet->setCellValue(self::letter($columnSpanSum - 1) . $rowIndex, $totalAllSum);
+        $sheet->setCellValue(self::letter($columnSpanSum) . $rowIndex, $totalAllUsd);
+        $sheet->mergeCells("A$rowIndex:" . self::letter($columnSpanSum - 2) . $rowIndex);
 
         $totalRowRange = "A$rowIndex:" . self::letter($columnSpanSum) . $rowIndex;
         $sheet->getStyle($totalRowRange)->getFill()->setFillType(Fill::FILL_SOLID);

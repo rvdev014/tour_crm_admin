@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\CurrencyEnum;
+use App\Models\TourDayExpense;
 use Illuminate\Support\Arr;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
@@ -267,14 +268,54 @@ class ExpenseService
         }
     }
 
-    public static function getCurrency(CurrencyEnum $from): ?Currency
+    public static function calculateExpensesPrice($expenses, bool $isUsd = true): float
+    {
+        $result = 0;
+        foreach ($expenses as $expense) {
+            $result += ExpenseService::calculateExpensePrice($expense, $isUsd);
+        }
+        return $result;
+    }
+
+    public static function calculateExpensePrice($expense, bool $isUsd = true): float
+    {
+        /** @var TourDayExpense $expense */
+        if ($isUsd) {
+            $result = $expense->price_result;
+        } else {
+            $currencyUzs = ExpenseService::getUzsToUsdCurrency();
+            $result = round($expense->price_result * $currencyUzs?->rate, 2);
+        }
+
+        return $result;
+    }
+
+    public static function getUzsToUsdCurrency(): ?Currency
+    {
+        /** @var Currency $currency */
+        $currency = CacheService::remember(
+            'currency_uzs_usd',
+            function() {
+                /** @var Currency $currency */
+                $currency = Currency::query()
+                    ->where('from', CurrencyEnum::UZS->value)
+                    ->where('to', CurrencyEnum::USD->value)
+                    ->first();
+                return $currency;
+            }
+        );
+
+        return $currency;
+    }
+
+    public static function getCurrency(CurrencyEnum $to): ?Currency
     {
         /** @var Currency $currency */
         $currency = CacheService::remember(
             'currency_usd',
-            function() use ($from) {
+            function() use ($to) {
                 /** @var Currency $currency */
-                $currency = Currency::query()->where('from', $from->value)->first();
+                $currency = Currency::query()->where('to', $to->value)->first();
                 return $currency;
             }
         );
@@ -289,7 +330,8 @@ class ExpenseService
             'currency_main',
             function() {
                 /** @var Currency $currency */
-                $currency = Currency::query()->where('is_main', true)->first();
+                $currency = Currency::query()->where('to', CurrencyEnum::USD->value)->first();
+//                $currency = Currency::query()->where('is_main', true)->first();
                 return $currency;
             }
         );

@@ -26,10 +26,14 @@ class CreateTour extends CreateRecord
 
         ExpenseService::convertExpensePrice($data, 'price');
         ExpenseService::convertExpensePrice($data, 'guide_price');
+        ExpenseService::convertExpensePrice($data, 'transport_price');
 
-        $price = $data['price_converted'] ?? $data['price'] ?? 0;
-        $guidePrice = $data['guide_price_converted'] ?? $data['guide_price'] ?? 0;
-        $data['price'] = $price + $guidePrice;
+        $data['price_result'] = $data['price_converted'] ?? $data['price'] ?? 0;
+        $data['guide_price_result'] = $data['guide_price_converted'] ?? $data['guide_price'] ?? 0;
+        $data['transport_price_result'] = $data['transport_price_converted'] ?? $data['transport_price'] ?? 0;
+
+        $data['expenses_total'] = $data['guide_price_result'];
+        $data['income'] = $data['price_result'] - $data['expenses_total'];
 
         return $data;
     }
