@@ -89,7 +89,7 @@ class ExportService
                 ['Manager', $tour->createdBy->name],
                 ['Pax', $tour->passengers()->count()],
                 ['FOC', $tour->leader_pax],
-                ['Ex.rate', $tour->expenses_total],
+                ['Ex.rate', TourService::formatMoney($tour->expenses_total)],
             ];
         } else {
             $data = [
@@ -98,7 +98,7 @@ class ExportService
                 ['Travel Dates', $tour->start_date->format('d') . '-' . $tour->end_date->format('d.m.y')],
                 ['Pax', $tour->pax],
                 ['FOC', $tour->leader_pax],
-                ['Ex.rate', $tour->expenses_total],
+                ['Ex.rate', TourService::formatMoney($tour->expenses_total)],
             ];
         }
 
@@ -124,18 +124,18 @@ class ExportService
 
         if ($tour->type == TourType::Corporate) {
             $data = [
-                ['Payment', $tour->price],
-                ['Expenses', $tour->expenses_total],
-                ['Profit', $profit],
+                ['Payment', TourService::formatMoney($tour->price_result)],
+                ['Expenses', TourService::formatMoney($tour->expenses_total)],
+                ['Profit', TourService::formatMoney($profit)],
                 ['Operator', $operator]
             ];
         } else {
             $data = [
-                ['Payment', $tour->price],
-                ['Expenses', $tour->expenses_total],
-                ['Profit', $profit],
+                ['Payment', TourService::formatMoney($tour->price_result)],
+                ['Expenses', TourService::formatMoney($tour->expenses_total)],
+                ['Profit', TourService::formatMoney($profit)],
                 [$operator . "($createdBy->operator_percent_tps%)", $operatorProfit],
-                ['Grand Profit', $profit - $operatorProfit]
+                ['Grand Profit', TourService::formatMoney($profit - $operatorProfit)]
             ];
         }
 
