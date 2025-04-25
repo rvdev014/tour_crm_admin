@@ -87,6 +87,10 @@
     border-width: 0;
 }
 
+.fi-ta-table .custom-table thead {
+    position: static!important;
+}
+
 .custom-table th {
     border-bottom: 1px solid rgba(var(--gray-200), 1);
 }
