@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Hotel;
+use App\Models\ManualPhone;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -27,13 +28,22 @@ class InsertHotelPhones extends Command
      */
     public function handle(): void
     {
-        /** @var Collection<Hotel> $hotels */
-        $hotels = Hotel::query()->get();
+        /** @var Collection<ManualPhone> $manualPhones */
+        $manualPhones = ManualPhone::query()->whereNotNull('hotel_id')->get();
 
-        foreach ($hotels as $hotel) {
-            if ($hotel->phones()->where(['phone_number' => $hotel->phone])->doesntExist()) {
-                $hotel->phones()->create(['phone_number' => $hotel->phone]);
-            }
+        if ($manualPhones->isEmpty()) {
+            $this->info('No manual phones found with hotel_id.');
+            return;
         }
+
+        foreach ($manualPhones as $manualPhone) {
+            $manualPhone->update([
+                'hotel_id' => null,
+                'manual_type' => Hotel::class,
+                'manual_id' => $manualPhone->hotel_id,
+            ]);
+        }
+
+        $this->info('Manual phones updated successfully.');
     }
 }
