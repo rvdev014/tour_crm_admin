@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Throwable;
 use Carbon\Carbon;
 use App\Models\City;
 use App\Models\Show;
@@ -31,6 +32,27 @@ use Filament\Forms\Components\TextInput;
 
 class TourService
 {
+    public function notifyDrivers(): void
+    {
+        try {
+            /** @var \Illuminate\Database\Eloquent\Collection<Transfer> $transfers */
+            $transfers = Transfer::query()
+                ->whereNull('notified_at')
+                ->whereBetween('date_time', [
+                    Carbon::now()->timezone('Asia/Tashkent'),
+                    Carbon::now()->timezone('Asia/Tashkent')->addMinutes(20)
+                ])
+                ->get();
+
+            foreach ($transfers as $transfer) {
+                TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
+                $transfer->update(['notified_at' => Carbon::now()]);
+            }
+        } catch (Throwable $e) {
+            // Handle exception
+        }
+    }
+
     public static function getCities($countryId = null, bool $isPluck = true, $isAll = false): array|Collection
     {
         if (!$countryId) {
@@ -409,7 +431,7 @@ HTML;
         }
     }
 
-    public static function sendTelegramTransfer($data, $isUpdated = false): void
+    public static function sendTelegramTransfer($data, $isUpdated = false, $isReminder = false): void
     {
         $driverIds = $data['driver_ids'] ?? [];
         foreach ($driverIds as $driverId) {
@@ -435,6 +457,10 @@ HTML;
                 'price' => $data['price'] ?? '',
                 'comment' => $data['comment'],
             ]);
+
+            if ($isReminder) {
+                $message = "<b>REMINDER</b>\n" . $message;
+            }
 
             if ($isUpdated) {
                 $message = "<b>***Updated***</b>\n" . $message;
