@@ -9,49 +9,62 @@ use App\Services\ExportHotelService;
 use App\Services\ExportMuseumService;
 use App\Services\ExportService;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Exception;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpWord\Exception\CopyFileException;
 use PhpOffice\PhpWord\Exception\CreateTemporaryFileException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use ZipArchive;
 
 class ExportController extends Controller
 {
-    public function export(Tour $tour): void
+    /**
+     * @throws Exception
+     */
+    public function export(Tour $tour): BinaryFileResponse
     {
         $spreadsheet = ExportService::getExport($tour);
 
-        $filename = "Tour_" . $tour->group_number . ".xlsx";
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
+        $filename = "tour_" . $tour->group_number . "_client.xlsx";
+        $tempFile = tempnam(sys_get_temp_dir(), $filename);
 
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $writer->save('php://output');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
     }
 
-    public function exportClient(Tour $tour): void
+    /**
+     * @throws Exception
+     */
+    public function exportClient(Tour $tour): BinaryFileResponse
     {
         $spreadsheet = ExportClientService::getExport($tour);
 
-        $filename = "Tour_" . $tour->group_number . "_client.xlsx";
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
+        $filename = "tour_" . $tour->group_number . "_client.xlsx";
+        $tempFile = tempnam(sys_get_temp_dir(), $filename);
 
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $writer->save('php://output');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
     }
 
-    public function exportMuseum(Tour $tour): void
+    /**
+     * @throws Exception
+     */
+    public function exportMuseum(Tour $tour): BinaryFileResponse
     {
         $spreadsheet = ExportMuseumService::getExport($tour);
 
-        $filename = "Tour_" . $tour->group_number . "_museum.xlsx";
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
+        $filename = "tour_" . $tour->group_number . "_museum.xlsx";
+        $tempFile = tempnam(sys_get_temp_dir(), $filename);
 
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $writer->save('php://output');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
     }
 
     /**
@@ -96,7 +109,7 @@ class ExportController extends Controller
 
     /**
      * @throws CopyFileException
-     * @throws CreateTemporaryFileException
+     * @throws CreateTemporaryFileException|Exception
      */
     public function exportAllZip(Tour $tour): void
     {

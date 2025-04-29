@@ -89,7 +89,7 @@ class ExportService
                 ['Manager', $tour->createdBy->name],
                 ['Pax', $tour->passengers()->count()],
                 ['FOC', $tour->leader_pax],
-                ['Ex.rate', TourService::formatMoney($tour->expenses_total)],
+                ['Ex.rate', $tour->expenses_total],
             ];
         } else {
             $data = [
@@ -98,7 +98,7 @@ class ExportService
                 ['Travel Dates', $tour->start_date->format('d') . '-' . $tour->end_date->format('d.m.y')],
                 ['Pax', $tour->pax],
                 ['FOC', $tour->leader_pax],
-                ['Ex.rate', TourService::formatMoney($tour->expenses_total)],
+                ['Ex.rate', $tour->expenses_total],
             ];
         }
 
@@ -124,18 +124,18 @@ class ExportService
 
         if ($tour->type == TourType::Corporate) {
             $data = [
-                ['Payment', TourService::formatMoney($tour->price_result)],
-                ['Expenses', TourService::formatMoney($tour->expenses_total)],
-                ['Profit', TourService::formatMoney($profit)],
+                ['Payment', $tour->price_result],
+                ['Expenses', $tour->expenses_total],
+                ['Profit', $profit],
                 ['Operator', $operator]
             ];
         } else {
             $data = [
-                ['Payment', TourService::formatMoney($tour->price_result)],
-                ['Expenses', TourService::formatMoney($tour->expenses_total)],
-                ['Profit', TourService::formatMoney($profit)],
+                ['Payment', $tour->price_result],
+                ['Expenses', $tour->expenses_total],
+                ['Profit', $profit],
                 [$operator . "($createdBy->operator_percent_tps%)", $operatorProfit],
-                ['Grand Profit', TourService::formatMoney($profit - $operatorProfit)]
+                ['Grand Profit', $profit - $operatorProfit]
             ];
         }
 
@@ -328,34 +328,34 @@ class ExportService
         $roomTypes[] = ['value' => '', 'colspan' => 1];
         $amounts[] = ['value' => '', 'colspan' => 1];
         $prices[] = ['value' => '', 'colspan' => 1];
-        $totals[] = ['value' => TourService::formatMoney($hotelsTotalSum), 'colspan' => 1];
-        $guides[] = ['value' => TourService::formatMoney($guidesTotalSum), 'colspan' => 1];
-        $museums[] = ['value' => TourService::formatMoney($museumsTotalSum), 'colspan' => 1];
-        $transports[] = ['value' => TourService::formatMoney($transportsTotalSum), 'colspan' => 1];
-        $lunches[] = ['value' => TourService::formatMoney($lunchesTotalSum), 'colspan' => 1];
-        $dinners[] = ['value' => TourService::formatMoney($dinnersTotalSum), 'colspan' => 1];
-        $planes[] = ['value' => TourService::formatMoney($planesTotalSum), 'colspan' => 1];
-        $trains[] = ['value' => TourService::formatMoney($trainsTotalSum), 'colspan' => 1];
-        $shows[] = ['value' => TourService::formatMoney($showsTotalSum), 'colspan' => 1];
-        $others[] = ['value' => TourService::formatMoney($othersTotalSum), 'colspan' => 1];
-        $conferences[] = ['value' => TourService::formatMoney($conferencesTotalSum), 'colspan' => 1];
+        $totals[] = ['value' => $hotelsTotalSum, 'colspan' => 1];
+        $guides[] = ['value' => $guidesTotalSum, 'colspan' => 1];
+        $museums[] = ['value' => $museumsTotalSum, 'colspan' => 1];
+        $transports[] = ['value' => $transportsTotalSum, 'colspan' => 1];
+        $lunches[] = ['value' => $lunchesTotalSum, 'colspan' => 1];
+        $dinners[] = ['value' => $dinnersTotalSum, 'colspan' => 1];
+        $planes[] = ['value' => $planesTotalSum, 'colspan' => 1];
+        $trains[] = ['value' => $trainsTotalSum, 'colspan' => 1];
+        $shows[] = ['value' => $showsTotalSum, 'colspan' => 1];
+        $others[] = ['value' => $othersTotalSum, 'colspan' => 1];
+        $conferences[] = ['value' => $conferencesTotalSum, 'colspan' => 1];
 
         $days[] = ['value' => '', 'colspan' => 1];
         $hotels[] = ['value' => 'USD TOTAL', 'colspan' => 1];
         $roomTypes[] = ['value' => '', 'colspan' => 1];
         $amounts[] = ['value' => '', 'colspan' => 1];
         $prices[] = ['value' => '', 'colspan' => 1];
-        $totals[] = ['value' => TourService::formatMoney($hotelsTotalUsd), 'colspan' => 1];
-        $guides[] = ['value' => TourService::formatMoney($guidesTotalUsd), 'colspan' => 1];
-        $museums[] = ['value' => TourService::formatMoney($museumsTotalUsd), 'colspan' => 1];
-        $transports[] = ['value' => TourService::formatMoney($transportsTotalUsd), 'colspan' => 1];
-        $lunches[] = ['value' => TourService::formatMoney($lunchesTotalUsd), 'colspan' => 1];
-        $dinners[] = ['value' => TourService::formatMoney($dinnersTotalUsd), 'colspan' => 1];
-        $planes[] = ['value' => TourService::formatMoney($planesTotalUsd), 'colspan' => 1];
-        $trains[] = ['value' => TourService::formatMoney($trainsTotalUsd), 'colspan' => 1];
-        $shows[] = ['value' => TourService::formatMoney($showsTotalUsd), 'colspan' => 1];
-        $others[] = ['value' => TourService::formatMoney($othersTotalUsd), 'colspan' => 1];
-        $conferences[] = ['value' => TourService::formatMoney($conferencesTotalUsd), 'colspan' => 1];
+        $totals[] = ['value' => $hotelsTotalUsd, 'colspan' => 1];
+        $guides[] = ['value' => $guidesTotalUsd, 'colspan' => 1];
+        $museums[] = ['value' => $museumsTotalUsd, 'colspan' => 1];
+        $transports[] = ['value' => $transportsTotalUsd, 'colspan' => 1];
+        $lunches[] = ['value' => $lunchesTotalUsd, 'colspan' => 1];
+        $dinners[] = ['value' => $dinnersTotalUsd, 'colspan' => 1];
+        $planes[] = ['value' => $planesTotalUsd, 'colspan' => 1];
+        $trains[] = ['value' => $trainsTotalUsd, 'colspan' => 1];
+        $shows[] = ['value' => $showsTotalUsd, 'colspan' => 1];
+        $others[] = ['value' => $othersTotalUsd, 'colspan' => 1];
+        $conferences[] = ['value' => $conferencesTotalUsd, 'colspan' => 1];
 
         $result[] = $days;
         $result[] = $hotels;
@@ -450,8 +450,8 @@ class ExportService
         $totalAllSum = $hotelsTotalSum + $guidesTotalSum + $museumsTotalSum + $transportsTotalSum + $lunchesTotalSum + $dinnersTotalSum + $planesTotalSum + $trainsTotalSum + $showsTotalSum + $othersTotalSum + $conferencesTotalSum;
         $totalAllUsd = $hotelsTotalUsd + $guidesTotalUsd + $museumsTotalUsd + $transportsTotalUsd + $lunchesTotalUsd + $dinnersTotalUsd + $planesTotalUsd + $trainsTotalUsd + $showsTotalUsd + $othersTotalUsd + $conferencesTotalUsd;
 
-        $sheet->setCellValue(self::letter($columnSpanSum - 1) . $rowIndex, TourService::formatMoney($totalAllSum));
-        $sheet->setCellValue(self::letter($columnSpanSum) . $rowIndex, TourService::formatMoney($totalAllUsd));
+        $sheet->setCellValue(self::letter($columnSpanSum - 1) . $rowIndex, $totalAllSum);
+        $sheet->setCellValue(self::letter($columnSpanSum) . $rowIndex, $totalAllUsd);
         $sheet->mergeCells("A$rowIndex:" . self::letter($columnSpanSum - 2) . $rowIndex);
 
         $totalRowRange = "A$rowIndex:" . self::letter($columnSpanSum) . $rowIndex;

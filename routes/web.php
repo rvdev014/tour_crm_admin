@@ -19,6 +19,7 @@ Route::get('/', function() {
 });
 
 Route::get('export/{tour}', [\App\Http\Controllers\ExportController::class, 'export'])->name('export');
+//Route::get('export/{tour}', [\App\Http\Controllers\ExportController::class, 'export'])->name('export');
 Route::get('export-client/{tour}', [\App\Http\Controllers\ExportController::class, 'exportClient'])->name(
     'export-client'
 );
