@@ -64,7 +64,7 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
 
     public function changedAttributes(TourDayExpense $tourDayExpense): array
     {
-        $tour = $tourDayExpense->tourDay?->tour ?? $tourDayExpense->tour;
+        $tour = $tourDayExpense->tourDay?->tour ?? $tourDayExpense->tourGroup?->tour;
         $expenseDate = $tourDayExpense->tourDay?->date ?? $tourDayExpense->date;
 
         $dateTime = null;

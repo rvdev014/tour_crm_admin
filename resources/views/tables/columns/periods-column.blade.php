@@ -9,6 +9,7 @@
         return;
     }
 
+    $roomTypes = $hotel->roomTypes->take(2);
     $mainCurrencySymbol = ExpenseService::getMainCurrency()?->to?->getSymbol();
 
 @endphp
@@ -23,7 +24,7 @@
             <th>Price Foreign</th>
         </tr>
         </thead>
-        @foreach($hotel->roomTypes as $roomType)
+        @foreach($roomTypes as $roomType)
 
             <tr>
                 <td>{{ $roomType?->roomType?->name }}</td>

@@ -173,13 +173,14 @@ class TransferResource extends Resource
                             $query = $query
                                 ->whereDate('date_time', Carbon::today())
                                 ->orWhereDate('date_time', Carbon::tomorrow());
-                        }
-                        if ($data['today']) {
-                            $query = $query->whereDate('date_time', Carbon::today());
-                        }
-                        if ($data['tomorrow']) {
-                            $tomorrow = Carbon::tomorrow();
-                            $query = $query->whereDate('date_time', $tomorrow);
+                        } else {
+                            if ($data['today']) {
+                                $query = $query->whereDate('date_time', Carbon::today());
+                            }
+                            if ($data['tomorrow']) {
+                                $tomorrow = Carbon::tomorrow();
+                                $query = $query->whereDate('date_time', $tomorrow);
+                            }
                         }
                         if ($data['statuses']) {
                             $query = $query->whereIn('status', $data['statuses']);
