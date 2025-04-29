@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('manual_phones', function (Blueprint $table) {
             if (Schema::hasColumn('manual_phones', 'hotel_id')) {
-                $table->dropForeign(['hotel_id']);
                 $table->dropColumn('hotel_id');
             }
         });
@@ -25,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('manual_phones', function (Blueprint $table) {
-            $table->foreignId('hotel_id')->nullable()->constrained('hotels');
+//            $table->foreignId('hotel_id')->nullable()->constrained('hotels');
         });
     }
 };
