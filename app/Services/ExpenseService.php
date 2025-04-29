@@ -274,7 +274,7 @@ class ExpenseService
         foreach ($expenses as $expense) {
             $result += ExpenseService::calculateExpensePrice($expense, $isUsd);
         }
-        return $result;
+        return $result ?: 0;
     }
 
     public static function calculateExpensePrice($expense, bool $isUsd = true): float
@@ -287,7 +287,7 @@ class ExpenseService
             $result = round($expense->price_result * $currencyUzs?->rate, 2);
         }
 
-        return $result;
+        return $result ?: 0;
     }
 
     public static function getUzsToUsdCurrency(): ?Currency
