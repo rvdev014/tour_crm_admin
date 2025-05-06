@@ -360,7 +360,7 @@ class TourTpsTestResource extends Resource
                     ->formatStateUsing(function($record, $state) {
                         /** @var Tour $record */
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($record->price_result) . ' ' . ExpenseService::getMainCurrency()?->to?->getSymbol();
+                            return TourService::formatMoney($record->price_result) . ' ' . ExpenseService::getMainCurrency()?->from?->getSymbol();
 //                            return TourService::formatMoney($state) . ' ' . $record->price_currency?->getSymbol();
                         }
 
@@ -373,7 +373,7 @@ class TourTpsTestResource extends Resource
                     ->size(Columns\TextColumn\TextColumnSize::Large)
                     ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency()?->to?->getSymbol();
+                            return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency()?->from?->getSymbol();
                         }
 
                         return '-';
@@ -385,7 +385,7 @@ class TourTpsTestResource extends Resource
                     ->size(Columns\TextColumn\TextColumnSize::Large)
                     ->formatStateUsing(function($record, $state) {
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency()?->to?->getSymbol();
+                            return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency()?->from?->getSymbol();
                         }
 
                         return '-';

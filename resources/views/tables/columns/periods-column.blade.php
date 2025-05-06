@@ -10,7 +10,7 @@
     }
 
     $roomTypes = $hotel->roomTypes->take(2);
-    $mainCurrencySymbol = ExpenseService::getMainCurrency()?->to?->getSymbol();
+    $mainCurrencySymbol = ExpenseService::getMainCurrency()?->from?->getSymbol();
 
 @endphp
 

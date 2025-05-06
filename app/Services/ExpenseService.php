@@ -262,7 +262,7 @@ class ExpenseService
         $mainCurrency = ExpenseService::getMainCurrency();
         if ($mainCurrency) {
             $attributeCurrency = $data["{$attribute}_currency"] ?? null;
-            if ($attributeCurrency && $attributeCurrency != $mainCurrency->to->value) {
+            if ($attributeCurrency && $attributeCurrency != $mainCurrency->from->value) {
                 $data["{$attribute}_converted"] = round(($data[$attribute] ?? 0) * $mainCurrency->rate, 2);
             }
         }
@@ -282,7 +282,7 @@ class ExpenseService
         /** @var TourDayExpense $expense */
         if ($isUsd) {
             $currencyUsd = ExpenseService::getUsdToUzsCurrency();
-            $result = round($expense->price_result * $currencyUsd?->rate, 2);
+            $result = round($expense->price_result / $currencyUsd?->rate, 2);
         } else {
             $result = $expense->price_result;
         }
@@ -330,7 +330,7 @@ class ExpenseService
             'currency_main',
             function() {
                 /** @var Currency $currency */
-                $currency = Currency::query()->where('to', CurrencyEnum::UZS->value)->first();
+                $currency = Currency::query()->where('from', CurrencyEnum::UZS->value)->first();
 //                $currency = Currency::query()->where('is_main', true)->first();
                 return $currency;
             }

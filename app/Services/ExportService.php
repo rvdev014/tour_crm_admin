@@ -230,7 +230,7 @@ class ExportService
                 if ($tour->guide_price_currency == CurrencyEnum::USD) {
                     $guidesTotalUsd = $tour->guide_price;
                 } else {
-                    $guidesTotalUsd = round($tour->guide_price_result * $currencyUsd->rate, 2);
+                    $guidesTotalUsd = round($tour->guide_price_result / $currencyUsd->rate, 2);
                 }
             } else {
                 $guideExpenses = $tourDay->getExpenses(ExpenseType::Guide);
@@ -321,7 +321,7 @@ class ExportService
             }
         }
 
-        $hotelsTotalUsd = $hotelsTotalSum * $currencyUsd?->rate;
+        $hotelsTotalUsd = round($hotelsTotalSum / $currencyUsd?->rate, 2);
 
         $days[] = ['value' => '', 'colspan' => 1];
         $hotels[] = ['value' => 'SUM TOTAL', 'colspan' => 1];

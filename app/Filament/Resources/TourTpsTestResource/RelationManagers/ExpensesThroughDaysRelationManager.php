@@ -461,7 +461,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                     ->formatStateUsing(function(TourDayExpense $record) {
                         $symbol = $record->price_currency?->getSymbol();
                         if (!$symbol) {
-                            $symbol = ExpenseService::getMainCurrency()?->to?->getSymbol();
+                            $symbol = ExpenseService::getMainCurrency()?->from?->getSymbol();
                         }
                         return TourService::formatMoney($record->price) . ' ' . $symbol;
                     })
