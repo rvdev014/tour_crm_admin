@@ -154,7 +154,7 @@ class ExportService
     {
         $addPercent = TourService::getCompanyAddPercent($tour->company_id);
         $personType = ExpenseService::getPersonType($tour->country_id);
-        $currencyUzs = ExpenseService::getUzsToUsdCurrency();
+        $currencyUsd = ExpenseService::getUsdToUzsCurrency();
 
         // TODO: person_type, season_type added
         $tourRoomTypes = $tour->roomTypes->map(fn(TourRoomType $roomType) => [
@@ -226,11 +226,11 @@ class ExportService
             if ($tour->guide_type == GuideType::Escort) {
                 $guides[] = ['value' => '', 'colspan' => $tourRoomTypesCount];
 
-                $guidesTotalUsd = $tour->guide_price_result;
-                if ($tour->guide_price_currency == CurrencyEnum::UZS) {
-                    $guidesTotalSum = $tour->guide_price;
+                $guidesTotalSum = $tour->guide_price_result;
+                if ($tour->guide_price_currency == CurrencyEnum::USD) {
+                    $guidesTotalUsd = $tour->guide_price;
                 } else {
-                    $guidesTotalSum = round($tour->guide_price_result * $currencyUzs->rate, 2);
+                    $guidesTotalUsd = round($tour->guide_price_result * $currencyUsd->rate, 2);
                 }
             } else {
                 $guideExpenses = $tourDay->getExpenses(ExpenseType::Guide);
@@ -317,11 +317,11 @@ class ExportService
                 $prices[] = ['value' => $price, 'colspan' => 1];
                 $totals[] = ['value' => $hotelTotal, 'colspan' => 1];
 
-                $hotelsTotalUsd += $hotelTotal;
+                $hotelsTotalSum += $hotelTotal;
             }
         }
 
-        $hotelsTotalSum = $hotelsTotalUsd * $currencyUzs?->rate;
+        $hotelsTotalUsd = $hotelsTotalSum * $currencyUsd?->rate;
 
         $days[] = ['value' => '', 'colspan' => 1];
         $hotels[] = ['value' => 'SUM TOTAL', 'colspan' => 1];

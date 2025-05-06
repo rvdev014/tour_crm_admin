@@ -148,6 +148,11 @@ class HotelResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+
+                PeriodsColumn::make('room_prices')
+                    ->label('Room prices')
+                    ->getStateUsing(fn($record) => $record),
+
                 Tables\Columns\TextColumn::make('email')
                     ->url(fn($record) => $record->email ? "mailto:{$record->email}" : null, true)
                     ->color('info')
@@ -181,10 +186,6 @@ class HotelResource extends Resource
                 Tables\Columns\TextColumn::make('booking_cancellation_days')
                     ->label('Booking days')
                     ->sortable(),
-
-                PeriodsColumn::make('room_prices')
-                    ->label('Room prices')
-                    ->getStateUsing(fn($record) => $record),
             ])
             ->filters([
                 //

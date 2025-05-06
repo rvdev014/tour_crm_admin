@@ -200,10 +200,11 @@ class Tour extends Model
     {
         // Only for TPS
         if (!$this->isCorporate()) {
-            $total = ExpenseService::updateExpensesPricesTps($this);
+            $expensesTotal = ExpenseService::updateExpensesPricesTps($this);
+            $expensesTotal = $expensesTotal + $this->guide_price_result;
             $this->update([
-                'expenses_total' => $total,
-                'income' => $this->price_result + $this->guide_price_result - $total,
+                'expenses_total' => $expensesTotal,
+                'income' => $this->price_result - $expensesTotal,
             ]);
         }
     }

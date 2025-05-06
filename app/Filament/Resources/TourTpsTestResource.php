@@ -130,13 +130,13 @@ class TourTpsTestResource extends Resource
                 ]),
                 Components\Grid::make(4)->schema([
                     Components\TextInput::make('price')
-                        ->label(fn($get) => 'Price (' . ($get('price_currency') ?? 'USD') . ')')
+                        ->label(fn($get) => 'Price (' . ($get('price_currency') ?? 'UZS') . ')')
                         ->suffixAction(
                             Components\Actions\Action::make('toggle-currency')
                                 ->icon('heroicon-o-banknotes')
                                 ->iconSize('md')
                                 ->action(function($get, $set) {
-                                    $set('price_currency', $get('price_currency') != 'UZS' ? 'UZS' : 'USD');
+                                    $set('price_currency', $get('price_currency') != 'USD' ? 'USD' : 'UZS');
                                 })
                         )
                         ->numeric(),
@@ -231,13 +231,13 @@ class TourTpsTestResource extends Resource
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput
     {
         return Components\TextInput::make('price')
-            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'USD') . ")")
+            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'UZS') . ")")
             ->suffixAction(
                 Components\Actions\Action::make('toggle-currency')
                     ->icon('heroicon-o-banknotes')
                     ->iconSize('md')
                     ->action(function($get, $set) {
-                        $set('price_currency', $get('price_currency') != 'UZS' ? 'UZS' : 'USD');
+                        $set('price_currency', $get('price_currency') != 'USD' ? 'USD' : 'UZS');
                     })
             )
             ->numeric();

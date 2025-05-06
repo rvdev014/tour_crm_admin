@@ -263,7 +263,7 @@ class ExpenseService
         if ($mainCurrency) {
             $attributeCurrency = $data["{$attribute}_currency"] ?? null;
             if ($attributeCurrency && $attributeCurrency != $mainCurrency->to->value) {
-                $data["{$attribute}_converted"] = round(($data[$attribute] ?? 0) / $mainCurrency->rate, 2);
+                $data["{$attribute}_converted"] = round(($data[$attribute] ?? 0) * $mainCurrency->rate, 2);
             }
         }
     }
@@ -281,20 +281,20 @@ class ExpenseService
     {
         /** @var TourDayExpense $expense */
         if ($isUsd) {
-            $result = $expense->price_result;
+            $currencyUsd = ExpenseService::getUsdToUzsCurrency();
+            $result = round($expense->price_result * $currencyUsd?->rate, 2);
         } else {
-            $currencyUzs = ExpenseService::getUzsToUsdCurrency();
-            $result = round($expense->price_result * $currencyUzs?->rate, 2);
+            $result = $expense->price_result;
         }
 
         return $result ?: 0;
     }
 
-    public static function getUzsToUsdCurrency(): ?Currency
+    public static function getUsdToUzsCurrency(): ?Currency
     {
         /** @var Currency $currency */
         $currency = CacheService::remember(
-            'currency_uzs_usd',
+            'currency_usd_uzs',
             function() {
                 /** @var Currency $currency */
                 $currency = Currency::query()
@@ -330,7 +330,7 @@ class ExpenseService
             'currency_main',
             function() {
                 /** @var Currency $currency */
-                $currency = Currency::query()->where('to', CurrencyEnum::USD->value)->first();
+                $currency = Currency::query()->where('to', CurrencyEnum::UZS->value)->first();
 //                $currency = Currency::query()->where('is_main', true)->first();
                 return $currency;
             }
