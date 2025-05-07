@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RoomSeasonType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -51,7 +52,16 @@ class Hotel extends Model
 
     public function roomTypes(): HasMany
     {
-        return $this->hasMany(HotelRoomType::class)->orderBy('id');
+        $seasonTypes = collect([
+            RoomSeasonType::High->value,
+            RoomSeasonType::Yearly->value,
+            RoomSeasonType::Exhibition->value,
+            RoomSeasonType::Mid->value,
+            RoomSeasonType::Low->value,
+        ])->join(', ');
+
+        return $this->hasMany(HotelRoomType::class)
+            ->orderByRaw("FIELD(season_type, $seasonTypes)");
     }
 
     public function country(): BelongsTo

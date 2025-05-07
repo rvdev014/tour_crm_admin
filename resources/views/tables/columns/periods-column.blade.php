@@ -9,7 +9,7 @@
         return;
     }
 
-    $roomTypes = $hotel->roomTypes()->orderByDesc('season_type')->limit(2)->get();
+    $roomTypes = $hotel->roomTypes->take(2);
     $mainCurrencySymbol = ExpenseService::getMainCurrency()?->from?->getSymbol();
 
 @endphp
