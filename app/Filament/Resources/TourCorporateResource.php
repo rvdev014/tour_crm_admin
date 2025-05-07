@@ -276,7 +276,8 @@ class TourCorporateResource extends Resource
 
                                             Components\TextInput::make('amount')
                                                 ->numeric()
-                                                ->label('Amount'),
+                                                ->label('Amount')
+                                                ->required(),
                                         ])
                                     ])
 
