@@ -52,16 +52,7 @@ class Hotel extends Model
 
     public function roomTypes(): HasMany
     {
-        $seasonTypes = collect([
-            RoomSeasonType::High->value,
-            RoomSeasonType::Yearly->value,
-            RoomSeasonType::Exhibition->value,
-            RoomSeasonType::Mid->value,
-            RoomSeasonType::Low->value,
-        ])->join(', ');
-
-        return $this->hasMany(HotelRoomType::class)
-            ->orderByRaw("FIELD('season_type', $seasonTypes)");
+        return $this->hasMany(HotelRoomType::class)->orderBy('id');
     }
 
     public function country(): BelongsTo
