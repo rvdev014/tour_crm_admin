@@ -272,6 +272,7 @@ class TourCorporateResource extends Resource
                                                 ->preload()
                                                 ->label('Room type')
                                                 ->options(RoomType::query()->pluck('name', 'id')->toArray())
+                                                ->required()
                                                 ->reactive(),
 
                                             Components\TextInput::make('amount')
