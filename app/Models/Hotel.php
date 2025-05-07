@@ -61,7 +61,7 @@ class Hotel extends Model
         ])->join(', ');
 
         return $this->hasMany(HotelRoomType::class)
-            ->orderByRaw("FIELD(season_type, $seasonTypes)");
+            ->orderByRaw("FIELD('season_type', $seasonTypes)");
     }
 
     public function country(): BelongsTo
