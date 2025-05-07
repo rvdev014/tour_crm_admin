@@ -52,7 +52,16 @@ class Hotel extends Model
 
     public function roomTypes(): HasMany
     {
-        return $this->hasMany(HotelRoomType::class)->orderBy('id');
+        return $this->hasMany(HotelRoomType::class)
+            ->orderByRaw("
+            CASE season_type
+                WHEN 3 THEN 1
+                WHEN 4 THEN 2
+                WHEN 5 THEN 3
+                WHEN 2 THEN 4
+                ELSE 5
+            END
+        ");
     }
 
     public function country(): BelongsTo

@@ -1,5 +1,5 @@
 @php
-    use App\Models\Hotel;use App\Enums\RoomSeasonType;use App\Services\ExpenseService;
+    use App\Models\Hotel;use App\Services\ExpenseService;
 
     /** @var Hotel $hotel */
     $hotel = $getState();
@@ -9,18 +9,7 @@
         return;
     }
 
-    $roomTypes = $hotel->roomTypes
-        ->sortBy(function ($price) {
-            return array_search($price->season_type, [
-                RoomSeasonType::High->value,
-                RoomSeasonType::Yearly->value,
-                RoomSeasonType::Exhibition->value,
-                RoomSeasonType::Mid->value,
-                RoomSeasonType::Low->value,
-            ]);
-        })
-        ->take(2);
-
+    $roomTypes = $hotel->roomTypes->take(2);
     $mainCurrencySymbol = ExpenseService::getMainCurrency()?->from?->getSymbol();
 
 @endphp
