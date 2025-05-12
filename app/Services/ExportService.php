@@ -91,7 +91,7 @@ class ExportService
                 ['Group', $tour->group_number],
                 ['Manager', $tour->createdBy->name],
                 ['Pax', $tour->passengers()->count()],
-                ['FOC', $tour->leader_pax ?? '0'],
+                ['FOC', $tour->leader_pax > 0 ? $tour->leader_pax : '0'],
                 ['Ex.rate', $exRate],
             ];
         } else {
@@ -100,7 +100,7 @@ class ExportService
                 ['Manager', $tour->createdBy->name],
                 ['Travel Dates', $tour->start_date->format('d') . '-' . $tour->end_date->format('d.m.y')],
                 ['Pax', $tour->pax],
-                ['FOC', $tour->leader_pax ?? '0'],
+                ['FOC', $tour->leader_pax > 0 ? $tour->leader_pax : '0'],
                 ['Ex.rate', $exRate],
             ];
         }
@@ -127,18 +127,26 @@ class ExportService
             $operatorPercent = $createdBy->operator_percent_tps ?? '0';
         }
 
+        $grandProfit = $profit - $operatorProfit;
+
+        $currency = ExpenseService::getUsdToUzsCurrency();
+
+        $payment = round($tour->price_result / $currency->rate, 2);
+        $expensesTotal = round($tour->expenses_total / $currency->rate, 2);
+        $profit = round($profit / $currency->rate, 2);
+        $grandProfit = round($grandProfit / $currency->rate, 2);
+
         if ($tour->type == TourType::Corporate) {
             $data = [
-                ['Payment', TourService::formatMoney($tour->price_result)],
-                ['Expenses', TourService::formatMoney($tour->expenses_total)],
+                ['Payment', TourService::formatMoney($payment)],
+                ['Expenses', TourService::formatMoney($expensesTotal)],
                 ['Profit', TourService::formatMoney($profit)],
                 ['Operator', $operator]
             ];
         } else {
-            $grandProfit = $profit - $operatorProfit;
             $data = [
-                ['Payment', TourService::formatMoney($tour->price_result)],
-                ['Expenses', TourService::formatMoney($tour->expenses_total)],
+                ['Payment', TourService::formatMoney($payment)],
+                ['Expenses', TourService::formatMoney($expensesTotal)],
                 ['Profit', TourService::formatMoney($profit)],
                 [$operator . "($operatorPercent%)", TourService::formatMoney($operatorProfit)],
                 ['Grand Profit', TourService::formatMoney($grandProfit)]
@@ -227,6 +235,37 @@ class ExportService
             // Hotels
             $hotelExpense = $tourDay->getExpense(ExpenseType::Hotel);
             $hotels[] = ['value' => $hotelExpense?->hotel?->name, 'colspan' => $tourRoomTypesCount];
+
+            // Room types, Amount, Price, Total
+            foreach ($tourRoomTypes as $roomType) {
+                if (!$hotelExpense) {
+                    $roomTypes[] = ['value' => '', 'colspan' => 1];
+                    $amounts[] = ['value' => '', 'colspan' => 1];
+                    $prices[] = ['value' => '', 'colspan' => 1];
+                    $totals[] = ['value' => '', 'colspan' => 1];
+                    continue;
+                }
+
+                $hotel = $hotelExpense->hotel;
+                $seasonType = ExpenseService::getSeasonType($hotel, $tourDay->date);
+
+                /** @var HotelRoomType $hotelRoomType */
+                $hotelRoomType = $hotel->roomTypes()
+                    ->where('room_type_id', $roomType['id'])
+                    ->where('season_type', $seasonType)
+                    ->first();
+
+                $amount = $roomType['amount'] ?? 0;
+                $price = $hotelRoomType?->getPrice($addPercent, $personType) ?? 0;
+                $hotelTotal = $amount * $price;
+
+                $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];
+                $amounts[] = ['value' => $amount, 'colspan' => 1];
+                $prices[] = ['value' => $price > 0 ? TourService::formatMoney($price, currency: 'sum') : 0, 'colspan' => 1];
+                $totals[] = ['value' => $hotelTotal > 0  ? TourService::formatMoney($hotelTotal, currency: 'sum') : 0, 'colspan' => 1];
+
+                $hotelsTotalSum += $hotelTotal;
+            }
 
             // Guides
             if ($tour->guide_type == GuideType::Escort) {
@@ -334,33 +373,6 @@ class ExportService
 
             $conferencesTotalUsd += $conferencesUsd;
             $conferencesTotalSum += $conferencesSum;
-
-            // Room types, Amount, Price, Total
-            foreach ($tourRoomTypes as $roomType) {
-                if (!$hotelExpense) {
-                    continue;
-                }
-
-                $hotel = $hotelExpense->hotel;
-                $seasonType = ExpenseService::getSeasonType($hotel, $tourDay->date);
-
-                /** @var HotelRoomType $hotelRoomType */
-                $hotelRoomType = $hotel->roomTypes()
-                    ->where('room_type_id', $roomType['id'])
-                    ->where('season_type', $seasonType)
-                    ->first();
-
-                $amount = $roomType['amount'] ?? 0;
-                $price = $hotelRoomType?->getPrice($addPercent, $personType) ?? 0;
-                $hotelTotal = $amount * $price;
-
-                $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];
-                $amounts[] = ['value' => $amount, 'colspan' => 1];
-                $prices[] = ['value' => $price > 0 ? TourService::formatMoney($price, currency: 'sum') : 0, 'colspan' => 1];
-                $totals[] = ['value' => $hotelTotal > 0  ? TourService::formatMoney($hotelTotal, currency: 'sum') : 0, 'colspan' => 1];
-
-                $hotelsTotalSum += $hotelTotal;
-            }
         }
 
         $hotelsTotalUsd = round($hotelsTotalSum / $currencyUsd?->rate, 2);

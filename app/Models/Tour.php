@@ -108,7 +108,7 @@ class Tour extends Model
 
     public function days(): HasMany
     {
-        return $this->hasMany(TourDay::class);
+        return $this->hasMany(TourDay::class)->orderBy('date');
     }
 
     public function groups(): HasMany
