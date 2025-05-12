@@ -277,6 +277,30 @@ class ExpenseService
         return $result ?: 0;
     }
 
+    public static function calculateExpensesPriceView($expenses): string
+    {
+        $priority = 'USD';
+
+        $fullPriority = true;
+        $result = 0;
+        $resultSum = 0;
+        foreach ($expenses as $expense) {
+            if ($expense->price_currency?->value == $priority) {
+                $result += $expense->price;
+            } else {
+                $fullPriority = false;
+            }
+
+            $resultSum += ExpenseService::calculateExpensePrice($expense, false);
+        }
+
+        if ($fullPriority) {
+            return $result > 0 ? TourService::formatMoney($result, currency: '$') : 0;
+        }
+
+        return $resultSum > 0 ? TourService::formatMoney($resultSum, currency: 'sum') : 0;
+    }
+
     public static function calculateExpensePrice($expense, bool $isUsd = true): float
     {
         /** @var TourDayExpense $expense */

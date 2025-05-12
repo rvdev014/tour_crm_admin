@@ -294,7 +294,7 @@ class TourService
         if ($divideBy) {
             $money /= $divideBy;
         }
-        return Number::format($money);
+        return Number::format($money) . ($currency ? " $currency" : '');
     }
 
     public static function generateRoomingSchema($firstThree = false): array
