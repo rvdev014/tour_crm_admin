@@ -257,7 +257,7 @@ class TourTpsTestResource extends Resource
                     ->with('company', 'createdBy', 'country');
             })
             ->striped()
-            ->defaultSort('start_date', 'asc')
+            ->defaultSort('start_date', 'desc')
             ->filters([
                 Tables\Filters\Filter::make('country_id')
                     ->form([
