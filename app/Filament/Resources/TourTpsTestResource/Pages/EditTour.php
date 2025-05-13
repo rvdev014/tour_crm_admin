@@ -49,6 +49,10 @@ class EditTour extends EditRecord
                 ->type('restaurants')
                 ->label('Mail Restaurants'),*/
             Actions\Action::make('export')
+                ->label('Report Client')
+                ->icon('heroicon-o-document-text')
+                ->url(route('export-client', $this->record)),
+            Actions\Action::make('export')
                 ->label('Report')
                 ->icon('heroicon-o-document-text')
                 ->url(route('export', $this->record)),

@@ -66,7 +66,8 @@ class ExportClientService
         $placeholders = [
             '{date}' => now()->format('d/m/Y'),
             '{groupNumber}' => $tour->group_number,
-            '{personsCount}' => $tour->pax . '+' . $tour->leader_pax . ' FOC',
+            '{personsCount}' => $tour->leader_pax . ' FOC',
+//            '{personsCount}' => $tour->pax . '+' . $tour->leader_pax . ' FOC',
             '{arrivalDate}' => $tour->start_date->format('m/d/Y'),
             '{departureDate}' => $tour->end_date->format('m/d/Y'),
             '{expensesList}' => $expensesList->implode("\n"),

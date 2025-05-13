@@ -253,8 +253,8 @@ class TransferResource extends Resource
                 Tables\Columns\TextColumn::make('tour_id')
                     ->label('Tour')
                     ->getStateUsing(function (Transfer $record) {
-                        $tour = $record->tourDayExpense->tour ?? $record->tourDayExpense->tourDay->tour;
-                        return $tour->group_number;
+                        $tour = $record->tourDayExpense?->tour ?? $record->tourDayExpense?->tourDay?->tour ?? null;
+                        return $tour ? $tour->group_number : '-';
                     }),
 
                 Tables\Columns\TextColumn::make('company.name')
