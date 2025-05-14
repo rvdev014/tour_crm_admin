@@ -92,7 +92,10 @@ class TourCorporateResource extends Resource
                         ),*/
                 ]),
 
-                Components\Textarea::make('comment'),
+                Components\Grid::make(4)->schema([
+                    Components\TextInput::make('requested_by'),
+                    Components\Textarea::make('comment')
+                ]),
             ]),
 
             Components\Repeater::make('groups')
@@ -625,6 +628,8 @@ class TourCorporateResource extends Resource
                         return '-';
                     })
                     ->sortable(),
+
+                Columns\TextColumn::make('requested_by'),
 
                 Columns\TextColumn::make('createdBy.name')
                     ->sortable(),
