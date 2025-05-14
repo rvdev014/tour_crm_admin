@@ -31,25 +31,24 @@ class ExportClientService
         /** @var Collection<TourDayExpense> $extraExpenses */
         $extraExpenses = $allExpenses->filter(fn(TourDayExpense $expense) => $expense->type == ExpenseType::Extra);
 
-        $expenseTotal = $tour->expenses_total;
-        $planePriceTotal = $planeExpense?->price;
-        $extraPriceTotal = $extraExpenses->sum('price');
+        $currencyUsd = ExpenseService::getUsdToUzsCurrency();
 
         $pax = max(1, $tour->pax + $tour->leader_pax);
-        $paxPriceTotal = $expenseTotal - $planePriceTotal;
-        $paxPrice = ceil($paxPriceTotal / $pax);
+        $paxPriceTotal = round($tour->price_result / $currencyUsd->rate, 2);
+        $paxPrice = round($paxPriceTotal / $pax, 2);
 
-        $planePax = max(1, $pax ?? 1);
-        $planePrice = ceil($planePriceTotal / $planePax);
+        $extraPax = $pax;
+        $extraPriceTotal = ExpenseService::calculateExpensesPrice($extraExpenses);
+        $extraPrice = round($extraPriceTotal / $extraPax, 2);
 
-        $extraPax = max(1, $tour->leader_pax ?? 1);
-        $extraPrice = ceil($extraPriceTotal / $extraPax);
+        $tourLeaderPax = $tour->leader_pax ?? 0;
+        $tourLeadersPrice = $paxPrice;
+        $tourLeadersPriceTotal = $tourLeadersPrice * $tourLeaderPax;
 
-        $tourLeadersPrice = $paxPrice + $planePrice;
-        $tourLeadersPriceTotal = $tourLeadersPrice * $tour->leader_pax;
+        $priceTotal = $paxPriceTotal + $extraPriceTotal;
 
-        $dueTotal = $expenseTotal - $tourLeadersPriceTotal;
-        $dueTotalWithWords = self::getPriceWithWords($dueTotal);
+        $dueTotal = $priceTotal - $tourLeadersPriceTotal;
+        $dueTotalWithWords = ucfirst(self::getPriceWithWords($dueTotal));
 
         $expensesList = $allExpenses->groupBy(fn(TourDayExpense $expense) => $expense->type->getLabel())
             ->map(fn($expenses, string $type) => "* $type");
@@ -66,8 +65,7 @@ class ExportClientService
         $placeholders = [
             '{date}' => now()->format('d/m/Y'),
             '{groupNumber}' => $tour->group_number,
-            '{personsCount}' => $tour->leader_pax . ' FOC',
-//            '{personsCount}' => $tour->pax . '+' . $tour->leader_pax . ' FOC',
+            '{personsCount}' => $tour->pax . '+' . "$tourLeaderPax" . ' FOC',
             '{arrivalDate}' => $tour->start_date->format('m/d/Y'),
             '{departureDate}' => $tour->end_date->format('m/d/Y'),
             '{expensesList}' => $expensesList->implode("\n"),
@@ -82,22 +80,23 @@ class ExportClientService
             '{paxPrice}' => $paxPrice,
             '{paxPriceTotal}' => $paxPriceTotal,
 
-            '{planePax}' => $planePax,
-            '{planePrice}' => $planePrice,
-            '{planePriceTotal}' => $planePriceTotal,
+//            '{planePax}' => $planePax,
+//            '{planePrice}' => $planePrice,
+//            '{planePriceTotal}' => $planePriceTotal,
 
+            '{extraNames}' => $extraExpenses->map(fn(TourDayExpense $expense) => $expense->other_name)->implode(", "),
             '{extraPax}' => $extraPax,
             '{extraPrice}' => $extraPrice,
             '{extraPriceTotal}' => $extraPriceTotal,
 
-            '{priceTotal}' => $expenseTotal,
+            '{priceTotal}' => $priceTotal,
 
             '{tourLeadersPrice}' => $tourLeadersPrice,
-            '{tourLeadersCount}' => $tour->leader_pax,
-            '{tourLeaderPriceTotal}' => $tourLeadersPrice * $tour->leader_pax,
+            '{tourLeadersCount}' => "$tourLeaderPax",
+            '{tourLeaderPriceTotal}' => "$tourLeadersPriceTotal",
 
-            '{dueTotal}' => $expenseTotal - $tourLeadersPriceTotal,
-            '{dueTotalWithWords}' => ucfirst($dueTotalWithWords),
+            '{dueTotal}' => $dueTotal,
+            '{dueTotalWithWords}' => $dueTotalWithWords,
 
             '{rooming}' => $roomTypes->map(fn($amount, $roomType) => "$roomType - $amount")->implode("\n"),
         ];
@@ -129,7 +128,7 @@ class ExportClientService
     {
         return $tour->days
             ->groupBy(fn(TourDay $day) => $day->date->format('d.m.Y'))
-            ->flatMap(function(TourDay $day) {
+            ->flatMap(function (TourDay $day) {
                 return $day->expenses->map(fn(TourDayExpense $expense) => "* " . $expense->type->getLabel());
             });
     }
