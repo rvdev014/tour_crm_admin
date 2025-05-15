@@ -26,7 +26,7 @@ class ExportClientService
         $allExpenses = $tour->days->flatMap(fn(TourDay $day) => $day->expenses);
 
         /** @var TourDayExpense $planeExpense */
-        $planeExpense = $allExpenses->first(fn(TourDayExpense $expense) => $expense->type == ExpenseType::Plane);
+        $planeExpense = $allExpenses->first(fn(TourDayExpense $expense) => $expense->type == ExpenseType::Flight);
 
         /** @var Collection<TourDayExpense> $extraExpenses */
         $extraExpenses = $allExpenses->filter(fn(TourDayExpense $expense) => $expense->type == ExpenseType::Extra);

@@ -16,7 +16,7 @@
             <th>Cities</th>
             <th>Hotel</th>
             <th>Guide</th>
-            <th>Plane</th>
+            <th>Flight</th>
             <th>Lunch</th>
             <th>Dinner</th>
             <th>Extra</th>
@@ -40,7 +40,7 @@
                 }
 
                 /** @var TourDayExpense $plane */
-                $plane = $day->expenses()->where('type', ExpenseType::Plane)->first();
+                $plane = $day->expenses()->where('type', ExpenseType::Flight)->first();
 
                 /** @var TourDayExpense $lunch */
                 $lunch = $day->expenses()->where('type', ExpenseType::Lunch)->first();

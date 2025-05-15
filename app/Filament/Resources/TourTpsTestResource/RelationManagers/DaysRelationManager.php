@@ -402,8 +402,8 @@ class DaysRelationManager extends RelationManager
 
                         ])->visible(fn($get) => $get('type') == ExpenseType::Show->value),
 
-                        // Plane
-                        Components\Fieldset::make('Plane info')->schema([
+                        // Flight
+                        Components\Fieldset::make('Flight info')->schema([
 
                             Components\Grid::make(3)->schema([
                                 self::getExpensePriceInput(),
@@ -425,7 +425,7 @@ class DaysRelationManager extends RelationManager
                                     ->seconds(false)
                                     ->label('Departure time'),
 
-                                Components\TimePicker::make('arrival_time')
+                                Components\DateTimePicker::make('arrival_time')
                                     ->seconds(false)
                                     ->label('Arrival time'),
 
@@ -433,7 +433,7 @@ class DaysRelationManager extends RelationManager
                                     ->label('Comment'),
                             ]),
 
-                        ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
+                        ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),
 
                         // Extra
                         Components\Fieldset::make('Extra info')->schema([
@@ -549,10 +549,10 @@ class DaysRelationManager extends RelationManager
                     }),
 
                 Tables\Columns\TextColumn::make('plane')
-                    ->label('Plane')
+                    ->label('Flight')
                     ->getStateUsing(function ($record) {
                         /** @var TourDayExpense $planeExpense */
-                        $planeExpense = $record->expenses()->where('type', ExpenseType::Plane)->first();
+                        $planeExpense = $record->expenses()->where('type', ExpenseType::Flight)->first();
 
                         return view('filament.columns.status-column', [
                             'name' => '',

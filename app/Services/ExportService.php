@@ -324,8 +324,8 @@ class ExportService
             $dinnersTotalUsd += $dinnersUsd;
             $dinnersTotalSum += $dinnersSum;
 
-            // Plane
-            $planeExpenses = $tourDay->getExpenses(ExpenseType::Plane);
+            // Flight
+            $planeExpenses = $tourDay->getExpenses(ExpenseType::Flight);
             $planesUsd = ExpenseService::calculateExpensesPrice($planeExpenses);
             $planesSum = ExpenseService::calculateExpensesPrice($planeExpenses, false);
             $planesView = ExpenseService::calculateExpensesPriceView($planeExpenses);
@@ -611,8 +611,8 @@ class ExportService
             $dinners[] = ['value' => $dinnerExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
             $dinnersTotal += $dinnerExpenses->sum('price') ?? 0;
 
-            // Plane
-            $planeExpenses = $tour->getExpensesByDate($date, ExpenseType::Plane);
+            // Flight
+            $planeExpenses = $tour->getExpensesByDate($date, ExpenseType::Flight);
             $planes[] = ['value' => $planeExpenses->sum('price'), 'colspan' => $tourRoomTypesCount];
             $planesTotal += $planeExpenses->sum('price') ?? 0;
 

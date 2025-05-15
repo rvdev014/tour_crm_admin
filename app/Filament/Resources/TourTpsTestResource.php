@@ -303,15 +303,18 @@ class TourTpsTestResource extends Resource
                         ])
                     ])
                     ->query(function(Builder $query, $data) {
+                        if ($data['active'] && $data['archive']) {
+                            $query->where(function($query) use ($data) {
+                                $query->where('start_date', '>=', Carbon::now())
+                                    ->orWhere('start_date', '<', Carbon::now());
+                            });
+                        } elseif ($data['active']) {
+                            $query->where('start_date', '>=', Carbon::now());
+                        } elseif ($data['archive']) {
+                            $query->where('start_date', '<', Carbon::now());
+                        }
+
                         return $query
-                            ->when(
-                                $data['active'],
-                                fn($query) => $query->where('start_date', '>=', Carbon::now())
-                            )
-                            ->when(
-                                $data['archive'],
-                                fn($query) => $query->where('start_date', '<', Carbon::now())
-                            )
                             ->when(
                                 $data['country_id'],
                                 fn($query, $countryId) => $query->where('country_id', $countryId)

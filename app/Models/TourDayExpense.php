@@ -82,7 +82,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Restaurant
  * @property int $restaurant_id
  *
- * Plane
+ * Flight
  * @property int $supplier_id
  *
  * Other
