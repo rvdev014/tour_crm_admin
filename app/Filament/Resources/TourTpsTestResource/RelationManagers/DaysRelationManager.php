@@ -46,8 +46,7 @@ class DaysRelationManager extends RelationManager
                             return $this->ownerRecord->start_date;
                         })
                         ->native(false)
-                        ->required()
-                        ->reactive(),
+                        ->required(),
                     Components\Select::make('city_id')
                         ->native(false)
                         ->searchable()
