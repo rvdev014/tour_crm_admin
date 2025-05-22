@@ -73,8 +73,8 @@ class ExportClientService
             '{company}' => $tour->company->name,
             '{package}' => $tour->package_name,
             '{flightInfo}' => $flightInfo,
-            '{cityFrom}' => $planeExpense?->fromCity->name,
-            '{cityTo}' => $planeExpense?->toCity->name,
+            '{cityFrom}' => $planeExpense?->fromCity?->name,
+            '{cityTo}' => $planeExpense?->toCity?->name,
 
             '{pax}' => $pax,
             '{paxPrice}' => $paxPrice,
