@@ -499,6 +499,7 @@ HTML;
         $toCity = $data['to_city'] ? City::find($data['to_city'])?->name : null;
         $place = $data['transport_place'] ?? '-';
         $comment = $data['comment'] ?? '-';
+        $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
 
         if ($transfer && !empty($oldValues)) {
             $oldDrivers = Driver::query()
@@ -508,6 +509,7 @@ HTML;
                 ->implode(', ');
 
             $drivers = self::getChangedField($oldDrivers, $drivers);
+            $date = self::getChangedField($oldValues['date_time'] ?? null, $date);
 
             $pax = self::getChangedField($oldValues['pax'] ?? null, $pax);
             $route = self::getChangedField($oldValues['route'] ?? null, $route);
@@ -517,8 +519,6 @@ HTML;
             $place = self::getChangedField($oldValues['place_of_submission'] ?? null, $place);
             $comment = self::getChangedField($oldValues['comment'] ?? null, $comment);
         }
-
-        $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
 
         $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
         $price = $data['price'] ?? '';
