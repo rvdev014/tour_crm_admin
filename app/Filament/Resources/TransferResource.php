@@ -123,19 +123,19 @@ class TransferResource extends Resource
         return $table
             ->striped()
             ->modifyQueryUsing(function ($query) {
-                $today = Carbon::today()->toDateString();
+                $now = Carbon::today()->toDateTimeString();
 
                 $query
                     ->with(['toCity', 'company', 'createdBy'])
                     ->orderByRaw(
                         "
 CASE
-    WHEN date_time::date >= ?::date THEN 0
+    WHEN date_time >= ?::timestamp THEN 0
     ELSE 1
 END,
-    ABS((date_time::date - ?::date)) ASC
+    ABS(EXTRACT(EPOCH FROM (date_time - ?::timestamp))) ASC
                     ",
-                        [$today, $today]
+                        [$now, $now]
                     );
             })
 //            ->defaultSort('date_time', 'desc')
