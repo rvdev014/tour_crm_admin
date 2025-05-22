@@ -500,6 +500,7 @@ HTML;
         $place = $data['transport_place'] ?? '-';
         $comment = $data['comment'] ?? '-';
         $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
+        $oldDate = ($oldValues['date_time'] ?? null) ? Carbon::parse($oldValues['date_time'])->format('d-M H:i') : '-';
 
         if ($transfer && !empty($oldValues)) {
             $oldDrivers = Driver::query()
@@ -509,7 +510,7 @@ HTML;
                 ->implode(', ');
 
             $drivers = self::getChangedField($oldDrivers, $drivers);
-            $date = self::getChangedField($oldValues['date_time'] ?? null, $date);
+            $date = self::getChangedField($oldDate, $date);
 
             $pax = self::getChangedField($oldValues['pax'] ?? null, $pax);
             $route = self::getChangedField($oldValues['route'] ?? null, $route);
