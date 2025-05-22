@@ -35,18 +35,28 @@ class TourService
     public function notifyDrivers(): void
     {
         try {
+            $now = Carbon::now()->timezone('Asia/Tashkent');
+
             /** @var \Illuminate\Database\Eloquent\Collection<Transfer> $transfers */
             $transfers = Transfer::query()
                 ->whereNull('notified_at')
-                ->whereBetween('date_time', [
-                    Carbon::now()->timezone('Asia/Tashkent'),
-                    Carbon::now()->timezone('Asia/Tashkent')->addMinutes(20)
-                ])
+                ->whereBetween('date_time', [$now, $now->addMinutes(61)])
                 ->get();
 
             foreach ($transfers as $transfer) {
-                TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
-                $transfer->update(['notified_at' => Carbon::now()]);
+                $diffInMinutes = $now->diffInMinutes(Carbon::parse($transfer->date_time), false);
+
+                if ($diffInMinutes >= 59 && $diffInMinutes <= 61) {
+                    // 1-hour reminder
+                    TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
+                }
+
+                if ($diffInMinutes >= 29 && $diffInMinutes <= 31) {
+                    // 30-minute reminder
+                    TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
+                    // Optionally update notified_at here to mark it fully notified
+                    $transfer->update(['notified_at' => $now]);
+                }
             }
         } catch (Throwable $e) {
             // Handle exception
