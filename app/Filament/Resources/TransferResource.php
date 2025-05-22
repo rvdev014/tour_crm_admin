@@ -122,7 +122,23 @@ class TransferResource extends Resource
     {
         return $table
             ->striped()
-            ->modifyQueryUsing(fn($query) => $query->with(['toCity', 'company', 'createdBy']))
+            ->modifyQueryUsing(function ($query) {
+                $today = Carbon::today()->toDateString();
+
+                $query
+                    ->with(['toCity', 'company', 'createdBy'])
+                    ->orderByRaw(
+                        "
+CASE
+    WHEN date_time::date >= ?::date THEN 0
+    ELSE 1
+END,
+    ABS((date_time::date - ?::date)) ASC
+                    ",
+                        [$today, $today]
+                    );
+            })
+//            ->defaultSort('date_time', 'desc')
             ->filtersFormColumns(3)
             ->recordClasses(function ($record) {
                 if ($record->status == ExpenseStatus::Done) {
@@ -242,7 +258,6 @@ class TransferResource extends Resource
                         return $indicators;
                     }),
             ], layout: FiltersLayout::AboveContent)
-            ->defaultSort('date_time', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('Number')
