@@ -40,11 +40,11 @@ class TourService
             /** @var \Illuminate\Database\Eloquent\Collection<Transfer> $transfers */
             $transfers = Transfer::query()
                 ->whereNull('notified_at')
-                ->whereBetween('date_time', [$now, $now->addMinutes(61)])
+                ->whereBetween('date_time', [$now, $now->clone()->addMinutes(61)])
                 ->get();
 
             foreach ($transfers as $transfer) {
-                $diffInMinutes = $now->diffInMinutes(Carbon::parse($transfer->date_time), false);
+                $diffInMinutes = $now->diffInMinutes(Carbon::createFromFormat('Y-m-d H:i:s', $transfer->date_time, 'Asia/Tashkent'), false);
 
                 if ($diffInMinutes >= 59 && $diffInMinutes <= 61) {
                     // 1-hour reminder
