@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property int $tour_id
  * @property int $tour_day_id
+ * @property int $tour_group_id
  * @property Carbon $date
  * @property int $city_id
  * @property ExpenseType $type

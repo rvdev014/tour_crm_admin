@@ -586,6 +586,10 @@ HTML;
         $hotelCheckinDateTime = Carbon::parse($date->format('Y-m-d') . ' ' . $checkIn);
         $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);
 
+        if ($hotelCheckinDateTime->greaterThan($hotelCheckoutDateTime)) {
+            return 0;
+        }
+
         $diffInDays = $hotelCheckinDateTime->clone()->startOfDay()->diffInDays(
             $hotelCheckoutDateTime->clone()->startOfDay()
         );

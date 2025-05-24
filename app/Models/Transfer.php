@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 /**
  * @property int $id
- * @property int $transport_type
- * @property int $transport_comfort_level
+ * @property TransportType $transport_type
+ * @property TransportComfortLevel $transport_comfort_level
  * @property int $from_city_id
  * @property int $to_city_id
  * @property float $price
