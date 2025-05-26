@@ -611,8 +611,8 @@ class TourTpsResource extends Resource
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Show->value),
 
-                            // Plane
-                            Components\Fieldset::make('Plane info')->schema([
+                            // Flight
+                            Components\Fieldset::make('Flight info')->schema([
 
                                 Components\Grid::make(3)->schema([
                                     self::getExpensePriceInput(),
@@ -633,7 +633,7 @@ class TourTpsResource extends Resource
                                         ->seconds(false)
                                         ->label('Departure time'),
 
-                                    Components\TimePicker::make('arrival_time')
+                                    Components\DateTimePicker::make('arrival_time')
                                         ->seconds(false)
                                         ->label('Arrival time'),
 
@@ -641,7 +641,7 @@ class TourTpsResource extends Resource
                                         ->label('Comment'),
                                 ]),
 
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),
 
                             // Extra
                             Components\Fieldset::make('Extra info')->schema([

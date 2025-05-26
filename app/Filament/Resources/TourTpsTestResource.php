@@ -15,6 +15,7 @@ use App\Enums\GuideType;
 use Filament\Forms\Form;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Support\Arr;
 use App\Enums\CurrencyEnum;
@@ -257,40 +258,62 @@ class TourTpsTestResource extends Resource
                     ->with('company', 'createdBy', 'country');
             })
             ->striped()
-            ->defaultSort('start_date', 'asc')
+            ->defaultSort('start_date', 'desc')
             ->filters([
                 Tables\Filters\Filter::make('country_id')
+                    ->columnSpanFull()
                     ->form([
-                        Components\Select::make('country_id')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->options(Country::all()->pluck('name', 'id')->toArray()),
-                        Components\Select::make('city_id')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->options(fn($get) => TourService::getCities($get('country_id'))),
-                        Components\Select::make('company_id')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->options(Company::query()->pluck('name', 'id')->toArray()),
-                        Components\Select::make('created_by')
-                            ->label('Admin creator')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->options(User::query()->pluck('name', 'id')->toArray()),
+                        Components\Grid::make(6)->schema([
+                            Components\Checkbox::make('active')
+                                ->label('Active')
+                                ->default(false),
+                            Components\Checkbox::make('archive')
+                                ->label('Archive')
+                                ->default(false),
+                        ]),
+                        Components\Grid::make(6)->schema([
+                            Components\Select::make('country_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(Country::all()->pluck('name', 'id')->toArray()),
+                            Components\Select::make('city_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(fn($get) => TourService::getCities($get('country_id'))),
+                            Components\Select::make('company_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(Company::query()->pluck('name', 'id')->toArray()),
+                            Components\Select::make('created_by')
+                                ->label('Admin creator')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(User::query()->pluck('name', 'id')->toArray()),
 
-                        Components\DatePicker::make('created_from')
-                            ->displayFormat('d.m.Y')
-                            ->native(false),
-                        Components\DatePicker::make('created_until')
-                            ->displayFormat('d.m.Y')
-                            ->native(false),
+                            Components\DatePicker::make('created_from')
+                                ->displayFormat('d.m.Y')
+                                ->native(false),
+                            Components\DatePicker::make('created_until')
+                                ->displayFormat('d.m.Y')
+                                ->native(false),
+                        ])
                     ])
                     ->query(function(Builder $query, $data) {
+                        if ($data['active'] && $data['archive']) {
+                            $query->where(function($query) use ($data) {
+                                $query->where('start_date', '>=', Carbon::now())
+                                    ->orWhere('start_date', '<', Carbon::now());
+                            });
+                        } elseif ($data['active']) {
+                            $query->where('start_date', '>=', Carbon::now());
+                        } elseif ($data['archive']) {
+                            $query->where('start_date', '<', Carbon::now());
+                        }
+
                         return $query
                             ->when(
                                 $data['country_id'],
@@ -315,7 +338,24 @@ class TourTpsTestResource extends Resource
                             );
                     })
                     ->indicateUsing(function(array $data): array {
+                        $query = Tour::query()->where('type', TourType::TPS->value);
+
                         $indicators = [];
+                        if ($data['active'] && $data['archive']) {
+                            $query = $query
+                                ->where('start_date', '>=', Carbon::now())
+                                ->orWhere('start_date', '<', Carbon::now());
+                            $indicators['active'] = "Active & Archive ({$query->count()})";
+                        }
+
+                        if ($data['active']) {
+                            $query = $query->where('start_date', '>=', Carbon::now());
+                            $indicators['active'] = "Active ({$query->count()})";
+                        }
+                        if ($data['archive']) {
+                            $query = $query->where('start_date', '<', Carbon::now());
+                            $indicators['archive'] = "Archive ({$query->count()})";
+                        }
                         if ($data['country_id'] ?? null) {
                             $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
                         }
@@ -341,7 +381,7 @@ class TourTpsTestResource extends Resource
 
                         return $indicators;
                     })
-            ])
+            ], layout: FiltersLayout::AboveContent)
             ->columns([
                 Columns\TextColumn::make('group_number')
                     ->searchable(),

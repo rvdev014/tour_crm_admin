@@ -35,18 +35,28 @@ class TourService
     public function notifyDrivers(): void
     {
         try {
+            $now = Carbon::now()->timezone('Asia/Tashkent');
+
             /** @var \Illuminate\Database\Eloquent\Collection<Transfer> $transfers */
             $transfers = Transfer::query()
                 ->whereNull('notified_at')
-                ->whereBetween('date_time', [
-                    Carbon::now()->timezone('Asia/Tashkent'),
-                    Carbon::now()->timezone('Asia/Tashkent')->addMinutes(20)
-                ])
+                ->whereBetween('date_time', [$now, $now->clone()->addMinutes(61)])
                 ->get();
 
             foreach ($transfers as $transfer) {
-                TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
-                $transfer->update(['notified_at' => Carbon::now()]);
+                $diffInMinutes = $now->diffInMinutes(Carbon::createFromFormat('Y-m-d H:i:s', $transfer->date_time, 'Asia/Tashkent'), false);
+
+                if ($diffInMinutes >= 59 && $diffInMinutes <= 61) {
+                    // 1-hour reminder
+                    TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
+                }
+
+                if ($diffInMinutes >= 29 && $diffInMinutes <= 31) {
+                    // 30-minute reminder
+                    TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
+                    // Optionally update notified_at here to mark it fully notified
+                    $transfer->update(['notified_at' => $now]);
+                }
             }
         } catch (Throwable $e) {
             // Handle exception
@@ -294,7 +304,7 @@ class TourService
         if ($divideBy) {
             $money /= $divideBy;
         }
-        return Number::format($money);
+        return Number::format($money) . ($currency ? " $currency" : '');
     }
 
     public static function generateRoomingSchema($firstThree = false): array
@@ -489,6 +499,8 @@ HTML;
         $toCity = $data['to_city'] ? City::find($data['to_city'])?->name : null;
         $place = $data['transport_place'] ?? '-';
         $comment = $data['comment'] ?? '-';
+        $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
+        $oldDate = ($oldValues['date_time'] ?? null) ? Carbon::parse($oldValues['date_time'])->format('d-M H:i') : '-';
 
         if ($transfer && !empty($oldValues)) {
             $oldDrivers = Driver::query()
@@ -498,6 +510,7 @@ HTML;
                 ->implode(', ');
 
             $drivers = self::getChangedField($oldDrivers, $drivers);
+            $date = self::getChangedField($oldDate, $date);
 
             $pax = self::getChangedField($oldValues['pax'] ?? null, $pax);
             $route = self::getChangedField($oldValues['route'] ?? null, $route);
@@ -507,8 +520,6 @@ HTML;
             $place = self::getChangedField($oldValues['place_of_submission'] ?? null, $place);
             $comment = self::getChangedField($oldValues['comment'] ?? null, $comment);
         }
-
-        $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
 
         $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
         $price = $data['price'] ?? '';
@@ -574,6 +585,10 @@ HTML;
         $date = \Illuminate\Support\Carbon::parse($date);
         $hotelCheckinDateTime = Carbon::parse($date->format('Y-m-d') . ' ' . $checkIn);
         $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);
+
+        if ($hotelCheckinDateTime->greaterThan($hotelCheckoutDateTime)) {
+            return 0;
+        }
 
         $diffInDays = $hotelCheckinDateTime->clone()->startOfDay()->diffInDays(
             $hotelCheckoutDateTime->clone()->startOfDay()

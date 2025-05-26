@@ -8,8 +8,8 @@ use App\Services\ExportClientService;
 use App\Services\ExportHotelService;
 use App\Services\ExportMuseumService;
 use App\Services\ExportService;
+use App\Services\ExportTransferService;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Exception;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpWord\Exception\CopyFileException;
@@ -80,7 +80,7 @@ class ExportController extends Controller
             $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
             $fileName = $tempDir . '/Hotel_' . $hotelName . '.docx';
 
-            $templateProcessor = ExportHotelService::getReplacedTemplate($hotelItem);
+            $templateProcessor = ExportHotelService::getReplacedTemplateFirst($hotelItem);
             $templateProcessor->saveAs($fileName);
         }
 
@@ -118,9 +118,13 @@ class ExportController extends Controller
         $hotelsData = ExportHotelService::getHotelsData($tour);
         foreach ($hotelsData as $hotelItem) {
             $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
-            $fileName = $this->getTempDir("all_reports/hotels") . '/' . $hotelName . '.docx';
 
-            $templateProcessor = ExportHotelService::getReplacedTemplate($hotelItem);
+            $fileName = $this->getTempDir("all_reports/hotels") . '/' . $hotelName . '.docx';
+            $templateProcessor = ExportHotelService::getReplacedTemplateFirst($hotelItem);
+            $templateProcessor->saveAs($fileName);
+
+            $fileName = $this->getTempDir("all_reports/hotels2") . '/' . $hotelName . '.docx';
+            $templateProcessor = ExportHotelService::getReplacedTemplateSecond($hotelItem);
             $templateProcessor->saveAs($fileName);
         }
 
@@ -155,6 +159,12 @@ class ExportController extends Controller
                 $zip->addFile($file, 'Hotels/' . basename($file));
             }
 
+            // Add Hotels folder
+            $zip->addEmptyDir('Hotels2');
+            foreach (glob($tempDir . "/hotels2/*.docx") as $file) {
+                $zip->addFile($file, 'Hotels2/' . basename($file));
+            }
+
             $zip->close();
         } else {
             die('Failed to create ZIP');
@@ -183,7 +193,7 @@ class ExportController extends Controller
         $tempDir = $this->getTempDir("transfer_reports");
 
         $fileName = $tempDir . '/Transfer_' . $transfer->id . '.docx';
-        $templateProcessor = ExportHotelService::getReplacedTemplateForTransfer($transfer);
+        $templateProcessor = ExportTransferService::getReplacedTemplateForTransfer($transfer);
         $templateProcessor->saveAs($fileName);
 
         // Output file for download

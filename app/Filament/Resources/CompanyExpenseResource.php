@@ -255,7 +255,7 @@ class CompanyExpenseResource extends Resource
 
                         return match ($record->type) {
                             ExpenseType::Transport => $record->transport_route,
-                            ExpenseType::Plane     => $record->plane_route,
+                            ExpenseType::Flight     => $record->plane_route,
                             ExpenseType::Train     => "$fromCity - {$record->toCity?->name}",
                             default                => '',
                         };

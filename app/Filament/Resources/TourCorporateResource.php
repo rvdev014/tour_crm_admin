@@ -92,7 +92,10 @@ class TourCorporateResource extends Resource
                         ),*/
                 ]),
 
-                Components\Textarea::make('comment'),
+                Components\Grid::make(4)->schema([
+                    Components\TextInput::make('requested_by'),
+                    Components\Textarea::make('comment')
+                ]),
             ]),
 
             Components\Repeater::make('groups')
@@ -161,7 +164,7 @@ class TourCorporateResource extends Resource
                                             ExpenseType::Hotel->getLabel(),
                                             ExpenseType::Transport->getLabel(),
                                             ExpenseType::Train->getLabel(),
-                                            ExpenseType::Plane->getLabel(),
+                                            ExpenseType::Flight->getLabel(),
                                             ExpenseType::Extra->getLabel(),
                                             ExpenseType::Conference->getLabel(),
                                         ]))->toArray();
@@ -171,7 +174,7 @@ class TourCorporateResource extends Resource
                                 Components\DatePicker::make('date')
                                     ->label(function ($get) {
                                         $label = 'Date';
-                                        if ($get('type') == ExpenseType::Plane->value) {
+                                        if ($get('type') == ExpenseType::Flight->value) {
                                             $label = 'Flight date';
                                         }
                                         return $label;
@@ -199,7 +202,7 @@ class TourCorporateResource extends Resource
                                     ->preload()
                                     ->required()
                                     ->hidden(fn($get) => in_array($get('type'), [
-                                        ExpenseType::Plane->value,
+                                        ExpenseType::Flight->value,
                                     ])),
                             ]),
 
@@ -389,8 +392,8 @@ class TourCorporateResource extends Resource
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
 
-                            // Plane
-                            Components\Fieldset::make('Plane info')->schema([
+                            // Flight
+                            Components\Fieldset::make('Flight info')->schema([
 
                                 Components\Grid::make(3)->schema([
                                     self::getExpensePriceInput(),
@@ -412,7 +415,7 @@ class TourCorporateResource extends Resource
                                         ->seconds(false)
                                         ->label('Departure time'),
 
-                                    Components\TimePicker::make('arrival_time')
+                                    Components\DateTimePicker::make('arrival_time')
                                         ->seconds(false)
                                         ->label('Arrival time'),
 
@@ -424,7 +427,7 @@ class TourCorporateResource extends Resource
                                     Components\Textarea::make('comment')->label('Comment'),
                                 ]),
 
-                            ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
+                            ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),
 
                             // Extra
                             Components\Fieldset::make('Extra info')->schema([
@@ -625,6 +628,8 @@ class TourCorporateResource extends Resource
                         return '-';
                     })
                     ->sortable(),
+
+                Columns\TextColumn::make('requested_by'),
 
                 Columns\TextColumn::make('createdBy.name')
                     ->sortable(),

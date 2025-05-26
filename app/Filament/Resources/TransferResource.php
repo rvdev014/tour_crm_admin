@@ -122,7 +122,23 @@ class TransferResource extends Resource
     {
         return $table
             ->striped()
-            ->modifyQueryUsing(fn($query) => $query->with(['toCity', 'company', 'createdBy']))
+            ->modifyQueryUsing(function ($query) {
+                $now = Carbon::today()->toDateTimeString();
+
+                $query
+                    ->with(['toCity', 'company', 'createdBy'])
+                    ->orderByRaw(
+                        "
+CASE
+    WHEN date_time >= ?::timestamp THEN 0
+    ELSE 1
+END,
+    ABS(EXTRACT(EPOCH FROM (date_time - ?::timestamp))) ASC
+                    ",
+                        [$now, $now]
+                    );
+            })
+//            ->defaultSort('date_time', 'desc')
             ->filtersFormColumns(3)
             ->recordClasses(function ($record) {
                 if ($record->status == ExpenseStatus::Done) {
@@ -242,12 +258,18 @@ class TransferResource extends Resource
                         return $indicators;
                     }),
             ], layout: FiltersLayout::AboveContent)
-            ->defaultSort('date_time', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('Number')
                     ->formatStateUsing(function ($record) {
                         return $record->getNumber();
+                    }),
+
+                Tables\Columns\TextColumn::make('tour_id')
+                    ->label('Tour')
+                    ->getStateUsing(function (Transfer $record) {
+                        $tour = $record->tourDayExpense?->tour ?? $record->tourDayExpense?->tourDay?->tour ?? null;
+                        return $tour ? $tour->group_number : '-';
                     }),
 
                 Tables\Columns\TextColumn::make('company.name')

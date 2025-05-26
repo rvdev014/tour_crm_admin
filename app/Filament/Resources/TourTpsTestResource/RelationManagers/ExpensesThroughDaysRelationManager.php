@@ -350,8 +350,8 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
                 ])->visible(fn($get) => $get('type') == ExpenseType::Show->value),
 
-                // Plane
-                Components\Fieldset::make('Plane info')->schema([
+                // Flight
+                Components\Fieldset::make('Flight info')->schema([
 
                     Components\Grid::make(3)->schema([
                         self::getExpensePriceInput(),
@@ -373,15 +373,18 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->seconds(false)
                             ->label('Departure time'),
 
-                        Components\TimePicker::make('arrival_time')
+                        Components\DateTimePicker::make('arrival_time')
                             ->seconds(false)
+                            ->formatStateUsing(function($record, $state) {
+                                return $record->arrival_timel;
+                            })
                             ->label('Arrival time'),
 
                         Components\Textarea::make('comment')
                             ->label('Comment'),
                     ]),
 
-                ])->visible(fn($get) => $get('type') == ExpenseType::Plane->value),
+                ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),
 
                 // Extra
                 Components\Fieldset::make('Extra info')->schema([
@@ -451,7 +454,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ExpenseType::Lunch,
                             ExpenseType::Dinner    => $record->restaurant?->name,
                             ExpenseType::Train     => $record->train?->name,
-                            ExpenseType::Plane     => $record->plane_route,
+                            ExpenseType::Flight     => $record->plane_route,
                             ExpenseType::Show      => $record->show?->name,
                             default                => $record->other_name,
                         };
