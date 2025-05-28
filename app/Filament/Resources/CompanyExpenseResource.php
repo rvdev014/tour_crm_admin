@@ -245,6 +245,9 @@ class CompanyExpenseResource extends Resource
                     ->label('Pax')
                     ->getStateUsing(function(TourDayExpense $record) {
                         $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
+                        if ($record->tourGroup) {
+                            return $record->tourGroup->passengers()->count();
+                        }
                         return $tour->getTotalPax();
                     }),
 
