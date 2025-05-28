@@ -35,7 +35,7 @@ class ExportTransferService
 
         $placeholders = [
             'transfer_number' => 1000 + $transfer->id,
-            'created_at' => Carbon::parse($transfer->created_at)->format('d-M Y H:i'),
+            'created_at' => Carbon::parse($transfer->date_time)->format('d-M Y H:i'),
             'route' => $transfer->route,
             'driver' => $driversNames,
             'driver_phone' => $driversPhones,
