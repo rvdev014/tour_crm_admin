@@ -28,6 +28,14 @@ use Illuminate\Support\Collection;
 
 class ExpenseService
 {
+    public static function getAllExpenses(Tour $tour): Collection
+    {
+        if ($tour->isCorporate()) {
+            return ExpenseService::getAllExpensesCorporate($tour);
+        }
+        return ExpenseService::getAllExpensesTps($tour);
+    }
+
     public static function getAllExpensesTps(Tour $tour): Collection
     {
         $allExpenses = collect();

@@ -25,14 +25,12 @@ class MailService
     public static function getExpensesDataForMail(Tour $tour, $type = 'restaurants', $isCorporate = false): array
     {
         /** @var Collection<TourDayExpense> $expenses */
-        $expenses = $tour->expenses->filter(fn($expense) => self::checkExpenseType($expense, $type));
+        $expenses = ExpenseService::getAllExpenses($tour)->filter(fn($expense) => self::checkExpenseType($expense, $type));
 
         $expensesData = [];
         foreach ($expenses as $expense) {
             $date = $isCorporate ? $expense->date : $expense->tourDay->date;
-            if (isset($expense->date)) {
-                $expensesData[$date->format('Y-m-d')] = $expense;
-            }
+            $expensesData[$date->format('Y-m-d')] = $expense;
         }
 
         return $expensesData;
@@ -40,6 +38,7 @@ class MailService
 
     public static function sendMailRestaurants(Tour $tour): void
     {
+        /** @var Collection<TourDayExpense> $expensesData */
         $expensesData = self::getExpensesDataForMail($tour, 'restaurants', $tour->isCorporate());
         foreach ($expensesData as $date => $expense) {
             if (!$expense->restaurant_id) {
