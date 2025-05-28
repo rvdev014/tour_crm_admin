@@ -269,11 +269,13 @@ class CompanyExpenseResource extends Resource
                     ->label('Price')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('payment_status')
+                /*Tables\Columns\TextColumn::make('payment_status')
                     ->getStateUsing(function(TourDayExpense $record) {
-                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
-                        return $tour->payment_status?->getLabel();
-                    }),
+                        return $record->payment_status?->getLabel();
+                    }),*/
+
+                Tables\Columns\SelectColumn::make('payment_status')
+                    ->options(PaymentStatus::class),
 
                 Tables\Columns\TextColumn::make('passengers')
                     ->label('Passengers FIO')

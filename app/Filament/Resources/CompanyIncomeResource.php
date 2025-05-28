@@ -164,8 +164,7 @@ class CompanyIncomeResource extends Resource
                     ->searchable(),
 
                 Tables\Columns\SelectColumn::make('payment_status')
-                    ->options(PaymentStatus::class)
-                ,
+                    ->options(PaymentStatus::class),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
+use App\Enums\PaymentStatus;
 use App\Observers\TourDayExpenseObserver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon $date
  * @property int $city_id
  * @property ExpenseType $type
+ * @property PaymentStatus $payment_status
  *
  * Common fields
  * @property float $price
@@ -122,6 +124,7 @@ class TourDayExpense extends Model
     protected $casts = [
         'date' => 'date',
         'type' => ExpenseType::class,
+        'payment_status' => PaymentStatus::class,
         'car_ids' => 'array',
         'transport_driver_ids' => 'array',
         'museum_ids' => 'array',
