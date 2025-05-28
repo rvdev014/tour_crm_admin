@@ -283,10 +283,9 @@ class CompanyExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('passengers')
                     ->label('Passengers FIO')
                     ->getStateUsing(function(TourDayExpense $record) {
-                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         $passengers = [];
-                        foreach ($tour->groups as $group) {
-                            foreach ($group->passengers as $passenger) {
+                        if ($record->tourGroup) {
+                            foreach ($record->tourGroup->passengers as $passenger) {
                                 $passengers[] = $passenger->name;
                             }
                         }
