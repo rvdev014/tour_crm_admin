@@ -39,8 +39,8 @@ class TourService
 
             /** @var \Illuminate\Database\Eloquent\Collection<Transfer> $transfers */
             $transfers = Transfer::query()
-                ->whereNull('notified_at')
-                ->whereBetween('date_time', [$now, $now->clone()->addMinutes(61)])
+                ->whereBetween('date_time', [$now, $now->clone()->addMinutes(60)])
+                ->where('notified_times', '<', 2)
                 ->get();
 
             foreach ($transfers as $transfer) {
@@ -49,16 +49,15 @@ class TourService
                     false
                 );
 
-                if ($diffInMinutes >= 59 && $diffInMinutes <= 61) {
-                    // 1-hour reminder
+                $notifiedTimes = $transfer->notified_times ?? 0;
+                if ($notifiedTimes == 0 && $diffInMinutes <= 60 && $diffInMinutes > 30) {
                     TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
+                    $transfer->update(['notified_times' => 1]);
                 }
 
-                if ($diffInMinutes >= 29 && $diffInMinutes <= 31) {
-                    // 30-minute reminder
+                if ($transfer->notified_times < 2 && $diffInMinutes <= 30) {
                     TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
-                    // Optionally update notified_at here to mark it fully notified
-                    $transfer->update(['notified_at' => $now]);
+                    $transfer->update(['notified_times' => 2]);
                 }
             }
         } catch (Throwable $e) {

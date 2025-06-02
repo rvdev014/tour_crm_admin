@@ -120,7 +120,7 @@ class TourTpsTestResource extends Resource
                         ->label('Departure time')
 //                        ->native(false)
                         ->seconds(false)
-                        ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay())
+                        ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay()->format('d.m.Y H:i'))
                         ->reactive()
                         ->required(),
                     Components\TextInput::make('pax')

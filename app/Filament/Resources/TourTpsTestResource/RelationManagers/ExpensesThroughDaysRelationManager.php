@@ -80,7 +80,8 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                                 fn($get) => TourService::getHotels($get('city_id') ?? $get('../../city_id'))
                             )
                             ->preload()
-                            ->reactive(),
+                            ->reactive()
+                            ->required(),
                         Components\Select::make('status')
                             ->options(ExpenseStatus::class)
                             ->default(ExpenseStatus::New->value)

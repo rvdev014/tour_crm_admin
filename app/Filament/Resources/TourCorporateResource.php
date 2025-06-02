@@ -216,7 +216,8 @@ class TourCorporateResource extends Resource
                                         ->label('Hotel')
                                         ->options(fn($get) => TourService::getHotels($get('city_id')))
                                         ->preload()
-                                        ->reactive(),
+                                        ->reactive()
+                                        ->required(),
                                     Components\TimePicker::make('hotel_checkin_time')
                                         ->seconds(false)
                                         ->reactive()

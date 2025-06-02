@@ -41,7 +41,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property numeric $buy_price
  * @property string $nameplate
  * @property string $mark
- * @property Carbon $notified_at
+ * @property integer $notified_times
  *
  * @property User $createdBy
  * @property Driver $driver
@@ -62,7 +62,6 @@ class Transfer extends Model
         'transport_type' => TransportType::class,
         'transport_comfort_level' => TransportComfortLevel::class,
         'date_time' => 'datetime',
-        'notified_at' => 'datetime',
         'driver_ids' => 'array',
         'old_values' => 'array',
     ];
