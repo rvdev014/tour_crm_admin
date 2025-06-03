@@ -43,7 +43,7 @@ class HotelBookingResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('tour_id')
                     ->getStateUsing(function (TourDayExpense $record) {
-                        $tour = $record->tour ?? $record->tourDay->tour;
+                        $tour = $record->tourGroup?->tour ?? $record->tourDay?->tour;
                         if ($tour->isCorporate()) {
                             $link = "/admin/tour-corporate/$tour->id/edit";
                         }  else {
@@ -73,7 +73,7 @@ class HotelBookingResource extends Resource
                 Tables\Columns\TextColumn::make('tour_pax')
                     ->label('Pax')
                     ->getStateUsing(function (TourDayExpense $record) {
-                        $tour = $record->tour ?? $record->tourDay->tour;
+                        $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         return $tour->getTotalPax();
                     }),
             ])

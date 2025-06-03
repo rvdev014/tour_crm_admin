@@ -65,11 +65,7 @@ class CompanyIncomeResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->label('Company')
-                                ->options(
-                                    fn() => Company::all()
-                                        ->where('type', CompanyType::Corporate)
-                                        ->pluck('name', 'id')
-                                ),
+                                ->options(fn() => Company::all()->pluck('name', 'id')),
 
                             Forms\Components\Select::make('payment_status')
                                 ->native(false)
@@ -105,7 +101,7 @@ class CompanyIncomeResource extends Resource
                         return $query;
                     })
                     ->indicateUsing(function (array $data): array {
-                        $query = TourDayExpense::query();
+                        $query = Tour::query();
 
                         $indicators = [];
                         if ($companyIds = $data['companies']) {

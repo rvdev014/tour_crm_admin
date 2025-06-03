@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\CurrencyEnum;
 use Filament\Forms;
 use Filament\Tables;
 use App\Enums\TourType;
@@ -122,17 +123,7 @@ class CompanyExpenseResource extends Resource
                             $query = $query->whereIn('type', $data['expense_types']);
                         }
                         if ($paymentStatus = $data['payment_status']) {
-                            $query = $query
-                                ->whereHas(
-                                    'tourGroup',
-                                    fn($q) => $q->whereHas('tour', fn($q) => $q->where('payment_status', $paymentStatus)
-                                    )
-                                )
-                                ->orWhereHas(
-                                    'tourDay',
-                                    fn($q) => $q->whereHas('tour', fn($q) => $q->where('payment_status', $paymentStatus)
-                                    )
-                                );
+                            $query = $query->where('payment_status', $paymentStatus);
                         }
                         if ($data['date_from']) {
                             $query = $query->where(function($subQuery) use ($data) {
@@ -266,16 +257,12 @@ class CompanyExpenseResource extends Resource
 
                 Tables\Columns\TextColumn::make('price')
                     ->formatStateUsing(function(TourDayExpense $record) {
-                        return TourService::formatMoney($record->price) . ' ' . ($record->price_currency?->getSymbol(
-                            ) ?? '$');
+                        return TourService::formatMoney($record->price_result) . ' ' . CurrencyEnum::UZS->getSymbol();
+//                        return TourService::formatMoney($record->price) . ' ' . ($record->price_currency?->getSymbol(
+//                            ) ?? '$');
                     })
                     ->label('Price')
                     ->searchable(),
-
-                /*Tables\Columns\TextColumn::make('payment_status')
-                    ->getStateUsing(function(TourDayExpense $record) {
-                        return $record->payment_status?->getLabel();
-                    }),*/
 
                 Tables\Columns\SelectColumn::make('payment_status')
                     ->options(PaymentStatus::class),

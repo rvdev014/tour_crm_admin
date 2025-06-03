@@ -124,6 +124,39 @@ class ExpenseService
         return $expensesTotal;
     }
 
+    public static function updateExpensesPricesCorporate(Tour $tour, $updatedData = [], $withRooming = false): float
+    {
+        $expensesTotal = 0;
+        $updatedData = array_merge($tour->getAttributes(), $updatedData);
+
+        $totalPax = $tour->getTotalPax();
+        if ($withRooming) {
+            $roomingAmounts = ExpenseService::getRoomingAmounts($updatedData);
+        } else {
+            $roomingAmounts = $tour->roomTypes->mapWithKeys(fn($roomType) => [
+                $roomType->room_type_id => $roomType->amount
+            ]);
+        }
+
+        foreach ($tour->groups as $group) {
+            foreach ($group->expenses as $expense) {
+                $updatedExpense = ExpenseService::mutateExpense(
+                    data: $expense->toArray(),
+                    totalPax: $totalPax,
+                    countryId: $updatedData['country_id'],
+                    roomAmounts: $roomingAmounts
+                );
+
+                $expensePrice = $updatedExpense['price_converted'] ?? $updatedExpense['price'] ?? 0;
+                $expense->update(array_merge($updatedExpense, ['price_result' => $expensePrice]));
+
+                $expensesTotal += $expensePrice;
+            }
+        }
+
+        return $expensesTotal;
+    }
+
 
     public static function calculateAllExpensesPrice(Collection $allExpenses): float
     {

@@ -199,8 +199,10 @@ class Tour extends Model
 
     public function saveExpensesTotal(): void
     {
-        // Only for TPS
-        if (!$this->isCorporate()) {
+        if ($this->isCorporate()) {
+            $expensesTotal = ExpenseService::updateExpensesPricesCorporate($this);
+            $this->update(['expenses_total' => $expensesTotal]);
+        } else {
             $expensesTotal = ExpenseService::updateExpensesPricesTps($this);
             $expensesTotal = $expensesTotal + $this->guide_price_result;
             $this->update([
