@@ -375,6 +375,8 @@ class ExportService
             $conferencesTotalSum += $conferencesSum;
         }
 
+//        $transportsTotalSum = $tour->transport_price_result;
+//        $transportsTotalUsd = round($tour->transport_price_result / $currencyUsd?->rate, 2);
         $hotelsTotalUsd = round($hotelsTotalSum / $currencyUsd?->rate, 2);
 
         $days[] = ['value' => '', 'colspan' => 1];

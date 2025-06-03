@@ -377,7 +377,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                         Components\DateTimePicker::make('arrival_time')
                             ->seconds(false)
                             ->formatStateUsing(function($record, $state) {
-                                return $record->arrival_timel;
+                                return $record?->arrival_timel;
                             })
                             ->label('Arrival time'),
 

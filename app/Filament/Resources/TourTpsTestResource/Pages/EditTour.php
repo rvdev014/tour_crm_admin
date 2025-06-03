@@ -52,10 +52,10 @@ class EditTour extends EditRecord
 //                ->label('Report Client')
 //                ->icon('heroicon-o-document-text')
 //                ->url(route('export-client', $this->record)),
-//            Actions\Action::make('export')
-//                ->label('Report')
-//                ->icon('heroicon-o-document-text')
-//                ->url(route('export', $this->record)),
+            Actions\Action::make('export')
+                ->label('Report')
+                ->icon('heroicon-o-document-text')
+                ->url(route('export', $this->record)),
             SendMailAction::make('mail_hotel')
                 ->tour($tour)
                 ->type('hotels')
