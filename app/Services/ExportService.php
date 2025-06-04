@@ -804,4 +804,15 @@ class ExportService
     {
         return Coordinate::stringFromColumnIndex($number);
     }
+
+    public static function getTempDir(string $dirName): string
+    {
+        //        $tempDir = sys_get_temp_dir() . '/' . $dirName;
+        $tempDir = storage_path('app/temp/' . $dirName);
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
+
+        return $tempDir;
+    }
 }

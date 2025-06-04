@@ -33,11 +33,9 @@ class ExportController extends Controller
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
-        register_shutdown_function(function () use ($tempFile) {
-            File::deleteDirectory($tempFile);
-        });
+        register_shutdown_function(fn() => File::deleteDirectory($tempFile));
 
-        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+        return response()->download($tempFile, $filename)->deleteFileAfterSend();
     }
 
     /**
@@ -53,11 +51,9 @@ class ExportController extends Controller
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
-        register_shutdown_function(function () use ($tempFile) {
-            File::deleteDirectory($tempFile);
-        });
+        register_shutdown_function(fn() => File::deleteDirectory($tempFile));
 
-        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+        return response()->download($tempFile, $filename)->deleteFileAfterSend();
     }
 
     /**
@@ -65,42 +61,27 @@ class ExportController extends Controller
      */
     public function exportMuseum(Tour $tour): BinaryFileResponse
     {
-        $spreadsheet = ExportMuseumService::getExport($tour);
+        $tempFile = ExportMuseumService::getMuseumReportFile($tour);
 
-        $filename = "tour_" . $tour->group_number . "_museum.xlsx";
-        $tempFile = tempnam(sys_get_temp_dir(), $filename);
+        register_shutdown_function(fn() => File::deleteDirectory($tempFile));
 
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($tempFile);
-
-        register_shutdown_function(function () use ($tempFile) {
-            File::deleteDirectory($tempFile);
-        });
-
-        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+        return response()->download($tempFile)->deleteFileAfterSend();
     }
 
-    /**
-     * @throws CopyFileException
-     * @throws CreateTemporaryFileException
-     */
     public function exportHotelsZip(Tour $tour): BinaryFileResponse
     {
-        $tempDir = $this->getTempDir("hotel_reports");
+        $tempDir = ExportService::getTempDir("hotel_reports");
+
         $hotelsData = ExportHotelService::getHotelsData($tour);
         foreach ($hotelsData as $hotelItem) {
-            $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
-            $fileName = $tempDir . '/Hotel_' . $hotelName . '.docx';
-
-            $templateProcessor = ExportHotelService::getReplacedTemplateFirst($hotelItem);
-            $templateProcessor->saveAs($fileName);
+            ExportHotelService::saveReport($hotelItem, $tempDir);
         }
 
         $zip = new ZipArchive();
         $zipFilename = "Tour_" . $tour->group_number . "_hotels.zip";
-        $zipPath = $this->getTempDir("hotel_reports") . "/Tour_" . $tour->group_number . "_hotels.zip";
+        $zipPath = ExportService::getTempDir("hotel_reports") . "/Tour_" . $tour->group_number . "_hotels.zip";
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-            foreach (glob($this->getTempDir("hotel_reports") . "/*.docx") as $file) {
+            foreach (glob(ExportService::getTempDir("hotel_reports") . "/*.docx") as $file) {
                 $zip->addFile($file, basename($file));
             }
             $zip->close();
@@ -108,11 +89,9 @@ class ExportController extends Controller
             die('Failed to create ZIP');
         }
 
-        register_shutdown_function(function () use ($tempDir) {
-            File::deleteDirectory($tempDir);
-        });
+        register_shutdown_function(fn() => File::deleteDirectory($tempDir));
 
-        return response()->download($zipPath, $zipFilename)->deleteFileAfterSend(true);
+        return response()->download($zipPath, $zipFilename)->deleteFileAfterSend();
     }
 
     /**
@@ -121,17 +100,17 @@ class ExportController extends Controller
      */
     public function exportAllZip(Tour $tour): BinaryFileResponse
     {
-        $tempDir = $this->getTempDir("all_reports");
+        $tempDir = ExportService::getTempDir("all_reports");
 
         $hotelsData = ExportHotelService::getHotelsData($tour);
         foreach ($hotelsData as $hotelItem) {
             $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
 
-            $fileName = $this->getTempDir("all_reports/hotels") . '/' . $hotelName . '.docx';
+            $fileName = ExportService::getTempDir("all_reports/hotels") . '/' . $hotelName . '.docx';
             $templateProcessor = ExportHotelService::getReplacedTemplateFirst($hotelItem);
             $templateProcessor->saveAs($fileName);
 
-            $fileName = $this->getTempDir("all_reports/hotels2") . '/' . $hotelName . '.docx';
+            $fileName = ExportService::getTempDir("all_reports/hotels2") . '/' . $hotelName . '.docx';
             $templateProcessor = ExportHotelService::getReplacedTemplateSecond($hotelItem);
             $templateProcessor->saveAs($fileName);
         }
@@ -178,11 +157,9 @@ class ExportController extends Controller
             die('Failed to create ZIP');
         }
 
-        register_shutdown_function(function () use ($tempDir) {
-            File::deleteDirectory($tempDir);
-        });
+        register_shutdown_function(fn() => File::deleteDirectory($tempDir));
 
-        return response()->download($zipPath, $zipFilename)->deleteFileAfterSend(true);
+        return response()->download($zipPath, $zipFilename)->deleteFileAfterSend();
     }
 
     /**
@@ -191,27 +168,14 @@ class ExportController extends Controller
      */
     public function exportTransfer(Transfer $transfer): BinaryFileResponse
     {
-        $tempDir = $this->getTempDir("transfer_reports");
+        $tempDir = ExportService::getTempDir("transfer_reports");
 
         $fileName = $tempDir . '/Transfer_' . $transfer->id . '.docx';
         $templateProcessor = ExportTransferService::getReplacedTemplateForTransfer($transfer);
         $templateProcessor->saveAs($fileName);
 
-        register_shutdown_function(function () use ($tempDir) {
-            File::deleteDirectory($tempDir);
-        });
+        register_shutdown_function(fn() => File::deleteDirectory($tempDir));
 
         return response()->download($fileName, 'Transfer_' . $transfer->id . '.docx')->deleteFileAfterSend(true);
-    }
-
-    protected function getTempDir(string $dirName): string
-    {
-//        $tempDir = sys_get_temp_dir() . '/' . $dirName;
-        $tempDir = storage_path('app/temp/' . $dirName);
-        if (!is_dir($tempDir)) {
-            mkdir($tempDir, 0777, true);
-        }
-
-        return $tempDir;
     }
 }

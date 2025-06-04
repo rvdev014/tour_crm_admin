@@ -8,15 +8,33 @@ use App\Models\MuseumItem;
 use App\Models\Tour;
 use App\Models\TourDay;
 use App\Models\TourDayExpense;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Database\Eloquent\Collection;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Writer\Exception;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ExportMuseumService
 {
+    /**
+     * @throws Exception
+     */
+    public static function getMuseumReportFile(Tour $tour): string
+    {
+        $spreadsheet = ExportMuseumService::getExport($tour);
+
+        $filename = "tour_" . $tour->group_number . "_museum.xlsx";
+        $tempFile = tempnam(sys_get_temp_dir(), $filename);
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        return $tempFile;
+    }
+
     public static function getExport(Tour $tour): ?Spreadsheet
     {
         $museumsData = self::getMuseums($tour);

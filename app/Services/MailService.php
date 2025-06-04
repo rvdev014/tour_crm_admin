@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use App\Enums\ExpenseType;
 use App\Mail\HotelMail;
 use App\Mail\RestaurantMail;
@@ -9,6 +10,7 @@ use App\Models\Hotel;
 use App\Models\Restaurant;
 use App\Models\Tour;
 use App\Models\TourDayExpense;
+use Illuminate\Support\Facades\File;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Mail;
 
@@ -57,6 +59,9 @@ class MailService
 
     public static function sendMailHotels(Tour $tour): void
     {
+        $tempDir = ExportService::getTempDir('hotel_reports');
+        $hotelsData = ExportHotelService::getHotelsData($tour);
+
         /** @var Collection<TourDayExpense> $expensesData */
         $expensesData = self::getExpensesDataForMail($tour, 'hotels', $tour->isCorporate());
         foreach ($expensesData as $date => $expense) {
@@ -67,10 +72,36 @@ class MailService
             /** @var Hotel $hotel */
             $hotel = Hotel::find($expense->hotel_id);
             if (!empty($hotel->email)) {
-                Mail::to($hotel->email)->send(
-                    new HotelMail($date, $expense, $tour->getTotalPax())
+                $hotelItem = $hotelsData->get($hotel->id);
+                if (!$hotelItem) {
+                    continue; // Skip if hotel data is not available
+                }
+
+                $hotelReportFile = ExportHotelService::saveReport(
+                    $hotelsData->get($hotel->id),
+                    $tempDir
                 );
+
+                $firstArrivalTime = Carbon::parse(collect($hotelItem['arrivals'])->first())->format('d-m');
+                $lastDepartureTime = Carbon::parse(collect($hotelItem['departures'])->last())->format('d-m');
+
+                $rooming = $hotelItem['rooming']->map(function ($value, $key) {
+                    return $value . strtolower($key);
+                })->implode('/');
+
+                $subject = "$tour->group_number | $firstArrivalTime-$lastDepartureTime | $rooming";
+
+                $mailable = new HotelMail(
+                    $subject,
+                    $date,
+                    $expense,
+                    $tour->getTotalPax(),
+                    [$hotelReportFile]
+                );
+                Mail::to($hotel->email)->send($mailable);
             }
         }
+
+        register_shutdown_function(fn() => File::deleteDirectory($tempDir));
     }
 }

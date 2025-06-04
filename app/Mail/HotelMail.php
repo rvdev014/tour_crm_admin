@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -18,15 +19,18 @@ class HotelMail extends Mailable
     protected $date;
     protected $expense;
     protected $totalPax;
+    protected $attachmentPaths = [];
 
     /**
      * Create a new message instance.
      */
-    public function __construct($date, $expense, $totalPax)
+    public function __construct($subject, $date, $expense, $totalPax, $attachmentPaths = [])
     {
+        $this->subject = $subject;
         $this->date = $date;
         $this->expense = $expense;
         $this->totalPax = $totalPax;
+        $this->attachmentPaths = $attachmentPaths;
     }
 
     /**
@@ -35,7 +39,7 @@ class HotelMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Hotel Mail',
+            subject: $this->subject,
         );
     }
 
@@ -57,10 +61,14 @@ class HotelMail extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {
-        return [];
+        $result = [];
+        foreach ($this->attachmentPaths as $attachmentPath) {
+            $result[] = Attachment::fromPath($attachmentPath);
+        }
+        return $result;
     }
 }

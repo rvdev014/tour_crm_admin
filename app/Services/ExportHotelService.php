@@ -55,6 +55,17 @@ class ExportHotelService
         return $hotelPrices;
     }
 
+    public static function saveReport($hotelItem, $tempDir): ?string
+    {
+        $hotelName = str_replace([' ', '(', ')'], '_', $hotelItem['hotelName']);
+        $fileName = $tempDir . '/Hotel_' . $hotelName . '.docx';
+
+        $templateProcessor = ExportHotelService::getReplacedTemplateFirst($hotelItem);
+        $templateProcessor->saveAs($fileName);
+
+        return $fileName;
+    }
+
     public static function getHotelsDataTps(Tour $tour): Collection
     {
         $result = collect();
