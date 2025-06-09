@@ -13,6 +13,7 @@ use App\Services\TourService;
 use Filament\Resources\Resource;
 use App\Tables\Columns\PeriodsColumn;
 use App\Filament\Resources\HotelResource\Pages;
+use Illuminate\Database\Eloquent\Model;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
 use App\Filament\Resources\HotelResource\Actions\HotelPeriodsAction;
@@ -25,6 +26,20 @@ class HotelResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?int $navigationSort = 4;
     protected static ?string $navigationGroup = 'Manual';
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'inn', 'company_name', 'address', 'phones.phone_number'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Email' => $record->email,
+            'Address' => $record->address,
+        ];
+    }
 
     public static function form(Form $form): Form
     {

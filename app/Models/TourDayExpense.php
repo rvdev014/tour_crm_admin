@@ -87,6 +87,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * Flight
  * @property int $supplier_id
+ * @property string $arrival_number
+ * @property string $departure_number
  *
  * Other
  * @property string $other_name

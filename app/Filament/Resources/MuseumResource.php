@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MuseumResource extends Resource
@@ -22,22 +23,38 @@ class MuseumResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-library';
     protected static ?int $navigationSort = 6;
     protected static ?string $navigationGroup = 'Manual';
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'inn', 'contract'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'INN' => $record->inn,
+            'Price per Person' => $record->price_per_person,
+        ];
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('name')
                         ->required()
                         ->maxLength(255),
                     Forms\Components\TextInput::make('inn')
                         ->required()
                         ->maxLength(255),
+                    Forms\Components\TextInput::make('legal_name')
+                        ->maxLength(255),
                     Forms\Components\TextInput::make('contract')
                         ->maxLength(255),
                 ]),
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\Select::make('country_id')
                         ->native(false)
                         ->searchable()
@@ -69,6 +86,8 @@ class MuseumResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('inn')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('legal_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('contract')
                     ->searchable(),

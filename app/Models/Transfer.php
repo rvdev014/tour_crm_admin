@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 /**
  * @property int $id
+ * @property string $number
  * @property TransportType $transport_type
  * @property TransportComfortLevel $transport_comfort_level
  * @property int $from_city_id
@@ -71,6 +72,11 @@ class Transfer extends Model
         static::creating(function(Transfer $transfer) {
             $transfer->created_by = auth()->id();
         });
+    }
+
+    public function getNumAttribute(): string
+    {
+        return 1000 + $this->id;
     }
 
     public function getNumber(): float|string

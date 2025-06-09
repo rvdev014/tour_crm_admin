@@ -40,6 +40,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property string $guide_name
  * @property string $guide_phone
  * @property string $package_name
+ * @property string $arrival_number
+ * @property string $departure_number
  * @property TransportType $transport_type
  * @property PaymentType $payment_type
  * @property PaymentStatus $payment_status
@@ -65,6 +67,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property City $city
  * @property Country $country
  * @property Collection<TourDay> $days
+ * @property Collection<TourDay> $daysNormal
  * @property Collection<TourGroup> $groups
  * @property Collection<TourDayExpense> $expenses
  * @property Collection<TourRoomType> $roomTypes
@@ -110,6 +113,11 @@ class Tour extends Model
     public function days(): HasMany
     {
         return $this->hasMany(TourDay::class)->orderBy('date');
+    }
+
+    public function daysNormal(): HasMany
+    {
+        return $this->hasMany(TourDay::class);
     }
 
     public function groups(): HasMany

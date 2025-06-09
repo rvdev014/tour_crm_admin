@@ -43,7 +43,7 @@ class ExportClientService
 
         $tourLeaderPax = $tour->leader_pax ?? 0;
         $tourLeadersPrice = $paxPrice;
-        $tourLeadersPriceTotal = $tourLeadersPrice * $tourLeaderPax;
+        $tourLeadersPriceTotal = ($tourLeadersPrice + $tour->single_supplement_price) * $tourLeaderPax;
 
         $priceTotal = $paxPriceTotal + $extraPriceTotal;
 

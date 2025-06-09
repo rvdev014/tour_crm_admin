@@ -23,6 +23,7 @@ class EmployeeResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?int $navigationSort = 10;
     protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Form $form): Form
     {

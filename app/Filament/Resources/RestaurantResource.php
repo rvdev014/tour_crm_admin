@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use App\Services\TourService;
 use App\Models\TourDayExpense;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Filament\Resources\RestaurantResource\Pages;
 use App\Filament\Resources\RestaurantResource\RelationManagers;
@@ -21,6 +22,20 @@ class RestaurantResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?int $navigationSort = 7;
     protected static ?string $navigationGroup = 'Manual';
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'inn', 'phone'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Email' => $record->email,
+            'Price per Person' => $record->price_per_person,
+        ];
+    }
 
     public static function form(Form $form): Form
     {

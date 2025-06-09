@@ -396,7 +396,7 @@ class TourCorporateResource extends Resource
                             // Flight
                             Components\Fieldset::make('Flight info')->schema([
 
-                                Components\Grid::make(3)->schema([
+                                Components\Grid::make(4)->schema([
                                     self::getExpensePriceInput(),
 
                                     Components\TextInput::make('plane_route'),
@@ -409,23 +409,25 @@ class TourCorporateResource extends Resource
                                         ->searchable()
                                         ->preload()
                                         ->label('Status'),
+
+                                    Components\Textarea::make('comment')
+                                        ->label('Comment'),
                                 ]),
 
-                                Components\Grid::make(3)->schema([
+                                Components\Grid::make(4)->schema([
                                     Components\TimePicker::make('departure_time')
                                         ->seconds(false)
                                         ->label('Departure time'),
+
+                                    Components\TextInput::make('departure_number')
+                                        ->label('Departure reys number'),
 
                                     Components\DateTimePicker::make('arrival_time')
                                         ->seconds(false)
                                         ->label('Arrival time'),
 
-                                    Components\Select::make('supplier_id')
-                                        ->native(false)
-                                        ->relationship('supplier', 'name')
-                                        ->label('Postavshik'),
-
-                                    Components\Textarea::make('comment')->label('Comment'),
+                                    Components\TextInput::make('arrival_number')
+                                        ->label('Arrival reys number'),
                                 ]),
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),

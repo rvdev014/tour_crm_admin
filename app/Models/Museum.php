@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property string $name
  * @property string $inn
+ * @property string $legal_name
  * @property int $country_id
  * @property int $city_id
  * @property float $price_per_person
@@ -29,6 +30,7 @@ class Museum extends Model
     protected $fillable = [
         'name',
         'inn',
+        'legal_name',
         'country_id',
         'city_id',
         'price_per_person',

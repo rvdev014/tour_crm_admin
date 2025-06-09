@@ -21,6 +21,8 @@ class CityResource extends Resource
     protected static ?int $navigationSort = 12;
     protected static ?string $navigationGroup = 'Settings';
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     public static function form(Form $form): Form
     {
         return $form

@@ -38,7 +38,7 @@ class DaysRelationManager extends RelationManager
                             }
 
                             /** @var TourDay $lastDay */
-                            $lastDay = $this->ownerRecord->days()->latest('date')->first();
+                            $lastDay = $this->ownerRecord->daysNormal()->latest('date')->first();
                             if ($lastDay) {
                                 return $lastDay->date->addDay();
                             }
@@ -115,8 +115,11 @@ class DaysRelationManager extends RelationManager
                                 ->searchable()
                                 ->preload()
                                 ->options(fn($get) => TourService::getCities())
+                                ->formatStateUsing(function($get) {
+                                    return $get('../../city_id') ?? null;
+                                })
                                 ->reactive()
-                                ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
+//                                ->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
                         ]),
 
                         // Hotel
@@ -405,7 +408,7 @@ class DaysRelationManager extends RelationManager
                         // Flight
                         Components\Fieldset::make('Flight info')->schema([
 
-                            Components\Grid::make(3)->schema([
+                            Components\Grid::make(4)->schema([
                                 self::getExpensePriceInput(),
 
                                 Components\TextInput::make('plane_route'),
@@ -418,19 +421,25 @@ class DaysRelationManager extends RelationManager
                                     ->searchable()
                                     ->preload()
                                     ->label('Status'),
+
+                                Components\Textarea::make('comment')
+                                    ->label('Comment'),
                             ]),
 
-                            Components\Grid::make(3)->schema([
+                            Components\Grid::make(4)->schema([
                                 Components\TimePicker::make('departure_time')
                                     ->seconds(false)
                                     ->label('Departure time'),
+
+                                Components\TextInput::make('departure_number')
+                                    ->label('Departure reys number'),
 
                                 Components\DateTimePicker::make('arrival_time')
                                     ->seconds(false)
                                     ->label('Arrival time'),
 
-                                Components\Textarea::make('comment')
-                                    ->label('Comment'),
+                                Components\TextInput::make('arrival_number')
+                                    ->label('Arrival reys number'),
                             ]),
 
                         ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),

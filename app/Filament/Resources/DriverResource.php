@@ -2,20 +2,18 @@
 
 namespace App\Filament\Resources;
 
-use Illuminate\Database\QueryException;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Notifications\Notification;
-use Filament\Support\Facades\FilamentIcon;
 use App\Filament\Resources\DriverResource\Pages;
 use App\Filament\Resources\DriverResource\RelationManagers;
 use App\Models\Driver;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Facades\FilamentIcon;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class DriverResource extends Resource
@@ -25,6 +23,19 @@ class DriverResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-truck';
     protected static ?int $navigationSort = 10;
     protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'phone', 'chat_id'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Phone' => $record->phone,
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -90,20 +101,19 @@ class DriverResource extends Resource
                         ->requiresConfirmation()
                         ->action(function ($records) {
                             try {
-                                $records->each(fn (Model $record) => $record->delete());
+                                $records->each(fn(Model $record) => $record->delete());
 
                                 Notification::make()
                                     ->title('Success')
                                     ->body('Drivers were successfully deleted.')
                                     ->success()
                                     ->send();
-
                             } catch (QueryException $e) {
                                 if ($e->getCode() === '23503') { // Foreign key violation
 
                                     $drivers = Driver::query()->whereIn('id', $e->getBindings())->pluck('name')
                                         ->filter()
-                                        ->map(fn ($name) => "'$name'")
+                                        ->map(fn($name) => "'$name'")
                                         ->join(', ');
 
                                     Notification::make()

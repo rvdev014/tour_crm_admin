@@ -46,6 +46,7 @@ class TourTpsTestResource extends Resource
     protected static ?string $navigationLabel = 'TPS';
     protected static ?string $slug = 'tour-tps-test';
     protected static ?int $navigationSort = 1;
+    protected static ?string $recordTitleAttribute = 'group_number';
 
     public static function getEloquentQuery(): Builder
     {
@@ -158,6 +159,10 @@ class TourTpsTestResource extends Resource
                 ]),
                 Components\Grid::make(4)->schema([
                     Components\TextInput::make('package_name'),
+                    Components\TextInput::make('arrival_number')
+                        ->label('Arrival reys number'),
+                    Components\TextInput::make('departure_number')
+                        ->label('Departure reys number'),
                     Components\Textarea::make('comment'),
                 ]),
             ]),

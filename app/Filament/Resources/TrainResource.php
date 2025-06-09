@@ -20,6 +20,7 @@ class TrainResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
     protected static ?int $navigationSort = 9;
     protected static ?string $navigationGroup = 'Manual';
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Form $form): Form
     {

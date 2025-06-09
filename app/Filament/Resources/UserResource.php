@@ -20,6 +20,20 @@ class UserResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?int $navigationSort = 9;
     protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'role'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Email' => $record->email,
+            'Role' => $record->role === 0 ? 'Admin' : 'Operator'
+        ];
+    }
 
     public static function getEloquentQuery(): Builder
     {

@@ -17,6 +17,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -26,6 +27,34 @@ class TransferResource extends Resource
     protected static ?string $model = Transfer::class;
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
     protected static ?int $navigationSort = 3;
+    protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'id',
+            'group_number',
+            'company.name',
+            'place_of_submission',
+            'route',
+            'mark',
+            'nameplate'
+        ];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
+    {
+        return 'Transfer #' . $record->id . ", $record->pax pax";
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Company' => $record->company?->name ?? 'N/A',
+            'Pickup Location' => $record->place_of_submission ?? 'N/A',
+            'Date & Time' => $record->date_time?->format('d.m.Y H:i') ?? 'N/A',
+        ];
+    }
 
     public static function canEdit(Model $record): bool
     {
