@@ -49,6 +49,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property float $expenses_total
  * @property float $income
  * @property float $price
+ * @property float $total_price
  * @property float $guide_price
  * @property float $transport_price
  * @property CurrencyEnum $price_currency
@@ -205,17 +206,25 @@ class Tour extends Model
         return $this->pax + $this->leader_pax;
     }
 
-    public function saveExpensesTotal(): void
+    public function saveExpensesTotal($withTotalPrice = false): void
     {
         if ($this->isCorporate()) {
             $expensesTotal = ExpenseService::updateExpensesPricesCorporate($this);
             $this->update(['expenses_total' => $expensesTotal]);
         } else {
+
+            if ($withTotalPrice) {
+                $totalPrice = round($this->price_result * $this->getTotalPax(), 2);
+            } else {
+                $totalPrice = $this->total_price;
+            }
+
             $expensesTotal = ExpenseService::updateExpensesPricesTps($this);
             $expensesTotal = $expensesTotal + $this->guide_price_result;
             $this->update([
                 'expenses_total' => $expensesTotal,
-                'income' => $this->price_result - $expensesTotal,
+                'total_price' => $totalPrice,
+                'income' => $totalPrice - $expensesTotal,
             ]);
         }
     }

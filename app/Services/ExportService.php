@@ -117,7 +117,7 @@ class ExportService
     public static function getThirdTable(string $startLetter, int $startRow, Worksheet $sheet, Tour $tour): array
     {
         $operator = "-";
-        $profit = $tour->price_result - $tour->expenses_total;
+        $profit = $tour->income;
         $operatorProfit = 0;
         $createdBy = $tour->createdBy;
         $operatorPercent = '0';
@@ -131,7 +131,7 @@ class ExportService
 
         $currency = ExpenseService::getUsdToUzsCurrency();
 
-        $payment = round($tour->price_result / $currency->rate, 2);
+        $payment = round($tour->total_price / $currency->rate, 2);
         $expensesTotal = round($tour->expenses_total / $currency->rate, 2);
         $profit = round($profit / $currency->rate, 2);
         $grandProfit = round($grandProfit / $currency->rate, 2);

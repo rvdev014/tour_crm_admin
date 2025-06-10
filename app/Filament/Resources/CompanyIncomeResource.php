@@ -152,7 +152,7 @@ class CompanyIncomeResource extends Resource
                         if ($record->isCorporate()) {
                             $price = $record->expenses_total;
                         } else {
-                            $price = $record->price_result;
+                            $price = $record->total_price;
                         }
                         return TourService::formatMoney($price) . ' ' . CurrencyEnum::UZS->getSymbol();
                     })

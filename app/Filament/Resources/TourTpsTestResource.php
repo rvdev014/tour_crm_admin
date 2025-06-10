@@ -401,12 +401,11 @@ class TourTpsTestResource extends Resource
                     ->sortable(),
                 Columns\TextColumn::make('status')
                     ->badge(),
-                Columns\TextColumn::make('price')
+                Columns\TextColumn::make('total_price')
                     ->formatStateUsing(function($record, $state) {
                         /** @var Tour $record */
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($record->price_result) . ' ' . ExpenseService::getMainCurrency()?->from?->getSymbol();
-//                            return TourService::formatMoney($state) . ' ' . $record->price_currency?->getSymbol();
+                            return TourService::formatMoney($record->total_price) . ' ' . ExpenseService::getMainCurrency()?->from?->getSymbol();
                         }
 
                         return '-';

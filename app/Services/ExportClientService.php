@@ -34,7 +34,7 @@ class ExportClientService
         $currencyUsd = ExpenseService::getUsdToUzsCurrency();
 
         $pax = max(1, $tour->pax + $tour->leader_pax);
-        $paxPriceTotal = round($tour->price_result / $currencyUsd->rate, 2);
+        $paxPriceTotal = round($tour->total_price / $currencyUsd->rate, 2);
         $paxPrice = round($paxPriceTotal / $pax, 2);
 
         $extraPax = $pax;
