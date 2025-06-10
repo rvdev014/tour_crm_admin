@@ -123,6 +123,7 @@ class ExportHotelService
                 'rooming' => $roomAmounts,
                 'arrivals' => [],
                 'departures' => [],
+                'operator' => $tour->createdBy->name ?? '-',
             ];
 
             $existingHotel = $result->get($hotelExpense->hotel_id);
@@ -132,7 +133,7 @@ class ExportHotelService
                     continue;
                 }
 
-                // If the hotel is different from the previous day, but exists in the result, it's a new arrival
+                // If the hotel is different from the previous day, it's a new arrival
                 $existingHotel['arrivals'][] = $date->format('d.m.Y H:i');
                 $result->put($hotelExpense->hotel_id, $existingHotel);
 
@@ -295,9 +296,13 @@ class ExportHotelService
             $label = ++$index . ExportHotelService::getNumberSuffix($index) . " arrival\n";
             return $label . Carbon::parse($arrival)->format('d.m.Y');
         })->implode("\n\n");
-
         $arrivalTimesStr = $arrivals->map(fn($arrival) => Carbon::parse($arrival)->format('H:i'))->implode("\n\n");
-        $departuresStr = $departures->map(fn($arrival) => Carbon::parse($arrival)->format('d.m.Y'))->implode("\n\n");
+
+        $departuresStr = $departures->map(function ($departure, $index) {
+            $label = ++$index . ExportHotelService::getNumberSuffix($index) . " check-out\n";
+            return $label . Carbon::parse($departure)->format('d.m.Y');
+        })->implode("\n\n");
+        $departureTimesStr = $departures->map(fn($departure) => Carbon::parse($departure)->format('H:i'))->implode("\n\n");
 
         $placeholders = [
             'date' => Carbon::parse($hotelItem['date'])->format('d-M'),
@@ -310,7 +315,8 @@ class ExportHotelService
             'arrivals' => $arrivalsStr,
             'arrivalTimes' => $arrivalTimesStr,
             'outs' => $departuresStr,
-            'outsTime' => '',
+            'outsTime' => $departureTimesStr,
+            'operator' => $hotelItem['operator'],
         ];
         foreach ($placeholders as $placeholder => $value) {
             $templateProcessor->setValue($placeholder, $value);
