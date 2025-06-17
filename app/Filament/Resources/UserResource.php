@@ -37,7 +37,7 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('role', '!=', 0);
+        return parent::getEloquentQuery();//->where('id', '!=', auth()->id());
     }
 
     public static function form(Form $form): Form
