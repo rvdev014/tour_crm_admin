@@ -12,6 +12,7 @@ use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
 use Filament\Tables\Table;
 use App\Enums\PaymentStatus;
+use App\Enums\InvoiceStatus;
 use App\Services\TourService;
 use App\Models\CompanyExpense;
 use App\Models\TourDayExpense;
@@ -207,7 +208,7 @@ class CompanyExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('expense_date')
                     ->getStateUsing(function(TourDayExpense $record) {
                         $date = $record->tourDay->date ?? $record->date;
-                        return $date->format('d/m/Y');
+                        return $date->format('d.m.Y');
                     })
                     ->searchable(),
 
@@ -266,6 +267,9 @@ class CompanyExpenseResource extends Resource
 
                 Tables\Columns\SelectColumn::make('payment_status')
                     ->options(PaymentStatus::class),
+
+                Tables\Columns\SelectColumn::make('invoice_status')
+                    ->options(InvoiceStatus::class),
 
                 Tables\Columns\TextColumn::make('passengers')
                     ->label('Passengers FIO')

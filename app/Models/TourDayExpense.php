@@ -6,6 +6,7 @@ use App\Enums\CurrencyEnum;
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\PaymentStatus;
+use App\Enums\InvoiceStatus;
 use App\Observers\TourDayExpenseObserver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $city_id
  * @property ExpenseType $type
  * @property PaymentStatus $payment_status
+ * @property InvoiceStatus $invoice_status
  *
  * Common fields
  * @property float $price
@@ -59,6 +61,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $transport_comfort_level
  * @property int $from_city_id
  * @property int $to_city_id
+ * @property string $nameplate
  * @property string $transport_driver_ids
  * @property string $transport_time
  * @property string $transport_route
@@ -127,6 +130,7 @@ class TourDayExpense extends Model
         'date' => 'date',
         'type' => ExpenseType::class,
         'payment_status' => PaymentStatus::class,
+        'invoice_status' => InvoiceStatus::class,
         'car_ids' => 'array',
         'transport_driver_ids' => 'array',
         'museum_ids' => 'array',

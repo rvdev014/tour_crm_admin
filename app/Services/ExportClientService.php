@@ -7,6 +7,7 @@ use App\Models\Tour;
 use App\Models\TourDay;
 use App\Models\TourDayExpense;
 use App\Models\TourRoomType;
+use PhpOffice\PhpSpreadsheet\Exception;
 use Illuminate\Database\Eloquent\Collection;
 use NumberFormatter;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -14,6 +15,9 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ExportClientService
 {
+    /**
+     * @throws Exception
+     */
     public static function getExport(Tour $tour): Spreadsheet
     {
         $templateFile = __DIR__ . '/Templates/Invoice_client.xlsx';
@@ -63,11 +67,11 @@ class ExportClientService
         );
 
         $placeholders = [
-            '{date}' => now()->format('d/m/Y'),
+            '{date}' => now()->format('d.m.Y'),
             '{groupNumber}' => $tour->group_number,
             '{personsCount}' => $tour->pax . '+' . "$tourLeaderPax" . ' FOC',
-            '{arrivalDate}' => $tour->start_date->format('m/d/Y'),
-            '{departureDate}' => $tour->end_date->format('m/d/Y'),
+            '{arrivalDate}' => $tour->start_date->format('d.m.Y'),
+            '{departureDate}' => $tour->end_date->format('d.m.Y'),
             '{expensesList}' => $expensesList->implode("\n"),
 
             '{company}' => $tour->company->name,
@@ -120,6 +124,12 @@ class ExportClientService
         $sheet->getRowDimension(13)->setRowHeight($roomingHeight);
         $sheet->getRowDimension(14)->setRowHeight($roomingHeight);
         $sheet->getRowDimension(15)->setRowHeight($roomingHeight);
+
+        if (empty($tourLeaderPax) || $tourLeaderPax == 0) {
+//            $sheet->removeRow(19);
+//            $sheet->removeRow(20, 2);
+            $sheet->removeRow(20);
+        }
 
         return $spreadsheet;
     }

@@ -58,7 +58,7 @@ class TransferResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        if ($record->status == ExpenseStatus::Done) {
+        if ($record->status == ExpenseStatus::Done && !auth()->user()->isAdmin()) {
             return false;
         }
         return true;

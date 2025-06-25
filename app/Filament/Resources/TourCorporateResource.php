@@ -105,9 +105,18 @@ class TourCorporateResource extends Resource
                 ->collapsible()
                 ->itemLabel(function ($get, $uuid) {
                     $current = Arr::get($get('groups'), $uuid);
+
+                    $expenseTypes = [];
+                    foreach ($current['expenses'] ?? [] as $expense) {
+                        $expenseType = $expense['type'] ?? null;
+                        if ($expenseType && !array_key_exists($expenseType, $expenseTypes)) {
+                            $expenseTypes[$expenseType] = ExpenseType::from($expenseType)->getLabel();
+                        }
+                    }
+
                     $index = array_search($uuid, array_keys($get('groups'))) ?? 0;
                     $index++;
-                    return "Group $index";
+                    return 'Expenses: ' . (!empty($expenseTypes) ? implode(', ', $expenseTypes) : '');
                 })
                 ->relationship('groups')
                 ->addActionLabel('Add group')
@@ -291,7 +300,7 @@ class TourCorporateResource extends Resource
                             // Transport
                             Components\Fieldset::make('Transport info')->schema([
 
-                                Components\Grid::make(3)->schema([
+                                Components\Grid::make(4)->schema([
                                     /*Components\Select::make('transport_driver_ids')
                                         ->label('Drivers')
                                         ->multiple()
@@ -308,9 +317,11 @@ class TourCorporateResource extends Resource
                                         ->options(TransportType::class),
                                     Components\TextInput::make('transport_place')
                                         ->label('Pickup location'),
+                                    Components\TextInput::make('nameplate')
+                                        ->label('Табличка'),
                                 ]),
 
-                                Components\Grid::make(3)->schema([
+                                Components\Grid::make(4)->schema([
                                     Components\TextInput::make('transport_route')
                                         ->label('Destination'),
                                     Components\Select::make('to_city_id')
