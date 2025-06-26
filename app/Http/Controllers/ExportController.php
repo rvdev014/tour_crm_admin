@@ -110,7 +110,7 @@ class ExportController extends Controller
             $templateProcessor = ExportHotelService::getReplacedTemplateFirst($hotelItem);
             $templateProcessor->saveAs($fileName);
 
-            $fileName = ExportService::getTempDir("all_reports/hotels2") . '/' . $hotelName . '.docx';
+            $fileName = ExportService::getTempDir("all_reports/client_vouchers") . '/' . $hotelName . '.docx';
             $templateProcessor = ExportHotelService::getReplacedTemplateSecond($hotelItem);
             $templateProcessor->saveAs($fileName);
         }
@@ -147,9 +147,9 @@ class ExportController extends Controller
             }
 
             // Add Hotels folder
-            $zip->addEmptyDir('Hotels2');
-            foreach (glob($tempDir . "/hotels2/*.docx") as $file) {
-                $zip->addFile($file, 'Hotels2/' . basename($file));
+            $zip->addEmptyDir('Client Vouchers');
+            foreach (glob($tempDir . "/client_vouchers/*.docx") as $file) {
+                $zip->addFile($file, 'Client Vouchers/' . basename($file));
             }
 
             $zip->close();

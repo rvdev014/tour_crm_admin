@@ -277,7 +277,7 @@ class ExportHotelService
 
     public static function getTemplateSecondPath(): string
     {
-        return __DIR__ . '/Templates/Report_hotel2.docx';
+        return __DIR__ . '/Templates/Client_voucher.docx';
     }
 
     /**

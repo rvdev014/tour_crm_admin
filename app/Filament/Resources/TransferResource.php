@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Models\User;
 use App\Enums\ExpenseStatus;
 use App\Enums\TransportType;
 use App\Filament\Resources\TransferResource\Pages;
@@ -62,6 +63,17 @@ class TransferResource extends Resource
             return false;
         }
         return true;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var User $user */
+        $user = auth()->user();
+        if (!$user->isAdmin()) {
+            return parent::getEloquentQuery()->where('created_by', $user->id);
+        }
+
+        return parent::getEloquentQuery();
     }
 
     public static function form(Form $form): Form
@@ -185,13 +197,20 @@ END,
                 Tables\Filters\Filter::make('today')
                     ->columnSpanFull()
                     ->form([
-                        Components\Grid::make(6)->schema([
+                        Components\Grid::make(7)->schema([
                             Components\Checkbox::make('today')
                                 ->label('Today')
                                 ->default(false),
                             Components\Checkbox::make('tomorrow')
                                 ->label('Tomorrow')
                                 ->default(false),
+                            Components\Select::make('driver_ids')
+                                ->label('Drivers')
+                                ->options(TourService::getDrivers())
+                                ->native(false)
+                                ->multiple()
+                                ->searchable()
+                                ->preload(),
                             Components\Select::make('companies')
                                 ->native(false)
                                 ->multiple()
@@ -233,6 +252,9 @@ END,
                         if ($data['companies']) {
                             $query = $query->whereIn('company_id', $data['companies']);
                         }
+                        if ($data['driver_ids']) {
+                            $query = $query->whereJsonContains('driver_ids', $data['driver_ids']);
+                        }
                         if ($data['date_from']) {
                             $query = $query->whereDate('date_time', '>=', $data['date_from']);
                         }
@@ -272,6 +294,12 @@ END,
                             $companies = Company::query()->whereIn('id', $data['companies'])->get();
                             $companyNames = $companies->map(fn($company) => $company->name)->join(', ');
                             $indicators['company_id'] = $companyNames . " ({$query->count()})";
+                        }
+                        if ($data['driver_ids']) {
+                            $query = $query->whereJsonContains('driver_ids', $data['driver_ids']);
+                            $drivers = Driver::query()->whereIn('id', $data['driver_ids'])->get();
+                            $driverNames = $drivers->map(fn($driver) => $driver->name)->join(', ');
+                            $indicators['driver_ids'] = $driverNames . " ({$query->count()})";
                         }
                         if ($data['date_from']) {
                             $indicators['date_from'] = 'Order from ' . Carbon::parse(
