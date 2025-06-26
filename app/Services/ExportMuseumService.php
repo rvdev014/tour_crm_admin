@@ -69,7 +69,7 @@ class ExportMuseumService
         $currentRow = $startRow;
 
         ////////////////////// HEADER //////////////////////
-        $textContent = "EAST ASIA POINT TRAVEL & TOURS\n115A, Buyuk Ipak Yoli Street, 100077 Tashkent, Uzbekistan\nPhone/Fax: +99871 268 77 52 E-mail: info@asia-point.uz";
+        $textContent = "EAST ASIA POINT TRAVEL & TOURS\n115A, Buyuk Ipak Yoli Street, 100077 Tashkent, Uzbekistan\nPhone/Fax: +99897 720 77 52 E-mail: info@asia-point.uz";
         $sheet->setCellValue("A$startRow", $textContent);
         $sheet->mergeCells("A$startRow:$endColumn" . $startRow);
 

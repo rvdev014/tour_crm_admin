@@ -260,6 +260,16 @@ class TourService
         return ($toursTableSequence?->next_id ?? 1);
     }
 
+    public static function transferNextId(): int
+    {
+        if (DB::table('transfers')->count() == 0) {
+            return 1;
+        }
+
+        $transfersTableSequence = DB::selectOne("SELECT last_value + 1 AS next_id FROM transfers_id_seq;");
+        return ($transfersTableSequence?->next_id ?? 1);
+    }
+
     public static function getGroupNumber(TourType $tourType): string
     {
         $userName = auth()->user()->name;

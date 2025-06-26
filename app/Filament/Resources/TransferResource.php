@@ -33,7 +33,8 @@ class TransferResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return [
-            'id',
+//            'id',
+            'number',
             'group_number',
             'company.name',
             'place_of_submission',
@@ -45,7 +46,7 @@ class TransferResource extends Resource
 
     public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
     {
-        return 'Transfer #' . $record->id . ", $record->pax pax";
+        return 'Transfer #' . $record->number . ", $record->pax pax";
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
@@ -146,13 +147,11 @@ class TransferResource extends Resource
                         ->label('Marka'),
                     Forms\Components\TextInput::make('nameplate')
                         ->label('Табличка'),
-                    Forms\Components\TextInput::make('sell_price')->numeric(),
+                    Forms\Components\TextInput::make('requested_by'),
                 ]),
 
                 Forms\Components\Grid::make(4)->schema([
-                    /*Forms\Components\TextInput::make('price')
-                        ->label('Sell price')
-                        ->numeric(),*/
+                    Forms\Components\TextInput::make('sell_price')->numeric(),
                     Forms\Components\TextInput::make('buy_price')->numeric(),
                     Forms\Components\Textarea::make('comment'),
                 ]),
@@ -316,11 +315,7 @@ END,
                     }),
             ], layout: FiltersLayout::AboveContent)
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label('Number')
-                    ->formatStateUsing(function ($record) {
-                        return $record->getNumber();
-                    }),
+                Tables\Columns\TextColumn::make('number')->label('Number'),
 
                 Tables\Columns\TextColumn::make('tour_id')
                     ->label('Tour')
@@ -380,6 +375,8 @@ HTML;
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('requested_by'),
 
                 Tables\Columns\TextColumn::make('createdBy.name'),
 

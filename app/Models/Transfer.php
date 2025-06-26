@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use App\Enums\TransportType;
 use App\Enums\ExpenseStatus;
+use App\Services\TourService;
 use App\Observers\TransferObserver;
 use App\Enums\TransportComfortLevel;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property int $status
  * @property int $pax
  * @property int $tour_day_expense_id
+ * @property string $requested_by
  * @property string $comment
  * @property array $old_values
  * @property Carbon $created_at
@@ -70,18 +72,9 @@ class Transfer extends Model
     protected static function booted(): void
     {
         static::creating(function(Transfer $transfer) {
+            $transfer->number = 1000 + TourService::transferNextId();
             $transfer->created_by = auth()->id();
         });
-    }
-
-    public function getNumAttribute(): string
-    {
-        return 1000 + $this->id;
-    }
-
-    public function getNumber(): float|string
-    {
-        return 1000 + $this->id;
     }
 
     public function company(): BelongsTo
