@@ -228,6 +228,7 @@ class TourCorporateResource extends Resource
                                         ->reactive()
                                         ->required(),
                                     Components\TimePicker::make('hotel_checkin_time')
+                                        ->required()
                                         ->seconds(false)
                                         ->reactive()
                                         ->afterStateUpdated(function ($get, $set) {
@@ -242,6 +243,7 @@ class TourCorporateResource extends Resource
                                         })
                                         ->label('Check-in time'),
                                     Components\DateTimePicker::make('hotel_checkout_date_time')
+                                        ->required()
                                         ->seconds(false)
                                         ->afterStateUpdated(function ($get, $set) {
                                             $set(

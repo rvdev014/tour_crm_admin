@@ -123,7 +123,7 @@ class ExportHotelService
                     $date->format('d.m.Y H:i')
                 ],
                 'departures' => [
-                    $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time)->format('d.m.Y H:i')
+                    $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time ?? '00:00')->format('d.m.Y H:i')
                 ],
                 'operator' => $tour->createdBy->name ?? '-',
             ];
@@ -231,7 +231,7 @@ class ExportHotelService
                     $date->format('d.m.Y H:i')
                 ],
                 'departures' => [
-                    $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time)->format('d.m.Y H:i')
+                    $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time ?? '00:00')->format('d.m.Y H:i')
                 ],
             ];
 

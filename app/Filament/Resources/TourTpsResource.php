@@ -355,9 +355,11 @@ class TourTpsResource extends Resource
                                         ->required()
                                         ->label('Status'),
                                     Components\TimePicker::make('hotel_checkin_time')
+                                        ->required()
                                         ->seconds(false)
                                         ->label('Check-in time'),
                                     Components\TimePicker::make('hotel_checkout_time')
+                                        ->required()
                                         ->seconds(false)
                                         ->label('Check-out time'),
                                 ]),
