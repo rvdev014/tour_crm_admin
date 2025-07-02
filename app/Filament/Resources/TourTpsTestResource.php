@@ -116,6 +116,9 @@ class TourTpsTestResource extends Resource
                         })
                         ->reactive()
                         ->required(),
+                    Components\TextInput::make('arrival_number')
+                        ->label('Arrival reys number'),
+
                     Components\DateTimePicker::make('end_date')
                         ->displayFormat('d.m.Y H:i')
                         ->label('Departure time')
@@ -124,13 +127,15 @@ class TourTpsTestResource extends Resource
                         ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay()->format('d.m.Y H:i'))
                         ->reactive()
                         ->required(),
+                    Components\TextInput::make('departure_number')
+                        ->label('Departure reys number'),
+                ]),
+                Components\Grid::make(4)->schema([
                     Components\TextInput::make('pax')
                         ->required()
                         ->numeric(),
                     Components\TextInput::make('leader_pax')
                         ->numeric(),
-                ]),
-                Components\Grid::make(4)->schema([
                     Components\TextInput::make('price')
                         ->label(fn($get) => 'Price (' . ($get('price_currency') ?? 'UZS') . ')')
                         ->suffixAction(
@@ -144,6 +149,8 @@ class TourTpsTestResource extends Resource
                         ->numeric(),
                     Components\TextInput::make('single_supplement_price')
                         ->numeric(),
+                ]),
+                Components\Grid::make(4)->schema([
                     Components\Select::make('payment_type')
                         ->native(false)
                         ->searchable()
@@ -156,13 +163,7 @@ class TourTpsTestResource extends Resource
                         ->preload()
                         ->options(PaymentStatus::class)
                         ->reactive(),
-                ]),
-                Components\Grid::make(4)->schema([
                     Components\TextInput::make('package_name'),
-                    Components\TextInput::make('arrival_number')
-                        ->label('Arrival reys number'),
-                    Components\TextInput::make('departure_number')
-                        ->label('Departure reys number'),
                     Components\Textarea::make('comment'),
                 ]),
             ]),

@@ -1,5 +1,5 @@
 @php use App\Models\TourDayExpense; @endphp
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,59 +8,138 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
+            font-size: 14px;
         }
 
-        .email-container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #ffffff;
-            border: 1px solid #dddddd;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .email-header {
-            background-color: #4CAF50;
-            color: #ffffff;
+        .header {
             text-align: center;
-            padding: 15px;
+            margin-bottom: 10px;
         }
 
-        .email-body {
-            padding: 20px;
-            color: #333333;
-        }
-
-        .email-body p {
-            margin: 0 0 10px;
-        }
-
-        .email-footer {
-            background-color: #f1f1f1;
-            text-align: center;
-            padding: 10px;
+        .contact {
             font-size: 12px;
-            color: #888888;
+            text-align: center;
+        }
+
+        .section {
+            margin: 20px 0;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .reservation-box {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th {
+            background-color: #f3f3f3;
+        }
+
+        th, td {
+            padding: 5px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 20px;
         }
     </style>
 </head>
-<body>
 @php
     /** @var $expense TourDayExpense */
+    /** @var $placeholders array */
+
+$rooming = $placeholders['roomingArr'];
 @endphp
-<div class="email-container">
-    <div class="email-header">
-        <h1>Visit Details</h1>
+<body>
+
+<div style="width: 100%; max-width: 900px; margin: 0 auto; padding: 10px;">
+
+    <div class="header">
+        <img src="{{ asset('img/logo.jpg') }}" alt="Logo" height="50"><br>
+        <strong>EAST ASIA POINT TRAVEL & TOURS</strong><br>
     </div>
-    <div class="email-body">
-        <p><strong>Date:</strong> {{ $date }}</p>
-        <p><strong>Pax:</strong> {{ $totalPax }}</p>
-        <p><strong>Comment:</strong> {{ $expense->comment }}</p>
+
+    <div class="contact">
+        38, 91/2 Green Park, Makhtumkuli str., 100047 Tashkent, Uzbekistan<br>
+        Phone: +998977207752 &nbsp; | &nbsp; Email: info@asia-point.uz &nbsp; | &nbsp;
+        Website: <a href="https://www.letsgouzbekistan.com">www.letsgouzbekistan.com</a>
     </div>
+
+    <div class="section">
+        <p><strong>Отдел бронирования / Reservation Department</strong></p>
+        <p><strong>Дата / Date:</strong> {{ $placeholders['date'] }}</p>
+        <p><strong>{{ $placeholders['hotel'] }}</strong></p>
+    </div>
+
+    <div class="reservation-box">FINAL RESERVATION</div>
+
+    <div class="section">
+        <p><strong>Уважаемые коллеги,<br>Dear Sir/Madam,</strong></p>
+        <p>Просим Вас внести изменения и забронировать нижеследующие номера.<br>
+            We are pleased to send the below booking to your esteemed hotel:</p>
+
+        <p><strong>Ref#:</strong> {{ $placeholders['groupNum'] }} &nbsp;&nbsp;&nbsp; <strong>Кол-во
+                (Pax):</strong> {{ $placeholders['pax'] }}</p>
+        {{--    <p><strong>Single:</strong> 1 &nbsp;&nbsp; <strong>Double:</strong> 10</p>--}}
+        <p>{!! $rooming->map(fn($amount, $roomType) => "<strong>{$roomType}:</strong> {$amount}")->implode('&nbsp;&nbsp;') !!}</p>
+
+        <table>
+            <thead>
+            <tr>
+                <th>№</th>
+                <th>Номер извещения</th>
+                <th>ФИО туристов / Гостиница</th>
+                <th>Заезд (Check-in)</th>
+                <th>Время заезда (Arr.Time)</th>
+                <th>Выезд (Check-out)</th>
+                <th>Время выезда (Dep.Time)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>{{ $placeholders['groupNum'] }} {{ $placeholders['country'] }}</td>
+                <td>{{ $placeholders['hotel'] }} {{ $placeholders['city'] }}</td>
+                <td>{{ $placeholders['arrivals'] }}</td>
+                <td>{{ $placeholders['arrivalTimes'] }}</td>
+                <td>{{ $placeholders['outs'] }}</td>
+                <td>{{ $placeholders['outsTime'] }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Заранее спасибо и жду Ваших подтверждений<br>
+            /Thanks in advance and looking forward to your written confirmation).</p>
+        <p>Оплату гарантируем.<br>We guarantee the payment.</p>
+        <p>
+            <b>С уважением, With best regards</b>
+            <br>
+            <b>{{ $placeholders['operator'] }}</b>
+            <br>
+            <b>+998977207752</b>
+            <br>
+            <b>+998333377752</b>
+        </p>
+    </div>
+
 </div>
+
 </body>
-</html>

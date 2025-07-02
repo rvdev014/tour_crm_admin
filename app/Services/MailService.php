@@ -77,11 +77,6 @@ class MailService
                     continue; // Skip if hotel data is not available
                 }
 
-                $hotelReportFile = ExportHotelService::saveReport(
-                    $hotelsData->get($hotel->id),
-                    $tempDir
-                );
-
                 $firstArrivalTime = Carbon::parse(collect($hotelItem['arrivals'])->first())->format('d-m');
                 $lastDepartureTime = Carbon::parse(collect($hotelItem['departures'])->last())->format('d-m');
 
@@ -96,7 +91,7 @@ class MailService
                     $date,
                     $expense,
                     $tour->getTotalPax(),
-                    [$hotelReportFile]
+                    $hotelsData->get($hotel->id)
                 );
                 Mail::to($hotel->email)->send($mailable);
             }

@@ -300,7 +300,15 @@ class ExportHotelService
     public static function getReplacedTemplateFirst($hotelItem): TemplateProcessor
     {
         $templateProcessor = new TemplateProcessor(self::getTemplateFirstPath());
+        foreach (self::getPlaceholders($hotelItem) as $placeholder => $value) {
+            $templateProcessor->setValue($placeholder, $value);
+        }
 
+        return $templateProcessor;
+    }
+
+    public static function getPlaceholders($hotelItem): array
+    {
         $rooming = collect($hotelItem['rooming'] ?? []);
         $arrivals = collect($hotelItem['arrivals'] ?? []);
         $departures = collect($hotelItem['departures'] ?? []);
@@ -319,7 +327,7 @@ class ExportHotelService
             "\n\n"
         );
 
-        $placeholders = [
+        return [
             'date' => Carbon::parse($hotelItem['date'])->format('d-M'),
             'country' => $hotelItem['country'],
             'city' => $hotelItem['city'],
@@ -327,17 +335,13 @@ class ExportHotelService
             'groupNum' => $hotelItem['groupNum'],
             'hotel' => $hotelItem['hotelName'],
             'rooming' => $rooming->map(fn($amount, $roomType) => "$roomType: $amount")->implode("\t\t\t"),
+            'roomingArr' => $rooming,
             'arrivals' => $arrivalsStr,
             'arrivalTimes' => $arrivalTimesStr,
             'outs' => $departuresStr,
             'outsTime' => $departureTimesStr,
             'operator' => $hotelItem['operator'],
         ];
-        foreach ($placeholders as $placeholder => $value) {
-            $templateProcessor->setValue($placeholder, $value);
-        }
-
-        return $templateProcessor;
     }
 
     /**

@@ -4,6 +4,8 @@ namespace App\Mail;
 
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
+use App\Services\ExportService;
+use App\Services\ExportHotelService;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -19,18 +21,18 @@ class HotelMail extends Mailable
     protected $date;
     protected $expense;
     protected $totalPax;
-    protected $attachmentPaths = [];
+    protected $hotelData = [];
 
     /**
      * Create a new message instance.
      */
-    public function __construct($subject, $date, $expense, $totalPax, $attachmentPaths = [])
+    public function __construct($subject, $date, $expense, $totalPax, $hotelData = [])
     {
         $this->subject = $subject;
         $this->date = $date;
         $this->expense = $expense;
         $this->totalPax = $totalPax;
-        $this->attachmentPaths = $attachmentPaths;
+        $this->hotelData = $hotelData;
     }
 
     /**
@@ -54,6 +56,7 @@ class HotelMail extends Mailable
                 'date' => Carbon::parse($this->date)->format('d-m-Y'),
                 'expense' => $this->expense,
                 'totalPax' => $this->totalPax,
+                'placeholders' => ExportHotelService::getPlaceholders($this->hotelData)
             ],
         );
     }
@@ -65,10 +68,11 @@ class HotelMail extends Mailable
      */
     public function attachments(): array
     {
-        $result = [];
-        foreach ($this->attachmentPaths as $attachmentPath) {
-            $result[] = Attachment::fromPath($attachmentPath);
-        }
-        return $result;
+        $tempDir = ExportService::getTempDir('hotel_reports');
+        $hotelReportFile = ExportHotelService::saveReport($this->hotelData, $tempDir);
+
+        return [
+            Attachment::fromPath($hotelReportFile)
+        ];
     }
 }
