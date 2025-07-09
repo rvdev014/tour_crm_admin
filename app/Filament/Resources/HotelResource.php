@@ -83,10 +83,11 @@ class HotelResource extends Resource
                         ->relationship('city', 'name')
                         ->options(fn($get) => TourService::getCities($get('country_id'))),
 
-                    Forms\Components\TextInput::make('company_name')->maxLength(255),
                     Forms\Components\TextInput::make('contract_number')->maxLength(255),
+                    Forms\Components\DatePicker::make('contract_date')->native(false),
                 ]),
                 Forms\Components\Grid::make(4)->schema([
+                    Forms\Components\TextInput::make('company_name')->maxLength(255),
                     Forms\Components\TextInput::make('address')->maxLength(255),
                     Forms\Components\Repeater::make('phones')
                         ->relationship('phones')
@@ -129,7 +130,12 @@ class HotelResource extends Resource
                                     ->url("https://t.me/{$record->phone}", true)
                             ];
                         }),*/
-                    Forms\Components\Textarea::make('comment')->maxLength(255),
+                ]),
+
+                Forms\Components\Grid::make()->schema([
+                    Forms\Components\Textarea::make('comment')
+                        ->columnSpan(1)
+                        ->maxLength(255),
                 ]),
 
                 Forms\Components\Repeater::make('periods')

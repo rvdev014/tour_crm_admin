@@ -101,6 +101,8 @@ class TransferResource extends Resource
                         ->relationship('company', 'name')
                         ->required(),
 
+                    Forms\Components\TextInput::make('requested_by'),
+
                     Forms\Components\Select::make('driver_ids')
                         ->label('Drivers')
                         ->options(TourService::getDrivers())
@@ -108,13 +110,13 @@ class TransferResource extends Resource
                         ->multiple()
                         ->searchable()
                         ->preload(),
+                ]),
+
+                Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\TextInput::make('pax')
                         ->label('Pax')
                         ->numeric(),
-                ]),
-
-                Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\Select::make('status')
                         ->native(false)
@@ -133,21 +135,20 @@ class TransferResource extends Resource
 
                     Forms\Components\TextInput::make('place_of_submission')
                         ->label('Pickup Location'),
+                ]),
+
+                Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\DateTimePicker::make('date_time')
                         ->displayFormat('d.m.Y H:i')
 //                        ->native(false)
                         ->seconds(false),
-                ]),
-
-                Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\TextInput::make('route'),
                     Forms\Components\TextInput::make('mark')
                         ->label('Marka'),
                     Forms\Components\TextInput::make('nameplate')
                         ->label('Табличка'),
-                    Forms\Components\TextInput::make('requested_by'),
                 ]),
 
                 Forms\Components\Grid::make(4)->schema([
