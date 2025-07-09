@@ -7,6 +7,7 @@ use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\PaymentStatus;
 use App\Enums\InvoiceStatus;
+use App\Enums\PlaneType;
 use App\Observers\TourDayExpenseObserver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -92,6 +93,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $supplier_id
  * @property string $arrival_number
  * @property string $departure_number
+ * @property PlaneType $plane_type
+ * @property float $plane_service_fee
  *
  * Other
  * @property string $other_name
@@ -137,6 +140,7 @@ class TourDayExpense extends Model
         'museum_item_ids' => 'array',
         'status' => ExpenseStatus::class,
         'price_currency' => CurrencyEnum::class,
+        'plane_type' => PlaneType::class,
     ];
 
     public function tour(): BelongsTo

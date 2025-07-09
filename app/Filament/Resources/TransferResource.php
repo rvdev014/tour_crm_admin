@@ -386,7 +386,11 @@ HTML;
 
                 //                Tables\Columns\TextColumn::make('group_number')->sortable(),
 
-                Tables\Columns\TextColumn::make('price')
+                Tables\Columns\TextColumn::make('sell_price')
+                    ->money()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('buy_price')
                     ->money()
                     ->sortable(),
 

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property string $contract_number
  * @property int $country_id
  * @property int $city_id
  * @property int $booking_cancellation_days
@@ -38,6 +39,7 @@ class Hotel extends Model
 
     protected $fillable = [
         'name',
+        'contract_number',
         'email',
         'country_id',
         'city_id',

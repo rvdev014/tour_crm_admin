@@ -40,7 +40,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property string $place_of_submission
  * @property string $route
  * @property string $passenger
- * // * @property numeric $sell_price
+ * @property numeric $sell_price
  * @property numeric $buy_price
  * @property string $nameplate
  * @property string $mark
@@ -74,6 +74,12 @@ class Transfer extends Model
         static::creating(function(Transfer $transfer) {
             $transfer->number = 1000 + TourService::transferNextId();
             $transfer->created_by = auth()->id();
+        });
+
+        static::updating(function(Transfer $transfer) {
+            if (empty($transfer->number)) {
+                $transfer->number = 1000 + $transfer->id;
+            }
         });
     }
 

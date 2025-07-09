@@ -21,19 +21,26 @@ class ListTransfers extends ListRecords
             ExportAction::make()
                 ->requiresConfirmation()
                 ->exports([
-                    ExcelExport::make()->fromTable()->withColumns([
-                        Column::make('date_time')->heading('Date & Time')->formatStateUsing(function ($state) {
-                            return $state->format('d.m.Y H:i');
-                        }),
-                        Column::make('driver_ids')->heading('Drivers')->formatStateUsing(function ($state) {
-                            if (empty($state)) {
-                                return '-';
-                            }
+                    ExcelExport::make()
+                        ->fromTable()
+                        ->withColumns([
 
-                            $driver = Driver::query()->find($state);
-                            return $driver?->name ?? '-';
-                        }),
-                    ])
+                            Column::make('date_time')
+                                ->heading('Date & Time')
+                                ->formatStateUsing(fn ($state) => $state->format('d.m.Y H:i')),
+
+                            Column::make('driver_ids')
+                                ->heading('Drivers')
+                                ->formatStateUsing(function ($state) {
+                                    if (empty($state)) {
+                                        return '-';
+                                    }
+
+                                    $driver = Driver::query()->find($state);
+                                    return $driver?->name ?? '-';
+                                }),
+
+                        ])
                 ]),
             Actions\CreateAction::make(),
         ];

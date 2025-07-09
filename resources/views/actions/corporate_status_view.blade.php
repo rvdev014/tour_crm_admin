@@ -5,15 +5,14 @@
     use App\Models\TourDayExpense;use App\Models\Transfer;
 
     /** @var Tour $record */
-    $record->loadMissing('days.expenses');
+    $record->loadMissing('groups.expenses');
 @endphp
 
 <div class="custom-table-wrapper">
     <table class="custom-table">
         <thead>
         <tr>
-            <th>Date</th>
-            <th>Cities</th>
+            <th>Passengers</th>
             <th>Hotel</th>
             <th>Guide</th>
             <th>Flight</th>
@@ -24,37 +23,35 @@
             <th>Extra</th>
         </tr>
         </thead>
-        @foreach($record->days as $day)
+        @foreach($record->groups as $group)
 
             @php
-                $hotel = $day->getExpense(ExpenseType::Hotel);
+                $hotel = $group->getExpense(ExpenseType::Hotel);
 
                 if ($record->guide_type == GuideType::Escort) {
                     $guideName = $record->guide_name;
                     $guideStatus = ExpenseStatus::Confirmed;
                 } else {
-                    $expense = $day->getExpense(ExpenseType::Guide);
+                    $expense = $group->getExpense(ExpenseType::Guide);
                     // TODO: Guide
                     $guideName = $expense?->guides->map(fn($guide) => $guide->name)->join(', ');
                     $guideStatus = $expense?->status;
                 }
 
-                $plane = $day->getExpense(ExpenseType::Flight);
-                $train = $day->getExpense(ExpenseType::Train);
+                $flight = $group->getExpense(ExpenseType::Flight);
+                $train = $group->getExpense(ExpenseType::Train);
 
-                $transport = $day->getExpense(ExpenseType::Transport);
+                $transport = $group->getExpense(ExpenseType::Transport);
                 /** @var Transfer $transfer */
                 $transfer = Transfer::query()->where('tour_day_expense_id', $transport?->id)->first();
 
-                $lunch = $day->getExpense(ExpenseType::Lunch);
-                $dinner = $day->getExpense(ExpenseType::Dinner);
-                $extra = $day->getExpense(ExpenseType::Extra);
+                $lunch = $group->getExpense(ExpenseType::Lunch);
+                $dinner = $group->getExpense(ExpenseType::Dinner);
+                $extra = $group->getExpense(ExpenseType::Extra);
             @endphp
 
             <tr>
-                <td>{{ $day->date->format('d.m.Y') }}</td>
-
-                <td>{{ $day->city->name }}</td>
+                <td>{{ $group->passengers?->first()?->name }}</td>
 
                 <td>
                     <div class="flex-td">
@@ -72,7 +69,7 @@
 
                 <td>
                     <div class="flex-td">
-                        <p>{{ $guideName  }}</p>
+                        <p>{{ $guideName }}</p>
                         @if ($guideStatus)
                             <x-filament::badge
                                 :color="$guideStatus->getColor()"
@@ -86,12 +83,13 @@
 
                 <td>
                     <div class="flex-td">
-                        @if ($plane?->status)
+                        <p>{{ $flight?->plane_route }}</p>
+                        @if ($flight?->status)
                             <x-filament::badge
-                                :color="$plane->status->getColor()"
+                                :color="$flight->status->getColor()"
                                 size="sm"
                             >
-                                {{ $plane->status->getLabel() }}
+                                {{ $flight->status->getLabel() }}
                             </x-filament::badge>
                         @endif
                     </div>

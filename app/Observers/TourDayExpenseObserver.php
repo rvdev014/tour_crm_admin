@@ -75,6 +75,8 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
         }
 
         return [
+            'tour_day_expense_id' => $tourDayExpense->id,
+
             'from_city_id' => $tourDayExpense->tourDay?->city_id ?? $tourDayExpense->city_id,
             'to_city_id' => $tourDayExpense->to_city_id,
             'comment' => $tourDayExpense->comment,
@@ -83,16 +85,16 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             'transport_type' => $tour->transport_type ?? $tourDayExpense->transport_type,
             'transport_comfort_level' => $tour->transport_comfort_level,
             'price' => $tourDayExpense->price,
+            'sell_price' => $tourDayExpense->price,
             'status' => $tourDayExpense->status,
             'pax' => $tour->getTotalPax(),
-            'tour_day_expense_id' => $tourDayExpense->id,
             'nameplate' => $tourDayExpense->nameplate,
             'requested_by' => $tour->requested_by,
 
             'driver_ids' => $tourDayExpense->transport_driver_ids,
-            'date_time' => $dateTime,
             'place_of_submission' => $tourDayExpense->transport_place,
             'route' => $tourDayExpense->transport_route,
+            'date_time' => $dateTime,
         ];
     }
 }

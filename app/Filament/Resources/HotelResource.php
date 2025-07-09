@@ -84,10 +84,10 @@ class HotelResource extends Resource
                         ->options(fn($get) => TourService::getCities($get('country_id'))),
 
                     Forms\Components\TextInput::make('company_name')->maxLength(255),
-                    Forms\Components\TextInput::make('address')->maxLength(255),
+                    Forms\Components\TextInput::make('contract_number')->maxLength(255),
                 ]),
                 Forms\Components\Grid::make(4)->schema([
-
+                    Forms\Components\TextInput::make('address')->maxLength(255),
                     Forms\Components\Repeater::make('phones')
                         ->relationship('phones')
                         ->addActionLabel('Add phone')
@@ -166,7 +166,10 @@ class HotelResource extends Resource
 
                 PeriodsColumn::make('room_prices')
                     ->label('Room prices')
-                    ->getStateUsing(fn($record) => $record),
+                    ->getStateUsing(fn($record, $livewire) => [
+                        'hotel' => $record,
+                        'isFirst' => $record->is($livewire->getTableRecords()->first()),
+                    ]),
 
                 Tables\Columns\TextColumn::make('email')
                     ->url(fn($record) => $record->email ? "mailto:{$record->email}" : null, true)

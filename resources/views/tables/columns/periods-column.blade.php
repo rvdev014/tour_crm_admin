@@ -2,7 +2,9 @@
     use App\Models\Hotel;use App\Services\ExpenseService;
 
     /** @var Hotel $hotel */
-    $hotel = $getState();
+    $state = $getState();
+    $hotel = $state['hotel'];
+    $isFirst = $state['isFirst'];
     $hotel->loadMissing('roomTypes');
 
     if ($hotel->roomTypes->isEmpty()) {
@@ -16,14 +18,16 @@
 
 <div class="custom-table-wrapper">
     <table class="custom-table">
-        <thead>
-        <tr>
-            <th>Room type</th>
-            <th>Season type</th>
-            <th>Price Uz</th>
-            <th>Price Foreign</th>
-        </tr>
-        </thead>
+        @if($isFirst)
+            <thead>
+            <tr>
+                <th>Room type</th>
+                <th>Season type</th>
+                <th>Price Uz</th>
+                <th>Price Foreign</th>
+            </tr>
+            </thead>
+        @endif
         @foreach($roomTypes as $roomType)
 
             <tr>

@@ -7,10 +7,12 @@ use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
+use App\Enums\PlaneType;
 use App\Enums\TourType;
 use App\Enums\TransportType;
 use App\Filament\Resources\TourCorporateResource\Pages;
 use App\Filament\Resources\TourCorporateResource\RelationManagers;
+use App\Filament\Resources\TourCorporateResource\Actions\StatusAction;
 use App\Models\City;
 use App\Models\Company;
 use App\Models\Country;
@@ -443,6 +445,15 @@ class TourCorporateResource extends Resource
                                         ->label('Arrival reys number'),
                                 ]),
 
+                                Components\Grid::make(4)->schema([
+                                    Components\Select::make('plane_type')
+                                        ->options(PlaneType::class)
+                                        ->label('Plane type'),
+
+                                    Components\TextInput::make('plane_service_fee')
+                                        ->label('Service fee'),
+                                ]),
+
                             ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),
 
                             // Extra
@@ -655,14 +666,16 @@ class TourCorporateResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->recordUrl(null)
+            ->recordAction(StatusAction::class)
             ->actions([
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
+                Tables\Actions\Action::make('export_all')
+                    ->label('Reports')
                     ->icon('heroicon-o-document-text')
-                    ->requiresConfirmation()
-                    ->url(fn(Tour $record) => route('export', $record)),
+                    ->url(fn(Tour $record) => route('export-all', $record)),
                 Tables\Actions\EditAction::make(),
-            ])
+                StatusAction::make()->label('')->icon(''),
+            ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->headerActions([
 
             ])

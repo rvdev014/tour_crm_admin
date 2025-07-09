@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TourTpsTestResource\RelationManagers;
 
+use App\Enums\PlaneType;
 use App\Models\Tour;
 use App\Models\TourDay;
 use App\Services\ExpenseService;
@@ -388,6 +389,15 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
                         Components\TextInput::make('arrival_number')
                             ->label('Arrival reys number'),
+                    ]),
+
+                    Components\Grid::make(4)->schema([
+                        Components\Select::make('plane_type')
+                            ->options(PlaneType::class)
+                            ->label('Plane type'),
+
+                        Components\TextInput::make('plane_service_fee')
+                            ->label('Service fee'),
                     ]),
 
                 ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),
