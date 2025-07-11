@@ -96,7 +96,7 @@ class ExportController extends Controller
 
     /**
      * @throws CopyFileException
-     * @throws CreateTemporaryFileException|Exception
+     * @throws CreateTemporaryFileException|Exception|\PhpOffice\PhpSpreadsheet\Exception
      */
     public function exportAllZip(Tour $tour): BinaryFileResponse
     {
@@ -120,17 +120,20 @@ class ExportController extends Controller
         $zipPath = $tempDir . "/$zipFilename";
 
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-            // Main report
-            $spreadsheet = ExportService::getExport($tour);
-            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-            $writer->save($filePath = $tempDir . '/Tour_' . $tour->group_number . '_main.xlsx');
-            $zip->addFile($filePath, 'Main_report.xlsx');
 
-            // Client report
-            $spreadsheet = ExportClientService::getExport($tour);
-            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-            $writer->save($filePath = $tempDir . '/Tour_' . $tour->group_number . '_client.xlsx');
-            $zip->addFile($filePath, 'Client_report.xlsx');
+            if (!$tour->isCorporate()) {
+                // Main report
+                $spreadsheet = ExportService::getExport($tour);
+                $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+                $writer->save($filePath = $tempDir . '/Tour_' . $tour->group_number . '_main.xlsx');
+                $zip->addFile($filePath, 'Main_report.xlsx');
+
+                // Client report
+                $spreadsheet = ExportClientService::getExport($tour);
+                $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+                $writer->save($filePath = $tempDir . '/Tour_' . $tour->group_number . '_client.xlsx');
+                $zip->addFile($filePath, 'Client_report.xlsx');
+            }
 
             // Museum report
             $spreadsheet = ExportMuseumService::getExport($tour);

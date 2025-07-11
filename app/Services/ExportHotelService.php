@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
 use App\Models\Tour;
 use App\Models\Hotel;
 use App\Models\TourDay;
@@ -11,6 +10,7 @@ use App\Models\TourRoomType;
 use App\Enums\RoomPersonType;
 use App\Models\HotelRoomType;
 use App\Models\TourDayExpense;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use PhpOffice\PhpWord\TemplateProcessor;
 use PhpOffice\PhpWord\Exception\CopyFileException;
@@ -190,17 +190,17 @@ class ExportHotelService
 
         $prevHotelExpense = null;
 
-        $dates = $tour->expenses->pluck('date')->unique();
-
-        foreach ($dates as $date) {
+        foreach ($tour->groups as $group) {
             /** @var TourDayExpense $hotelExpense */
-            $hotelExpense = $tour->getExpenseByDate($date, ExpenseType::Hotel);
+            $hotelExpense = $group->getExpense(ExpenseType::Hotel);
             if (!$hotelExpense) {
                 continue;
             }
 
+            $date = $hotelExpense->date;
             $city = $hotelExpense->city?->name;
-            $hotelName = $hotelExpense->hotel?->name;
+            $hotel = $hotelExpense->hotel;
+
             $hotelPrices = self::getHotelPrices(
                 hotelExpense: $hotelExpense,
                 date: $date,
@@ -218,7 +218,7 @@ class ExportHotelService
                 'payment_method' => $tour->payment_type->getLabel(),
                 'hotel' => $hotelExpense->hotel,
                 'hotelId' => $hotelExpense->hotel_id,
-                'hotelName' => $hotelName,
+                'hotelName' => $hotel?->name,
                 'hotelPrices' => $hotelPrices,
                 'total_nights' => $hotelExpense->hotel_total_nights,
                 'hotelTotalPrice' => $hotelPrices->sum(),
@@ -233,8 +233,11 @@ class ExportHotelService
                     $date->format('d.m.Y H:i')
                 ],
                 'departures' => [
-                    $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time ?? '00:00')->format('d.m.Y H:i')
+                    Carbon::parse($hotelExpense->hotel_checkout_date_time)->format('d.m.Y H:i')
                 ],
+                'operator' => $tour->createdBy->name ?? '-',
+                'contract_number' => $hotel?->contract_number ?? null,
+                'contract_date' => $hotel?->contract_date ?? null,
             ];
 
 //            $existingHotel = $result->get($hotelExpense->hotel_id);
@@ -273,6 +276,7 @@ class ExportHotelService
 //                $result->put($hotelExpense->hotel_id, $hotelItem);
 //            }
 
+            $result->put($hotelExpense->hotel_id, $hotelItem);
             $prevHotelExpense = $hotelItem;
         }
 
@@ -302,7 +306,6 @@ class ExportHotelService
     public static function getReplacedTemplateFirst($hotelItem): TemplateProcessor
     {
         $templateProcessor = new TemplateProcessor(self::getTemplateFirstPath());
-        dd(self::getPlaceholders($hotelItem));
         foreach (self::getPlaceholders($hotelItem) as $placeholder => $value) {
             $templateProcessor->setValue($placeholder, $value);
         }
@@ -330,7 +333,7 @@ class ExportHotelService
             "\n\n"
         );
 
-        /** @var \Illuminate\Support\Carbon $contractDate */
+        /** @var Carbon $contractDate */
         $contractDate = $hotelItem['contract_date'];
 
         return [
@@ -347,9 +350,10 @@ class ExportHotelService
             'outs' => $departuresStr,
             'outsTime' => $departureTimesStr,
             'operator' => $hotelItem['operator'],
-            'contract_number' => $hotelItem['contract_number'] ?? null,
+            'contract_num' => $hotelItem['contract_number'] ?? null,
             'contract_day' => $contractDate?->format('d'),
-            'contract_month' => $contractDate?->locale('ru')->format('F'),
+            'contract_month' => $contractDate?->locale('ru')->translatedFormat('F'),
+            'contract_month_en' => $contractDate?->locale('en')->translatedFormat('F'),
         ];
     }
 

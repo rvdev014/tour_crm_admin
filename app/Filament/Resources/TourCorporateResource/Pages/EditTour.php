@@ -42,6 +42,10 @@ class EditTour extends EditRecord
                 ->tour($tour)
                 ->type('hotels')
                 ->label('Mail Hotels'),
+            Actions\Action::make('export_all')
+                ->label('Export All')
+                ->icon('heroicon-o-document-text')
+                ->url(route('export-all', $this->record)),
             Actions\DeleteAction::make()
                 ->label('Delete')
                 ->icon('heroicon-o-trash'),
