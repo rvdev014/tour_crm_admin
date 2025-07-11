@@ -7,11 +7,11 @@
     $isFirst = $state['isFirst'];
     $hotel->loadMissing('roomTypes');
 
-    if ($hotel->roomTypes->isEmpty()) {
-        return;
-    }
+//    if ($hotel->roomTypes->isEmpty()) {
+//        return;
+//    }
 
-    $roomTypes = $hotel->roomTypes->take(2);
+    $roomTypes = $hotel->roomTypes?->take(2) ?? [];
     $mainCurrencySymbol = ExpenseService::getMainCurrency()?->from?->getSymbol();
 
 @endphp
