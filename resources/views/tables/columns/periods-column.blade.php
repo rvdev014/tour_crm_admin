@@ -21,7 +21,7 @@
         @if($isFirst)
             <thead>
             <tr>
-                <th style="min-width: 80px">Room type</th>
+                <th style="min-width: 100px">Room type</th>
                 <th style="min-width: 100px">Season type</th>
                 <th style="min-width: 150px">Price Uz</th>
                 <th style="min-width: 150px">Price Foreign</th>
@@ -31,7 +31,7 @@
         @foreach($roomTypes as $roomType)
 
             <tr>
-                <td style="min-width: 80px">{{ $roomType?->roomType?->name }}</td>
+                <td style="min-width: 100px">{{ $roomType?->roomType?->name }}</td>
 
                 <td style="min-width: 100px">
                     <div class="flex-td">
