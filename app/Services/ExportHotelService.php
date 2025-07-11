@@ -90,7 +90,7 @@ class ExportHotelService
 
             $date = $tourDay->date;
             $city = $tourDay->city->name;
-            $hotelName = $hotelExpense->hotel->name;
+            $hotel = $hotelExpense->hotel;
             $hotelPrices = self::getHotelPrices(
                 hotelExpense: $hotelExpense,
                 date: $date,
@@ -108,7 +108,7 @@ class ExportHotelService
                 'payment_method' => $tour->payment_type->getLabel(),
                 'hotel' => $hotelExpense->hotel,
                 'hotelId' => $hotelExpense->hotel_id,
-                'hotelName' => $hotelName,
+                'hotelName' => $hotel->name,
                 'hotelPrices' => $hotelPrices,
                 'hotelTotalPrice' => $hotelPrices->sum(),
                 'guests' => $tour->company->name,
@@ -126,6 +126,8 @@ class ExportHotelService
                     $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time ?? '00:00')->format('d.m.Y H:i')
                 ],
                 'operator' => $tour->createdBy->name ?? '-',
+                'contract_number' => $hotel?->contract_number ?? null,
+                'contract_date' => $hotel?->contract_date ?? null,
             ];
 
             //            $existingHotel = $result->get($hotelExpense->hotel_id);
@@ -300,6 +302,7 @@ class ExportHotelService
     public static function getReplacedTemplateFirst($hotelItem): TemplateProcessor
     {
         $templateProcessor = new TemplateProcessor(self::getTemplateFirstPath());
+        dd(self::getPlaceholders($hotelItem));
         foreach (self::getPlaceholders($hotelItem) as $placeholder => $value) {
             $templateProcessor->setValue($placeholder, $value);
         }
@@ -327,6 +330,9 @@ class ExportHotelService
             "\n\n"
         );
 
+        /** @var \Illuminate\Support\Carbon $contractDate */
+        $contractDate = $hotelItem['contract_date'];
+
         return [
             'date' => Carbon::parse($hotelItem['date'])->format('d-M'),
             'country' => $hotelItem['country'],
@@ -341,6 +347,9 @@ class ExportHotelService
             'outs' => $departuresStr,
             'outsTime' => $departureTimesStr,
             'operator' => $hotelItem['operator'],
+            'contract_number' => $hotelItem['contract_number'] ?? null,
+            'contract_day' => $contractDate?->format('d'),
+            'contract_month' => $contractDate?->locale('ru')->format('F'),
         ];
     }
 

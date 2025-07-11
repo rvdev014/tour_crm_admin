@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RoomSeasonType;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $name
  * @property string $email
  * @property string $contract_number
- * @property string $contract_date
+ * @property Carbon $contract_date
  * @property int $country_id
  * @property int $city_id
  * @property int $booking_cancellation_days
@@ -52,6 +53,10 @@ class Hotel extends Model
         'rate',
         'phone',
         'comment',
+    ];
+
+    protected $casts = [
+        'contract_date' => 'date',
     ];
 
     public function roomTypes(): HasMany
