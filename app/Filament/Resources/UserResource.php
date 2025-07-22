@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\UserRole;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
@@ -60,10 +61,7 @@ class UserResource extends Resource
                     ->native(false)
                     ->searchable()
                     ->preload()
-                    ->options([
-                        0 => 'Admin',
-                        1 => 'Operator',
-                    ])
+                    ->options(UserRole::class)
                     ->required()
                     ->default(1),
                 Forms\Components\TextInput::make('operator_percent_tps'),
