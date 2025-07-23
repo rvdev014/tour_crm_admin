@@ -147,11 +147,9 @@ class DaysRelationManager extends RelationManager
                                     ->required()
                                     ->label('Status'),
                                 Components\TimePicker::make('hotel_checkin_time')
-                                    ->required()
                                     ->seconds(false)
                                     ->label('Check-in time'),
                                 Components\TimePicker::make('hotel_checkout_time')
-                                    ->required()
                                     ->seconds(false)
                                     ->label('Check-out time'),
                             ]),
@@ -350,7 +348,7 @@ class DaysRelationManager extends RelationManager
                                     ->seconds(false)
                                     ->label('Departure time'),
 
-                                Components\TimePicker::make('arrival_time')
+                                Components\DateTimePicker::make('arrival_time')
                                     ->seconds(false)
                                     ->label('Arrival time'),
                             ]),

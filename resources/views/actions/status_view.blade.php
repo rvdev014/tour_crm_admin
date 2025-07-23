@@ -39,7 +39,7 @@
                     $guideStatus = $expense?->status;
                 }
 
-                $plane = $day->getExpense(ExpenseType::Flight);
+                $flight = $day->getExpense(ExpenseType::Flight);
                 $train = $day->getExpense(ExpenseType::Train);
 
                 $transport = $day->getExpense(ExpenseType::Transport);
@@ -85,21 +85,24 @@
                 </td>
 
                 <td>
-                    <div class="flex-td">
-                        @if ($plane?->status)
+                    <div class="flex-td" style="flex-direction: row; justify-content: center">
+                        <p>{{ $flight?->plane_route }}</p>&nbsp;
+                        @if ($flight?->status)
                             <x-filament::badge
-                                :color="$plane->status->getColor()"
+                                :color="$flight->status->getColor()"
                                 size="sm"
                             >
-                                {{ $plane->status->getLabel() }}
+                                {{ $flight->status->getLabel() }}
                             </x-filament::badge>
                         @endif
                     </div>
+                    <p>{{ $flight?->departure_time }} - {{ $flight?->arrival_time?->format('d.m.Y H:i') }}</p>
                 </td>
 
                 <td>
                     <div class="flex-td">
                         <p>{{ $train?->train?->name }}</p>
+                        <p>{{ $train?->departure_time }} - {{ $train?->arrival_time?->format('d.m.Y H:i') }}</p>
                     </div>
                 </td>
 

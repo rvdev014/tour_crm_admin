@@ -76,7 +76,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $train_class_economy
  * @property int $train_class_vip
  * @property int $train_class_second
- * @property string $arrival_time
+ * @property Carbon $arrival_time
  * @property string $departure_time
  *
  * Show
@@ -131,6 +131,7 @@ class TourDayExpense extends Model
 
     protected $casts = [
         'date' => 'date',
+        'arrival_time' => 'datetime',
         'type' => ExpenseType::class,
         'payment_status' => PaymentStatus::class,
         'invoice_status' => InvoiceStatus::class,

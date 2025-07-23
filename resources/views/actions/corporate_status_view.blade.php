@@ -93,11 +93,13 @@
                             </x-filament::badge>
                         @endif
                     </div>
+                    <p>{{ $flight?->departure_time }} - {{ $flight?->arrival_time?->format('d.m.Y H:i') }}</p>
                 </td>
 
                 <td>
                     <div class="flex-td">
                         <p>{{ $train?->train?->name }}</p>
+                        <p>{{ $train->departure_time }} - {{ $train->arrival_time?->format('d.m.Y H:i') }}</p>
                     </div>
                 </td>
 
