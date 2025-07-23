@@ -87,10 +87,6 @@
     border-width: 0;
 }
 
-.fi-ta-table .custom-table thead {
-    position: static!important;
-}
-
 .custom-table th {
     border-bottom: 1px solid rgba(var(--gray-200), 1);
 }
@@ -135,16 +131,14 @@
     background-color: hsl(240deg 4% 14.71%);
 }
 
-.flex-td {
+.custom-table .flex-td {
     display: flex;
-    /*flex-direction: column;*/
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
 }
 
-.flex-td p {
-    font-size: 14px;
-    margin-right: 5px;
+.custom-table .flex-td p {
+    margin-bottom: 5px;
 }
 
 
@@ -214,12 +208,4 @@
 .repeater-guides .fi-btn:hover {
     background: #1e4e6e !important;
     transition: 0.2s ease-in-out;
-}
-
-.fi-fo-repeater-item-header h4 {
-    color: #fff !important;
-}
-
-.fi-fo-repeater-item.simple {
-    border: none!important;
 }
