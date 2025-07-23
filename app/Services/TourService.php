@@ -192,7 +192,7 @@ class TourService
     {
         /** @var User $user */
         $user = auth()->user();
-        if ($user->isAdmin()) {
+        if ($user->isAdmin() || $user->isAccountant()) {
             return true;
         }
         if ($tour->created_by == $user->id) {
