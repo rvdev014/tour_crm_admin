@@ -41,7 +41,11 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property string $route
  * @property string $passenger
  * @property numeric $sell_price
+ * @property numeric $sell_price_result
+ * @property string $sell_price_currency
  * @property numeric $buy_price
+ * @property numeric $buy_price_result
+ * @property string $buy_price_currency
  * @property string $nameplate
  * @property string $mark
  * @property integer $notified_times

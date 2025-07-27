@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TransferResource\Pages;
 
 use App\Enums\ExpenseStatus;
 use App\Filament\Resources\TransferResource;
+use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
@@ -86,6 +87,17 @@ class CreateTransfer extends CreateRecord
         $redirectUrl = $this->getRedirectUrl();
 
         $this->redirect($redirectUrl, navigate: FilamentView::hasSpaMode() && is_app_url($redirectUrl));
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        ExpenseService::convertExpensePrice($data, 'sell_price');
+        ExpenseService::convertExpensePrice($data, 'buy_price');
+
+        $data['sell_price_result'] = $data['sell_price_converted'] ?? $data['sell_price'] ?? 0;
+        $data['buy_price_result'] = $data['buy_price_converted'] ?? $data['buy_price'] ?? 0;
+
+        return $data;
     }
 
     protected function afterCreate(): void

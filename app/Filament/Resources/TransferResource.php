@@ -13,6 +13,7 @@ use App\Models\Transfer;
 use App\Services\TourService;
 use Filament\Forms;
 use Filament\Forms\Components;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -81,6 +82,8 @@ class TransferResource extends Resource
     {
         return $form
             ->schema([
+                Hidden::make('sell_price_currency'),
+                Hidden::make('buy_price_currency'),
                 Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\Select::make('to_city_id')
@@ -152,8 +155,28 @@ class TransferResource extends Resource
                 ]),
 
                 Forms\Components\Grid::make(4)->schema([
-                    Forms\Components\TextInput::make('sell_price')->numeric(),
-                    Forms\Components\TextInput::make('buy_price')->numeric(),
+                    Forms\Components\TextInput::make('sell_price')
+                        ->label(fn($get) => 'Sell price (' . ($get('sell_price_currency') ?? 'UZS') . ')')
+                        ->suffixAction(
+                            Components\Actions\Action::make('toggle-currency')
+                                ->icon('heroicon-o-banknotes')
+                                ->iconSize('md')
+                                ->action(function($get, $set) {
+                                    $set('sell_price_currency', $get('sell_price_currency') != 'USD' ? 'USD' : 'UZS');
+                                })
+                        )
+                        ->numeric(),
+                    Forms\Components\TextInput::make('buy_price')
+                        ->label(fn($get) => 'Buy price (' . ($get('buy_price_currency') ?? 'UZS') . ')')
+                        ->suffixAction(
+                            Components\Actions\Action::make('toggle-currency')
+                                ->icon('heroicon-o-banknotes')
+                                ->iconSize('md')
+                                ->action(function($get, $set) {
+                                    $set('buy_price_currency', $get('buy_price_currency') != 'USD' ? 'USD' : 'UZS');
+                                })
+                        )
+                        ->numeric(),
                     Forms\Components\Textarea::make('comment'),
                 ]),
             ]);
