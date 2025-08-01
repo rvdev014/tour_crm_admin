@@ -25,6 +25,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $address
  * @property float $rate
  * @property string $phone
+ * @property string $photo
+ * @property string $description
  * @property string $comment
  *
  * @property City $city
