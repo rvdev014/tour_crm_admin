@@ -8,4 +8,10 @@
             {{ $status->getLabel() }}
         </x-filament::badge>
     @endif
+
+    @if (isset($content))
+        <div class="mt-1">
+            {!! $content !!}
+        </div>
+    @endif
 </div>
