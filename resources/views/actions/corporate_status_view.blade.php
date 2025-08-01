@@ -99,13 +99,13 @@
                 <td>
                     <div class="flex-td">
                         <p>{{ $train?->train?->name }}</p>
-                        <p>{{ $train->departure_time }} - {{ $train->arrival_time?->format('d.m.Y H:i') }}</p>
+                        <p>{{ $train?->departure_time }} - {{ $train?->arrival_time?->format('d.m.Y H:i') }}</p>
                     </div>
                 </td>
 
                 <td>
                     <div class="flex-td">
-                        <a target="_blank" href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer?->number }}</a>
+                        <a target="_blank" href="/admin/transfers/{{ $transfer?->id }}/edit">{{ $transfer?->number }}</a>
                     </div>
                 </td>
 
