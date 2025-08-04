@@ -6,8 +6,10 @@ use App\Enums\RoomSeasonType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -24,6 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $company_name
  * @property string $address
  * @property float $rate
+ * @property float $website_price
  * @property string $phone
  * @property string $photo
  * @property string $description
@@ -34,6 +37,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Collection<HotelRoomType> $roomTypes
  * @property Collection<HotelPeriod> $periods
  * @property Collection<ManualPhone> $phones
+ * @property Collection<Facility> $facilities
+ * @property Collection<Attachment> $attachments
+ * @property Collection<RecommendedHotel> $recommendedHotels
+ * @property Collection<HotelReview> $reviews
  */
 class Hotel extends Model
 {
@@ -53,8 +60,11 @@ class Hotel extends Model
         'company_name',
         'address',
         'rate',
+        'photo',
+        'website_price',
         'phone',
         'comment',
+        'description',
     ];
 
     protected $casts = [
@@ -93,5 +103,25 @@ class Hotel extends Model
     public function phones(): MorphMany
     {
         return $this->morphMany(ManualPhone::class, 'manual');
+    }
+
+    public function facilities(): BelongsToMany
+    {
+        return $this->belongsToMany(Facility::class, 'hotel_facilities');
+    }
+
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(Attachment::class, 'attachable');
+    }
+
+    public function recommendedHotels(): HasMany
+    {
+        return $this->hasMany(RecommendedHotel::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(HotelReview::class);
     }
 }

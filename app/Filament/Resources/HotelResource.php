@@ -2,22 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use App\Models\Hotel;
 use App\Enums\RateEnum;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
 use App\Enums\RoomSeasonType;
-use App\Services\TourService;
-use Filament\Resources\Resource;
-use App\Tables\Columns\PeriodsColumn;
 use App\Filament\Resources\HotelResource\Pages;
+use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
+use App\Models\Hotel;
+use App\Models\RealEstate;
+use App\Services\TourService;
+use App\Tables\Columns\PeriodsColumn;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
-use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
-use App\Filament\Resources\HotelResource\Actions\HotelPeriodsAction;
-use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
 
 class HotelResource extends Resource
 {
@@ -52,7 +51,7 @@ class HotelResource extends Resource
 
                     Forms\Components\TextInput::make('email')
                         ->email()
-                        ->suffixAction(function($record) {
+                        ->suffixAction(function ($record) {
                             if (!$record?->email) {
                                 return [];
                             }
@@ -97,7 +96,7 @@ class HotelResource extends Resource
                                 ->strictMode()
                                 ->onlyCountries(['UZ'])
                                 ->defaultCountry('UZ')
-                                ->suffixAction(function($record) {
+                                ->suffixAction(function ($record) {
                                     if (!$record?->phone_number) {
                                         return [];
                                     }
@@ -111,7 +110,7 @@ class HotelResource extends Resource
                         ),
 
                     Forms\Components\Select::make('rate')
-                        ->options(function() {
+                        ->options(function () {
                             $options = [];
                             foreach (RateEnum::cases() as $rate) {
                                 $options[$rate->value] = $rate->getLabel();
@@ -132,8 +131,41 @@ class HotelResource extends Resource
                         }),*/
                 ]),
 
+//                Forms\Components\Grid::make(4)->schema([
+//                    Forms\Components\TextInput::make('website_price')
+//                        ->label('Website price')
+//                        ->numeric()
+//                        ->helperText('Price for the website, not for the operator'),
+//                ]),
+
                 Forms\Components\Grid::make()->schema([
+
+                    Forms\Components\Select::make('facilities')
+                        ->relationship('facilities', 'name_ru')
+                        ->multiple()
+                        ->preload(),
+
                     Forms\Components\Textarea::make('comment')
+                        ->columnSpan(1)
+                        ->maxLength(255),
+                ]),
+
+                Forms\Components\Grid::make()->schema([
+                    Forms\Components\FileUpload::make('photos')
+                        ->multiple()
+                        ->formatStateUsing(function ($record) {
+                            if (!$record) {
+                                return [];
+                            }
+                            /** @var Hotel $record */
+                            $value = $record->attachments->map(fn($attachment) => $attachment->file_path);
+                            return $value->toArray();
+                        })
+                        ->storeFiles(false)
+                        ->columnSpan(1)
+                        ->image(),
+
+                    Forms\Components\Textarea::make('description')
                         ->columnSpan(1)
                         ->maxLength(255),
                 ]),
@@ -194,8 +226,8 @@ class HotelResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('phone_list')
                     ->label('Phones')
-                    ->getStateUsing(function($record) {
-                        return $record->phones->map(function($phone) {
+                    ->getStateUsing(function ($record) {
+                        return $record->phones->map(function ($phone) {
                             return "<a href='https://t.me/{$phone->phone_number}' target='_blank'>{$phone->phone_number}</a>";
                         })->implode('<br/>');
                     })

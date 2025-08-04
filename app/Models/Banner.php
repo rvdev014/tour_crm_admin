@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasLocaleFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -24,7 +25,7 @@ use Illuminate\Support\Carbon;
  */
 class Banner extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLocaleFields;
 
     protected $fillable = [
         'header_ru',
@@ -37,11 +38,11 @@ class Banner extends Model
 
     public function getHeaderAttribute(): string
     {
-        return $this['header_' . app()->getLocale()];
+        return $this->getLocaleValue('header');
     }
 
     public function getDescriptionAttribute(): string
     {
-        return $this['description_' . app()->getLocale()];
+        return $this->getLocaleValue('description');
     }
 }

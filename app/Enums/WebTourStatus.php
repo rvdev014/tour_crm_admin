@@ -42,10 +42,10 @@ enum WebTourStatus: int implements HasLabel, HasIcon, HasColor
     public function getIcon(): ?string
     {
         return match ($this) {
-            self::New => 'heroicon-o-annotation',
-            self::Waiting => 'heroicon-o-clock',
-            self::Done => 'heroicon-o-check',
-            self::Rejected => 'heroicon-o-x',
+            self::New => '',
+            self::Waiting => '',
+            self::Done => '',
+            self::Rejected => '',
         };
     }
 }

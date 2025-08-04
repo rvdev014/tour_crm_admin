@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasLocaleFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $name_ru
@@ -14,26 +16,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $description_ru
  * @property string|null $description_en
  * @property string|null $photo
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read mixed $description
  * @property-read mixed $name
- * @method static \Illuminate\Database\Eloquent\Builder|Service newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Service newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Service query()
- * @method static \Illuminate\Database\Eloquent\Builder|Service whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Service whereDescriptionEn($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Service whereDescriptionRu($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Service whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Service whereNameEn($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Service whereNameRu($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Service wherePhoto($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Service whereUpdatedAt($value)
- * @mixin \Eloquent
  */
 class Service extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLocaleFields;
 
     protected $fillable = [
         'name_ru',
@@ -43,13 +33,13 @@ class Service extends Model
         'photo'
     ];
 
-    public function getNameAttribute()
+    public function getNameAttribute(): string
     {
-        return $this['name_' . app()->getLocale()];
+        return $this->getLocaleValue('name');
     }
 
-    public function getDescriptionAttribute()
+    public function getDescriptionAttribute(): ?string
     {
-        return $this['description_' . app()->getLocale()];
+        return $this->getLocaleValue('description');
     }
 }

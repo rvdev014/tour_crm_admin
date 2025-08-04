@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\HotelController;
+use App\Http\Controllers\Api\ManualController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,12 +16,23 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->group(function() {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
+});
 
-    Route::get('/hotels', [\App\Http\Controllers\Api\ManualController::class, 'getHotels']);
-    Route::get('/countries', [\App\Http\Controllers\Api\ManualController::class, 'getCountries']);
-    Route::get('/cities', [\App\Http\Controllers\Api\ManualController::class, 'getCities']);
+Route::controller(ManualController::class)->group(function () {
+    Route::get('/tours', 'getTours');
+    Route::get('/banners', 'getBanners');
+    Route::get('/services', 'getServices');
+    Route::get('/countries', 'getCountries');
+    Route::get('/cities', 'getCities');
+});
+
+Route::controller(HotelController::class)->group(function () {
+    Route::get('/hotels', 'getHotels');
+    Route::get('/hotels/{id}', 'getHotel');
+    Route::post('/hotels/{id}/review', 'storeReview');
+    Route::get('/recommended-hotels', 'getRecommendedHotels');
 });
 
 Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login'])->name('login');

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasLocaleFields;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $web_tour_id
  * @property int $day_number
+ * @property string $place_name
  * @property string $place_name_ru
  * @property string|null $place_name_en
  * @property string|null $photo
@@ -27,9 +29,14 @@ use Illuminate\Support\Carbon;
  */
 class WebTourDay extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLocaleFields;
 
     protected $guarded = ['id'];
+
+    public function getPlaceNameAttribute(): string
+    {
+        return $this->getLocaleValue('place_name');
+    }
 
     public function webTour(): BelongsTo
     {
