@@ -2,28 +2,56 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Hotel;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HotelResource;
 use App\Http\Resources\HotelReviewResource;
-use App\Models\Hotel;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class HotelController extends Controller
 {
-    public function getHotels(): JsonResponse
+    public function getHotels(Request $request): JsonResponse
     {
+        $search = $request->get('search', '');
+        $search = trim(mb_strtolower($search));
+
         $hotels = Hotel::query()
             ->with(['country', 'city', 'facilities', 'attachments'])
+            ->when($search, function($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q
+                        ->whereRaw('LOWER(name) LIKE ?', ["%$search%"])
+                        ->orWhereRaw('LOWER(email) LIKE ?', ["%$search%"])
+                        ->orWhereRaw('LOWER(company_name) LIKE ?', ["%$search%"])
+                        ->orWhereRaw('LOWER(description) LIKE ?', ["%$search%"])
+                        ->orWhereRaw('LOWER(phone) LIKE ?', ["%$search%"])
+                        ->orWhereRaw('LOWER(address) LIKE ?', ["%$search%"]);
+                });
+            })
             ->get();
 
         return response()->json(['data' => HotelResource::collection($hotels)]);
     }
 
+    public function getHotelOthers(Request $request): JsonResponse
+    {
+        $hotelId = $request->route('id');
+
+        $hotel = Hotel::query()
+            ->with(['country', 'city', 'facilities', 'attachments'])
+            ->whereNot('id', $hotelId)
+            ->orderByDesc('rate')
+            ->limit(10)
+            ->get();
+
+        return response()->json(['data' => HotelResource::collection($hotel)]);
+    }
+
     public function getHotel($hotelId): JsonResponse
     {
         $hotel = Hotel::query()
-            ->with(['country', 'city', 'facilities', 'attachments'])
+            ->with(['country', 'city', 'facilities', 'attachments', 'reviews'])
             ->findOrFail($hotelId);
 
         return response()->json(['data' => HotelResource::make($hotel)]);
@@ -47,7 +75,7 @@ class HotelController extends Controller
         $request->validate([
             'name' => 'nullable|string',
             'hotel' => 'nullable|string|email',
-            'rate' => 'required|float',
+            'rate' => 'required|integer|between:1,5',
             'comment' => 'required|string',
         ]);
 

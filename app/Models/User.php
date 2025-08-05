@@ -3,17 +3,21 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Enums\UserRole;
-use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use App\Enums\Gender;
+use App\Enums\UserRole;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property int $id
  * @property string $name
+ * @property string $birthday
+ * @property Gender $gender
+ * @property string $avatar
  * @property string $email
  * @property string $password
  * @property int $operator_percent_tps
@@ -33,7 +37,11 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'password',
         'role',
-        'operator_percent_tps'
+        'operator_percent_tps',
+        'avatar',
+        'birthday',
+        'gender',
+        'phone',
     ];
 
     /**
@@ -54,12 +62,13 @@ class User extends Authenticatable implements FilamentUser
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'role' => UserRole::class
+        'role' => UserRole::class,
+        'gender' => Gender::class
     ];
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->role !== UserRole::User;
     }
 
     public function isAdmin(): bool

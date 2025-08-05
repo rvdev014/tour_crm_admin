@@ -280,22 +280,14 @@ class ExpenseService
 
     public static function getSeasonType(Hotel $hotel, $date): ?RoomSeasonType
     {
-        /** @var RoomSeasonType $seasonType */
-        $seasonType = CacheService::remember(
-            'season_type',
-            function() use ($date, $hotel) {
-                $hotelDate = Carbon::parse($date);
-                /** @var HotelPeriod $currentSeason */
-                $currentSeason = $hotel->periods()
-                    ->where('start_date', '<=', $hotelDate)
-                    ->where('end_date', '>=', $hotelDate)
-                    ->first();
+        $hotelDate = Carbon::parse($date);
+        /** @var HotelPeriod $currentSeason */
+        $currentSeason = $hotel->periods()
+            ->where('start_date', '<=', $hotelDate)
+            ->where('end_date', '>=', $hotelDate)
+            ->first();
 
-                return $currentSeason?->season_type;
-            }
-        );
-
-        return $seasonType;
+        return $currentSeason?->season_type;
     }
 
     public static function convertExpensePrice(&$data, $attribute): void
