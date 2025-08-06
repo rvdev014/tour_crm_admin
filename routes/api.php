@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::controller(ManualController::class)->group(function () {
     Route::get('/tours', 'getTours');
+    Route::get('/tours/{id}', 'getTour');
     Route::get('/banners', 'getBanners');
     Route::get('/services', 'getServices');
     Route::get('/countries', 'getCountries');

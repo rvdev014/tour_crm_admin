@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -41,6 +42,7 @@ use Illuminate\Support\Carbon;
  * @property-read WebTourPrice $currentPrice
  * @property-read Collection<WebTour> $similarTours
  * @property-read Collection<SimilarTour> $similarToursRel
+ * @property-read Collection<Review> $reviews
  */
 class WebTour extends Model
 {
@@ -112,5 +114,10 @@ class WebTour extends Model
     public function similarTours(): BelongsToMany
     {
         return $this->belongsToMany(WebTour::class, 'similar_tours', 'web_tour_id', 'similar_web_tour_id');
+    }
+
+    public function reviews(): MorphMany
+    {
+        return $this->morphMany(Review::class, 'reviewable');
     }
 }

@@ -42,7 +42,7 @@ class HotelResource extends JsonResource
 
             'phone' => $this->getPhone(),
             'facilities' => FacilityResource::collection($this->whenLoaded('facilities')),
-            'reviews' => HotelReviewResource::collection($this->whenLoaded('reviews')),
+            'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
         ];
     }
 

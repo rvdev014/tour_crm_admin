@@ -40,7 +40,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Collection<Facility> $facilities
  * @property Collection<Attachment> $attachments
  * @property Collection<RecommendedHotel> $recommendedHotels
- * @property Collection<HotelReview> $reviews
+ * @property Collection<Review> $reviews
  */
 class Hotel extends Model
 {
@@ -120,8 +120,8 @@ class Hotel extends Model
         return $this->hasMany(RecommendedHotel::class);
     }
 
-    public function reviews(): HasMany
+    public function reviews(): MorphMany
     {
-        return $this->hasMany(HotelReview::class);
+        return $this->morphMany(Review::class, 'reviewable');
     }
 }

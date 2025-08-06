@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasLocaleFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,8 +14,10 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property int $web_tour_id
+ * @property string $header
  * @property string $header_ru
  * @property string|null $header_en
+ * @property string|null $description
  * @property string|null $description_ru
  * @property string|null $description_en
  * @property int|null $days
@@ -27,9 +30,19 @@ use Illuminate\Support\Carbon;
  */
 class WebTourAccommodation extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLocaleFields;
 
     protected $guarded = ['id'];
+
+    public function getHeaderAttribute(): string
+    {
+        return $this->getLocaleValue('header');
+    }
+
+    public function getDescriptionAttribute(): string
+    {
+        return $this->getLocaleValue('description');
+    }
 
     public function city(): BelongsTo
     {

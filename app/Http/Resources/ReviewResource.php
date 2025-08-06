@@ -2,14 +2,14 @@
 
 namespace App\Http\Resources;
 
-use App\Models\HotelReview;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin HotelReview
+ * @mixin Review
  */
-class HotelReviewResource extends JsonResource
+class ReviewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -22,7 +22,6 @@ class HotelReviewResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'user_id' => $this->user_id,
-            'hotel_id' => $this->hotel_id,
             'comment' => $this->comment,
             'rate' => $this->rate,
 

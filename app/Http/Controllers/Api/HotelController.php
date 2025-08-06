@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HotelResource;
-use App\Http\Resources\HotelReviewResource;
+use App\Http\Resources\ReviewResource;
 
 class HotelController extends Controller
 {
@@ -87,6 +87,6 @@ class HotelController extends Controller
             'user_id' => auth()->user()?->id,
         ]);
 
-        return response()->json(['data' => HotelReviewResource::make($review)]);
+        return response()->json(['data' => ReviewResource::make($review)]);
     }
 }

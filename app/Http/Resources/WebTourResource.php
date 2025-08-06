@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\WebTour;
+use App\Models\WebTourAccommodation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,6 +32,10 @@ class WebTourResource extends JsonResource
             'updated_at' => $this->updated_at,
 
             'days' => WebTourDayResource::collection($this->whenLoaded('days')),
+            'accommodations' => WebTourAccommodationResource::collection($this->whenLoaded('accommodations')),
+            'packagesIncluded' => PackageResource::collection($this->whenLoaded('packagesIncluded')),
+            'packagesNotIncluded' => PackageResource::collection($this->whenLoaded('packagesNotIncluded')),
+            'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
         ];
     }
 }
