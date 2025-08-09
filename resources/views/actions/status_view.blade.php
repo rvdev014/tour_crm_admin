@@ -43,8 +43,12 @@
                 $train = $day->getExpense(ExpenseType::Train);
 
                 $transport = $day->getExpense(ExpenseType::Transport);
-                /** @var Transfer $transfer */
-                $transfer = Transfer::query()->where('tour_day_expense_id', $transport?->id)->first();
+
+                $transfer = null;
+                if ($transport) {
+                    /** @var Transfer $transfer */
+                    $transfer = Transfer::query()->where('tour_day_expense_id', $transport?->id)->first();
+                }
 
                 $lunch = $day->getExpense(ExpenseType::Lunch);
                 $dinner = $day->getExpense(ExpenseType::Dinner);
@@ -108,7 +112,10 @@
 
                 <td>
                     <div class="flex-td">
-                        <a target="_blank" href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer?->number }}</a>
+                        @if ($transfer)
+                            <a target="_blank"
+                               href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer?->number }}</a>
+                        @endif
                     </div>
                 </td>
 
