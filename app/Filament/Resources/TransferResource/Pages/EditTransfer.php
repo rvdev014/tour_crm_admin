@@ -36,7 +36,7 @@ class EditTransfer extends EditRecord
         /** @var Transfer $transfer */
         $transfer = $this->record;
 
-        $transfer->tourDayExpense?->update([
+        $transfer->tourDayExpense?->updateQuietly([
             'to_city_id' => $transfer->to_city_id,
             'comment' => $transfer->comment,
             'transport_type' => $transfer->transport_type,
