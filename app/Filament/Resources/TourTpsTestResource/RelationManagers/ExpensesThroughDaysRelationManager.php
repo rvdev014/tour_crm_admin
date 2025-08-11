@@ -439,8 +439,6 @@ class ExpensesThroughDaysRelationManager extends RelationManager
     {
         return $table
             ->defaultSort('id', 'asc')
-            ->paginationPageOptions([30, 50, 100])
-            ->defaultPaginationPageOption(30)
             ->recordTitleAttribute('tourDay.date')
             ->defaultGroup(
                 Tables\Grouping\Group::make('tourDay.date')

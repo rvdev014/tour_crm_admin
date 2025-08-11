@@ -186,6 +186,8 @@ class TransferResource extends Resource
     {
         return $table
             ->striped()
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->modifyQueryUsing(function ($query) {
                 $now = Carbon::today()->toDateTimeString();
 
