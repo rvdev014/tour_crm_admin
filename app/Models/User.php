@@ -11,6 +11,7 @@ use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -42,6 +43,7 @@ class User extends Authenticatable implements FilamentUser
         'birthday',
         'gender',
         'phone',
+        'google_id',
     ];
 
     /**
@@ -79,5 +81,18 @@ class User extends Authenticatable implements FilamentUser
     public function isAccountant(): bool
     {
         return $this->role === UserRole::Accountant;
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
+        return Storage::disk('public')->url($this->avatar);
     }
 }
