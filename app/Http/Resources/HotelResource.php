@@ -39,6 +39,7 @@ class HotelResource extends JsonResource
             'photos' => $this->getPhotos(),
             'description' => $this->description,
             'comment' => $this->comment,
+            'position' => $this->getPosition(),
 
             'phone' => $this->getPhone(),
             'facilities' => FacilityResource::collection($this->whenLoaded('facilities')),
@@ -71,5 +72,14 @@ class HotelResource extends JsonResource
     private function getPhone()
     {
         return $this->phones->first()?->phone_number;
+    }
+
+    private function getPosition(): ?array
+    {
+        if ($this->latitude && $this->longitude) {
+            return [(float) $this->longitude, (float) $this->latitude];
+        }
+        
+        return null;
     }
 }

@@ -65,6 +65,8 @@ class Hotel extends Model
         'phone',
         'comment',
         'description',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
