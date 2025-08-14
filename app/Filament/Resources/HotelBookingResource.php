@@ -35,6 +35,8 @@ class HotelBookingResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->modifyQueryUsing(function (Builder $query) {
                 $query
                     ->with(['tour', 'hotel'])

@@ -164,6 +164,8 @@ class WebTourResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->columns([
                 Tables\Columns\TextColumn::make('name_ru')
                     ->searchable(),

@@ -46,6 +46,8 @@ class CompanyIncomeResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->filters([
                 Tables\Filters\Filter::make('company')
                     ->columnSpanFull()

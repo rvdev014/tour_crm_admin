@@ -540,6 +540,8 @@ class TourCorporateResource extends Resource
         return $table
             ->striped()
             ->defaultSort('start_date', 'asc')
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->filters([
                 Tables\Filters\Filter::make('country_id')
                     ->form([

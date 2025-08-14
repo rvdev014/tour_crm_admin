@@ -37,6 +37,8 @@ class CountryResource extends Resource
         return $table
             ->defaultSort('id', 'desc')
             ->striped()
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),

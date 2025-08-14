@@ -48,6 +48,8 @@ class CompanyExpenseResource extends Resource
     {
         return $table
             ->defaultSort('date', 'desc')
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->filters([
                 Tables\Filters\Filter::make('filters')
                     ->columnSpanFull()

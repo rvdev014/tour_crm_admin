@@ -265,6 +265,8 @@ class TourTpsTestResource extends Resource
             })
             ->striped()
             ->defaultSort('start_date', 'desc')
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->filters([
                 Tables\Filters\Filter::make('country_id')
                     ->columnSpanFull()
