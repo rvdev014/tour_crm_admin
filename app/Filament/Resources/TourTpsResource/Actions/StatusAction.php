@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\TourTpsResource\Actions;
 
-use App\Models\Tour;
 use Closure;
 use Filament\Actions\StaticAction;
 use Filament\Support\Enums\MaxWidth;
@@ -26,7 +25,7 @@ class StatusAction extends Action
 
         $this->label('Statuses');
 
-        $this->modalHeading(fn (Tour $record) => "TPS {$record->group_number} | {$record->country->name} | Pax: {$record->getTotalPax()} | Arrival: {$record->start_date->format('d.m.Y')} | Departure: {$record->end_date->format('d.m.Y')}");
+        $this->modalHeading(fn (Model $record) => "Statuses for Tour TPS {$record->group_number}");
 
         $this->modalSubmitAction(fn (StaticAction $action, $record) => $action->url(route('filament.admin.resources.tour-tps.edit', $record->id))->label('Edit'));
         $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('filament-actions::view.single.modal.actions.close.label')));

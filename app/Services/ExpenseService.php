@@ -70,7 +70,8 @@ class ExpenseService
                 $updatedExpense = ExpenseService::mutateExpense(
                     data: $expense,
                     totalPax: $totalPaxGroup,
-                    roomAmounts: ExpenseService::getRoomingAmountsForExpense($expense)
+                    roomAmounts: ExpenseService::getRoomingAmountsForExpense($expense),
+                    isTps: false
                 );
 
                 $allExpenses->push($updatedExpense);
@@ -111,7 +112,8 @@ class ExpenseService
                     totalPax: $totalPax,
                     countryId: $updatedData['country_id'],
                     roomAmounts: $roomingAmounts,
-                    day: $day
+                    day: $day,
+                    isTps: true
                 );
 
                 $expensePrice = $updatedExpense['price_converted'] ?? $updatedExpense['price'] ?? 0;
@@ -144,7 +146,8 @@ class ExpenseService
                     data: $expense->toArray(),
                     totalPax: $totalPax,
                     countryId: $updatedData['country_id'],
-                    roomAmounts: $roomingAmounts
+                    roomAmounts: $roomingAmounts,
+                    isTps: false
                 );
 
                 $expensePrice = $updatedExpense['price_converted'] ?? $updatedExpense['price'] ?? 0;
@@ -173,9 +176,12 @@ class ExpenseService
               $countryId = null,
               $roomAmounts = null,
               $companyId = null,
-              $day = null
+              $day = null,
+              $isTps = false
     ): array {
         ExpenseService::convertExpensePrice($data, 'price');
+
+        $data['status'] = $data['train_status'] ?? $data['status'] ?? ExpenseStatus::New->value;
 
         switch ($data['type']) {
             case ExpenseType::Hotel->value:
@@ -195,6 +201,14 @@ class ExpenseService
                         }
 
                         $totalNights = $data['hotel_total_nights'] ?? 1;
+                        
+                        // For TPS tours: if check-in time is before 14:00, calculate as 1.5 days instead of 1
+                        if ($isTps && $totalNights == 1 && !empty($data['hotel_checkin_time'])) {
+                            $checkinTime = \Carbon\Carbon::parse($data['hotel_checkin_time']);
+                            if ($checkinTime->format('H:i') < '14:00') {
+                                $totalNights = 1.5;
+                            }
+                        }
 
                         /** @var HotelRoomType $hotelRoomType */
                         $hotelRoomType = $hotel->roomTypes()

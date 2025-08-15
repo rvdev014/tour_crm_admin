@@ -188,6 +188,7 @@ class TransferResource extends Resource
             ->striped()
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
+            ->searchable()
             ->modifyQueryUsing(function ($query) {
                 $now = Carbon::today()->toDateTimeString();
 
@@ -341,13 +342,22 @@ END,
                     }),
             ], layout: FiltersLayout::AboveContent)
             ->columns([
-                Tables\Columns\TextColumn::make('number')->label('Number'),
+                Tables\Columns\TextColumn::make('number')
+                    ->label('Number')
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('tour_id')
                     ->label('Tour')
                     ->getStateUsing(function (Transfer $record) {
                         $tour = $record->tourDayExpense?->tour ?? $record->tourDayExpense?->tourDay?->tour ?? null;
                         return $tour ? $tour->group_number : '-';
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('tourDayExpense.tour', function (Builder $query) use ($search) {
+                            $query->where('group_number', 'like', "%{$search}%");
+                        })->orWhereHas('tourDayExpense.tourDay.tour', function (Builder $query) use ($search) {
+                            $query->where('group_number', 'like', "%{$search}%");
+                        });
                     }),
 
                 Tables\Columns\TextColumn::make('company.name')

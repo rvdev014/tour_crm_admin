@@ -185,12 +185,15 @@ class CompanyExpenseResource extends Resource
                         if ($tour->isCorporate()) {
                             $link = "/admin/tour-corporate/$tour->id/edit";
                         } else {
-                            $link = "/admin/tour-tps-test/$tour->id/edit";
+                            $link = "/admin/tour-tps/$tour->id/edit";
                         }
                         return "<a href='{$link}' target='_blank'>$tour->group_number</a>";
                     })
                     ->color('info')
                     ->html(),
+
+                Tables\Columns\SelectColumn::make('invoice_status')
+                    ->options(InvoiceStatus::class),
 
                 Tables\Columns\TextColumn::make('company')
                     ->getStateUsing(function (TourDayExpense $record) {
@@ -289,9 +292,6 @@ class CompanyExpenseResource extends Resource
 
                 Tables\Columns\SelectColumn::make('payment_status')
                     ->options(PaymentStatus::class),
-
-                Tables\Columns\SelectColumn::make('invoice_status')
-                    ->options(InvoiceStatus::class),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

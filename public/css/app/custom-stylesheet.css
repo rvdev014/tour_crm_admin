@@ -131,13 +131,6 @@
     background-color: hsl(240deg 4% 14.71%);
 }
 
-.flex-td {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
 .custom-table .flex-td {
     display: flex;
     flex-direction: column;

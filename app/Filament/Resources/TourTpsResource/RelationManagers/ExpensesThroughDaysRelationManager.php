@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\TourTpsTestResource\RelationManagers;
+namespace App\Filament\Resources\TourTpsResource\RelationManagers;
 
 use App\Enums\PlaneType;
 use App\Models\Tour;
@@ -311,7 +311,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
                         Components\Select::make('status')
                             ->options(ExpenseStatus::class)
-                            ->default(ExpenseStatus::New->value)
+                            ->formatStateUsing(fn($state, $get) => $get('id') ? $get('status') : ExpenseStatus::Confirmed->value)
                             ->required()
                             ->native(false)
                             ->searchable()

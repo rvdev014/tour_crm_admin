@@ -123,7 +123,7 @@ class CompanyIncomeResource extends Resource
                         if ($record->isCorporate()) {
                             $link = "/admin/tour-corporate/$record->id/edit";
                         } else {
-                            $link = "/admin/tour-tps-test/$record->id/edit";
+                            $link = "/admin/tour-tps/$record->id/edit";
                         }
                         return "<a href='{$link}' target='_blank'>$record->group_number</a>";
                     })

@@ -44,6 +44,12 @@
                 $transport = $group->getExpense(ExpenseType::Transport);
                 /** @var Transfer $transfer */
                 $transfer = Transfer::query()->where('tour_day_expense_id', $transport?->id)->first();
+                
+                // Get driver names if driver_ids exist
+                $driverNames = [];
+                if ($transfer && $transfer->driver_ids) {
+                    $driverNames = \App\Models\Driver::whereIn('id', $transfer->driver_ids)->pluck('name')->toArray();
+                }
 
                 $lunch = $group->getExpense(ExpenseType::Lunch);
                 $dinner = $group->getExpense(ExpenseType::Dinner);
@@ -105,7 +111,15 @@
 
                 <td>
                     <div class="flex-td">
-                        <a target="_blank" href="/admin/transfers/{{ $transfer?->id }}/edit">{{ $transfer?->number }}</a>
+                        @if ($transfer)
+                            <a target="_blank" href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer->number }}</a>
+                            @if (!empty($driverNames))
+                                <p>{{ implode(', ', $driverNames) }}</p>
+                            @endif
+                            @if ($transfer->nameplate)
+                                <p>{{ $transfer->nameplate }}</p>
+                            @endif
+                        @endif
                     </div>
                 </td>
 
