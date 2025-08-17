@@ -65,6 +65,8 @@ class DriverResource extends Resource
         return $table
             ->striped()
             ->defaultSort('id', 'desc')
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),

@@ -391,7 +391,7 @@ class TourCorporateResource extends Resource
                                         ->numeric(),
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
-                                        ->default(ExpenseStatus::New->value)
+                                        ->formatStateUsing(fn($state, $get) => $get('id') ? $get('status') : ExpenseStatus::Confirmed->value)
                                         ->required()
                                         ->native(false)
                                         ->searchable()
@@ -502,7 +502,8 @@ class TourCorporateResource extends Resource
                                 data: $data,
                                 totalPax: $passengersCount,
                                 roomAmounts: ExpenseService::getRoomingAmountsForExpense($data),
-                                companyId: $tourData['company_id']
+                                companyId: $tourData['company_id'],
+                                isTps: false
                             );
                         })
                         ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
@@ -513,7 +514,8 @@ class TourCorporateResource extends Resource
                                 data: $data,
                                 totalPax: $passengersCount,
                                 roomAmounts: ExpenseService::getRoomingAmountsForExpense($data),
-                                companyId: $tourData['company_id']
+                                companyId: $tourData['company_id'],
+                                isTps: false
                             );
                         })*/
                 ]),
@@ -540,6 +542,8 @@ class TourCorporateResource extends Resource
         return $table
             ->striped()
             ->defaultSort('start_date', 'asc')
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->filters([
                 Tables\Filters\Filter::make('country_id')
                     ->form([

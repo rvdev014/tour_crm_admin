@@ -51,6 +51,8 @@ class RoomTypeResource extends Resource
                             ->columnSpanFull(),
                     ]),
             ])
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -99,7 +101,7 @@ class RoomTypeResource extends Resource
                                 ->body($errorMessage)
                                 ->danger()
                                 ->send();
-                            
+
                             $action->halt();
                         }
                     }),
@@ -109,26 +111,26 @@ class RoomTypeResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                         ->before(function (Tables\Actions\DeleteBulkAction $action, Collection $records) {
                             $undeletableRecords = [];
-                            
+
                             foreach ($records as $record) {
                                 if (!$record->canBeDeleted()) {
                                     $undeletableRecords[] = $record->name;
                                 }
                             }
-                            
+
                             if (!empty($undeletableRecords)) {
                                 $count = count($undeletableRecords);
                                 $recordsList = implode(', ', array_slice($undeletableRecords, 0, 5));
                                 if ($count > 5) {
                                     $recordsList .= " and " . ($count - 5) . " more";
                                 }
-                                
+
                                 \Filament\Notifications\Notification::make()
                                     ->title('Cannot Delete Room Types')
                                     ->body("Cannot delete {$count} room type(s) ({$recordsList}) because they are being used by related records.")
                                     ->danger()
                                     ->send();
-                                
+
                                 $action->halt();
                             }
                         }),

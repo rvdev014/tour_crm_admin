@@ -71,6 +71,8 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->paginationPageOptions([30, 50, 100])
+            ->defaultPaginationPageOption(30)
             ->defaultSort('id', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')

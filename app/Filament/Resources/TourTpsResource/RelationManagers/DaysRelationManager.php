@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\TourTpsTestResource\RelationManagers;
+namespace App\Filament\Resources\TourTpsResource\RelationManagers;
 
 use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
@@ -366,12 +366,12 @@ class DaysRelationManager extends RelationManager
 
                                 Components\Select::make('status')
                                     ->options(ExpenseStatus::class)
-                                    ->default(ExpenseStatus::New->value)
+                                    ->formatStateUsing(fn($state, $get) => $get('id') ? $get('status') : ExpenseStatus::Confirmed->value)
+                                    ->reactive()
                                     ->required()
                                     ->native(false)
                                     ->searchable()
-                                    ->preload()
-                                    ->label('Status'),
+                                    ->preload(),
                             ]),
 
                             Components\Textarea::make('comment')
@@ -472,20 +472,11 @@ class DaysRelationManager extends RelationManager
                         /** @var Tour $tour */
                         $tour = $this->getOwnerRecord();
                         $data['from_city_id'] = $get('city_id');
-                        return ExpenseService::mutateExpense(
-                            data: $data,
-                            totalPax: $tour->getTotalPax(),
-                            countryId: $tour->country_id,
-                            roomAmounts: $tour->roomTypes->mapWithKeys(
-                                fn($roomType) => [$roomType->room_type_id => $roomType->amount]
-                            ),
-                            day: $get()
-                        );
-                    })
-                    ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
-                        /** @var Tour $tour */
-                        $tour = $this->getOwnerRecord();
-                        $data['from_city_id'] = $get('city_id');
+
+                        // Set default status for Train expenses to Confirmed
+                        if ($data['type'] == ExpenseType::Train->value && empty($data['status'])) {
+                            $data['status'] = ExpenseStatus::Confirmed->value;
+                        }
 
                         return ExpenseService::mutateExpense(
                             data: $data,
@@ -494,7 +485,29 @@ class DaysRelationManager extends RelationManager
                             roomAmounts: $tour->roomTypes->mapWithKeys(
                                 fn($roomType) => [$roomType->room_type_id => $roomType->amount]
                             ),
-                            day: $get()
+                            day: $get(),
+                            isTps: true
+                        );
+                    })
+                    ->mutateRelationshipDataBeforeSaveUsing(function ($data, $get) {
+                        /** @var Tour $tour */
+                        $tour = $this->getOwnerRecord();
+                        $data['from_city_id'] = $get('city_id');
+
+                        // Set default status for Train expenses to Confirmed
+                        if ($data['type'] == ExpenseType::Train->value && empty($data['status'])) {
+                            $data['status'] = ExpenseStatus::Confirmed->value;
+                        }
+
+                        return ExpenseService::mutateExpense(
+                            data: $data,
+                            totalPax: $tour->getTotalPax(),
+                            countryId: $tour->country_id,
+                            roomAmounts: $tour->roomTypes->mapWithKeys(
+                                fn($roomType) => [$roomType->room_type_id => $roomType->amount]
+                            ),
+                            day: $get(),
+                            isTps: true
                         );
                     })
             ]);

@@ -45,9 +45,15 @@
                 $transport = $day->getExpense(ExpenseType::Transport);
 
                 $transfer = null;
+                $driverNames = [];
                 if ($transport) {
                     /** @var Transfer $transfer */
                     $transfer = Transfer::query()->where('tour_day_expense_id', $transport?->id)->first();
+
+                    // Get driver names if driver_ids exist
+                    if ($transfer && $transfer->driver_ids) {
+                        $driverNames = \App\Models\Driver::whereIn('id', $transfer->driver_ids)->pluck('name')->toArray();
+                    }
                 }
 
                 $lunch = $day->getExpense(ExpenseType::Lunch);
@@ -106,15 +112,27 @@
                 <td>
                     <div class="flex-td">
                         <p>{{ $train?->train?->name }}</p>
-                        <p>{{ $train?->departure_time }} - {{ $train?->arrival_time?->format('d.m.Y H:i') }}</p>
+                        @if ($train?->status)
+                            <x-filament::badge
+                                :color="$train->status->getColor()"
+                                size="sm"
+                            >
+                                {{ $train->status->getLabel() }}
+                            </x-filament::badge>
+                        @endif
                     </div>
                 </td>
 
                 <td>
                     <div class="flex-td">
                         @if ($transfer)
-                            <a target="_blank"
-                               href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer?->number }}</a>
+                            <a target="_blank" href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer->number }}</a>
+                            @if (!empty($driverNames))
+                                <p>{{ implode(', ', $driverNames) }}</p>
+                            @endif
+                            @if ($transfer->nameplate)
+                                <p>{{ $transfer->nameplate }}</p>
+                            @endif
                         @endif
                     </div>
                 </td>

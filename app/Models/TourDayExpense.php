@@ -228,4 +228,9 @@ class TourDayExpense extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
+
+    public function getTrainStatusAttribute(): ExpenseStatus
+    {
+        return $this->status;
+    }
 }
