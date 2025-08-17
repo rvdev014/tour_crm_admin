@@ -20,7 +20,7 @@ class WebTourRequestResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'tour_id' => $this->tour_id,
+            'web_tour_id' => $this->web_tour_id,
             'start_date' => $this->start_date,
             'phone' => $this->phone,
             'citizenship' => $this->citizenship,
@@ -31,7 +31,7 @@ class WebTourRequestResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
-            'tour' => new WebTourResource($this->whenLoaded('tour')),
+            'tour' => new WebTourResource($this->whenLoaded('webTour')),
         ];
     }
 }

@@ -3,22 +3,16 @@
 namespace App\Filament\Resources\RoomTypeResource\Pages;
 
 use App\Filament\Resources\RoomTypeResource;
-use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ManageRecords;
 
-class EditRoomType extends EditRecord
+class ManageRoomTypes extends ManageRecords
 {
     protected static string $resource = RoomTypeResource::class;
-
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            // Actions are handled in the table headerActions
         ];
     }
 }

@@ -44,6 +44,7 @@ class HotelResource extends JsonResource
             'phone' => $this->getPhone(),
             'facilities' => FacilityResource::collection($this->whenLoaded('facilities')),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
+            'room_types' => $this->getRoomTypes(),
         ];
     }
 
@@ -81,5 +82,31 @@ class HotelResource extends JsonResource
         }
         
         return null;
+    }
+
+    private function getRoomTypes(): array
+    {
+        if (!$this->relationLoaded('roomTypes')) {
+            return [];
+        }
+
+        // Group room types by unique room type name
+        $groupedRoomTypes = $this->roomTypes
+            ->load('roomType')
+            ->groupBy('roomType.name')
+            ->map(function ($hotelRoomTypes, $roomTypeName) {
+                // Get the first room type for basic info
+                $firstRoomType = $hotelRoomTypes->first();
+                
+                return [
+                    'name' => $roomTypeName,
+                    'picture' => $firstRoomType->roomType?->picture ? asset('storage/' . $firstRoomType->roomType->picture) : null,
+                    'description' => $firstRoomType->roomType?->description,
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        return $groupedRoomTypes;
     }
 }

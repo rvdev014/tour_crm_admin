@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\WebTourStatus;
+use App\Enums\WebTourType;
 use App\Models\User;
 use App\Enums\UserRole;
 use Illuminate\Http\Request;
@@ -146,13 +148,50 @@ class AuthController extends Controller
         /** @var User $user */
         $user = $request->user('sanctum');
 
-        $webTours = WebTourRequest::with(['tour'])
+        $webTours = WebTourRequest::with(['webTour'])
             ->where('user_id', $user->id)
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return response()->json([
-            'data' => WebTourRequestResource::collection($webTours)
+            'data' => WebTourRequestResource::collection($webTours->items()),
+            'pagination' => [
+                'current_page' => $webTours->currentPage(),
+                'last_page' => $webTours->lastPage(),
+                'per_page' => $webTours->perPage(),
+                'total' => $webTours->total(),
+                'from' => $webTours->firstItem(),
+                'to' => $webTours->lastItem(),
+                'has_next_page' => $webTours->hasMorePages(),
+                'has_previous_page' => $webTours->currentPage() > 1,
+            ]
         ]);
+    }
+
+    public function storeWebTourRequest(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user('sanctum');
+
+        $validated = $request->validate([
+            'web_tour_id' => 'nullable|exists:web_tours,id',
+            'phone' => 'nullable|string|max:255',
+            'citizenship' => 'nullable|string|max:255',
+            'comment' => 'nullable|string',
+            'travellers_count' => 'nullable|integer|min:1',
+            'tour_type' => 'nullable|integer|in:' . implode(',', array_column(WebTourType::cases(), 'value')),
+            'start_date' => 'required|date',
+            'status' => 'nullable|integer',
+        ]);
+
+        $validated['user_id'] = $user->id;
+        $validated['status'] = WebTourStatus::New;
+
+        $webTourRequest = WebTourRequest::create($validated);
+
+        return response()->json([
+            'message' => 'Web tour request created successfully',
+            'data' => new WebTourRequestResource($webTourRequest->load(['webTour']))
+        ], 201);
     }
 }

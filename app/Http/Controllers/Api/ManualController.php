@@ -38,9 +38,21 @@ class ManualController extends Controller
                         ->orWhereRaw('LOWER(description_en) LIKE ?', ["%$search%"]);
                 });
             })
-            ->get();
+            ->paginate(10);
 
-        return response()->json(['data' => WebTourResource::collection($webTours)]);
+        return response()->json([
+            'data' => WebTourResource::collection($webTours->items()),
+            'pagination' => [
+                'current_page' => $webTours->currentPage(),
+                'last_page' => $webTours->lastPage(),
+                'per_page' => $webTours->perPage(),
+                'total' => $webTours->total(),
+                'from' => $webTours->firstItem(),
+                'to' => $webTours->lastItem(),
+                'has_next_page' => $webTours->hasMorePages(),
+                'has_previous_page' => $webTours->currentPage() > 1,
+            ]
+        ]);
     }
 
     public function getTour($tourId): JsonResponse

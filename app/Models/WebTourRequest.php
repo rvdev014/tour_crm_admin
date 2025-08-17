@@ -3,39 +3,49 @@
 namespace App\Models;
 
 use App\Enums\TourType;
-use App\Enums\TourStatus;
 use App\Enums\WebTourStatus;
+use App\Enums\WebTourType;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property int $id
  * @property int $user_id
- * @property int $tour_id
+ * @property int|null $web_tour_id
  * @property string $start_date
- * @property string $phone
- * @property string $citizenship
- * @property string $comment
- * @property int $travellers_count
- * @property TourType $tour_type
- * @property TourStatus $status
+ * @property string|null $phone
+ * @property string|null $citizenship
+ * @property string|null $comment
+ * @property int|null $travellers_count
+ * @property TourType|null $tour_type
+ * @property WebTourStatus $status
  */
 class WebTourRequest extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'web_tour_id',
+        'phone',
+        'citizenship',
+        'comment',
+        'travellers_count',
+        'tour_type',
+        'start_date',
+        'status',
+    ];
 
     protected $casts = [
         'start_date' => 'date',
         'status' => WebTourStatus::class,
-        'tour_type' => TourType::class,
+        'tour_type' => WebTourType::class,
     ];
 
-    public function tour(): BelongsTo
+    public function webTour(): BelongsTo
     {
-        return $this->belongsTo(Tour::class);
+        return $this->belongsTo(WebTour::class);
     }
 
     public function user(): BelongsTo

@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
     Route::post('/me', [AuthController::class, 'updateMe'])->name('update_me'); // tested
     Route::get('/me/web-tours', [AuthController::class, 'getWebTours'])->name('me.web_tours');
+    Route::post('/web-tour-request', [AuthController::class, 'storeWebTourRequest'])->name('store_web_tour');
 });
 
 Route::controller(ManualController::class)->group(function () {

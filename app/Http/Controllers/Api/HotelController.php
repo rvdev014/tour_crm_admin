@@ -17,7 +17,7 @@ class HotelController extends Controller
         $search = trim(mb_strtolower($search));
 
         $hotels = Hotel::query()
-            ->with(['country', 'city', 'facilities', 'attachments'])
+            ->with(['country', 'city', 'facilities', 'attachments', 'roomTypes.roomType'])
             ->when($search, function($query) use ($search) {
                 $query->where(function($q) use ($search) {
                     $q
@@ -29,9 +29,21 @@ class HotelController extends Controller
                         ->orWhereRaw('LOWER(address) LIKE ?', ["%$search%"]);
                 });
             })
-            ->get();
+            ->paginate(10);
 
-        return response()->json(['data' => HotelResource::collection($hotels)]);
+        return response()->json([
+            'data' => HotelResource::collection($hotels->items()),
+            'pagination' => [
+                'current_page' => $hotels->currentPage(),
+                'last_page' => $hotels->lastPage(),
+                'per_page' => $hotels->perPage(),
+                'total' => $hotels->total(),
+                'from' => $hotels->firstItem(),
+                'to' => $hotels->lastItem(),
+                'has_next_page' => $hotels->hasMorePages(),
+                'has_previous_page' => $hotels->currentPage() > 1,
+            ]
+        ]);
     }
 
     public function getHotelOthers(Request $request): JsonResponse
@@ -39,7 +51,7 @@ class HotelController extends Controller
         $hotelId = $request->route('id');
 
         $hotel = Hotel::query()
-            ->with(['country', 'city', 'facilities', 'attachments'])
+            ->with(['country', 'city', 'facilities', 'attachments', 'roomTypes.roomType'])
             ->whereNot('id', $hotelId)
             ->orderByDesc('rate')
             ->limit(10)
@@ -51,7 +63,7 @@ class HotelController extends Controller
     public function getHotel($hotelId): JsonResponse
     {
         $hotel = Hotel::query()
-            ->with(['country', 'city', 'facilities', 'attachments', 'reviews'])
+            ->with(['country', 'city', 'facilities', 'attachments', 'reviews', 'roomTypes.roomType'])
             ->findOrFail($hotelId);
 
         return response()->json(['data' => HotelResource::make($hotel)]);
@@ -60,7 +72,7 @@ class HotelController extends Controller
     public function getRecommendedHotels(): JsonResponse
     {
         $hotels = Hotel::query()
-            ->with(['country', 'city', 'facilities', 'attachments'])
+            ->with(['country', 'city', 'facilities', 'attachments', 'roomTypes.roomType'])
             ->whereHas('recommendedHotels')
             ->get();
 
