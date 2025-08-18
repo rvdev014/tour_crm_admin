@@ -31,6 +31,7 @@ Route::controller(ManualController::class)->group(function () {
     Route::get('/services', 'getServices');
     Route::get('/countries', 'getCountries');
     Route::get('/cities', 'getCities');
+    Route::post('/transfer-requests', 'storeTransferRequest');
 });
 
 Route::controller(HotelController::class)->group(function () {

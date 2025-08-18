@@ -10,6 +10,7 @@ use App\Enums\PaymentType;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
 use App\Services\ExpenseService;
+use App\Services\TourService;
 use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
 use Carbon\Carbon;
@@ -95,6 +96,26 @@ class Tour extends Model
         'payment_type' => PaymentType::class,
         'payment_status' => PaymentStatus::class,
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Tour $tour) {
+            // Always call TourService::getGroupNumber to ensure uniqueness
+            if (empty($tour->group_number)) {
+                $tour->group_number = static::generateUniqueGroupNumber($tour->type);
+            } else {
+                // If group_number is manually set, still ensure it's unique
+                $tour->group_number = static::ensureUniqueGroupNumber($tour);
+            }
+        });
+
+        static::updating(function (Tour $tour) {
+            // Only check uniqueness if group_number is being changed
+            if ($tour->isDirty('group_number')) {
+                $tour->group_number = static::ensureUniqueGroupNumber($tour);
+            }
+        });
+    }
 
     public function company(): BelongsTo
     {
@@ -227,5 +248,39 @@ class Tour extends Model
                 'income' => $totalPrice - $expensesTotal,
             ]);
         }
+    }
+
+    /**
+     * Generate a unique group number using TourService
+     * Keep calling TourService::getGroupNumber until we get a unique one
+     */
+    protected static function generateUniqueGroupNumber(TourType $tourType): string
+    {
+        do {
+            $groupNumber = TourService::getGroupNumber($tourType);
+            $exists = static::where('group_number', $groupNumber)->exists();
+        } while ($exists);
+
+        return $groupNumber;
+    }
+
+    /**
+     * Ensure the group number is unique by incrementing the numeric part if necessary
+     * For format like A10325T -> A10425T -> A10525T -> A10625T
+     */
+    protected static function ensureUniqueGroupNumber(Tour $tour): string
+    {
+        $groupNumber = $tour->group_number;
+        $query = static::where('group_number', $tour->group_number);
+        if ($tour->id) {
+            $query->where('id', '!=', $tour->id);
+        }
+        $exists = $query->exists();
+
+        if ($exists) {
+            $groupNumber = TourService::getGroupNumber($tour->type);
+        }
+
+        return $groupNumber;
     }
 }

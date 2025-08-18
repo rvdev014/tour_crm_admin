@@ -47,6 +47,87 @@ class ListCompanyExpenses extends ListRecords
                                     $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                                     return $tour->group_number;
                                 }),
+                            Column::make('company')
+                                ->heading('Company')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
+                                    return $tour->company->name;
+                                }),
+                            Column::make('inn')
+                                ->heading('Company Inn')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
+                                    return $tour->company->inn;
+                                }),
+                            Column::make('start_date')
+                                ->heading('Start Date')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
+                                    return $tour->start_date?->format('d.m.Y H:i');
+                                }),
+                            Column::make('expense_date')
+                                ->heading('Expense Date')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    $date = $record->tourDay->date ?? $record->date;
+                                    return $date->format('d.m.Y');
+                                }),
+                            Column::make('passengers')
+                                ->heading('Passengers FIO')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    return $record->tourGroup?->passengers?->first()?->name ?? '-';
+                                }),
+                            Column::make('expense_type')
+                                ->heading('Expense Type')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    return $record->type->getLabel();
+                                }),
+                            Column::make('expense_name')
+                                ->heading('Expense Name')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    return match ($record->type) {
+                                        ExpenseType::Hotel => $record->hotel?->name,
+                                        ExpenseType::Museum => TourService::getMuseumsByIds([1, 2])->values()->join(', '),
+                                        ExpenseType::Lunch, ExpenseType::Dinner => $record->restaurant?->name,
+                                        ExpenseType::Train => $record->train?->name,
+                                        ExpenseType::Show => $record->show?->name,
+                                        default => '',
+                                    };
+                                }),
+                            Column::make('tour_pax')
+                                ->heading('Pax')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
+                                    if ($record->tourGroup) {
+                                        return $record->tourGroup->passengers()->count();
+                                    }
+                                    return $tour->getTotalPax();
+                                }),
+                            Column::make('route')
+                                ->heading('Route')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    $fromCity = $record->tourDay?->city?->name ?? $record->city?->name;
+                                    return match ($record->type) {
+                                        ExpenseType::Transport => $record->transport_route,
+                                        ExpenseType::Flight => $record->plane_route,
+                                        ExpenseType::Train => "$fromCity - {$record->toCity?->name}",
+                                        default => '',
+                                    };
+                                }),
+                            Column::make('price')
+                                ->heading('Price')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    return TourService::formatMoney($record->price_result) . ' ' . CurrencyEnum::UZS->getSymbol();
+                                }),
+                            Column::make('payment_status')
+                                ->heading('Payment Status')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    return $record->payment_status?->getLabel();
+                                }),
+                            Column::make('invoice_status')
+                                ->heading('Invoice Status')
+                                ->getStateUsing(function (TourDayExpense $record) {
+                                    return $record->invoice_status?->getLabel();
+                                }),
                         ])
                 ]),
             Actions\CreateAction::make(),
@@ -59,15 +140,68 @@ class ListCompanyExpenses extends ListRecords
         $filters = Arr::get($filters, 'filters', []);
 
         /** @var Collection<TourDayExpense> $expenses */
-        $expenses = TourDayExpense::query()
+        $query = TourDayExpense::query()
             ->with([
                 'tourGroup' => fn($query) => $query->with([
                     'tour' => fn($q) => $q->with('company'),
                     'passengers'
                 ]),
                 'tourDay' => fn($query) => $query->with(['tour' => fn($q) => $q->with('company')]),
-            ])
-            ->get();
+            ]);
+
+        // Apply filters to the query
+        if ($companyIds = $filters['companies'] ?? null) {
+            $query = $query->where(function ($query) use ($companyIds) {
+                $query
+                    ->whereHas(
+                        'tourGroup',
+                        fn($q) => $q->whereHas('tour', fn($q) => $q->whereIn('company_id', $companyIds))
+                    )
+                    ->orWhereHas(
+                        'tourDay',
+                        fn($q) => $q->whereHas('tour', fn($q) => $q->whereIn('company_id', $companyIds))
+                    );
+            });
+        }
+        if ($tourType = $filters['tour_type'] ?? null) {
+            $query = $query->where(function ($query) use ($tourType) {
+                $query
+                    ->whereHas(
+                        'tourGroup',
+                        fn($q) => $q->whereHas('tour', fn($q) => $q->where('type', $tourType))
+                    )
+                    ->orWhereHas(
+                        'tourDay',
+                        fn($q) => $q->whereHas('tour', fn($q) => $q->where('type', $tourType))
+                    );
+            });
+        }
+        if ($filters['expense_types'] ?? null) {
+            $query = $query->whereIn('type', $filters['expense_types']);
+        }
+        if ($paymentStatus = $filters['payment_status'] ?? null) {
+            $query = $query->where('payment_status', $paymentStatus);
+        }
+        if ($filters['date_from'] ?? null) {
+            $query = $query->where(function ($subQuery) use ($filters) {
+                $subQuery
+                    ->whereDate('date', '>=', $filters['date_from'])
+                    ->orWhereHas('tourDay', function ($q) use ($filters) {
+                        $q->whereDate('date', '>=', $filters['date_from']);
+                    });
+            });
+        }
+        if ($filters['date_until'] ?? null) {
+            $query = $query->where(function ($subQuery) use ($filters) {
+                $subQuery
+                    ->whereDate('date', '<=', $filters['date_until'])
+                    ->orWhereHas('tourDay', function ($q) use ($filters) {
+                        $q->whereDate('date', '<=', $filters['date_until']);
+                    });
+            });
+        }
+
+        $expenses = $query->get();
 
         $spreadsheet = new Spreadsheet();
 
