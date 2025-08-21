@@ -106,7 +106,7 @@
                             </x-filament::badge>
                         @endif
                     </div>
-                    <p>{{ $flight?->departure_time }} - {{ $flight?->arrival_time?->format('d.m.Y H:i') }}</p>
+{{--                    <p>{{ $flight?->departure_time }} - {{ $flight?->arrival_time?->format('d.m.Y H:i') }}</p>--}}
                 </td>
 
                 <td>

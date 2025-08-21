@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Company;
+use App\Models\Group;
 use Filament\Forms\Form;
 use App\Enums\CompanyType;
 use Filament\Tables\Table;
@@ -40,7 +41,7 @@ class CompanyResource extends Resource
         return $form
             ->schema([
 
-                Forms\Components\Grid::make(4)->schema([
+                Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('name')
                         ->required()
                         ->maxLength(255),
@@ -55,6 +56,16 @@ class CompanyResource extends Resource
                         ->reactive()
                         ->required(),
 
+                    Forms\Components\Select::make('group_id')
+                        ->label('Group')
+                        ->relationship('group', 'name')
+                        ->preload()
+                        ->searchable()
+                        ->createOptionForm([
+                            Forms\Components\TextInput::make('name')
+                                ->required(),
+                        ]),
+
                     Forms\Components\TextInput::make('inn')
                         ->maxLength(255)
                         ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
@@ -64,7 +75,7 @@ class CompanyResource extends Resource
                         ->visible(fn($get) => $get('type') == CompanyType::Corporate->value),
                 ]),
 
-                Forms\Components\Grid::make(4)->schema([
+                Forms\Components\Grid::make(2)->schema([
                     Forms\Components\TextInput::make('email')
                         ->email(255),
                     Forms\Components\Textarea::make('comment'),
@@ -84,6 +95,9 @@ class CompanyResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
                     ->badge(),
+                Tables\Columns\TextColumn::make('group.name')
+                    ->label('Group')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('inn')

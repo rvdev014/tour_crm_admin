@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CompanyType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $comment
  * @property CompanyType $type
  * @property int $additional_percent
+ * @property int|null $group_id
  */
 class Company extends Model
 {
@@ -27,10 +29,16 @@ class Company extends Model
         'email',
         'type',
         'comment',
-        'additional_percent'
+        'additional_percent',
+        'group_id'
     ];
 
     protected $casts = [
         'type' => CompanyType::class,
     ];
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
+    }
 }
