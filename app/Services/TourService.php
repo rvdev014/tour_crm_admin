@@ -299,7 +299,8 @@ class TourService
         $addPercent = null;
         if ($companyId) {
             /** @var Company $company */
-            $company = Company::query()->select('additional_percent')->find($companyId);
+//            $company = Company::query()->select('additional_percent')->find($companyId);
+            $company = Company::query()->find($companyId);
             $addPercent = $company?->additional_percent ?? null;
         }
         return $addPercent;

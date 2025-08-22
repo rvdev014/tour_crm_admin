@@ -45,7 +45,7 @@ class ExportHotelService
                 ->first();
 
             if ($hotelRoomType) {
-                $price = $hotelRoomType->getPrice($addPercent, $personType);
+                $price = $hotelRoomType->getPriceWithPercent($addPercent, $personType);
                 $hotelPrices->put($hotelRoomType->roomType->name, $price);
             }
         }

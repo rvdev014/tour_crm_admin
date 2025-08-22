@@ -256,7 +256,7 @@ class ExportService
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
-                $price = $hotelRoomType?->getPrice($addPercent, $personType) ?? 0;
+                $price = $hotelRoomType?->getPriceWithPercent($addPercent, $personType) ?? 0;
                 $hotelTotal = $amount * $price;
 
                 $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];
@@ -658,7 +658,7 @@ class ExportService
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
-                $price = $hotelRoomType?->getPrice($addPercent, $personType) ?? 0;
+                $price = $hotelRoomType?->getPriceWithPercent($addPercent, $personType) ?? 0;
                 $hotelTotal = $amount * $price;
 
                 $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];

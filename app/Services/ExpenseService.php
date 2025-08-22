@@ -201,7 +201,7 @@ class ExpenseService
                         }
 
                         $totalNights = $data['hotel_total_nights'] ?? 1;
-                        
+
                         // For TPS tours: if check-in time is before 14:00, calculate as 1.5 days instead of 1
                         if ($isTps && $totalNights == 1 && !empty($data['hotel_checkin_time'])) {
                             $checkinTime = \Carbon\Carbon::parse($data['hotel_checkin_time']);
@@ -220,7 +220,7 @@ class ExpenseService
                             continue;
                         }
 
-                        $hotelTotal += $hotelRoomType->getPrice($addPercent, $personType) * $amount * $totalNights;
+                        $hotelTotal += $hotelRoomType->getPriceWithPercent($addPercent, $personType) * $amount * $totalNights;
                     }
 
                     $data['price'] = $hotelTotal;
