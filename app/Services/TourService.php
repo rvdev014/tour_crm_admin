@@ -300,18 +300,8 @@ class TourService
         $addPercent = null;
         if ($companyId) {
             /** @var Company $company */
-            //            $company = Company::query()->select('additional_percent')->find($companyId);
             $company = Company::query()->find($companyId);
-            $group = $company->group;
-            if ($group) {
-                /** @var GroupItem $groupItem */
-                $groupItem = $group->groupItems()
-                    ->where('from_price', '<=', $price)
-                    ->where('to_price', '>=', $price)
-                    ->first();
-
-                $addPercent = $groupItem?->percent;
-            }
+            $addPercent = $company->group?->getPercent($price);
         }
 
         return $addPercent;

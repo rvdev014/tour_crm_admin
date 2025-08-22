@@ -23,4 +23,15 @@ class Group extends Model
     {
         return $this->hasMany(Company::class);
     }
+
+    public function getPercent($price): float
+    {
+        /** @var GroupItem $groupItem */
+        $groupItem = $this->groupItems()
+            ->where('from_price', '<=', $price)
+            ->where('to_price', '>=', $price)
+            ->first();
+
+        return $groupItem?->percent ?? 0;
+    }
 }

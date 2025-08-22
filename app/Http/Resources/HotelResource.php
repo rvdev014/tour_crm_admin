@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Hotel;
+use App\Models\Group;
 use App\Models\HotelRoomType;
 use App\Services\ExpenseService;
 use Illuminate\Http\Request;
@@ -67,7 +68,10 @@ class HotelResource extends JsonResource
         /** @var HotelRoomType $hotelRoomType */
         $hotelRoomType = $this->roomTypes()->where('season_type', $seasonType)->first();
 
-        return $hotelRoomType?->price_foreign;
+        /** @var Group $group */
+        $group = Group::query()->where('name', 'website')->firstOrFail();
+
+        return $hotelRoomType?->getPriceByGroup($group);
     }
 
     private function getPhone()
@@ -80,7 +84,7 @@ class HotelResource extends JsonResource
         if ($this->latitude && $this->longitude) {
             return [(float) $this->longitude, (float) $this->latitude];
         }
-        
+
         return null;
     }
 
@@ -97,7 +101,7 @@ class HotelResource extends JsonResource
             ->map(function ($hotelRoomTypes, $roomTypeName) {
                 // Get the first room type for basic info
                 $firstRoomType = $hotelRoomTypes->first();
-                
+
                 return [
                     'name' => $roomTypeName,
                     'picture' => $firstRoomType->roomType?->picture ? asset('storage/' . $firstRoomType->roomType->picture) : null,
