@@ -34,15 +34,15 @@ class GroupResource extends Resource
                         Forms\Components\TextInput::make('from_price')
                             ->required()
                             ->numeric()
-                            ->step(0.01),
+                            ->step(1),
                         Forms\Components\TextInput::make('to_price')
                             ->required()
                             ->numeric()
-                            ->step(0.01),
+                            ->step(1),
                         Forms\Components\TextInput::make('percent')
                             ->required()
                             ->numeric()
-                            ->step(0.01)
+                            ->step(1)
                             ->suffix('%'),
                     ])
                     ->columns(3)

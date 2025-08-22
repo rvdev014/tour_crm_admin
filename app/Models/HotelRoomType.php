@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\RoomPersonType;
 use App\Enums\RoomSeasonType;
+use App\Services\TourService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,9 +57,10 @@ class HotelRoomType extends Model
         return $hotelPrice ?? 0;
     }
 
-    public function getPriceWithPercent($addPercent, $personType): int|float
+    public function getPriceWithPercent($companyId, $personType): int|float
     {
-        $hotelPrice = $personType === RoomPersonType::Uzbek ? $this->price : $this->price_foreign;
+        $hotelPrice = $this->getPrice($personType);
+        $addPercent = TourService::getCompanyAddPercent($companyId, $hotelPrice);
         if ($addPercent) {
             $hotelPrice += $hotelPrice * $addPercent / 100;
         }

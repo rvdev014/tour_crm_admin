@@ -2,33 +2,34 @@
 
 namespace App\Services;
 
-use App\Enums\ExpenseStatus;
-use App\Enums\ExpenseType;
-use App\Enums\TourType;
-use App\Enums\TransportType;
+use Throwable;
 use App\Models\City;
-use App\Models\Company;
-use App\Models\Country;
-use App\Models\Driver;
-use App\Models\Hotel;
-use App\Models\Museum;
-use App\Models\MuseumItem;
-use App\Models\Restaurant;
-use App\Models\RoomType;
 use App\Models\Show;
 use App\Models\Tour;
-use App\Models\TourDayExpense;
-use App\Models\TourHotel;
-use App\Models\Train;
-use App\Models\Transfer;
 use App\Models\User;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\TextInput;
+use App\Models\Hotel;
+use App\Models\Train;
+use App\Models\Driver;
+use App\Models\Museum;
+use App\Enums\TourType;
+use App\Models\Company;
+use App\Models\Country;
+use App\Models\RoomType;
+use App\Models\Transfer;
+use App\Models\GroupItem;
+use App\Models\TourHotel;
+use App\Enums\ExpenseType;
+use App\Models\MuseumItem;
+use App\Models\Restaurant;
+use App\Enums\ExpenseStatus;
+use App\Enums\TransportType;
+use App\Models\TourDayExpense;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Number;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Number;
-use Throwable;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\TextInput;
 
 class TourService
 {
@@ -215,7 +216,7 @@ class TourService
         $totalExpense = TourDayExpense::query()
             ->whereHas(
                 'tourDay',
-                fn($query) => $query->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
+                fn($query) => $query->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
                     $q->whereBetween('created_at', [$startDate, $endDate])
                         ->where('type', TourType::TPS)
                         ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
@@ -230,7 +231,7 @@ class TourService
     public static function getCorporateTotalIncome($startDate, $endDate, $countryId): float|int
     {
         $totalExpense = TourHotel::query()
-            ->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
+            ->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate])
                     ->where('type', TourType::Corporate)
                     ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
@@ -294,15 +295,25 @@ class TourService
         return $number + 100;
     }
 
-    public static function getCompanyAddPercent($companyId): ?int
+    public static function getCompanyAddPercent($companyId, $price): ?int
     {
         $addPercent = null;
         if ($companyId) {
             /** @var Company $company */
-//            $company = Company::query()->select('additional_percent')->find($companyId);
+            //            $company = Company::query()->select('additional_percent')->find($companyId);
             $company = Company::query()->find($companyId);
-            $addPercent = $company?->additional_percent ?? null;
+            $group = $company->group;
+            if ($group) {
+                /** @var GroupItem $groupItem */
+                $groupItem = $group->groupItems()
+                    ->where('from_price', '<=', $price)
+                    ->where('to_price', '>=', $price)
+                    ->first();
+
+                $addPercent = $groupItem?->percent;
+            }
         }
+
         return $addPercent;
     }
 
@@ -328,10 +339,10 @@ class TourService
             $roomTypes = RoomType::query()->skip(3)->get();
         }
 
-        $result = $roomTypes->map(function (RoomType $roomType) {
+        $result = $roomTypes->map(function(RoomType $roomType) {
             return TextInput::make("room_type_$roomType->id")
                 ->label($roomType->name)
-                ->formatStateUsing(function ($record) use ($roomType) {
+                ->formatStateUsing(function($record) use ($roomType) {
                     if (!$record) {
                         return 0;
                     }

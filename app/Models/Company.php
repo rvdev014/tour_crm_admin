@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CompanyType $type
  * @property int $additional_percent
  * @property int|null $group_id
+ *
+ * @property Group $group
  */
 class Company extends Model
 {

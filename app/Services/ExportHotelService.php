@@ -31,8 +31,8 @@ class ExportHotelService
         TourDayExpense $hotelExpense,
                        $date,
                        $roomAmounts,
-                       $addPercent,
-                       $personType
+                       $personType,
+                       $companyId = null
     ): Collection {
         $hotelPrices = collect();
         $seasonType = ExpenseService::getSeasonType($hotelExpense->hotel, $date);
@@ -45,7 +45,11 @@ class ExportHotelService
                 ->first();
 
             if ($hotelRoomType) {
-                $price = $hotelRoomType->getPriceWithPercent($addPercent, $personType);
+                if ($companyId) {
+                    $price = $hotelRoomType->getPriceWithPercent($companyId, $personType);
+                } else {
+                    $price = $hotelRoomType->getPrice($personType);
+                }
                 $hotelPrices->put($hotelRoomType->roomType->name, $price);
             }
         }
@@ -71,6 +75,7 @@ class ExportHotelService
         $tourPax = $tour->getTotalPax();
         $groupNum = $tour->group_number;
         $countryName = $tour->country->name;
+        $companyId = $tour->company_id;
         $personType = ExpenseService::getPersonType($tour->country->id);
         $addPercent = 0;
 
@@ -95,8 +100,7 @@ class ExportHotelService
                 hotelExpense: $hotelExpense,
                 date: $date,
                 roomAmounts: $roomAmountsById,
-                addPercent: $addPercent,
-                personType: $personType
+                personType: $personType,
             );
 
             if ($hotelExpense->hotel_checkin_time) {
@@ -123,7 +127,9 @@ class ExportHotelService
                     $date->format('d.m.Y H:i')
                 ],
                 'departures' => [
-                    $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time ?? '00:00')->format('d.m.Y H:i')
+                    $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time ?? '00:00')->format(
+                        'd.m.Y H:i'
+                    )
                 ],
                 'operator' => $tour->createdBy->name ?? '-',
                 'contract_number' => $hotel?->contract_number ?? null,
@@ -183,7 +189,6 @@ class ExportHotelService
         $groupNum = $tour->group_number;
         $countryName = '-';
         $personType = RoomPersonType::Uzbek;
-        $addPercent = TourService::getCompanyAddPercent($tour->company_id);
 
         $roomAmounts = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->name => $rt->amount]);
         $roomAmountsById = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->id => $rt->amount]);
@@ -205,7 +210,6 @@ class ExportHotelService
                 hotelExpense: $hotelExpense,
                 date: $date,
                 roomAmounts: $roomAmountsById,
-                addPercent: $addPercent,
                 personType: $personType
             );
 
@@ -240,41 +244,41 @@ class ExportHotelService
                 'contract_date' => $hotel?->contract_date ?? null,
             ];
 
-//            $existingHotel = $result->get($hotelExpense->hotel_id);
-//            if ($existingHotel) {
-//                // If the hotel is the same as the previous day, it's not an arrival or departure
-//                if ($prevHotelExpense && $prevHotelExpense['hotelId'] === $hotelExpense->hotel_id) {
-//                    continue;
-//                }
-//
-//                // If the hotel is different from the previous day, but exists in the result, it's a new arrival
-//                $existingHotel['arrivals'][] = $date->format('d.m.Y H:i');
-//                $result->put($hotelExpense->hotel_id, $existingHotel);
-//
-//                // And departure for previous hotel
-//                if ($prevHotelExpense) {
-//                    $prevHotel = $result->get($prevHotelExpense['hotelId']);
-//                    $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString(
-//                        $hotelExpense->hotel_checkout_time
-//                    )->format('d.m.Y H:i');
-//                    $result->put($prevHotelExpense['hotelId'], $prevHotel);
-//                }
-//            } else {
-//                // If the hotel is different from the previous day, it's a new hotel
-//                // Add departures to the previous hotel
-//                if ($prevHotelExpense) {
-//                    $prevHotel = $result->get($prevHotelExpense['hotelId']);
-//                    //                    $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time)->format('d.m.Y H:i');
-//                    $result->put($prevHotelExpense['hotelId'], $prevHotel);
-//                }
-//
-//                // First day of hotel
-//                $hotelItem['arrivals'][] = $date->format('d.m.Y H:i');
-//                $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString(
-//                    $hotelExpense->hotel_checkout_time
-//                )->format('d.m.Y H:i');
-//                $result->put($hotelExpense->hotel_id, $hotelItem);
-//            }
+            //            $existingHotel = $result->get($hotelExpense->hotel_id);
+            //            if ($existingHotel) {
+            //                // If the hotel is the same as the previous day, it's not an arrival or departure
+            //                if ($prevHotelExpense && $prevHotelExpense['hotelId'] === $hotelExpense->hotel_id) {
+            //                    continue;
+            //                }
+            //
+            //                // If the hotel is different from the previous day, but exists in the result, it's a new arrival
+            //                $existingHotel['arrivals'][] = $date->format('d.m.Y H:i');
+            //                $result->put($hotelExpense->hotel_id, $existingHotel);
+            //
+            //                // And departure for previous hotel
+            //                if ($prevHotelExpense) {
+            //                    $prevHotel = $result->get($prevHotelExpense['hotelId']);
+            //                    $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString(
+            //                        $hotelExpense->hotel_checkout_time
+            //                    )->format('d.m.Y H:i');
+            //                    $result->put($prevHotelExpense['hotelId'], $prevHotel);
+            //                }
+            //            } else {
+            //                // If the hotel is different from the previous day, it's a new hotel
+            //                // Add departures to the previous hotel
+            //                if ($prevHotelExpense) {
+            //                    $prevHotel = $result->get($prevHotelExpense['hotelId']);
+            //                    //                    $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time)->format('d.m.Y H:i');
+            //                    $result->put($prevHotelExpense['hotelId'], $prevHotel);
+            //                }
+            //
+            //                // First day of hotel
+            //                $hotelItem['arrivals'][] = $date->format('d.m.Y H:i');
+            //                $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString(
+            //                    $hotelExpense->hotel_checkout_time
+            //                )->format('d.m.Y H:i');
+            //                $result->put($hotelExpense->hotel_id, $hotelItem);
+            //            }
 
             $result->put($hotelExpense->hotel_id, $hotelItem);
             $prevHotelExpense = $hotelItem;
@@ -417,9 +421,9 @@ class ExportHotelService
         }
 
         return match ($lastDigit) {
-            1 => 'st',
-            2 => 'nd',
-            3 => 'rd',
+            1       => 'st',
+            2       => 'nd',
+            3       => 'rd',
             default => 'th',
         };
     }

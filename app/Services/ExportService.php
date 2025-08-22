@@ -166,7 +166,6 @@ class ExportService
 
     public static function genSecondTable(int $startRow, Worksheet $sheet, Tour $tour): array
     {
-        $addPercent = TourService::getCompanyAddPercent($tour->company_id);
         $personType = ExpenseService::getPersonType($tour->country_id);
         $currencyUsd = ExpenseService::getUsdToUzsCurrency();
 
@@ -256,7 +255,7 @@ class ExportService
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
-                $price = $hotelRoomType?->getPriceWithPercent($addPercent, $personType) ?? 0;
+                $price = $hotelRoomType?->getPrice($personType) ?? 0;
                 $hotelTotal = $amount * $price;
 
                 $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];
@@ -530,7 +529,6 @@ class ExportService
 
     public static function genSecondTableCorporate(int $startRow, Worksheet $sheet, Tour $tour): array
     {
-        $addPercent = TourService::getCompanyAddPercent($tour->company_id);
         $personType = ExpenseService::getPersonType($tour->country_id);
 
         $tourRoomTypes = $tour->roomTypes->map(fn(TourRoomType $roomType) => [
@@ -658,7 +656,7 @@ class ExportService
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
-                $price = $hotelRoomType?->getPriceWithPercent($addPercent, $personType) ?? 0;
+                $price = $hotelRoomType?->getPriceWithPercent($tour->company_id, $personType) ?? 0;
                 $hotelTotal = $amount * $price;
 
                 $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];

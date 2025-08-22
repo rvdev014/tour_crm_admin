@@ -2,28 +2,27 @@
 
 namespace App\Services;
 
-use App\Enums\CurrencyEnum;
-use App\Models\TourDayExpense;
-use Illuminate\Support\Arr;
-use App\Enums\ExpenseStatus;
-use App\Enums\ExpenseType;
-use App\Enums\RoomPersonType;
-use App\Enums\RoomSeasonType;
-use App\Enums\TourStatus;
-use App\Models\Country;
-use App\Models\Currency;
-use App\Models\Hotel;
-use App\Models\HotelPeriod;
-use App\Models\HotelRoomType;
-use App\Models\Museum;
-use App\Models\MuseumItem;
-use App\Models\Restaurant;
+use Carbon\Carbon;
 use App\Models\Show;
 use App\Models\Tour;
-use App\Models\TourDayExpenseRoomType;
-use App\Models\TourRoomType;
+use App\Models\Hotel;
 use App\Models\Train;
-use Carbon\Carbon;
+use App\Models\Museum;
+use App\Models\Country;
+use App\Models\Currency;
+use App\Enums\TourStatus;
+use App\Enums\ExpenseType;
+use App\Models\MuseumItem;
+use App\Models\Restaurant;
+use App\Enums\CurrencyEnum;
+use Illuminate\Support\Arr;
+use App\Models\HotelPeriod;
+use App\Enums\ExpenseStatus;
+use App\Models\TourRoomType;
+use App\Enums\RoomPersonType;
+use App\Enums\RoomSeasonType;
+use App\Models\HotelRoomType;
+use App\Models\TourDayExpense;
 use Illuminate\Support\Collection;
 
 class ExpenseService
@@ -66,7 +65,6 @@ class ExpenseService
         foreach ($groups as $group) {
             $totalPaxGroup = count($group['passengers'] ?? []);
             foreach (Arr::get($group, 'expenses') as $expense) {
-
                 $updatedExpense = ExpenseService::mutateExpense(
                     data: $expense,
                     totalPax: $totalPaxGroup,
@@ -191,9 +189,7 @@ class ExpenseService
                     $seasonType = ExpenseService::getSeasonType($hotel, $day ? $day['date'] : $data['date']);
                     $personType = ExpenseService::getPersonType($countryId);
 
-                    $addPercent = TourService::getCompanyAddPercent($companyId);
                     $hotelTotal = 0;
-
                     $roomAmounts = $roomAmounts ?: ExpenseService::getRoomingAmounts($data);
                     foreach ($roomAmounts as $roomTypeId => $amount) {
                         if (empty($amount)) {
@@ -220,7 +216,12 @@ class ExpenseService
                             continue;
                         }
 
-                        $hotelTotal += $hotelRoomType->getPriceWithPercent($addPercent, $personType) * $amount * $totalNights;
+                        if ($isTps) {
+                            $hotelPrice = $hotelRoomType->getPrice($personType);
+                        } else {
+                            $hotelPrice = $hotelRoomType->getPriceWithPercent($companyId, $personType);
+                        }
+                        $hotelTotal += $hotelPrice * $amount * $totalNights;
                     }
 
                     $data['price'] = $hotelTotal;
@@ -402,7 +403,7 @@ class ExpenseService
             function() {
                 /** @var Currency $currency */
                 $currency = Currency::query()->where('from', CurrencyEnum::UZS->value)->first();
-//                $currency = Currency::query()->where('is_main', true)->first();
+                //                $currency = Currency::query()->where('is_main', true)->first();
                 return $currency;
             }
         );
