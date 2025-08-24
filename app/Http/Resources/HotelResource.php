@@ -45,7 +45,7 @@ class HotelResource extends JsonResource
             'phone' => $this->getPhone(),
             'facilities' => FacilityResource::collection($this->whenLoaded('facilities')),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
-            'room_types' => $this->getRoomTypes(),
+            'rooms' => $this->getRooms(),
         ];
     }
 
@@ -82,13 +82,13 @@ class HotelResource extends JsonResource
     private function getPosition(): ?array
     {
         if ($this->latitude && $this->longitude) {
-            return [(float) $this->longitude, (float) $this->latitude];
+            return [(float) $this->latitude, (float) $this->longitude];
         }
 
         return null;
     }
 
-    private function getRoomTypes(): array
+    private function getRooms(): array
     {
         if (!$this->relationLoaded('roomTypes')) {
             return [];
@@ -100,12 +100,20 @@ class HotelResource extends JsonResource
             ->groupBy('roomType.name')
             ->map(function ($hotelRoomTypes, $roomTypeName) {
                 // Get the first room type for basic info
+                /** @var HotelRoomType $firstRoomType */
                 $firstRoomType = $hotelRoomTypes->first();
+                $roomType = $firstRoomType->roomType;
+
+                /** @var Group $group */
+                $group = Group::query()->where('name', 'website')->firstOrFail();
 
                 return [
+                    'id' => $firstRoomType->id,
+                    'room_type_id' => $roomType->id,
                     'name' => $roomTypeName,
-                    'picture' => $firstRoomType->roomType?->picture ? asset('storage/' . $firstRoomType->roomType->picture) : null,
-                    'description' => $firstRoomType->roomType?->description,
+                    'picture' => $roomType?->picture ? asset('storage/' . $roomType->picture) : null,
+                    'description' => $roomType?->description,
+                    'price' => $firstRoomType->getPriceByGroup($group)
                 ];
             })
             ->values()

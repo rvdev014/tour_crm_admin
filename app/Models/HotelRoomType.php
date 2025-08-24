@@ -70,6 +70,7 @@ class HotelRoomType extends Model
     public function getPriceByGroup(Group $group): int|float
     {
         $price = $this->getPrice(RoomPersonType::Foreign);
-        return $group->getPercent($price);
+        $additionalPrice = $price * $group->getPercent($price) / 100;
+        return $price + $additionalPrice;
     }
 }

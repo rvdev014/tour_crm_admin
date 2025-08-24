@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Hotel;
+use App\Models\HotelRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HotelResource;
 use App\Http\Resources\ReviewResource;
+use App\Http\Requests\StoreHotelRequestRequest;
 
 class HotelController extends Controller
 {
@@ -100,5 +102,24 @@ class HotelController extends Controller
         ]);
 
         return response()->json(['data' => ReviewResource::make($review)]);
+    }
+
+    public function storeHotelRequest(StoreHotelRequestRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $hotelRequest = HotelRequest::create([
+            'checkin_time' => $validated['check_in_date'],
+            'checkout_time' => $validated['check_out_date'],
+            'room_type_id' => $validated['room_type'],
+            'hotel_id' => $validated['hotel_id'],
+            'user_id' => auth()->user()?->id,
+            'comment' => $validated['comments'] ?? null,
+        ]);
+
+        return response()->json([
+            'data' => $hotelRequest,
+            'message' => 'Hotel request created successfully'
+        ], 201);
     }
 }

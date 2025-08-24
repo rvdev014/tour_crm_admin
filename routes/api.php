@@ -19,9 +19,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
+    Route::get('/me', [AuthController::class, 'me'])->name('me'); // tested
     Route::post('/me', [AuthController::class, 'updateMe'])->name('update_me'); // tested
     Route::get('/me/web-tours', [AuthController::class, 'getWebTours'])->name('me.web_tours');
     Route::post('/web-tour-request', [AuthController::class, 'storeWebTourRequest'])->name('store_web_tour');
+    Route::post('/transfer-requests', [ManualController::class, 'storeTransferRequest']);
+    Route::post('/hotel-requests', [HotelController::class, 'storeHotelRequest']);
 });
 
 Route::controller(ManualController::class)->group(function () {
@@ -31,7 +34,7 @@ Route::controller(ManualController::class)->group(function () {
     Route::get('/services', 'getServices');
     Route::get('/countries', 'getCountries');
     Route::get('/cities', 'getCities');
-    Route::post('/transfer-requests', 'storeTransferRequest');
+    Route::get('/room-types', 'getRoomTypes');
 });
 
 Route::controller(HotelController::class)->group(function () {
@@ -45,5 +48,4 @@ Route::controller(HotelController::class)->group(function () {
 Route::post('/login', [AuthController::class, 'login'])->name('login'); // tested
 Route::post('/register', [AuthController::class, 'register'])->name('register'); // tested
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum'); // tested
-Route::get('/me', [AuthController::class, 'me'])->name('me'); // tested
 Route::post('/auth/google', [AuthController::class, 'googleAuth'])->name('google_auth');

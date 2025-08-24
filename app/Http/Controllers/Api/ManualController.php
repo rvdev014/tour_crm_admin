@@ -13,6 +13,7 @@ use App\Models\Banner;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Hotel;
+use App\Models\RoomType;
 use App\Models\Service;
 use App\Models\Tour;
 use App\Models\TransferRequest;
@@ -98,24 +99,52 @@ class ManualController extends Controller
         return response()->json(['data' => $cities]);
     }
 
+    public function getRoomTypes(): JsonResponse
+    {
+        $roomTypes = RoomType::query()->select('id', 'name')->get();
+        return response()->json(['data' => $roomTypes]);
+    }
+
     public function storeTransferRequest(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'from_city_id' => 'required|exists:cities,id',
             'to_city_id' => 'required|exists:cities,id|different:from_city_id',
-            'date_time' => 'required|date|after:now',
-            'passengers_count' => 'required|integer|min:1|max:50',
-            'transport_class' => 'nullable|integer|in:' . implode(',', array_column(TransportClass::cases(), 'value')),
-            'fio' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
-            'comment' => 'nullable|string|max:1000',
-            'payment_type' => 'nullable|string|max:255',
-            'payment_card' => 'nullable|string|max:255',
-            'payment_holder_name' => 'nullable|string|max:255',
-            'payment_valid_until' => 'nullable|string|max:255',
+            'date' => 'required|date|after_or_equal:today',
+            'time' => 'required|date_format:H:i',
+            'passengers' => 'required|integer|min:1|max:50',
+            'class_auto' => 'nullable|string|in:economy,business,premium',
+            'full_name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:255',
+            'comments' => 'nullable|string|max:1000',
+            'card_number' => 'nullable|string|max:255',
+            'cardholder_name' => 'nullable|string|max:255',
+            'valid_until' => 'nullable|string|max:255',
         ]);
 
-        $transferRequest = TransferRequest::create($validated);
+        // Combine date and time into datetime
+        $dateTime = $validated['date'] . ' ' . $validated['time'];
+
+        // Map transport class
+        $transportClass = match($validated['class_auto'] ?? null) {
+            'business' => 2,
+            'premium' => 4,
+            default => 1, // economy
+        };
+
+        $transferRequest = TransferRequest::create([
+            'from_city_id' => $validated['from_city_id'],
+            'to_city_id' => $validated['to_city_id'],
+            'date_time' => $dateTime,
+            'passengers_count' => $validated['passengers'],
+            'transport_class' => $transportClass,
+            'fio' => $validated['full_name'],
+            'phone' => $validated['phone_number'],
+            'comment' => $validated['comments'],
+            'payment_card' => $validated['card_number'],
+            'payment_holder_name' => $validated['cardholder_name'],
+            'payment_valid_until' => $validated['valid_until'],
+        ]);
 
         return response()->json([
             'message' => 'Transfer request created successfully',
