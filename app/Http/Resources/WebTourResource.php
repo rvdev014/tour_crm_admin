@@ -36,6 +36,7 @@ class WebTourResource extends JsonResource
             'packagesIncluded' => PackageResource::collection($this->whenLoaded('packagesIncluded')),
             'packagesNotIncluded' => PackageResource::collection($this->whenLoaded('packagesNotIncluded')),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
+            'prices' => WebTourPriceResource::collection($this->whenLoaded('prices')),
         ];
     }
 }
