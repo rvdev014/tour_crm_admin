@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::controller(ManualController::class)->group(function () {
     Route::get('/tours', 'getTours');
     Route::get('/tours/{id}', 'getTour');
+    Route::get('/tours/{id}/similar', 'getSimilarTours');
     Route::get('/banners', 'getBanners');
     Route::get('/services', 'getServices');
     Route::get('/countries', 'getCountries');
@@ -49,3 +50,4 @@ Route::post('/login', [AuthController::class, 'login'])->name('login'); // teste
 Route::post('/register', [AuthController::class, 'register'])->name('register'); // tested
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum'); // tested
 Route::post('/auth/google', [AuthController::class, 'googleAuth'])->name('google_auth');
+Route::post('/contact-us', [AuthController::class, 'storeContactRequest'])->name('contact_us');

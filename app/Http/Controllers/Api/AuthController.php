@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\WebTourRequestResource;
 use App\Models\WebTourRequest;
+use App\Models\ContactRequest;
 use Google_Client;
 
 class AuthController extends Controller
@@ -192,6 +193,28 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Web tour request created successfully',
             'data' => new WebTourRequestResource($webTourRequest->load(['webTour']))
+        ], 201);
+    }
+
+    public function storeContactRequest(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'comment' => 'required|string',
+        ]);
+
+        // Add user_id if user is authenticated
+        $user = $request->user('sanctum');
+        if ($user) {
+            $validated['user_id'] = $user->id;
+        }
+
+        $contactRequest = ContactRequest::create($validated);
+
+        return response()->json([
+            'message' => 'Contact request created successfully',
+            'data' => $contactRequest
         ], 201);
     }
 }

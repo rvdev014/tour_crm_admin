@@ -75,6 +75,21 @@ class ManualController extends Controller
         return response()->json(['data' => WebTourResource::make($webTour)]);
     }
 
+    public function getSimilarTours($tourId): JsonResponse
+    {
+        /** @var WebTour $webTour */
+        $webTour = WebTour::query()->findOrFail($tourId);
+
+        $similarTours = $webTour->similarTours()
+            ->with([
+                'days' => fn($query) => $query->with(['facilities']),
+                'currentPrice',
+            ])
+            ->get();
+
+        return response()->json(['data' => WebTourResource::collection($similarTours)]);
+    }
+
     public function getBanners(): JsonResponse
     {
         $banners = Banner::query()->get();

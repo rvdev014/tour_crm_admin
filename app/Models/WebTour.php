@@ -108,7 +108,7 @@ class WebTour extends Model
 
     public function similarToursRel(): HasMany
     {
-        return $this->hasMany(SimilarTour::class, 'tour_id');
+        return $this->hasMany(SimilarTour::class, 'web_tour_id');
     }
 
     public function similarTours(): BelongsToMany

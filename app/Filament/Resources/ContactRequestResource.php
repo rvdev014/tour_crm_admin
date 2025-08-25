@@ -63,8 +63,10 @@ class ContactRequestResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('comment')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->numeric()
+                    ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

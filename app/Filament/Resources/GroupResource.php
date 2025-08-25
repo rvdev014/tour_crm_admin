@@ -2,16 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Group;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
 use App\Filament\Resources\GroupResource\Pages;
 use App\Filament\Resources\GroupResource\RelationManagers;
-use App\Models\Group;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GroupResource extends Resource
 {
@@ -47,7 +45,10 @@ class GroupResource extends Resource
                     ])
                     ->columns(3)
                     ->collapsible()
-                    ->itemLabel(fn (array $state): ?string => $state['from_price'] && $state['to_price'] ? "{$state['from_price']} - {$state['to_price']} ({$state['percent']}%)" : null),
+                    ->itemLabel(
+                        fn(array $state
+                        ): ?string => $state['from_price'] && $state['to_price'] ? "{$state['from_price']} - {$state['to_price']} ({$state['percent']}%)" : null
+                    ),
             ]);
     }
 
