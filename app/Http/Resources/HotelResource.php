@@ -4,9 +4,9 @@ namespace App\Http\Resources;
 
 use App\Models\Hotel;
 use App\Models\Group;
+use Illuminate\Http\Request;
 use App\Models\HotelRoomType;
 use App\Services\ExpenseService;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -51,7 +51,7 @@ class HotelResource extends JsonResource
 
     private function getPhotos(): array
     {
-        return $this->attachments->map(function ($attachment) {
+        return $this->attachments->map(function($attachment) {
             return $attachment->getUrl();
         })->filter()->values()->all();
     }
@@ -71,7 +71,10 @@ class HotelResource extends JsonResource
         /** @var Group $group */
         $group = Group::query()->where('name', 'website')->firstOrFail();
 
-        return $hotelRoomType?->getPriceByGroup($group);
+        $price = $hotelRoomType?->getPriceByGroup($group);
+
+        $currencyUsd = ExpenseService::getUsdToUzsCurrency();
+        return round($price / $currencyUsd?->rate, 2);
     }
 
     private function getPhone()
@@ -82,7 +85,7 @@ class HotelResource extends JsonResource
     private function getPosition(): ?array
     {
         if ($this->latitude && $this->longitude) {
-            return [(float) $this->latitude, (float) $this->longitude];
+            return [(float)$this->latitude, (float)$this->longitude];
         }
 
         return null;
@@ -98,7 +101,7 @@ class HotelResource extends JsonResource
         $groupedRoomTypes = $this->roomTypes
             ->load('roomType')
             ->groupBy('roomType.name')
-            ->map(function ($hotelRoomTypes, $roomTypeName) {
+            ->map(function($hotelRoomTypes, $roomTypeName) {
                 // Get the first room type for basic info
                 /** @var HotelRoomType $firstRoomType */
                 $firstRoomType = $hotelRoomTypes->first();
@@ -106,6 +109,8 @@ class HotelResource extends JsonResource
 
                 /** @var Group $group */
                 $group = Group::query()->where('name', 'website')->firstOrFail();
+                $price = $firstRoomType->getPriceByGroup($group);
+                $currencyUsd = ExpenseService::getUsdToUzsCurrency();
 
                 return [
                     'id' => $firstRoomType->id,
@@ -113,7 +118,7 @@ class HotelResource extends JsonResource
                     'name' => $roomTypeName,
                     'picture' => $roomType?->picture ? asset('storage/' . $roomType->picture) : null,
                     'description' => $roomType?->description,
-                    'price' => $firstRoomType->getPriceByGroup($group)
+                    'price' => round($price / $currencyUsd?->rate, 2)
                 ];
             })
             ->values()
