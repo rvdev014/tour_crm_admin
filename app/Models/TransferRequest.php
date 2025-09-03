@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Enums\TransportClass;
+use App\Enums\TransferRequestStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
+ * @property TransferRequestStatus $status
+ * @property int|null $user_id
  * @property int $from_city_id
  * @property int $to_city_id
  * @property \DateTime $date_time
@@ -24,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \DateTime $created_at
  * @property \DateTime $updated_at
  * 
+ * @property User|null $user
  * @property City $fromCity
  * @property City $toCity
  */
@@ -32,6 +36,8 @@ class TransferRequest extends Model
     use HasFactory;
 
     protected $fillable = [
+        'status',
+        'user_id',
         'from_city_id',
         'to_city_id',
         'date_time',
@@ -49,7 +55,13 @@ class TransferRequest extends Model
     protected $casts = [
         'date_time' => 'datetime',
         'transport_class' => TransportClass::class,
+        'status' => TransferRequestStatus::class,
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function fromCity(): BelongsTo
     {

@@ -173,9 +173,14 @@ class HotelResource extends Resource
                         ->columnSpan(1)
                         ->image(),
 
-                    Forms\Components\Textarea::make('description')
-                        ->columnSpan(1)
-                        ->maxLength(255),
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\Textarea::make('description_en')
+                            ->label('Description (English)')
+                            ->maxLength(1000),
+                        Forms\Components\Textarea::make('description_ru')
+                            ->label('Description (Russian)')
+                            ->maxLength(1000),
+                    ]),
                 ]),
 
                 Forms\Components\Repeater::make('periods')

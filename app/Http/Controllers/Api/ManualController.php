@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\TransportClass;
+use App\Enums\TransferRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BannerResource;
 use App\Http\Resources\HotelResource;
@@ -149,6 +150,8 @@ class ManualController extends Controller
         };
 
         $transferRequest = TransferRequest::create([
+            'status' => TransferRequestStatus::Created,
+            'user_id' => $request->user()?->id,
             'from_city_id' => $validated['from_city_id'],
             'to_city_id' => $validated['to_city_id'],
             'date_time' => $dateTime,
@@ -166,5 +169,44 @@ class ManualController extends Controller
             'message' => 'Transfer request created successfully',
             'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
         ], 201);
+    }
+
+    public function updateTransferRequest(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => 'required|integer|in:1,2,3',
+        ]);
+
+        $transferRequest = TransferRequest::findOrFail($id);
+        $transferRequest->update([
+            'status' => $validated['status'],
+        ]);
+
+        return response()->json([
+            'message' => 'Transfer request updated successfully',
+            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
+        ]);
+    }
+
+    public function getUnbookedTransferRequest(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json(['data' => false]);
+        }
+
+        $unbookedRequest = TransferRequest::where('user_id', $user->id)
+            ->where('status', '!=', TransferRequestStatus::Booked)
+            ->with(['fromCity', 'toCity'])
+            ->first();
+
+        if (!$unbookedRequest) {
+            return response()->json(['data' => false]);
+        }
+
+        return response()->json([
+            'data' => new TransferRequestResource($unbookedRequest)
+        ]);
     }
 }

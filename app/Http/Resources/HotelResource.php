@@ -38,7 +38,7 @@ class HotelResource extends JsonResource
             'website_price' => $this->website_price,
             'photo' => $this->getPhoto(),
             'photos' => $this->getPhotos(),
-            'description' => $this->description,
+            'description' => $this->getDescription(),
             'comment' => $this->comment,
             'position' => $this->getPosition(),
 
