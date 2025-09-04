@@ -36,29 +36,29 @@ services:
     ports:
       - "55432:5432"
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    volumes:
-      - ./_docker/data/pgadmin:/root/.pgadmin
-    ports:
-      - "${PGADMIN_PORT}:80"
-    depends_on:
-      - db
+#  pgadmin:
+#    image: dpage/pgadmin4:latest
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+#      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+#    volumes:
+#      - ./_docker/data/pgadmin:/root/.pgadmin
+#    ports:
+#      - "${PGADMIN_PORT}:80"
+#    depends_on:
+#      - db
+#
+#  mailhog:
+#    image: mailhog/mailhog
+#    restart: always
+#    ports:
+#      - "${MAILHOG_PORT}:8025"
+#      - "1025:1025"
+#    volumes:
+#      - mailhog:/data
 
-  mailhog:
-    image: mailhog/mailhog
-    restart: always
-    ports:
-      - "${MAILHOG_PORT}:8025"
-      - "1025:1025"
-    volumes:
-      - mailhog:/data
-
-volumes:
+#volumes:
   #    postgres:
   #    pgadmin:
   #    vendor:
-  mailhog:
+  #    mailhog:
