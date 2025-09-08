@@ -20,11 +20,16 @@ class TransportClassResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'type' => $this->type,
             'name' => $this->name,
             'description' => $this->description,
             'price_per_km' => $this->price_per_km,
             'photo' => $this->photo ? asset('storage/' . $this->photo) : null,
+            'passenger_capacity' => $this->passenger_capacity,
+            'luggage_capacity' => $this->luggage_capacity,
+            'waiting_time_included' => $this->waiting_time_included,
+            'meeting_with_place' => $this->meeting_with_place,
+            'non_refundable_rate' => $this->non_refundable_rate,
+            'vehicle_example' => $this->vehicle_example,
         ];
     }
 }

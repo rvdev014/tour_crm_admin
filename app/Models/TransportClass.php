@@ -17,15 +17,24 @@ class TransportClass extends Model
     use HasFactory;
 
     protected $fillable = [
-        'type',
         'name',
         'description',
         'price_per_km',
         'photo',
+        'passenger_capacity',
+        'luggage_capacity',
+        'waiting_time_included',
+        'meeting_with_place',
+        'non_refundable_rate',
+        'vehicle_example',
     ];
 
     protected $casts = [
-        'type' => TransportType::class,
         'price_per_km' => 'decimal:2',
+        'passenger_capacity' => 'integer',
+        'luggage_capacity' => 'integer',
+        'waiting_time_included' => 'integer',
+        'meeting_with_place' => 'boolean',
+        'non_refundable_rate' => 'boolean',
     ];
 }

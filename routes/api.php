@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/web-tour-request', [AuthController::class, 'storeWebTourRequest'])->name('store_web_tour');
     Route::post('/transfer-requests', [ManualController::class, 'storeTransferRequest']);
     Route::post('/transfer-requests/{id}', [ManualController::class, 'updateTransferRequest']);
+    Route::post('/transfer-requests/{id}/book', [ManualController::class, 'bookTransferRequest']);
     Route::get('/unbooked-transfer-request', [ManualController::class, 'getUnbookedTransferRequest']);
     Route::post('/hotel-requests', [HotelController::class, 'storeHotelRequest']);
 });

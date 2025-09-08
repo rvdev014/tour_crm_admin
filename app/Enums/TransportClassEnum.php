@@ -5,7 +5,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum TransportClass: int implements HasLabel, HasColor
+enum TransportClassEnum: int implements HasLabel, HasColor
 {
     case Economy = 1;
     case Business = 2;

@@ -26,13 +26,6 @@ class TransportClassResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('type')
-                    ->options([
-                        '1' => 'Type 1',
-                        '2' => 'Type 2',
-                        '3' => 'Type 3',
-                    ])
-                    ->required(),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
@@ -46,6 +39,22 @@ class TransportClassResource extends Resource
                 Forms\Components\FileUpload::make('photo')
                     ->image()
                     ->directory('transport-classes'),
+                Forms\Components\TextInput::make('passenger_capacity')
+                    ->numeric()
+                    ->label('Passenger Capacity'),
+                Forms\Components\TextInput::make('luggage_capacity')
+                    ->numeric()
+                    ->label('Luggage Capacity'),
+                Forms\Components\TextInput::make('waiting_time_included')
+                    ->numeric()
+                    ->label('Waiting Time Included'),
+                Forms\Components\Checkbox::make('meeting_with_place')
+                    ->label('Meeting with Place'),
+                Forms\Components\Checkbox::make('non_refundable_rate')
+                    ->label('Non Refundable Rate'),
+                Forms\Components\TextInput::make('vehicle_example')
+                    ->maxLength(255)
+                    ->label('Vehicle Example'),
             ]);
     }
 
@@ -53,13 +62,6 @@ class TransportClassResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('type')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        '1' => 'gray',
-                        '2' => 'warning',
-                        '3' => 'success',
-                    }),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
@@ -69,18 +71,34 @@ class TransportClassResource extends Resource
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('photo')
                     ->circular(),
+                Tables\Columns\TextColumn::make('passenger_capacity')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('luggage_capacity')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('waiting_time_included')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('meeting_with_place')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('non_refundable_rate')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('vehicle_example')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type')
-                    ->options([
-                        '1' => 'Type 1',
-                        '2' => 'Type 2',
-                        '3' => 'Type 3',
-                    ]),
+                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
