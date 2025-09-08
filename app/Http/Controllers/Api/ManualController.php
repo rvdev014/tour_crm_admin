@@ -9,6 +9,7 @@ use App\Http\Resources\BannerResource;
 use App\Http\Resources\HotelResource;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\TransferRequestResource;
+use App\Http\Resources\TransportClassResource;
 use App\Http\Resources\WebTourResource;
 use App\Models\Banner;
 use App\Models\City;
@@ -18,6 +19,7 @@ use App\Models\RoomType;
 use App\Models\Service;
 use App\Models\Tour;
 use App\Models\TransferRequest;
+use App\Models\TransportClass as TransportClassModel;
 use App\Models\WebTour;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -122,6 +124,12 @@ class ManualController extends Controller
         return response()->json(['data' => $roomTypes]);
     }
 
+    public function getTransportClasses(): JsonResponse
+    {
+        $transportClasses = TransportClassModel::query()->get();
+        return response()->json(['data' => TransportClassResource::collection($transportClasses)]);
+    }
+
     public function storeTransferRequest(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -191,14 +199,16 @@ class ManualController extends Controller
     public function getUnbookedTransferRequest(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         if (!$user) {
             return response()->json(['data' => false]);
         }
 
-        $unbookedRequest = TransferRequest::where('user_id', $user->id)
+        $unbookedRequest = TransferRequest::query()
+            ->where('user_id', $user->id)
             ->where('status', '!=', TransferRequestStatus::Booked)
             ->with(['fromCity', 'toCity'])
+            ->orderByDesc('created_at')
             ->first();
 
         if (!$unbookedRequest) {

@@ -38,6 +38,7 @@ Route::controller(ManualController::class)->group(function () {
     Route::get('/countries', 'getCountries');
     Route::get('/cities', 'getCities');
     Route::get('/room-types', 'getRoomTypes');
+    Route::get('/transport-classes', 'getTransportClasses');
 });
 
 Route::controller(HotelController::class)->group(function () {
