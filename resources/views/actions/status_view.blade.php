@@ -39,7 +39,7 @@
                     $guideStatus = $expense?->status;
                 }
 
-                $flight = $day->getExpense(ExpenseType::Flight);
+                $flightExpense = $day->getExpense(ExpenseType::Flight);
                 $train = $day->getExpense(ExpenseType::Train);
 
                 $transport = $day->getExpense(ExpenseType::Transport);
@@ -95,29 +95,30 @@
                 </td>
 
                 <td>
-                    <div class="flex-td" style="flex-direction: row; justify-content: center">
-                        <p>{{ $flight?->plane_route }}</p>&nbsp;
-                        @if ($flight?->status)
+                    <p>{{ $flightExpense?->plane_route }}</p>
+                    <div class="flex-td" style="margin-top: 5px; flex-direction: row; justify-content: center">
+                        <p style="margin-bottom: 0;">{{ $flightExpense?->departure_time }}</p>&nbsp;&nbsp;
+                        @if ($flightExpense?->status)
                             <x-filament::badge
-                                :color="$flight->status->getColor()"
-                                size="sm"
+                                :color="$flightExpense->status->getColor()"
+                                size="md"
                             >
-                                {{ $flight->status->getLabel() }}
+                                {{ $flightExpense->status->getLabel() }}
                             </x-filament::badge>
                         @endif
                     </div>
-{{--                    <p>{{ $flight?->departure_time }} - {{ $flight?->arrival_time?->format('d.m.Y H:i') }}</p>--}}
                 </td>
 
                 <td>
-                    <div class="flex-td">
-                        <p>{{ $train?->train?->name }}</p>
+                    <p>{{ $train?->train?->name }}</p>
+                    <div class="flex-td" style="margin-top: 5px; flex-direction: row; justify-content: center">
+                        <p style="margin-bottom: 0;">{{ $train?->departure_time }}</p>&nbsp;&nbsp;
                         @if ($train?->status)
                             <x-filament::badge
-                                :color="$train->status->getColor()"
-                                size="sm"
+                                :color="$train?->status->getColor()"
+                                size="md"
                             >
-                                {{ $train->status->getLabel() }}
+                                {{ $train?->status->getLabel() }}
                             </x-filament::badge>
                         @endif
                     </div>
@@ -126,7 +127,8 @@
                 <td>
                     <div class="flex-td">
                         @if ($transfer)
-                            <a target="_blank" href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer->number }}</a>
+                            <a target="_blank"
+                               href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer->number }}</a>
                             @if (!empty($driverNames))
                                 <p>{{ implode(', ', $driverNames) }}</p>
                             @endif

@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $photo
  * @property string $description_en
  * @property string $description_ru
+ * @property string $description
  * @property string $comment
  *
  * @property City $city
@@ -130,8 +131,8 @@ class Hotel extends Model
         return $this->morphMany(Review::class, 'reviewable');
     }
 
-    public function getDescription($lang = null): ?string
+    public function getDescriptionAttribute(): ?string
     {
-        return $this->getLocaleValue('description_en', $lang);
+        return $this->getLocaleValue('description');
     }
 }

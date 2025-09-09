@@ -38,7 +38,7 @@ class HotelResource extends JsonResource
             'website_price' => $this->website_price,
             'photo' => $this->getPhoto(),
             'photos' => $this->getPhotos(),
-            'description' => $this->getDescription(),
+            'description' => $this->description,
             'comment' => $this->comment,
             'position' => $this->getPosition(),
 
@@ -74,7 +74,7 @@ class HotelResource extends JsonResource
         $price = $hotelRoomType?->getPriceByGroup($group);
 
         $currencyUsd = ExpenseService::getUsdToUzsCurrency();
-        return round($price / $currencyUsd?->rate, 2);
+        return round($price / ($currencyUsd?->rate ?? 1), 2);
     }
 
     private function getPhone()
@@ -118,7 +118,7 @@ class HotelResource extends JsonResource
                     'name' => $roomTypeName,
                     'picture' => $roomType?->picture ? asset('storage/' . $roomType->picture) : null,
                     'description' => $roomType?->description,
-                    'price' => round($price / $currencyUsd?->rate, 2)
+                    'price' => round($price / ($currencyUsd?->rate ?? 1), 2)
                 ];
             })
             ->values()
