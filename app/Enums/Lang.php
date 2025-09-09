@@ -27,7 +27,7 @@ enum Lang: string
         return self::EN;
     }
 
-    public static function fromValue($getLocale)
+    public static function fromValue($getLocale): Lang
     {
         return match ($getLocale) {
             'en' => self::EN,

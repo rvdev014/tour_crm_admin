@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RoomSeasonType;
+use App\Traits\HasLocaleFields;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,6 +30,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property float $website_price
  * @property string $phone
  * @property string $photo
+ * @property string $description_en
+ * @property string $description_ru
  * @property string $description
  * @property string $comment
  *
@@ -44,7 +47,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Hotel extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLocaleFields;
 
     public $timestamps = false;
 
@@ -64,7 +67,8 @@ class Hotel extends Model
         'website_price',
         'phone',
         'comment',
-        'description',
+        'description_en',
+        'description_ru',
         'latitude',
         'longitude',
     ];
@@ -125,5 +129,10 @@ class Hotel extends Model
     public function reviews(): MorphMany
     {
         return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->getLocaleValue('description');
     }
 }

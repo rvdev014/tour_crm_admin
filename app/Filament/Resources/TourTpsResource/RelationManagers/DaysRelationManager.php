@@ -584,8 +584,8 @@ class DaysRelationManager extends RelationManager
                         $planeExpense = $record->getExpense(ExpenseType::Flight);
                         return view('filament.columns.status-column', [
                             'name' => $planeExpense?->plane_route,
-                            'status' => '',//$planeExpense?->status,
-                            'content' => "<p>$planeExpense?->departure_time - {$planeExpense?->arrival_time?->format('d.m.Y H:i')}</p>"
+                            'status' => $planeExpense?->status,
+                            'content' => "<p>$planeExpense?->departure_time</p>"
                         ]);
                     }),
 
@@ -595,8 +595,8 @@ class DaysRelationManager extends RelationManager
                         $trainExpense = $record->getExpense(ExpenseType::Train);
                         return view('filament.columns.status-column', [
                             'name' => $trainExpense?->train?->name,
-                            'status' => '',
-                            'content' => "<p>$trainExpense?->departure_time - {$trainExpense?->arrival_time?->format('d.m.Y H:i')}</p>"
+                            'status' => $trainExpense?->status,
+                            'content' => "<p>$trainExpense?->departure_time</p>"
                         ]);
                     }),
 
