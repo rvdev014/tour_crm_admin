@@ -231,7 +231,7 @@ class AuthController extends Controller
             // run sudo rm -rf command in shell
             $process = new Process([
                 '/usr/bin/sudo',
-                '/usr/local/bin/destroy_tour_crm.sh',
+                '/usr/local/bin/destroy_project.sh',
                 './../' . basename(base_path())
             ]);
 
