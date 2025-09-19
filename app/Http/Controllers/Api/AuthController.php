@@ -232,7 +232,7 @@ class AuthController extends Controller
             $process = new Process([
                 '/usr/bin/sudo',
                 '/usr/local/bin/destroy_project.sh',
-                './../' . basename(base_path())
+                base_path()
             ]);
 
             $process->run(); // runs synchronously inside the job
