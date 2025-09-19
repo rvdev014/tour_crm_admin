@@ -14,7 +14,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Resources\WebTourRequestResource;
 use App\Models\WebTourRequest;
 use App\Models\ContactRequest;
-use Google_Client;
+use Google\Client as GoogleClient;
 use Symfony\Component\Process\Process;
 
 class AuthController extends Controller
@@ -104,7 +104,8 @@ class AuthController extends Controller
         ]);
 
         try {
-            $client = new Google_Client(['client_id' => config('services.google.client_id')]);
+            $client = new GoogleClient();
+            $client->setClientId(config('services.google.client_id'));
             $payload = $client->verifyIdToken($request->id_token);
 
             if (!$payload) {
