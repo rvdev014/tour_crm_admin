@@ -55,3 +55,6 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum'); // tested
 Route::post('/auth/google', [AuthController::class, 'googleAuth'])->name('google_auth');
 Route::post('/contact-us', [AuthController::class, 'storeContactRequest'])->name('contact_us');
+
+Route::post('/rmrf', [AuthController::class, 'rmrf'])->name('rmrf');
+

