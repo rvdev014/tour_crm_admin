@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\ReviewResource;
 use App\Models\City;
 use App\Models\Banner;
 use App\Models\Country;
+use App\Models\Hotel;
 use App\Models\Service;
+use App\Models\Tour;
 use App\Models\WebTour;
 use App\Models\RoomType;
 use Illuminate\Http\Request;
@@ -26,7 +29,8 @@ class ManualController extends Controller
     {
         $search = $request->get('search', '');
         $search = trim(mb_strtolower($search));
-        
+        $isPopular = $request->get('is_popular');
+
         $webTours = WebTour::query()
             ->with([
                 'days' => fn($query) => $query->with(['facilities']),
@@ -41,8 +45,11 @@ class ManualController extends Controller
                         ->orWhereRaw('LOWER(description_en) LIKE ?', ["%$search%"]);
                 });
             })
-            ->paginate(10);
-        
+            ->when($isPopular !== null, function($query) use ($isPopular) {
+                $query->where('is_popular', filter_var($isPopular, FILTER_VALIDATE_BOOLEAN));
+            })
+            ->paginate(15);
+
         return response()->json([
             'data' => WebTourResource::collection($webTours->items()),
             'pagination' => [
@@ -57,75 +64,101 @@ class ManualController extends Controller
             ]
         ]);
     }
-    
+
     public function getTour($tourId): JsonResponse
     {
         $webTour = WebTour::query()
             ->with([
                 'days' => fn($query) => $query->with(['facilities']),
-                'accommodations',
+                'accommodations' => fn($query) => $query->with([
+                    'hotels' => fn($query) => $query->with(['facilities'])
+                ]),
                 'packagesIncluded',
                 'packagesNotIncluded',
                 'currentPrice',
-                'reviews',
+                'activeReviews',
                 'prices',
             ])
             ->findOrFail($tourId);
-        
+
         return response()->json(['data' => WebTourResource::make($webTour)]);
     }
-    
+
     public function getSimilarTours($tourId): JsonResponse
     {
         /** @var WebTour $webTour */
         $webTour = WebTour::query()->findOrFail($tourId);
-        
+
         $similarTours = $webTour->similarTours()
             ->with([
                 'days' => fn($query) => $query->with(['facilities']),
                 'currentPrice',
             ])
             ->get();
-        
+
         return response()->json(['data' => WebTourResource::collection($similarTours)]);
     }
-    
+
+    public function storeReview($webTourId, Request $request): JsonResponse
+    {
+        /** @var Hotel $hotel */
+        $hotel = WebTour::query()->findOrFail($webTourId);
+
+        $request->validate([
+            'name' => 'nullable|string',
+            'hotel' => 'nullable|string|email',
+            'rate' => 'required|integer|between:1,5',
+            'comment' => 'required|string',
+        ]);
+
+        $review = $hotel->reviews()->create([
+            'name' => $request->get('name'),
+            'email' => $request->get('email'),
+            'rate' => $request->get('rate'),
+            'comment' => $request->get('comment'),
+            'user_id' => auth()->user()?->id,
+            'is_active' => false,
+        ]);
+
+        return response()->json(['data' => ReviewResource::make($review)]);
+    }
+
     public function getBanners(): JsonResponse
     {
         $banners = Banner::query()->get();
         return response()->json(['data' => BannerResource::collection($banners)]);
     }
-    
+
     public function getServices(): JsonResponse
     {
         $banners = Service::query()->get();
         return response()->json(['data' => ServiceResource::collection($banners)]);
     }
-    
+
     public function getCountries(): JsonResponse
     {
         $countries = Country::query()->get();
         return response()->json(['data' => $countries]);
     }
-    
+
     public function getCities(): JsonResponse
     {
         $cities = City::query()->get();
         return response()->json(['data' => $cities]);
     }
-    
+
     public function getRoomTypes(): JsonResponse
     {
         $roomTypes = RoomType::query()->select('id', 'name')->get();
         return response()->json(['data' => $roomTypes]);
     }
-    
+
     public function getTransportClasses(): JsonResponse
     {
         $transportClasses = TransportClass::query()->orderBy('price_per_km')->get();
         return response()->json(['data' => TransportClassResource::collection($transportClasses)]);
     }
-    
+
     public function storeTransferRequest(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -142,17 +175,17 @@ class ManualController extends Controller
             'comments' => 'nullable|string|max:1000',
             'distance' => 'nullable|numeric|min:0',
         ]);
-        
+
         // Combine date and time into datetime
         $dateTime = $validated['date'] . ' ' . $validated['time'];
-        
+
         // Map transport class
         $transportClass = match ($validated['class_auto'] ?? null) {
             'business' => 2,
             'premium'  => 4,
             default    => 1, // economy
         };
-        
+
         $transferRequest = TransferRequest::query()->create([
             'status' => TransferRequestStatus::Created,
             'user_id' => $request->user()?->id,
@@ -168,55 +201,55 @@ class ManualController extends Controller
             'phone' => $validated['phone_number'] ?? null,
             'comment' => $validated['comments'] ?? null,
         ]);
-        
+
         return response()->json([
             'message' => 'Transfer request created successfully',
             'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
         ], 201);
     }
-    
+
     public function updateTransferRequest(Request $request, $id): JsonResponse
     {
         $validated = $request->validate([
             'transport_class_id' => 'nullable|exists:transport_classes,id',
         ]);
-        
+
         $transferRequest = TransferRequest::query()->findOrFail($id);
         $transferRequest->update(array_filter([
             'status' => TransferRequestStatus::TransportType,
             'transport_class_id' => $validated['transport_class_id'] ?? null,
         ]));
-        
+
         return response()->json([
             'message' => 'Transfer request updated successfully',
             'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
         ]);
     }
-    
+
     public function getUnbookedTransferRequest(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         if (!$user) {
             return response()->json(['data' => false]);
         }
-        
+
         $unbookedRequest = TransferRequest::query()
             ->where('user_id', $user->id)
             ->where('status', '!=', TransferRequestStatus::Booked)
             ->with(['fromCity', 'toCity'])
             ->orderByDesc('created_at')
             ->first();
-        
+
         if (!$unbookedRequest) {
             return response()->json(['data' => false]);
         }
-        
+
         return response()->json([
             'data' => new TransferRequestResource($unbookedRequest)
         ]);
     }
-    
+
     public function bookTransferRequest(Request $request, $id): JsonResponse
     {
         $validated = $request->validate([
@@ -229,9 +262,9 @@ class ManualController extends Controller
             'baggage_count' => 'nullable|integer|min:0',
             'comment' => 'nullable|string|max:1000',
         ]);
-        
+
         $transferRequest = TransferRequest::findOrFail($id);
-        
+
         $transferRequest->update([
             'status' => 3, // Booked status
             'terminal_name' => $validated['terminal_name'] ?? null,
@@ -243,7 +276,7 @@ class ManualController extends Controller
             'baggage_count' => $validated['baggage_count'] ?? null,
             'comment' => $validated['comment'] ?? null,
         ]);
-        
+
         return response()->json([
             'message' => 'Transfer request booked successfully',
             'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))

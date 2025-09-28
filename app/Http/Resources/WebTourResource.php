@@ -35,7 +35,7 @@ class WebTourResource extends JsonResource
             'accommodations' => WebTourAccommodationResource::collection($this->whenLoaded('accommodations')),
             'packagesIncluded' => PackageResource::collection($this->whenLoaded('packagesIncluded')),
             'packagesNotIncluded' => PackageResource::collection($this->whenLoaded('packagesNotIncluded')),
-            'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
+            'reviews' => ReviewResource::collection($this->whenLoaded('activeReviews')),
             'prices' => WebTourPriceResource::collection($this->whenLoaded('prices')),
         ];
     }

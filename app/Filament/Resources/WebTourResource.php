@@ -38,6 +38,12 @@ class WebTourResource extends Resource
                         ->default(WebTourStatus::New),
                 ]),
 
+                Forms\Components\Grid::make(1)->schema([
+                    Forms\Components\Toggle::make('is_popular')
+                        ->label('Popular Tour')
+                        ->default(false),
+                ]),
+
                 Forms\Components\Grid::make(3)->schema([
                     Forms\Components\DateTimePicker::make('start_date')
                         ->required(),
@@ -190,6 +196,9 @@ class WebTourResource extends Resource
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('photo')
                     ->height('60px'),
+                Tables\Columns\ToggleColumn::make('is_popular')
+                    ->label('Popular')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -217,7 +226,7 @@ class WebTourResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ReviewsRelationManager::class,
         ];
     }
 

@@ -34,6 +34,7 @@ Route::controller(ManualController::class)->group(function () {
     Route::get('/tours', 'getTours');
     Route::get('/tours/{id}', 'getTour');
     Route::get('/tours/{id}/similar', 'getSimilarTours');
+    Route::post('/tours/{id}/review', 'storeReview');
     Route::get('/banners', 'getBanners');
     Route::get('/services', 'getServices');
     Route::get('/countries', 'getCountries');

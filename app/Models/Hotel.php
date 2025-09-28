@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Collection<Attachment> $attachments
  * @property Collection<RecommendedHotel> $recommendedHotels
  * @property Collection<Review> $reviews
+ * @property Collection<Review> $activeReviews
  */
 class Hotel extends Model
 {
@@ -129,6 +130,11 @@ class Hotel extends Model
     public function reviews(): MorphMany
     {
         return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function activeReviews(): MorphMany
+    {
+        return $this->morphMany(Review::class, 'reviewable')->where('is_active', true);
     }
 
     public function getDescriptionAttribute(): ?string

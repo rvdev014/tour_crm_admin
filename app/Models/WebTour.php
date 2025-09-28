@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $description_ru
  * @property string|null $description_en
  * @property string|null $photo
+ * @property bool $is_popular
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
@@ -43,6 +44,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<WebTour> $similarTours
  * @property-read Collection<SimilarTour> $similarToursRel
  * @property-read Collection<Review> $reviews
+ * @property-read Collection<Review> $activeReviews
  */
 class WebTour extends Model
 {
@@ -55,6 +57,7 @@ class WebTour extends Model
         'end_date' => 'datetime',
         'deadline' => 'datetime',
         'status' => WebTourStatus::class,
+        'is_popular' => 'boolean',
     ];
 
     public function getNameAttribute(): string
@@ -119,5 +122,10 @@ class WebTour extends Model
     public function reviews(): MorphMany
     {
         return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function activeReviews(): MorphMany
+    {
+        return $this->morphMany(Review::class, 'reviewable')->where('is_active', true);
     }
 }

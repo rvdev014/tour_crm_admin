@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasLocaleFields;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  *
  * @property-read City $city
+ * @property-read Collection<Hotel> $hotels
  * @property-read WebTour $webTour
  */
 class WebTourAccommodation extends Model

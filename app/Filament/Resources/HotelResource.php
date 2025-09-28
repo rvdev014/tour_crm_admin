@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\RateEnum;
 use App\Enums\RoomSeasonType;
 use App\Filament\Resources\HotelResource\Pages;
-use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
+use App\Filament\Resources\HotelResource\RelationManagers;
 use App\Models\Hotel;
 use App\Models\RealEstate;
 use App\Services\TourService;
@@ -277,7 +277,8 @@ class HotelResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RoomTypesRelationManager::class,
+            RelationManagers\RoomTypesRelationManager::class,
+            RelationManagers\ReviewsRelationManager::class,
         ];
     }
 
