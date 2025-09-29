@@ -6,9 +6,14 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\Transfer;
 use App\Models\TransferRequest;
 use Filament\Resources\Resource;
 use App\Enums\TransportClassEnum;
+use App\Enums\TransferRequestStatus;
+use App\Mail\TransferRequestConfirmed;
+use Illuminate\Support\Facades\Mail;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\TransferRequestResource\Pages;
 
@@ -148,6 +153,11 @@ class TransferRequestResource extends Resource
                     ->label('Phone')
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('terminal_name')
                     ->label('Terminal Name')
                     ->searchable()
@@ -209,6 +219,48 @@ class TransferRequestResource extends Resource
                     ->relationship('transportClass', 'name'),
             ])
             ->actions([
+                Tables\Actions\Action::make('confirm')
+                    ->label('Confirm')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn (TransferRequest $record) => $record->status !== TransferRequestStatus::Confirmed)
+                    ->requiresConfirmation()
+                    ->modalHeading('Confirm Transfer Request')
+                    ->modalDescription('This will create a new transfer and send a confirmation email to the user.')
+                    ->action(function (TransferRequest $record) {
+                        // Update status to confirmed
+                        $record->update(['status' => TransferRequestStatus::Confirmed]);
+
+                        // Create transfer from the request
+                        $transfer = Transfer::create([
+                            'from_city_id' => $record->from,
+                            'to_city_id' => $record->to,
+                            'date_time' => $record->date_time,
+                            'pax' => $record->passengers_count,
+                            'route' => $record->from . ' - ' . $record->to,
+                            'passenger' => $record->fio,
+                            'comment' => $record->comment,
+                            'transport_type' => \App\Enums\TransportType::Sedan,
+                            'transport_comfort_level' => \App\Enums\TransportComfortLevel::Standard,
+                            'nameplate' => $record->text_on_sign,
+                            'requested_by' => $record->fio,
+                            'status' => \App\Enums\ExpenseStatus::Pending,
+                            'company_id' => 1, // Default company
+                        ]);
+
+                        // Send confirmation email if user exists
+                        if ($record->user && $record->user->email) {
+                            Mail::to($record->user->email)->send(
+                                new TransferRequestConfirmed($record, $transfer)
+                            );
+                        }
+
+                        Notification::make()
+                            ->title('Transfer request confirmed')
+                            ->body("Transfer #{$transfer->number} has been created and confirmation email sent.")
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])

@@ -10,6 +10,7 @@ enum TransferRequestStatus: int implements HasLabel, HasColor
     case Created = 1;
     case TransportType = 2;
     case Booked = 3;
+    case Confirmed = 4;
 
     public function getLabel(): string
     {
@@ -17,6 +18,7 @@ enum TransferRequestStatus: int implements HasLabel, HasColor
             self::Created => 'Created',
             self::TransportType => 'Transport Type',
             self::Booked => 'Booked',
+            self::Confirmed => 'Confirmed',
         };
     }
 
@@ -26,6 +28,7 @@ enum TransferRequestStatus: int implements HasLabel, HasColor
             self::Created => 'gray',
             self::TransportType => 'warning',
             self::Booked => 'success',
+            self::Confirmed => 'info',
         };
     }
 }

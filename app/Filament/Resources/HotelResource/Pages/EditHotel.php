@@ -13,6 +13,21 @@ class EditHotel extends EditRecord
 {
     protected static string $resource = HotelResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $formState = $this->form->getRawState();
+        // Process coordinates field
+        if (!empty($formState['coordinates'])) {
+            $coordinates = explode(',', $formState['coordinates']);
+            if (count($coordinates) === 2) {
+                $data['latitude'] = trim($coordinates[0]);
+                $data['longitude'] = trim($coordinates[1]);
+            }
+        }
+
+        return $data;
+    }
+
     protected function afterSave(): void
     {
         $formState = $this->form->getState();

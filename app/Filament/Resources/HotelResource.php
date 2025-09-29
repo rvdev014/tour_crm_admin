@@ -88,14 +88,12 @@ class HotelResource extends Resource
                 Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('company_name')->maxLength(255),
                     Forms\Components\TextInput::make('address')->maxLength(255),
-                    Forms\Components\TextInput::make('latitude')
-                        ->numeric()
-                        ->step(0.00000001)
-                        ->placeholder('Enter latitude'),
-                    Forms\Components\TextInput::make('longitude')
-                        ->numeric()
-                        ->step(0.00000001)
-                        ->placeholder('Enter longitude'),
+                    Forms\Components\TextInput::make('coordinates')
+                        ->label('Coordinates (Latitude, Longitude)')
+                        ->placeholder('40.7128, -74.0060')
+                        ->helperText('Enter latitude and longitude separated by comma')
+                        ->formatStateUsing(fn($record) => $record && $record->latitude && $record->longitude ? $record->latitude . ', ' . $record->longitude : '')
+                        ->dehydrated(false),
                     Forms\Components\Repeater::make('phones')
                         ->relationship('phones')
                         ->addActionLabel('Add phone')

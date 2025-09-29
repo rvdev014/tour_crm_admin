@@ -13,6 +13,21 @@ class CreateHotel extends CreateRecord
 {
     protected static string $resource = HotelResource::class;
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Process coordinates field
+        if (!empty($data['coordinates'])) {
+            $coordinates = explode(',', $data['coordinates']);
+            if (count($coordinates) === 2) {
+                $data['latitude'] = trim($coordinates[0]);
+                $data['longitude'] = trim($coordinates[1]);
+            }
+        }
+        unset($data['coordinates']);
+
+        return $data;
+    }
+
     protected function afterCreate(): void
     {
         $formState = $this->form->getState();
