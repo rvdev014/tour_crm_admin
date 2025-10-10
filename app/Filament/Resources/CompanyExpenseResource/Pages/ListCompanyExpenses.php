@@ -231,6 +231,7 @@ class ListCompanyExpenses extends ListRecords
                     'expense_date' => 'Expense Date',
                     'hotel_checkin_time' => 'Check-in Time',
                     'hotel_checkout_time' => 'Check-out Time',
+                    'hotel_total_nights' => 'Total Nights',
                     'passengers' => 'Passengers FIO',
                     'expense_type' => 'Expense Type',
                     'expense_name' => 'Expense Name',
@@ -284,6 +285,7 @@ class ListCompanyExpenses extends ListRecords
                 if ($expense->type == ExpenseType::Hotel) {
                     $row['hotel_checkin_time']  = $expense->hotel_checkin_time;
                     $row['hotel_checkout_time'] = $expense->hotel_checkout_time;
+                    $row['hotel_total_nights']  = $expense->hotel_total_nights;
                 }
                 
                 $row['passengers']     = $expense->tourGroup?->passengers?->first()?->name ?? '-';
