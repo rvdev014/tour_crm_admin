@@ -242,10 +242,10 @@ class ListCompanyExpenses extends ListRecords
             $sheet->getDefaultColumnDimension()->setWidth(15);
             $sheet->setTitle($typeLabel);
 
-//            if ($type != ExpenseType::Hotel) {
-//                unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
-//                $headerLabels = array_values($headers);
-//            }
+            if ($type != ExpenseType::Hotel) {
+                unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
+                $headerLabels = array_values($headers);
+            }
             
             $sheet->fromArray($headerLabels, null, 'A1');
 
@@ -261,21 +261,22 @@ class ListCompanyExpenses extends ListRecords
                 } else {
                     $pax = $tour->getTotalPax();
                 }
-
-                $values[]['group_number']   = $tour->group_number;
-                $values[]['company']        = $company?->name;
-                $values[]['inn']            = $company?->inn;
-                $values[]['start_date']     = $tour->start_date?->format('d.m.Y H:i');
-                $values[]['expense_date']   = $date?->format('d.m.Y');
                 
-//                if ($expense->type == ExpenseType::Hotel) {
-                    $values[]['hotel_checkin_time']  = $expense->hotel_checkin_time;
-                    $values[]['hotel_checkout_time'] = $expense->hotel_checkout_time;
-//                }
+                $row = [];
+                $row['group_number']   = $tour->group_number;
+                $row['company']        = $company?->name;
+                $row['inn']            = $company?->inn;
+                $row['start_date']     = $tour->start_date?->format('d.m.Y H:i');
+                $row['expense_date']   = $date?->format('d.m.Y');
                 
-                $values[]['passengers']     = $expense->tourGroup?->passengers?->first()?->name ?? '-';
-                $values[]['expense_type']   = $expense->type->getLabel();
-                $values[]['expense_name']   = match ($expense->type) {
+                if ($expense->type == ExpenseType::Hotel) {
+                    $row['hotel_checkin_time']  = $expense->hotel_checkin_time;
+                    $row['hotel_checkout_time'] = $expense->hotel_checkout_time;
+                }
+                
+                $row['passengers']     = $expense->tourGroup?->passengers?->first()?->name ?? '-';
+                $row['expense_type']   = $expense->type->getLabel();
+                $row['expense_name']   = match ($expense->type) {
                     ExpenseType::Hotel => $expense->hotel?->name,
                     ExpenseType::Museum => TourService::getMuseumsByIds([1, 2])->values()->join(', '),
                     ExpenseType::Lunch, ExpenseType::Dinner => $expense->restaurant?->name,
@@ -283,16 +284,18 @@ class ListCompanyExpenses extends ListRecords
                     ExpenseType::Show => $expense->show?->name,
                     default => '',
                 };
-                $values[]['tour_pax']       = $pax;
-                $values[]['route']          = match ($expense->type) {
+                $row['tour_pax']       = $pax;
+                $row['route']          = match ($expense->type) {
                     ExpenseType::Transport => $expense->transport_route,
                     ExpenseType::Flight => $expense->plane_route,
                     ExpenseType::Train => "$fromCity - {$expense->toCity?->name}",
                     default => '',
                 };
-                $values[]['price']          = TourService::formatMoney($expense->price_result) . ' ' . CurrencyEnum::UZS->getSymbol();
-                $values[]['payment_status'] = $expense->payment_status?->getLabel();
-                $values[]['invoice_status'] = $expense->invoice_status?->getLabel();
+                $row['price']          = TourService::formatMoney($expense->price_result) . ' ' . CurrencyEnum::UZS->getSymbol();
+                $row['payment_status'] = $expense->payment_status?->getLabel();
+                $row['invoice_status'] = $expense->invoice_status?->getLabel();
+                
+                $values[] = $row;
             }
 
             $sheet->fromArray($values, null, 'A2');
