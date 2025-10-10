@@ -10,6 +10,7 @@ use App\Enums\PaymentType;
 use App\Enums\PlaneType;
 use App\Enums\TourType;
 use App\Enums\TransportType;
+use Filament\Tables\Enums\FiltersLayout;
 use App\Filament\Resources\TourCorporateResource\Pages;
 use App\Filament\Resources\TourCorporateResource\RelationManagers;
 use App\Filament\Resources\TourCorporateResource\Actions\StatusAction;
@@ -546,47 +547,55 @@ class TourCorporateResource extends Resource
             ->defaultPaginationPageOption(30)
             ->filters([
                 Tables\Filters\Filter::make('country_id')
+                    ->columnSpanFull()
                     ->form([
-                        Components\Select::make('country_id')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->relationship('country', 'name')
-                            ->options(Country::all()->pluck('name', 'id')->toArray()),
-                        Components\Select::make('city_id')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->relationship('city', 'name')
-                            ->options(fn($get) => TourService::getCities($get('country_id')))
-                            ->preload(),
-                        Components\Select::make('company_id')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->relationship('company', 'name')
-                            ->options(Company::query()->pluck('name', 'id')->toArray()),
-                        Components\Select::make('created_by')
-                            ->label('Admin creator')
-                            ->native(false)
-                            ->searchable()
-                            ->preload()
-                            ->relationship('createdBy', 'name')
-                            ->options(User::query()->pluck('name', 'id')->toArray()),
-
-                        Components\DatePicker::make('created_from')
-                            ->displayFormat('d.m.Y')
-                            ->native(false),
-                        Components\DatePicker::make('created_until')
-                            ->displayFormat('d.m.Y')
-                            ->native(false),
+                        Components\Grid::make(5)->schema([
+                            Components\Checkbox::make('active')
+                                ->label('Active')
+                                ->default(false),
+                            Components\Checkbox::make('archive')
+                                ->label('Archive')
+                                ->default(false),
+                        ]),
+                        Components\Grid::make(5)->schema([
+                            Components\Select::make('city_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(fn($get) => TourService::getCities($get('country_id'))),
+                            Components\Select::make('company_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(Company::query()->pluck('name', 'id')->toArray()),
+                            Components\Select::make('created_by')
+                                ->label('Admin creator')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(User::query()->pluck('name', 'id')->toArray()),
+                            
+                            Components\DatePicker::make('created_from')
+                                ->displayFormat('d.m.Y')
+                                ->native(false),
+                            Components\DatePicker::make('created_until')
+                                ->displayFormat('d.m.Y')
+                                ->native(false),
+                        ])
                     ])
-                    ->query(function (Builder $query, $data) {
+                    ->query(function(Builder $query, $data) {
+                        if ($data['active'] && $data['archive']) {
+                            $query->where(function($query) use ($data) {
+                                $query->where('start_date', '>=', Carbon::now())
+                                    ->orWhere('start_date', '<', Carbon::now());
+                            });
+                        } elseif ($data['active']) {
+                            $query->where('start_date', '>=', Carbon::now());
+                        } elseif ($data['archive']) {
+                            $query->where('start_date', '<', Carbon::now());
+                        }
+                        
                         return $query
-                            ->when(
-                                $data['country_id'],
-                                fn($query, $countryId) => $query->where('country_id', $countryId)
-                            )
                             ->when($data['city_id'], fn($query, $cityId) => $query->where('city_id', $cityId))
                             ->when(
                                 $data['company_id'],
@@ -598,15 +607,32 @@ class TourCorporateResource extends Resource
                             )
                             ->when(
                                 $data['created_from'],
-                                fn($query, $createdFrom) => $query->whereDate('created_at', '>=', $createdFrom)
+                                fn($query, $createdFrom) => $query->whereDate('start_date', '>=', $createdFrom)
                             )
                             ->when(
                                 $data['created_until'],
-                                fn($query, $createdUntil) => $query->whereDate('created_at', '<=', $createdUntil)
+                                fn($query, $createdUntil) => $query->whereDate('start_date', '<=', $createdUntil)
                             );
                     })
-                    ->indicateUsing(function (array $data): array {
+                    ->indicateUsing(function(array $data): array {
+                        $query = Tour::query()->where('type', TourType::TPS->value);
+                        
                         $indicators = [];
+                        if ($data['active'] && $data['archive']) {
+                            $query = $query
+                                ->where('start_date', '>=', Carbon::now())
+                                ->orWhere('start_date', '<', Carbon::now());
+                            $indicators['active'] = "Active & Archive ({$query->count()})";
+                        }
+                        
+                        if ($data['active']) {
+                            $query = $query->where('start_date', '>=', Carbon::now());
+                            $indicators['active'] = "Active ({$query->count()})";
+                        }
+                        if ($data['archive']) {
+                            $query = $query->where('start_date', '<', Carbon::now());
+                            $indicators['archive'] = "Archive ({$query->count()})";
+                        }
                         if ($data['country_id'] ?? null) {
                             $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
                         }
@@ -629,10 +655,10 @@ class TourCorporateResource extends Resource
                                     $data['created_until']
                                 )->toFormattedDateString();
                         }
-
+                        
                         return $indicators;
                     })
-            ])
+            ], layout: FiltersLayout::AboveContent)
             ->columns([
                 Columns\TextColumn::make('group_number')
                     ->searchable(),
