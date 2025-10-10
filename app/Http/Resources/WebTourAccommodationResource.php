@@ -22,8 +22,8 @@ class WebTourAccommodationResource extends JsonResource
             'id' => $this->id,
             'header' => $this->header,
             'description' => $this->description,
-            'days' => $this->days,
             'created_at' => $this->created_at,
+            'hotels' => HotelResource::collection($this->whenLoaded('hotels')),
         ];
     }
 }

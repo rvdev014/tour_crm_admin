@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\RateEnum;
 use App\Enums\RoomSeasonType;
 use App\Filament\Resources\HotelResource\Pages;
-use App\Filament\Resources\HotelResource\RelationManagers\RoomTypesRelationManager;
+use App\Filament\Resources\HotelResource\RelationManagers;
 use App\Models\Hotel;
 use App\Models\RealEstate;
 use App\Services\TourService;
@@ -88,14 +88,12 @@ class HotelResource extends Resource
                 Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('company_name')->maxLength(255),
                     Forms\Components\TextInput::make('address')->maxLength(255),
-                    Forms\Components\TextInput::make('latitude')
-                        ->numeric()
-                        ->step(0.00000001)
-                        ->placeholder('Enter latitude'),
-                    Forms\Components\TextInput::make('longitude')
-                        ->numeric()
-                        ->step(0.00000001)
-                        ->placeholder('Enter longitude'),
+                    Forms\Components\TextInput::make('coordinates')
+                        ->label('Coordinates (Latitude, Longitude)')
+                        ->placeholder('40.7128, -74.0060')
+                        ->helperText('Enter latitude and longitude separated by comma')
+                        ->formatStateUsing(fn($record) => $record && $record->latitude && $record->longitude ? $record->latitude . ', ' . $record->longitude : '')
+                        ->dehydrated(false),
                     Forms\Components\Repeater::make('phones')
                         ->relationship('phones')
                         ->addActionLabel('Add phone')
@@ -173,15 +171,16 @@ class HotelResource extends Resource
                         ->columnSpan(1)
                         ->image(),
 
-                    Forms\Components\Textarea::make('description_en')
-                        ->columnSpan(1)
-                        ->maxLength(255),
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\Textarea::make('description_en')
+                            ->label('Description (English)')
+                            ->maxLength(1000),
+                        Forms\Components\Textarea::make('description_ru')
+                            ->label('Description (Russian)')
+                            ->maxLength(1000),
+                    ]),
                 ]),
-                
-                Forms\Components\Textarea::make('description_ru')
-                    ->columnSpan(1)
-                    ->maxLength(255),
-                
+
                 Forms\Components\Repeater::make('periods')
                     ->grid(2)
                     ->extraAttributes(['class' => 'repeater-guides'])
@@ -276,7 +275,8 @@ class HotelResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RoomTypesRelationManager::class,
+            RelationManagers\RoomTypesRelationManager::class,
+            RelationManagers\ReviewsRelationManager::class,
         ];
     }
 

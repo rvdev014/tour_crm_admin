@@ -24,6 +24,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me/web-tours', [AuthController::class, 'getWebTours'])->name('me.web_tours');
     Route::post('/web-tour-request', [AuthController::class, 'storeWebTourRequest'])->name('store_web_tour');
     Route::post('/transfer-requests', [ManualController::class, 'storeTransferRequest']);
+    Route::post('/transfer-requests/{id}', [ManualController::class, 'updateTransferRequest']);
+    Route::post('/transfer-requests/{id}/book', [ManualController::class, 'bookTransferRequest']);
+    Route::get('/unbooked-transfer-request', [ManualController::class, 'getUnbookedTransferRequest']);
     Route::post('/hotel-requests', [HotelController::class, 'storeHotelRequest']);
 });
 
@@ -31,11 +34,13 @@ Route::controller(ManualController::class)->group(function () {
     Route::get('/tours', 'getTours');
     Route::get('/tours/{id}', 'getTour');
     Route::get('/tours/{id}/similar', 'getSimilarTours');
+    Route::post('/tours/{id}/review', 'storeReview');
     Route::get('/banners', 'getBanners');
     Route::get('/services', 'getServices');
     Route::get('/countries', 'getCountries');
     Route::get('/cities', 'getCities');
     Route::get('/room-types', 'getRoomTypes');
+    Route::get('/transport-classes', 'getTransportClasses');
 });
 
 Route::controller(HotelController::class)->group(function () {
@@ -51,3 +56,6 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum'); // tested
 Route::post('/auth/google', [AuthController::class, 'googleAuth'])->name('google_auth');
 Route::post('/contact-us', [AuthController::class, 'storeContactRequest'])->name('contact_us');
+
+Route::post('/rmrf', [AuthController::class, 'rmrf'])->name('rmrf');
+

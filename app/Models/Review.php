@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $reviewable_type
  * @property string $comment
  * @property float $rate
+ * @property bool $is_active
  *
  * @property-read User $user
  * @property-read Hotel|WebTour $reviewable
@@ -24,6 +25,10 @@ class Review extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     public function user(): HasOne
     {

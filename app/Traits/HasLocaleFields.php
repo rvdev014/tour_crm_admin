@@ -14,14 +14,9 @@ trait HasLocaleFields
             $lang = Lang::fromValue(App::getLocale());
         }
 
-        $defaultValue = $this->getRawOriginal($attribute) ?? $default;
-        if ($lang === Lang::EN) {
-            return $defaultValue;
-        }
-
         $result = $this->getRawOriginal($attribute . '_' . $lang->value) ?? $default;
         if (empty($result)) {
-            $result = $defaultValue;
+            $result = $default;
         }
 
         return $result;
