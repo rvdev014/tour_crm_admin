@@ -242,10 +242,10 @@ class ListCompanyExpenses extends ListRecords
             $sheet->getDefaultColumnDimension()->setWidth(15);
             $sheet->setTitle($typeLabel);
 
-            if ($type != ExpenseType::Hotel) {
-                unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
-                $headerLabels = array_values($headers);
-            }
+//            if ($type != ExpenseType::Hotel) {
+//                unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
+//                $headerLabels = array_values($headers);
+//            }
             
             $sheet->fromArray($headerLabels, null, 'A1');
 
@@ -268,10 +268,10 @@ class ListCompanyExpenses extends ListRecords
                 $values[]['start_date']     = $tour->start_date?->format('d.m.Y H:i');
                 $values[]['expense_date']   = $date?->format('d.m.Y');
                 
-                if ($expense->type == ExpenseType::Hotel) {
+//                if ($expense->type == ExpenseType::Hotel) {
                     $values[]['hotel_checkin_time']  = $expense->hotel_checkin_time;
                     $values[]['hotel_checkout_time'] = $expense->hotel_checkout_time;
-                }
+//                }
                 
                 $values[]['passengers']     = $expense->tourGroup?->passengers?->first()?->name ?? '-';
                 $values[]['expense_type']   = $expense->type->getLabel();
