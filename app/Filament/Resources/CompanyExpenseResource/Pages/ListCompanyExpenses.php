@@ -208,7 +208,7 @@ class ListCompanyExpenses extends ListRecords
 
         $groupData = [];
         foreach ($expenses as $expense) {
-            $groupData[$expense->type->getLabel()][] = $expense;
+            $groupData[$expense->type->value][] = $expense;
         }
 
         $headers = [
@@ -233,13 +233,14 @@ class ListCompanyExpenses extends ListRecords
 
         $sheetIndex = 0;
         foreach ($groupData as $type => $expenses) {
+            $typeLabel = ExpenseType::tryFrom($type)?->getLabel() ?? 'Other';
             if (empty($expenses)) {
                 continue;
             }
 
             $sheet = $sheetIndex === 0 ? $spreadsheet->getActiveSheet() : $spreadsheet->createSheet($sheetIndex);
             $sheet->getDefaultColumnDimension()->setWidth(15);
-            $sheet->setTitle($type);
+            $sheet->setTitle($typeLabel);
 
             if ($type != ExpenseType::Hotel) {
                 unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
