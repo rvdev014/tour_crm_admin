@@ -200,7 +200,8 @@ class ListCompanyExpenses extends ListRecords
                     });
             });
         }
-
+        
+        /** @var Collection<TourDayExpense> $expenses */
         $expenses = $query->get();
 
         $spreadsheet = new Spreadsheet();
@@ -216,6 +217,8 @@ class ListCompanyExpenses extends ListRecords
             'inn' => 'Company Inn',
             'start_date' => 'Start Date',
             'expense_date' => 'Expense Date',
+            'hotel_checkin_time' => 'Check-in Time',
+            'hotel_checkout_time' => 'Check-out Time',
             'passengers' => 'Passengers FIO',
             'expense_type' => 'Expense Type',
             'expense_name' => 'Expense Name',
@@ -238,6 +241,11 @@ class ListCompanyExpenses extends ListRecords
             $sheet->getDefaultColumnDimension()->setWidth(15);
             $sheet->setTitle($type);
 
+            if ($type != ExpenseType::Hotel) {
+                unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
+                $headerLabels = array_values($headers);
+            }
+            
             $sheet->fromArray($headerLabels, null, 'A1');
 
             $values = [];
@@ -253,33 +261,37 @@ class ListCompanyExpenses extends ListRecords
                     $pax = $tour->getTotalPax();
                 }
 
-                $values[] = [
-                    'group_number' => $tour->group_number,
-                    'company' => $company?->name,
-                    'inn' => $company?->inn,
-                    'start_date' => $tour->start_date?->format('d.m.Y H:i'),
-                    'expense_date' => $date?->format('d.m.Y'),
-                    'passengers' => $expense->tourGroup?->passengers?->first()?->name ?? '-',
-                    'expense_type' => $expense->type->getLabel(),
-                    'expense_name' => match ($expense->type) {
-                        ExpenseType::Hotel => $expense->hotel?->name,
-                        ExpenseType::Museum => TourService::getMuseumsByIds([1, 2])->values()->join(', '),
-                        ExpenseType::Lunch, ExpenseType::Dinner => $expense->restaurant?->name,
-                        ExpenseType::Train => $expense->train?->name,
-                        ExpenseType::Show => $expense->show?->name,
-                        default => '',
-                    },
-                    'tour_pax' => $pax,
-                    'route' => match ($expense->type) {
-                        ExpenseType::Transport => $expense->transport_route,
-                        ExpenseType::Flight => $expense->plane_route,
-                        ExpenseType::Train => "$fromCity - {$expense->toCity?->name}",
-                        default => '',
-                    },
-                    'price' => TourService::formatMoney($expense->price_result) . ' ' . CurrencyEnum::UZS->getSymbol(),
-                    'payment_status' => $expense->payment_status?->getLabel(),
-                    'invoice_status' => $expense->invoice_status?->getLabel(),
-                ];
+                $values[]['group_number']   = $tour->group_number;
+                $values[]['company']        = $company?->name;
+                $values[]['inn']            = $company?->inn;
+                $values[]['start_date']     = $tour->start_date?->format('d.m.Y H:i');
+                $values[]['expense_date']   = $date?->format('d.m.Y');
+                
+                if ($expense->type == ExpenseType::Hotel) {
+                    $values[]['hotel_checkin_time']  = $expense->hotel_checkin_time;
+                    $values[]['hotel_checkout_time'] = $expense->hotel_checkout_time;
+                }
+                
+                $values[]['passengers']     = $expense->tourGroup?->passengers?->first()?->name ?? '-';
+                $values[]['expense_type']   = $expense->type->getLabel();
+                $values[]['expense_name']   = match ($expense->type) {
+                    ExpenseType::Hotel => $expense->hotel?->name,
+                    ExpenseType::Museum => TourService::getMuseumsByIds([1, 2])->values()->join(', '),
+                    ExpenseType::Lunch, ExpenseType::Dinner => $expense->restaurant?->name,
+                    ExpenseType::Train => $expense->train?->name,
+                    ExpenseType::Show => $expense->show?->name,
+                    default => '',
+                };
+                $values[]['tour_pax']       = $pax;
+                $values[]['route']          = match ($expense->type) {
+                    ExpenseType::Transport => $expense->transport_route,
+                    ExpenseType::Flight => $expense->plane_route,
+                    ExpenseType::Train => "$fromCity - {$expense->toCity?->name}",
+                    default => '',
+                };
+                $values[]['price']          = TourService::formatMoney($expense->price_result) . ' ' . CurrencyEnum::UZS->getSymbol();
+                $values[]['payment_status'] = $expense->payment_status?->getLabel();
+                $values[]['invoice_status'] = $expense->invoice_status?->getLabel();
             }
 
             $sheet->fromArray($values, null, 'A2');
