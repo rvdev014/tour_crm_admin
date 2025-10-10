@@ -211,26 +211,6 @@ class ListCompanyExpenses extends ListRecords
             $groupData[$expense->type->value][] = $expense;
         }
 
-        $headers = [
-            'group_number' => 'Group Number',
-            'company' => 'Company',
-            'inn' => 'Company Inn',
-            'start_date' => 'Start Date',
-            'expense_date' => 'Expense Date',
-            'hotel_checkin_time' => 'Check-in Time',
-            'hotel_checkout_time' => 'Check-out Time',
-            'passengers' => 'Passengers FIO',
-            'expense_type' => 'Expense Type',
-            'expense_name' => 'Expense Name',
-            'tour_pax' => 'Pax',
-            'route' => 'Route',
-            'price' => 'Price',
-            'payment_status' => 'Payment Status',
-            'invoice_status' => 'Invoice Status',
-        ];
-
-        $headerLabels = array_values($headers);
-
         $sheetIndex = 0;
         foreach ($groupData as $type => $expenses) {
             $typeLabel = ExpenseType::tryFrom($type)?->getLabel() ?? 'Other';
@@ -242,11 +222,43 @@ class ListCompanyExpenses extends ListRecords
             $sheet->getDefaultColumnDimension()->setWidth(15);
             $sheet->setTitle($typeLabel);
 
-//            if ($type != ExpenseType::Hotel->value) {
-//                unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
-//                $headerLabels = array_values($headers);
-//            }
+            if ($type === ExpenseType::Hotel->value) {
+                $headers = [
+                    'group_number' => 'Group Number',
+                    'company' => 'Company',
+                    'inn' => 'Company Inn',
+                    'start_date' => 'Start Date',
+                    'expense_date' => 'Expense Date',
+                    'hotel_checkin_time' => 'Check-in Time',
+                    'hotel_checkout_time' => 'Check-out Time',
+                    'passengers' => 'Passengers FIO',
+                    'expense_type' => 'Expense Type',
+                    'expense_name' => 'Expense Name',
+                    'tour_pax' => 'Pax',
+                    'route' => 'Route',
+                    'price' => 'Price',
+                    'payment_status' => 'Payment Status',
+                    'invoice_status' => 'Invoice Status',
+                ];
+            } else {
+                $headers = [
+                    'group_number' => 'Group Number',
+                    'company' => 'Company',
+                    'inn' => 'Company Inn',
+                    'start_date' => 'Start Date',
+                    'expense_date' => 'Expense Date',
+                    'passengers' => 'Passengers FIO',
+                    'expense_type' => 'Expense Type',
+                    'expense_name' => 'Expense Name',
+                    'tour_pax' => 'Pax',
+                    'route' => 'Route',
+                    'price' => 'Price',
+                    'payment_status' => 'Payment Status',
+                    'invoice_status' => 'Invoice Status',
+                ];
+            }
             
+            $headerLabels = array_values($headers);
             $sheet->fromArray($headerLabels, null, 'A1');
 
             $values = [];
