@@ -665,10 +665,12 @@ class TourCorporateResource extends Resource
 
                 Columns\TextColumn::make('company.name')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
                 Columns\TextColumn::make('status')
-                    ->badge(),
+                    ->badge()
+                    ->searchable(),
 
                 Columns\TextColumn::make('expenses_total')
                     ->badge(fn(Tour $record) => TourService::isVisible($record))
@@ -681,12 +683,15 @@ class TourCorporateResource extends Resource
 
                         return '-';
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
-                Columns\TextColumn::make('requested_by'),
+                Columns\TextColumn::make('requested_by')
+                    ->searchable(),
 
                 Columns\TextColumn::make('createdBy.name')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
