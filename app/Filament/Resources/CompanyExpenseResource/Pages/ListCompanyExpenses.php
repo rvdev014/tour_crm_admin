@@ -242,10 +242,10 @@ class ListCompanyExpenses extends ListRecords
             $sheet->getDefaultColumnDimension()->setWidth(15);
             $sheet->setTitle($typeLabel);
 
-            if ($type != ExpenseType::Hotel->value) {
-                unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
-                $headerLabels = array_values($headers);
-            }
+//            if ($type != ExpenseType::Hotel->value) {
+//                unset($headers['hotel_checkin_time'], $headers['hotel_checkout_time']);
+//                $headerLabels = array_values($headers);
+//            }
             
             $sheet->fromArray($headerLabels, null, 'A1');
 
