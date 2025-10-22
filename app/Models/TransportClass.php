@@ -5,13 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-enum TransportType: string
-{
-    case ONE = '1';
-    case TWO = '2';
-    case THREE = '3';
-}
-
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $passenger_capacity
+ */
 class TransportClass extends Model
 {
     use HasFactory;

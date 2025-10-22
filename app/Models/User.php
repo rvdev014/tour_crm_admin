@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\Carbon;
 use Filament\Panel;
 use App\Enums\Gender;
 use App\Enums\UserRole;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Storage;
  * @property string $password
  * @property int $operator_percent_tps
  * @property string $timezone
+ * @property Carbon $timezone_updated_at
  * @property UserRole $role
  */
 class User extends Authenticatable implements FilamentUser
@@ -46,6 +48,7 @@ class User extends Authenticatable implements FilamentUser
         'phone',
         'google_id',
         'timezone',
+        'timezone_updated_at',
     ];
 
     /**
@@ -65,6 +68,7 @@ class User extends Authenticatable implements FilamentUser
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'timezone_updated_at' => 'datetime',
         'password' => 'hashed',
         'role' => UserRole::class,
         'gender' => Gender::class

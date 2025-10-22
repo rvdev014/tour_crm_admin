@@ -12,10 +12,12 @@ use Filament\Resources\Resource;
 use App\Enums\TransportClassEnum;
 use App\Enums\TransferRequestStatus;
 use App\Mail\TransferRequestConfirmed;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\TransferRequestResource\Pages;
+use Throwable;
 
 class TransferRequestResource extends Resource
 {
@@ -113,14 +115,14 @@ class TransferRequestResource extends Resource
                 Tables\Columns\TextColumn::make('from')
                     ->label('From')
                     ->wrap()
-                    ->extraAttributes(['style' => 'width: 300px'])
+                    ->extraAttributes(['style' => 'width: 200px'])
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('to')
                     ->label('To')
                     ->wrap()
-                    ->extraAttributes(['style' => 'width: 300px'])
+                    ->extraAttributes(['style' => 'width: 200px'])
                     ->searchable()
                     ->sortable(),
 
@@ -159,7 +161,7 @@ class TransferRequestResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('terminal_name')
-                    ->label('Terminal Name')
+                    ->label('Location details')
                     ->searchable()
                     ->placeholder('Not specified'),
 
@@ -168,13 +170,13 @@ class TransferRequestResource extends Resource
                     ->numeric()
                     ->placeholder('Not specified'),
 
-                Tables\Columns\IconColumn::make('is_sample_baggage')
-                    ->label('Sample Baggage')
-                    ->boolean(),
+//                Tables\Columns\IconColumn::make('is_sample_baggage')
+//                    ->label('Sample Baggage')
+//                    ->boolean(),
 
-                Tables\Columns\IconColumn::make('activate_flight_tracking')
-                    ->label('Flight Tracking')
-                    ->boolean(),
+//                Tables\Columns\IconColumn::make('activate_flight_tracking')
+//                    ->label('Flight Tracking')
+//                    ->boolean(),
 
                 Tables\Columns\TextColumn::make('text_on_sign')
                     ->label('Text on Sign')
@@ -219,51 +221,64 @@ class TransferRequestResource extends Resource
                     ->relationship('transportClass', 'name'),
             ])
             ->actions([
-                Tables\Actions\Action::make('confirm')
-                    ->label('Confirm')
+                Tables\Actions\Action::make('accept')
+                    ->label('Accept')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (TransferRequest $record) => $record->status !== TransferRequestStatus::Confirmed)
+                    ->visible(fn (TransferRequest $record) => $record->status !== TransferRequestStatus::Accepted)
                     ->requiresConfirmation()
-                    ->modalHeading('Confirm Transfer Request')
+                    ->modalHeading('Accept Transfer Request')
                     ->modalDescription('This will create a new transfer and send a confirmation email to the user.')
                     ->action(function (TransferRequest $record) {
-                        // Update status to confirmed
-                        $record->update(['status' => TransferRequestStatus::Confirmed]);
+                        try {
+                            DB::beginTransaction();
 
-                        // Create transfer from the request
-                        $transfer = Transfer::create([
-                            'from_city_id' => $record->from,
-                            'to_city_id' => $record->to,
-                            'date_time' => $record->date_time,
-                            'pax' => $record->passengers_count,
-                            'route' => $record->from . ' - ' . $record->to,
-                            'passenger' => $record->fio,
-                            'comment' => $record->comment,
-                            'transport_type' => \App\Enums\TransportType::Sedan,
-                            'transport_comfort_level' => \App\Enums\TransportComfortLevel::Standard,
-                            'nameplate' => $record->text_on_sign,
-                            'requested_by' => $record->fio,
-                            'status' => \App\Enums\ExpenseStatus::Pending,
-                            'company_id' => 1, // Default company
-                        ]);
+                            // Update status to confirmed
+                            $record->update(['status' => TransferRequestStatus::Accepted]);
 
-                        // Send confirmation email if user exists
-                        if ($record->user && $record->user->email) {
-                            Mail::to($record->user->email)->send(
-                                new TransferRequestConfirmed($record, $transfer)
-                            );
+                            // Create transfer from the request
+                            $transfer = Transfer::create([
+                                'from_city_id' => $record->from,
+                                'to_city_id' => $record->to,
+                                'date_time' => $record->date_time,
+                                'pax' => $record->passengers_count,
+                                'route' => $record->from . ' - ' . $record->to,
+                                'passenger' => $record->fio,
+                                'comment' => $record->comment,
+                                'transport_type' => \App\Enums\TransportType::Sedan,
+                                'transport_comfort_level' => \App\Enums\TransportComfortLevel::Standard,
+                                'nameplate' => $record->text_on_sign,
+                                'requested_by' => $record->fio,
+                                'status' => \App\Enums\ExpenseStatus::Pending,
+                                'company_id' => 1, // Default company
+                            ]);
+
+                            // Send confirmation email if user exists
+                            if ($record->user && $record->user->email) {
+                                Mail::to($record->user->email)->send(
+                                    new TransferRequestConfirmed($record, $transfer)
+                                );
+                            }
+
+                            DB::commit();
+
+                            Notification::make()
+                                ->title('Transfer request accepted')
+                                ->body("Transfer #{$transfer->number} has been created and confirmation email sent.")
+                                ->success()
+                                ->send();
+                        } catch (Throwable $exception) {
+                            DB::rollBack();
+                            Notification::make()
+                                ->title('Cannot delete some drivers')
+                                ->body("Cannot delete drivers: {$exception->getMessage()}. They are used in tours.")
+                                ->danger()
+                                ->send();
                         }
-
-                        Notification::make()
-                            ->title('Transfer request confirmed')
-                            ->body("Transfer #{$transfer->number} has been created and confirmation email sent.")
-                            ->success()
-                            ->send();
                     }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
+            ], position: Tables\Enums\ActionsPosition::AfterColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

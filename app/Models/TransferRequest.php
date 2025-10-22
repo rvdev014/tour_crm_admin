@@ -5,9 +5,11 @@ namespace App\Models;
 use DateTime;
 use App\Enums\TransportClassEnum;
 use App\Enums\TransferRequestStatus;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -20,6 +22,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $to_coords
  * @property DateTime $date_time
  * @property int $passengers_count
+ * @property int $parent_id
  * @property string $fio
  * @property string $phone
  * @property string|null $comment
@@ -30,6 +33,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property DateTime $created_at
  * @property DateTime $updated_at
  *
+ * @property TransferRequest|null $parent
+ * @property Collection<TransferRequest> $children
  * @property User|null $user
  * @property TransportClass|null $transportClass
  * @property City $fromCity
@@ -38,7 +43,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class TransferRequest extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'status',
         'user_id',
@@ -58,8 +63,9 @@ class TransferRequest extends Model
         'terminal_name',
         'text_on_sign',
         'activate_flight_tracking',
+        'parent_id',
     ];
-    
+
     protected $casts = [
         'date_time' => 'datetime',
         'transport_class' => TransportClassEnum::class,
@@ -68,22 +74,32 @@ class TransferRequest extends Model
         'activate_flight_tracking' => 'boolean',
         'baggage_count' => 'integer',
     ];
-    
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(TransferRequest::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(TransferRequest::class, 'parent_id');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function fromCity(): BelongsTo
     {
         return $this->belongsTo(City::class, 'from_city_id');
     }
-    
+
     public function toCity(): BelongsTo
     {
         return $this->belongsTo(City::class, 'to_city_id');
     }
-    
+
     public function transportClass(): BelongsTo
     {
         return $this->belongsTo(TransportClass::class, 'transport_class_id');

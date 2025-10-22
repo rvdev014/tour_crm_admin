@@ -2,28 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\User;
-use Illuminate\Support\Carbon;
-use App\Http\Resources\ReviewResource;
-use App\Models\City;
-use App\Models\Banner;
-use App\Models\Country;
-use App\Models\Hotel;
-use App\Models\Service;
-use App\Models\Tour;
-use App\Models\WebTour;
-use App\Models\RoomType;
-use Illuminate\Http\Request;
-use App\Models\TransportClass;
-use App\Models\TransferRequest;
-use Illuminate\Http\JsonResponse;
 use App\Enums\TransferRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BannerResource;
+use App\Models\User;
+use Illuminate\Support\Carbon;
+use App\Http\Resources\ReviewResource;
 use App\Http\Resources\ServiceResource;
-use App\Http\Resources\WebTourResource;
-use App\Http\Resources\TransportClassResource;
 use App\Http\Resources\TransferRequestResource;
+use App\Http\Resources\TransportClassResource;
+use App\Http\Resources\WebTourResource;
+use App\Models\Banner;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\Hotel;
+use App\Models\RoomType;
+use App\Models\Service;
+use App\Models\TransferRequest;
+use App\Models\TransportClass;
+use App\Models\WebTour;
+use App\Services\TransferService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ManualController extends Controller
 {
@@ -38,8 +39,8 @@ class ManualController extends Controller
                 'days' => fn($query) => $query->with(['facilities']),
                 'currentPrice',
             ])
-            ->when($search, function($query) use ($search) {
-                $query->where(function($q) use ($search) {
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q
                         ->whereRaw('LOWER(name_ru) LIKE ?', ["%$search%"])
                         ->orWhereRaw('LOWER(name_en) LIKE ?', ["%$search%"])
@@ -47,7 +48,7 @@ class ManualController extends Controller
                         ->orWhereRaw('LOWER(description_en) LIKE ?', ["%$search%"]);
                 });
             })
-            ->when($isPopular !== null, function($query) use ($isPopular) {
+            ->when($isPopular !== null, function ($query) use ($isPopular) {
                 $query->where('is_popular', filter_var($isPopular, FILTER_VALIDATE_BOOLEAN));
             })
             ->paginate(15);
@@ -165,7 +166,7 @@ class ManualController extends Controller
     {
         /** @var User $user */
         $user = auth()->user();
-        
+
         $validated = $request->validate([
             'from' => 'required|string',
             'to' => 'required|string|different:from',
@@ -174,7 +175,6 @@ class ManualController extends Controller
             'date' => 'required|date|after_or_equal:today',
             'time' => 'required|date_format:H:i',
             'passengers' => 'required|integer|min:1|max:50',
-            'class_auto' => 'nullable|string|in:economy,business,premium',
             'full_name' => 'string|max:255',
             'phone_number' => 'string|max:255',
             'comments' => 'nullable|string|max:1000',
@@ -184,15 +184,8 @@ class ManualController extends Controller
         // Combine date and time into datetime
         $dateTime = $validated['date'] . ' ' . $validated['time'];
         $dateTime = Carbon::parse($dateTime, $user->timezone)->utc();
-        
-        // Map transport class
-        $transportClass = match ($validated['class_auto'] ?? null) {
-            'business' => 2,
-            'premium'  => 4,
-            default    => 1, // economy
-        };
 
-        $transferRequest = TransferRequest::query()->create([
+        $attributes = [
             'status' => TransferRequestStatus::Created,
             'user_id' => $request->user()?->id,
             'from' => $validated['from'],
@@ -202,11 +195,20 @@ class ManualController extends Controller
             'from_coords' => $validated['from_coords'] ?? null,
             'to_coords' => $validated['to_coords'] ?? null,
             'passengers_count' => $validated['passengers'] ?? null,
-            'transport_class' => $transportClass,
             'fio' => $validated['full_name'] ?? null,
             'phone' => $validated['phone_number'] ?? null,
             'comment' => $validated['comments'] ?? null,
-        ]);
+        ];
+
+        $unbookedRequest = TransferService::getUnbookedRequest($user);
+        if ($unbookedRequest) {
+            $unbookedRequest->update($attributes);
+            unset($attributes['passengers_count']);
+            $unbookedRequest->children()->update($attributes);
+            $transferRequest = $unbookedRequest;
+        } else {
+            $transferRequest = TransferRequest::query()->create($attributes);
+        }
 
         return response()->json([
             'message' => 'Transfer request created successfully',
@@ -217,14 +219,49 @@ class ManualController extends Controller
     public function updateTransferRequest(Request $request, $id): JsonResponse
     {
         $validated = $request->validate([
-            'transport_class_id' => 'nullable|exists:transport_classes,id',
+            'force' => 'boolean',
+            'transport_class_id' => 'required|exists:transport_classes,id',
         ]);
 
+        /** @var TransferRequest $transferRequest */
         $transferRequest = TransferRequest::query()->findOrFail($id);
-        $transferRequest->update(array_filter([
-            'status' => TransferRequestStatus::TransportType,
-            'transport_class_id' => $validated['transport_class_id'] ?? null,
-        ]));
+
+        /** @var TransportClass $transportClass */
+        $transportClass = TransportClass::query()->findOrFail($validated['transport_class_id']);
+
+        $isForce = $request->get('force', false);
+        $capacity = $transportClass->passenger_capacity;
+        $total = $transferRequest->passengers_count;
+
+        // If client forces multi creation
+        if ($isForce && $total > $capacity) {
+            TransferService::storeMultipleRequests($transferRequest, $transportClass);
+            return response()->json([
+                'message' => 'Transfer request updated successfully',
+                'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
+            ]);
+        }
+
+        // Warning: If client set passengers more than capacity of transport
+        if ($total > $capacity) {
+            $transfersCount = ceil($total / $capacity);
+            return response()->json([
+                'capacity_limit' => true,
+                'data' => [
+                    'transport_class' => $transportClass,
+                    'transfers_count' => $transfersCount
+                ]
+            ]);
+        }
+
+        $updateData = [
+            'status' => TransferRequestStatus::TransportType->value,
+            'transport_class_id' => $transportClass->id,
+        ];
+
+        $transferRequest->update($updateData);
+        unset($updateData['passengers_count']);
+        $transferRequest->children()->update($updateData);
 
         return response()->json([
             'message' => 'Transfer request updated successfully',
@@ -235,18 +272,11 @@ class ManualController extends Controller
     public function getUnbookedTransferRequest(Request $request): JsonResponse
     {
         $user = $request->user();
-
         if (!$user) {
             return response()->json(['data' => false]);
         }
 
-        $unbookedRequest = TransferRequest::query()
-            ->where('user_id', $user->id)
-            ->where('status', '!=', TransferRequestStatus::Booked)
-            ->with(['fromCity', 'toCity'])
-            ->orderByDesc('created_at')
-            ->first();
-
+        $unbookedRequest = TransferService::getUnbookedRequest($user);
         if (!$unbookedRequest) {
             return response()->json(['data' => false]);
         }
@@ -269,10 +299,11 @@ class ManualController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        $transferRequest = TransferRequest::findOrFail($id);
+        /** @var TransferRequest $transferRequest */
+        $transferRequest = TransferRequest::query()->findOrFail($id);
 
-        $transferRequest->update([
-            'status' => 3, // Booked status
+        $updateData = [
+            'status' => TransferRequestStatus::Booked->value, // Booked status
             'terminal_name' => $validated['terminal_name'] ?? null,
             'activate_flight_tracking' => $validated['activate_flight_tracking'] ?? false,
             'fio' => $validated['fio'],
@@ -281,7 +312,11 @@ class ManualController extends Controller
             'is_sample_baggage' => $validated['is_sample_baggage'] ?? false,
             'baggage_count' => $validated['baggage_count'] ?? null,
             'comment' => $validated['comment'] ?? null,
-        ]);
+        ];
+
+        $transferRequest->update($updateData);
+        unset($updateData['passengers_count']);
+        $transferRequest->children()->update($updateData);
 
         return response()->json([
             'message' => 'Transfer request booked successfully',

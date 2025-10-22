@@ -49,6 +49,8 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property string $nameplate
  * @property string $mark
  * @property integer $notified_times
+ * @property string $from
+ * @property string $to
  *
  * @property User $createdBy
  * @property Driver $driver
