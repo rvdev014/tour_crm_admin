@@ -26,6 +26,7 @@ class UserResource extends JsonResource
             'google_id' => $this->google_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'timezone' => $this->timezone,
         ];
     }
 }

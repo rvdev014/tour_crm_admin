@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Storage;
  * @property string $email
  * @property string $password
  * @property int $operator_percent_tps
+ * @property string $timezone
  * @property UserRole $role
  */
 class User extends Authenticatable implements FilamentUser
@@ -44,6 +45,7 @@ class User extends Authenticatable implements FilamentUser
         'gender',
         'phone',
         'google_id',
+        'timezone',
     ];
 
     /**

@@ -69,7 +69,10 @@ class HotelResource extends JsonResource
         $hotelRoomType = $this->roomTypes()->where('season_type', $seasonType)->first();
 
         /** @var Group $group */
-        $group = Group::query()->where('name', 'website')->firstOrFail();
+        $group = Group::query()->where('name', 'website')->first();
+        if (!$group) {
+            throw new \Exception('Group "website" not found');
+        }
 
         $price = $hotelRoomType?->getPriceByGroup($group);
 

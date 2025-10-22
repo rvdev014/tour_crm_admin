@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\User;
+use Illuminate\Support\Carbon;
 use App\Http\Resources\ReviewResource;
 use App\Models\City;
 use App\Models\Banner;
@@ -161,6 +163,9 @@ class ManualController extends Controller
 
     public function storeTransferRequest(Request $request): JsonResponse
     {
+        /** @var User $user */
+        $user = auth()->user();
+        
         $validated = $request->validate([
             'from' => 'required|string',
             'to' => 'required|string|different:from',
@@ -178,7 +183,8 @@ class ManualController extends Controller
 
         // Combine date and time into datetime
         $dateTime = $validated['date'] . ' ' . $validated['time'];
-
+        $dateTime = Carbon::parse($dateTime, $user->timezone)->utc();
+        
         // Map transport class
         $transportClass = match ($validated['class_auto'] ?? null) {
             'business' => 2,

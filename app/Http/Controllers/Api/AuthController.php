@@ -25,14 +25,18 @@ class AuthController extends Controller
             'name' => 'required|string',
             'email' => 'required|string|unique:users,email',
             'password' => 'required|string',
+            'timezone' => 'nullable|string|timezone',
         ]);
-
+        
+        $timezone = $request->get('timezone', 'UTC');
+        
         /** @var User $user */
         $user = User::query()->create([
             'name' => $fields['name'],
             'email' => $fields['email'],
             'password' => Hash::make($fields['password']),
             'role' => UserRole::User,
+            'timezone' => $timezone,
         ]);
 
         $token = $user->createToken('authToken')->plainTextToken;
@@ -42,8 +46,18 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
+        
+        $timezone = $request->get('timezone', 'UTC');
+        
         if (auth()->attempt($credentials)) {
-            $token = auth()->user()->createToken('authToken')->plainTextToken;
+            
+            /** @var User $user */
+            $user = auth()->user();
+            if (empty($user->timezone)) {
+                $user->update(['timezone' => $timezone]);
+            }
+            
+            $token = $user->createToken('authToken')->plainTextToken;
             return response()->json(['token' => $token]);
         }
         return response()->json(['message' => 'Wrong credentials'], 400);
@@ -57,7 +71,13 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(new UserResource($request->user('sanctum')));
+        /** @var User $user */
+        $user = $request->user('sanctum');
+        
+        $timezone = $request->header('Timezone', 'UTC');
+        $user->update(['timezone' => $timezone]);
+        
+        return response()->json(new UserResource($user));
     }
 
     public function updateMe(Request $request): JsonResponse
@@ -74,9 +94,15 @@ class AuthController extends Controller
             'current_password' => 'nullable|string',
             'password' => 'nullable|string|confirmed',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'timezone' => 'nullable|string|timezone',
         ]);
+        
+        $timezone = $request->get('timezone', 'UTC');
+        if (empty($user->timezone)) {
+            $validated['timezone'] = $timezone;
+        }
 
-        if (isset($validated['current_password']) && !Hash::check($validated['current_password'], $user->password)) {
+        if (isset($validated['current_password']) && !empty($user->password) && !Hash::check($validated['current_password'], $user->password)) {
             return response()->json(['message' => 'Current password is incorrect'], 400);
         }
 
@@ -101,7 +127,10 @@ class AuthController extends Controller
     {
         $request->validate([
             'id_token' => 'required|string',
+            'timezone' => 'nullable|string|timezone',
         ]);
+        
+        $timezone = $request->get('timezone', 'UTC');
 
         try {
             $client = new GoogleClient();
@@ -126,11 +155,13 @@ class AuthController extends Controller
                     'google_id' => $googleId,
                     'avatar' => $avatar,
                     'role' => UserRole::User,
+                    'timezone' => $timezone,
                 ]);
             } else {
                 $user->update([
                     'google_id' => $googleId,
-                    'avatar' => $avatar
+                    'avatar' => $avatar,
+                    'timezone' => $timezone,
                 ]);
             }
 
