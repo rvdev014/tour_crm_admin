@@ -39,12 +39,21 @@ class TransportClassResource extends Resource
                 Forms\Components\FileUpload::make('photo')
                     ->image()
                     ->directory('transport-classes'),
+
+                Forms\Components\TextInput::make('limit_distance')
+                    ->numeric()
+                    ->label('Limit distance'),
+                Forms\Components\TextInput::make('additional_price_per_km')
+                    ->numeric()
+                    ->label('Additional price per km'),
+
                 Forms\Components\TextInput::make('passenger_capacity')
                     ->numeric()
                     ->label('Passenger Capacity'),
                 Forms\Components\TextInput::make('luggage_capacity')
                     ->numeric()
                     ->label('Luggage Capacity'),
+
                 Forms\Components\TextInput::make('waiting_time_included')
                     ->numeric()
                     ->label('Waiting Time Included'),
@@ -67,6 +76,12 @@ class TransportClassResource extends Resource
                 Tables\Columns\TextColumn::make('description')
                     ->limit(50),
                 Tables\Columns\TextColumn::make('price_per_km')
+                    ->money('USD')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('limit_distance')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('additional_price_per_km')
                     ->money('USD')
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('photo')

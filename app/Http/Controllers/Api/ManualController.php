@@ -256,6 +256,7 @@ class ManualController extends Controller
 
         $updateData = [
             'status' => TransferRequestStatus::TransportType->value,
+            'total_fare' => TransferService::calculateTotalFare($transferRequest, $transportClass),
             'transport_class_id' => $transportClass->id,
         ];
 

@@ -139,4 +139,20 @@ class TransferService
             $transfer->update(['user_notified_at' => now()]);
         }
     }
+
+    public static function calculateTotalFare(TransferRequest $transferRequest, TransportClass $transportClass): float
+    {
+        $distance = $transferRequest->distance;
+        $pricePerKm = $transportClass->price_per_km;
+        $limitDistance = $transportClass->limit_distance;
+
+        if (!$limitDistance || $distance <= $limitDistance) {
+            return round($pricePerKm * $distance, 2);
+        }
+
+        $baseCost = $pricePerKm * $limitDistance;
+        $extraCost = $transportClass->additional_price_per_km * ($distance - $limitDistance);
+
+        return $baseCost + $extraCost;
+    }
 }

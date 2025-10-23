@@ -105,7 +105,7 @@ class TransferRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'asc')
+            ->defaultSort('status', 'asc')
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
             ->columns([
@@ -226,7 +226,7 @@ class TransferRequestResource extends Resource
                     ->label('Accept')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn(TransferRequest $record) => $record->status !== TransferRequestStatus::Accepted)
+                    ->visible(fn(TransferRequest $record) => $record->status === TransferRequestStatus::Booked && $record->status !== TransferRequestStatus::Accepted)
                     ->requiresConfirmation()
                     ->modalHeading('Accept Transfer Request')
                     ->modalDescription('This will create a new transfer and send a confirmation email to the user.')
