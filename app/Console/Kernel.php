@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Services\LotService;
 use App\Services\TourService;
 use App\Services\PaymentService;
+use App\Services\TransferService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -18,6 +19,7 @@ class Kernel extends ConsoleKernel
         $schedule
             ->call(function() {
                 app(TourService::class)->notifyDrivers();
+                app(TransferService::class)->notifyClientsForTransfer();
             })
             ->everyMinute()
             ->onSuccess(function() {

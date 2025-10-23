@@ -34,6 +34,8 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon $date_time
+ * @property Carbon $user_notified_at
+ * @property string $location_details
  *
  * @property int $created_by
  * @property array $driver_ids
@@ -51,6 +53,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property integer $notified_times
  * @property string $from
  * @property string $to
+ * @property string $transfer_request_id
  *
  * @property User $createdBy
  * @property Driver $driver
@@ -58,6 +61,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property Company $company
  * @property City $fromCity
  * @property City $toCity
+ * @property TransferRequest $transferRequest
  */
 #[ObservedBy(TransferObserver::class)]
 class Transfer extends Model
@@ -71,6 +75,7 @@ class Transfer extends Model
         'transport_type' => TransportType::class,
         'transport_comfort_level' => TransportComfortLevel::class,
         'date_time' => 'datetime',
+        'user_notified_at' => 'datetime',
         'driver_ids' => 'array',
         'old_values' => 'array',
     ];
@@ -107,6 +112,11 @@ class Transfer extends Model
     public function toCity(): BelongsTo
     {
         return $this->belongsTo(City::class, 'to_city_id');
+    }
+
+    public function transferRequest(): BelongsTo
+    {
+        return $this->belongsTo(TransferRequest::class, 'transfer_request_id');
     }
 
     public function tourDayExpense(): BelongsTo

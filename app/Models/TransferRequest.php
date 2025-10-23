@@ -18,14 +18,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $from
  * @property int $to
  * @property float $distance
+ * @property float $total_fare
  * @property string $from_coords
  * @property string $to_coords
  * @property DateTime $date_time
  * @property int $passengers_count
  * @property int $parent_id
+ * @property string $terminal_name
  * @property string $fio
  * @property string $phone
  * @property string|null $comment
+ * @property string|null $text_on_sign
  * @property string|null $payment_type
  * @property string|null $payment_card
  * @property string|null $payment_holder_name
@@ -44,27 +47,7 @@ class TransferRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'status',
-        'user_id',
-        'from',
-        'to',
-        'distance',
-        'from_coords',
-        'to_coords',
-        'date_time',
-        'passengers_count',
-        'transport_class_id',
-        'fio',
-        'phone',
-        'comment',
-        'is_sample_baggage',
-        'baggage_count',
-        'terminal_name',
-        'text_on_sign',
-        'activate_flight_tracking',
-        'parent_id',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'date_time' => 'datetime',

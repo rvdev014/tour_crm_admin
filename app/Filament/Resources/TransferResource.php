@@ -101,8 +101,7 @@ class TransferResource extends Resource
                         ->searchable()
                         ->preload()
                         ->label('Company')
-                        ->relationship('company', 'name')
-                        ->required(),
+                        ->relationship('company', 'name'),
 
                     Forms\Components\TextInput::make('requested_by'),
 

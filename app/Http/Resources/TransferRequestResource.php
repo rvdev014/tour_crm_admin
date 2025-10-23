@@ -24,6 +24,7 @@ class TransferRequestResource extends JsonResource
             'from' => $this->from,
             'to' => $this->to,
             'distance' => $this->distance,
+            'total_fare' => $this->total_fare,
             'from_coords' => $this->from_coords,
             'to_coords' => $this->to_coords,
             'date_time' => $this->date_time,

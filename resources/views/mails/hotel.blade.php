@@ -77,7 +77,7 @@ $rooming = $placeholders['roomingArr'];
 
     <div class="contact">
         38, 91/2 Green Park, Makhtumkuli str., 100047 Tashkent, Uzbekistan<br>
-        Phone: +998977207752 &nbsp; | &nbsp; Email: info@asia-point.uz &nbsp; | &nbsp;
+        Phone: <a href="tel:+998977207752">+99897 720 77 52</a> &nbsp; | &nbsp; Email: <a href="mailto:info@asia-point.uz">info@asia-point.uz</a> &nbsp; | &nbsp;
         Website: <a href="https://www.letsgouzbekistan.com">www.letsgouzbekistan.com</a>
     </div>
 

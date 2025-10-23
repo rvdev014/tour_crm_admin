@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\TransferRequest;
 use App\Services\TourService;
+use App\Services\TransferService;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class SendTransfer extends Command
@@ -26,6 +29,9 @@ class SendTransfer extends Command
      */
     public function handle(): void
     {
-        app(TourService::class)->notifyDrivers();
+//        $transferRequest = TransferRequest::query()->find(29);
+//        app(TransferService::class)->acceptRequest($transferRequest);
+        app(TransferService::class)->notifyClientsForTransfer();
+//        app(TourService::class)->notifyDrivers();
     }
 }

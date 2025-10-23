@@ -1,14 +1,15 @@
 @php
-    /** @var TransferRequest $transferRequest */
-    use App\Models\TransferRequest;use Carbon\Carbon;
+    use App\Models\Transfer;use Carbon\Carbon;
+    /** @var Transfer $transfer */
+    $transferRequest = $transfer->transferRequest
 @endphp
 
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transfer Request Confirmed</title>
+    <title>Transfer Reminder</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -113,59 +114,33 @@
 </div>
 
 <div class="confirmation-badge">
-    ✓ Transfer Booking Confirmation
+    Transfer Reminder!
 </div>
 
 <p>Dear {{ $transferRequest->fio }},</p>
-<p>Your transfer has been successfully booked! <br>Thank you for choosing East Asia Point Travel and Tours.</p>
+<p>This is a friendly reminder from East Asia Point Travel and Tours.</p>
+<p>Your Business Class transfer from <strong>{{$transfer->from}}</strong> to <strong>{{$transfer->to}}</strong> is scheduled in 2 hours.</p>
 
 <div class="section">
-    <h3>📋 Booking Details</h3>
+    <h3>📋 Details:</h3>
     <div class="detail-row">
-        <span class="label">Pick-up location:</span>
-        <span class="value">{{ $transferRequest->from }}</span>
+        <span class="label">🕐 Pick-up time:</span>
+        <span class="value">{{ Carbon::parse($transfer->date_time, $transferRequest?->user?->timezone ?? 'UTC')->format('d F Y, h:i A') }}</span>
     </div>
     <div class="detail-row">
-        <span class="label">Destination:</span>
-        <span class="value">{{ $transferRequest->to }}</span>
+        <span class="label">📍 Meeting point:</span>
+        <span class="value">{{ $transfer->location_details ?? $transfer->from }}</span>
     </div>
     <div class="detail-row">
-        <span class="label">Pick-up date & time:</span>
-        <span class="value">{{ Carbon::parse($transferRequest->date_time, $transferRequest->user->timezone ?? 'UTC')->format('d.m.Y H:i') }}</span>
-    </div>
-    <div class="detail-row">
-        <span class="label">Vehicle class:</span>
-        <span class="value">{{ $transferRequest->transportClass->name }}</span>
-    </div>
-    <div class="detail-row">
-        <span class="label">Distance:</span>
-        <span class="value">{{ $transferRequest->distance }} km</span>
-    </div>
-    <div class="detail-row">
-        <span class="label">Total fare:</span>
-        <span class="value">{{ $transferRequest->total_fare }} $</span>
-    </div>
-    <div class="detail-row">
-        <span class="label">Included:</span>
-        @php
-            $tClass = $transferRequest->transportClass
-        @endphp
-        <span class="value">
-            Up to {{$tClass->passenger_capacity}} passengers,<br>
-            {{$tClass->luggage_capacity}} bags,
-            {{$tClass->waiting_time_included}} min waiting time,<br>
-            {{$tClass->meeting_with_place ? 'meeting with a plate' : ''}}
-            {{false ? ', flight tracking' : ''}}
-        </span>
+        <span class="label">🚘 Vehicle:</span>
+        <span class="value">{{ $transferRequest?->transportClass?->vehicle_example ?? '-' }}</span>
     </div>
 </div>
 
 <div class="section">
-    <h3>📝 Important notes:</h3>
-    <p class="notes">The driver will meet you at the hotel entrance with a sign displaying your name.</p>
-    <p class="notes">Please ensure your phone number is active and reachable.</p>
-    <p class="notes">Free cancellation is available up to 24 hours before the trip.</p>
-    <p class="notes">If you have any changes or questions, please contact us at info@letsouzbekistan.com or call <a href="tel:+998977207752">+99897 720 77 52</a></p>
+    <p class="notes">👤 Driver will meet you with a sign displaying your name</p>
+    <p class="notes">☎️ Please ensure your phone is switched on and reachable</p>
+    <p class="notes">We wish you a smooth and pleasant journey! If you need to make changes, please contact us at <a href="mailto:info@letsouzbekistan.com"></a> or <a href="tel:+998977207752">+998977207752</a>.</p>
 </div>
 
 <div class="footer">

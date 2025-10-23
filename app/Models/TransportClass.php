@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $name
  * @property int $passenger_capacity
+ * @property int $luggage_capacity
+ * @property int $waiting_time_included
+ * @property bool $meeting_with_place
+ * @property bool $non_refundable_rate
+ * @property bool $vehicle_example
  */
 class TransportClass extends Model
 {

@@ -2,21 +2,22 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
+use App\Enums\ExpenseStatus;
+use App\Enums\TransferRequestStatus;
+use App\Filament\Resources\TransferRequestResource\Pages;
+use App\Mail\TransferRequestConfirmedMail;
 use App\Models\Transfer;
 use App\Models\TransferRequest;
+use App\Services\TransferService;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use App\Enums\TransportClassEnum;
-use App\Enums\TransferRequestStatus;
-use App\Mail\TransferRequestConfirmed;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\TransferRequestResource\Pages;
 use Throwable;
 
 class TransferRequestResource extends Resource
@@ -104,7 +105,7 @@ class TransferRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('created_at', 'asc')
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
             ->columns([
@@ -204,7 +205,7 @@ class TransferRequestResource extends Resource
                         Forms\Components\DatePicker::make('until_date')
                             ->label('Until Date'),
                     ])
-                    ->query(function(Builder $query, array $data): Builder {
+                    ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 $data['from_date'],
@@ -225,53 +226,22 @@ class TransferRequestResource extends Resource
                     ->label('Accept')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (TransferRequest $record) => $record->status !== TransferRequestStatus::Accepted)
+                    ->visible(fn(TransferRequest $record) => $record->status !== TransferRequestStatus::Accepted)
                     ->requiresConfirmation()
                     ->modalHeading('Accept Transfer Request')
                     ->modalDescription('This will create a new transfer and send a confirmation email to the user.')
                     ->action(function (TransferRequest $record) {
                         try {
-                            DB::beginTransaction();
-
-                            // Update status to confirmed
-                            $record->update(['status' => TransferRequestStatus::Accepted]);
-
-                            // Create transfer from the request
-                            $transfer = Transfer::create([
-                                'from_city_id' => $record->from,
-                                'to_city_id' => $record->to,
-                                'date_time' => $record->date_time,
-                                'pax' => $record->passengers_count,
-                                'route' => $record->from . ' - ' . $record->to,
-                                'passenger' => $record->fio,
-                                'comment' => $record->comment,
-                                'transport_type' => \App\Enums\TransportType::Sedan,
-                                'transport_comfort_level' => \App\Enums\TransportComfortLevel::Standard,
-                                'nameplate' => $record->text_on_sign,
-                                'requested_by' => $record->fio,
-                                'status' => \App\Enums\ExpenseStatus::Pending,
-                                'company_id' => 1, // Default company
-                            ]);
-
-                            // Send confirmation email if user exists
-                            if ($record->user && $record->user->email) {
-                                Mail::to($record->user->email)->send(
-                                    new TransferRequestConfirmed($record, $transfer)
-                                );
-                            }
-
-                            DB::commit();
-
+                            $transfer = TransferService::acceptRequest($record);
                             Notification::make()
                                 ->title('Transfer request accepted')
                                 ->body("Transfer #{$transfer->number} has been created and confirmation email sent.")
                                 ->success()
                                 ->send();
                         } catch (Throwable $exception) {
-                            DB::rollBack();
                             Notification::make()
-                                ->title('Cannot delete some drivers')
-                                ->body("Cannot delete drivers: {$exception->getMessage()}. They are used in tours.")
+                                ->title('Error occurred')
+                                ->body("Error accepting request: {$exception->getMessage()}")
                                 ->danger()
                                 ->send();
                         }
