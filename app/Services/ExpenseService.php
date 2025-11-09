@@ -206,6 +206,8 @@ class ExpenseService
                             }
                         }
 
+                        $totalNights += 1;
+
                         /** @var HotelRoomType $hotelRoomType */
                         $hotelRoomType = $hotel->roomTypes()
                             ->where('room_type_id', $roomTypeId)
