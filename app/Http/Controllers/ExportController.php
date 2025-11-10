@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tour;
+use App\Models\Group;
 use App\Models\Transfer;
+use App\Models\TourGroup;
+use App\Enums\ExpenseType;
 use App\Services\ExportClientService;
 use App\Services\ExportHotelService;
 use App\Services\ExportMuseumService;
@@ -110,9 +113,28 @@ class ExportController extends Controller
             $templateProcessor = ExportHotelService::getReplacedTemplateFirst($hotelItem);
             $templateProcessor->saveAs($fileName);
 
-            $fileName = ExportService::getTempDir("all_reports/client_vouchers") . '/' . $hotelName . '.docx';
-            $templateProcessor = ExportHotelService::getReplacedTemplateSecond($hotelItem);
-            $templateProcessor->saveAs($fileName);
+            if ($tour->isCorporate()) {
+                foreach ($tour->groups as $group) {
+                    /** @var TourGroup $properGroup */
+                    $hotelExpExists = $group->expenses()
+                        ->where('type', ExpenseType::Hotel)
+                        ->where('hotel_id', $hotelItem['hotelId'])
+                        ->exists();
+                    if (!$hotelExpExists) {
+                        continue;
+                    }
+
+                    foreach ($group->passengers as $passenger) {
+                        $fileName = ExportService::getTempDir("all_reports/client_vouchers") . "/{$hotelName}_{$passenger->name}.docx";
+                        $templateProcessor = ExportHotelService::getReplacedTemplateSecond($hotelItem, $passenger->name);
+                        $templateProcessor->saveAs($fileName);
+                    }
+                }
+            } else {
+                $fileName = ExportService::getTempDir("all_reports/client_vouchers") . "/$hotelName.docx";
+                $templateProcessor = ExportHotelService::getReplacedTemplateSecond($hotelItem);
+                $templateProcessor->saveAs($fileName);
+            }
         }
 
         $zip = new ZipArchive();

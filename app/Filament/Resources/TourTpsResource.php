@@ -37,22 +37,22 @@ use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
 class TourTpsResource extends Resource
 {
     use InteractsWithForms;
-
+    
     protected static ?string $model = Tour::class;
-
+    
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationLabel = 'TPS';
     protected static ?string $slug = 'tour-tps';
     protected static ?int $navigationSort = 1;
     protected static ?string $recordTitleAttribute = 'group_number';
-
+    
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with('days.expenses')
             ->where('type', TourType::TPS->value);
     }
-
+    
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -62,11 +62,11 @@ class TourTpsResource extends Resource
                 Hidden::make('transport_price_currency'),
                 Components\Grid::make(4)->schema([
                     Components\TextInput::make('group_number')
-                        ->formatStateUsing(function($record) {
+                        ->formatStateUsing(function($record, $get) {
                             if (!empty($record)) {
                                 return $record->group_number;
                             }
-                            return TourService::getGroupNumber(TourType::TPS);
+                            return TourService::getGroupNumber(TourType::TPS, $get('start_date'));
                         })
                         ->readOnly(),
                     Components\Select::make('company_id')
@@ -103,11 +103,11 @@ class TourTpsResource extends Resource
                             $startDate = $get('start_date');
                             $firstDay = $get('days') ? Arr::first($get('days')) : null;
                             $firstDayUuid = $firstDay ? Arr::first(array_keys($get('days'))) : null;
-
+                            
                             if (empty($firstDay['id'])) {
                                 $set("days.$firstDayUuid.date", $startDate);
                             }
-
+                            
                             if (Carbon::parse($get('end_date')) < Carbon::parse($startDate)) {
                                 $set('end_date', null);
                             }
@@ -116,7 +116,7 @@ class TourTpsResource extends Resource
                         ->required(),
                     Components\TextInput::make('arrival_number')
                         ->label('Arrival reys number'),
-
+                    
                     Components\DateTimePicker::make('end_date')
                         ->displayFormat('d.m.Y H:i')
                         ->label('Departure time')
@@ -165,7 +165,7 @@ class TourTpsResource extends Resource
                     Components\Textarea::make('comment'),
                 ]),
             ]),
-
+            
             Components\Fieldset::make('Guide info')->schema([
                 Components\Grid::make(4)->schema([
                     Components\Select::make('guide_type')
@@ -175,16 +175,16 @@ class TourTpsResource extends Resource
                         ->options(GuideType::class)
                         ->reactive()
                         ->required(),
-
+                    
                     Components\TextInput::make('guide_name')
                         ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
-
+                    
                     PhoneInput::make('guide_phone')
                         ->strictMode()
                         ->onlyCountries(['UZ'])
                         ->defaultCountry('UZ')
                         ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
-
+                    
                     Components\TextInput::make('guide_price')
                         ->label(fn($get) => 'Price (' . ($get('guide_price_currency') ?? 'UZS') . ')')
                         ->suffixAction(
@@ -199,7 +199,7 @@ class TourTpsResource extends Resource
                         ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
                 ])
             ]),
-
+            
             Components\Fieldset::make('Transport info')->schema([
                 Components\Grid::make(4)->schema([
                     Components\Select::make('transport_type')
@@ -223,11 +223,11 @@ class TourTpsResource extends Resource
                         ->numeric(),
                 ])
             ]),
-
+            
             Components\Fieldset::make('Rooming info')->schema([
-
+                
                 ...TourService::generateRoomingSchema(true),
-
+                
                 Section::make("Other rooming")
                     ->schema(TourService::generateRoomingSchema())
                     ->collapsible()
@@ -235,7 +235,7 @@ class TourTpsResource extends Resource
             ])
         ]);
     }
-
+    
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput
     {
         return Components\TextInput::make('price')
@@ -250,12 +250,12 @@ class TourTpsResource extends Resource
             )
             ->numeric();
     }
-
+    
     public static function isLunch($expenseType): bool
     {
         return in_array($expenseType, [ExpenseType::Lunch->value, ExpenseType::Dinner->value]);
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table
@@ -275,10 +275,24 @@ class TourTpsResource extends Resource
                         Components\Grid::make(6)->schema([
                             Components\Checkbox::make('active')
                                 ->label('Active')
-                                ->default(false),
+                                ->default(false)
+                                ->inline(false),
                             Components\Checkbox::make('archive')
                                 ->label('Archive')
-                                ->default(false),
+                                ->default(false)
+                                ->inline(false),
+                            Components\Select::make('year')
+                                ->label('Year')
+                                ->native(false)
+                                ->options(function() {
+                                    $currentYear = (int)date('Y');
+                                    $startYear = $currentYear - 5;
+                                    $endYear = $currentYear + 3;
+                                    return array_combine(
+                                        $yearsArray = range($startYear, $endYear),
+                                        $yearsArray
+                                    );
+                                }),
                         ]),
                         Components\Grid::make(6)->schema([
                             Components\Select::make('country_id')
@@ -302,7 +316,7 @@ class TourTpsResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->options(User::query()->pluck('name', 'id')->toArray()),
-
+                            
                             Components\DatePicker::make('created_from')
                                 ->displayFormat('d.m.Y')
                                 ->native(false),
@@ -314,16 +328,22 @@ class TourTpsResource extends Resource
                     ->query(function(Builder $query, $data) {
                         if ($data['active'] && $data['archive']) {
                             $query->where(function($query) use ($data) {
-                                $query->where('start_date', '>=', Carbon::now())
-                                    ->orWhere('start_date', '<', Carbon::now());
+                                $query->where('end_date', '>=', Carbon::now())
+                                    ->orWhere('end_date', '<', Carbon::now());
                             });
                         } elseif ($data['active']) {
-                            $query->where('start_date', '>=', Carbon::now());
+                            $query->where('end_date', '>=', Carbon::now());
                         } elseif ($data['archive']) {
-                            $query->where('start_date', '<', Carbon::now());
+                            $query->where('end_date', '<', Carbon::now());
                         }
-
+                        
                         return $query
+                            ->when($data['year'], function ($query, $year) {
+                                return $query->where(function($q) use ($year) {
+                                    $q->whereYear('start_date', $year)
+                                        ->orWhereYear('end_date', $year);
+                                });
+                            })
                             ->when(
                                 $data['country_id'],
                                 fn($query, $countryId) => $query->where('country_id', $countryId)
@@ -348,7 +368,7 @@ class TourTpsResource extends Resource
                     })
                     ->indicateUsing(function(array $data): array {
                         $query = Tour::query()->where('type', TourType::TPS->value);
-
+                        
                         $indicators = [];
                         if ($data['active'] && $data['archive']) {
                             $query = $query
@@ -356,7 +376,7 @@ class TourTpsResource extends Resource
                                 ->orWhere('start_date', '<', Carbon::now());
                             $indicators['active'] = "Active & Archive ({$query->count()})";
                         }
-
+                        
                         if ($data['active']) {
                             $query = $query->where('start_date', '>=', Carbon::now());
                             $indicators['active'] = "Active ({$query->count()})";
@@ -387,7 +407,7 @@ class TourTpsResource extends Resource
                                     $data['created_until']
                                 )->toFormattedDateString();
                         }
-
+                        
                         return $indicators;
                     })
             ], layout: FiltersLayout::AboveContent)
@@ -413,7 +433,7 @@ class TourTpsResource extends Resource
                                     $record->total_price
                                 ) . ' ' . ExpenseService::getMainCurrency()?->from?->getSymbol();
                         }
-
+                        
                         return '-';
                     })
                     ->sortable(),
@@ -426,7 +446,7 @@ class TourTpsResource extends Resource
                             return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency(
                                 )?->from?->getSymbol();
                         }
-
+                        
                         return '-';
                     })
                     ->sortable(),
@@ -439,7 +459,7 @@ class TourTpsResource extends Resource
                             return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency(
                                 )?->from?->getSymbol();
                         }
-
+                        
                         return '-';
                     })
                     ->sortable(),
@@ -450,12 +470,12 @@ class TourTpsResource extends Resource
                     ->suffix('%')
                     ->sortable(),
                 Columns\TextColumn::make('country.name'),
-
+                
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-
+                
                 /*Columns\TextColumn::make('status')
                     ->numeric()
                     ->sortable(),
@@ -492,7 +512,7 @@ class TourTpsResource extends Resource
                 StatusAction::make()->label('')->icon(''),
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->headerActions([
-
+            
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -500,7 +520,7 @@ class TourTpsResource extends Resource
                 ]),
             ]);
     }
-
+    
     public static function getRelations(): array
     {
         return [
@@ -508,7 +528,7 @@ class TourTpsResource extends Resource
             RelationManagers\ExpensesThroughDaysRelationManager::class,
         ];
     }
-
+    
     public static function getPages(): array
     {
         return [

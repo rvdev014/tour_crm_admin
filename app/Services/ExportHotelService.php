@@ -109,7 +109,7 @@ class ExportHotelService
 
             $hotelItem = [
                 'tour_number' => $tour->group_number,
-                'payment_method' => $tour->payment_type->getLabel(),
+                'payment_method' => $tour->payment_type?->getLabel(),
                 'hotel' => $hotelExpense->hotel,
                 'hotelId' => $hotelExpense->hotel_id,
                 'hotelName' => $hotel->name,
@@ -355,6 +355,7 @@ class ExportHotelService
             'outsTime' => $departureTimesStr,
             'operator' => $hotelItem['operator'],
             'contract_num' => $hotelItem['contract_number'] ?? null,
+            'contract_year' => $contractDate?->format('Y'),
             'contract_day' => $contractDate?->format('d'),
             'contract_month' => $contractDate?->locale('ru')->translatedFormat('F'),
             'contract_month_en' => $contractDate?->locale('en')->translatedFormat('F'),
@@ -365,7 +366,7 @@ class ExportHotelService
      * @throws CopyFileException
      * @throws CreateTemporaryFileException
      */
-    public static function getReplacedTemplateSecond($hotelItem): TemplateProcessor
+    public static function getReplacedTemplateSecond($hotelItem, $passengerName = ''): TemplateProcessor
     {
         $templateProcessor = new TemplateProcessor(self::getTemplateSecondPath());
 
@@ -386,6 +387,7 @@ class ExportHotelService
 
         $placeholders = [
             'name' => $hotel->name,
+            'guest_name' => $passengerName,
             'address' => $hotel->address ?? '-',
             'phones' => $hotel->phones->map(fn($phone) => $phone->phone_number)->implode(', '),
             'tour_number' => $hotelItem['tour_number'],

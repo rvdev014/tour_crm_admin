@@ -87,7 +87,7 @@ $rooming = $placeholders['roomingArr'];
         <p><strong>{{ $placeholders['hotel'] }}</strong></p>
     </div>
 
-    <div class="reservation-box">FINAL RESERVATION</div>
+    <div class="reservation-box">RESERVATION</div>
 
     <div class="section">
         <p><strong>Уважаемые коллеги,<br>Dear Sir/Madam,</strong></p>
@@ -128,7 +128,8 @@ $rooming = $placeholders['roomingArr'];
     <div class="footer">
         <p>Заранее спасибо и жду Ваших подтверждений<br>
             /Thanks in advance and looking forward to your written confirmation).</p>
-        <p>Оплату гарантируем.<br>We guarantee the payment.</p>
+        <p>Оплату гарантируем сог. договора №{{ $placeholders['contract_num'] }} от {{ $placeholders['contract_year'] }}<br>
+            We guarantee the payment as per agreement #{{ $placeholders['contract_num'] }} on {{ $placeholders['contract_year'] }}</p>
         <p>
             <b>С уважением, With best regards</b>
             <br>

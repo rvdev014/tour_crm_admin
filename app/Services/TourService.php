@@ -271,7 +271,7 @@ class TourService
         return ($transfersTableSequence?->next_id ?? 1);
     }
 
-    public static function getGroupNumber(TourType $tourType): string
+    public static function getGroupNumber(TourType $tourType, $startDate = null): string
     {
         $userName = auth()->user()->name;
         $firstLetter = substr($userName, 0, 1);
@@ -285,8 +285,8 @@ class TourService
         }
 
         $number = self::addHundred(self::tourNextId());
-
-        $currentYear = date('y');
+        
+        $currentYear = $startDate ? Carbon::parse($startDate)->format('y') : date('y');
         return "{$firstLetter}{$number}{$currentYear}{$lastLetter}";
     }
 

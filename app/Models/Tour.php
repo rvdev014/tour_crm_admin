@@ -101,8 +101,8 @@ class Tour extends Model
     {
         static::creating(function (Tour $tour) {
             // Always call TourService::getGroupNumber to ensure uniqueness
-            if (empty($tour->group_number)) {
-                $tour->group_number = static::generateUniqueGroupNumber($tour->type);
+            if (empty($tour->id)) {
+                $tour->group_number = static::generateUniqueGroupNumber($tour->type, $tour->start_date);
             } else {
                 // If group_number is manually set, still ensure it's unique
                 $tour->group_number = static::ensureUniqueGroupNumber($tour);
@@ -199,9 +199,16 @@ class Tour extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function passengers(): HasMany
+    public function passengers(): HasManyThrough
     {
-        return $this->hasMany(TourPassenger::class);
+        return $this->hasManyThrough(
+            TourPassenger::class,
+            TourGroup::class,
+            'tour_id',
+            'tour_group_id',
+            'id',
+            'id'
+        );
     }
 
     public function isCorporate(): bool
@@ -254,10 +261,10 @@ class Tour extends Model
      * Generate a unique group number using TourService
      * Keep calling TourService::getGroupNumber until we get a unique one
      */
-    protected static function generateUniqueGroupNumber(TourType $tourType): string
+    protected static function generateUniqueGroupNumber(TourType $tourType, $startDate): string
     {
         do {
-            $groupNumber = TourService::getGroupNumber($tourType);
+            $groupNumber = TourService::getGroupNumber($tourType, $startDate);
             $exists = static::where('group_number', $groupNumber)->exists();
         } while ($exists);
 
@@ -278,7 +285,7 @@ class Tour extends Model
         $exists = $query->exists();
 
         if ($exists) {
-            $groupNumber = TourService::getGroupNumber($tour->type);
+            $groupNumber = TourService::getGroupNumber($tour->type, $tour->start_date);
         }
 
         return $groupNumber;
