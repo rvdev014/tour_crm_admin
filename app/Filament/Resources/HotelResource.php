@@ -7,7 +7,6 @@ use App\Enums\RoomSeasonType;
 use App\Filament\Resources\HotelResource\Pages;
 use App\Filament\Resources\HotelResource\RelationManagers;
 use App\Models\Hotel;
-use App\Models\RealEstate;
 use App\Services\TourService;
 use App\Tables\Columns\PeriodsColumn;
 use Filament\Forms;

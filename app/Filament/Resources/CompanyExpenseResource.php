@@ -220,7 +220,7 @@ class CompanyExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('expense_date')
                     ->getStateUsing(function (TourDayExpense $record) {
                         $date = $record->tourDay->date ?? $record->date;
-                        return $date->format('d.m.Y');
+                        return $date?->format('d.m.Y');
                     })
                     ->searchable(),
 

@@ -69,7 +69,7 @@ class ListCompanyExpenses extends ListRecords
                                 ->heading('Expense Date')
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     $date = $record->tourDay->date ?? $record->date;
-                                    return $date->format('d.m.Y');
+                                    return $date?->format('d.m.Y');
                                 }),
                             Column::make('passengers')
                                 ->heading('Passengers FIO')
