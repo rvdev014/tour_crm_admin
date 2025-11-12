@@ -2,14 +2,17 @@
 
 namespace App\Filament\Resources\TransferResource\Pages;
 
+use Carbon\Carbon;
 use App\Enums\ExpenseStatus;
 use App\Enums\TourStatus;
+use Filament\Notifications\Notification;
 use App\Filament\Resources\TransferResource;
 use App\Models\Transfer;
 use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Validation\ValidationException;
 
 class EditTransfer extends EditRecord
 {
@@ -22,6 +25,18 @@ class EditTransfer extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $dateTime = $data['date_time'] ? Carbon::parse($data['date_time']) : null;
+        if (!$dateTime?->isPast() && $data['status'] == ExpenseStatus::Done->value) {
+            Notification::make()
+                ->title('Validation Failed')
+                ->body('Cannot set status to Done. DateTime is actual.')
+                ->danger()
+                ->persistent() // Optional: keep the notification visible
+                ->send();
+            
+            throw ValidationException::withMessages([]);
+        }
+        
         ExpenseService::convertExpensePrice($data, 'sell_price');
         ExpenseService::convertExpensePrice($data, 'buy_price');
 

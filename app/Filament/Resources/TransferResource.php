@@ -124,7 +124,20 @@ class TransferResource extends Resource
                         ->native(false)
                         ->searchable()
                         ->preload()
-                        ->options(ExpenseStatus::class)
+                        ->options(function($get, $record) {
+                            $options = [
+                                ExpenseStatus::New->value => ExpenseStatus::New->getLabel(),
+                                ExpenseStatus::Confirmed->value => ExpenseStatus::Confirmed->getLabel(),
+                                ExpenseStatus::Rejected->value => ExpenseStatus::Rejected->getLabel(),
+                            ];
+                            
+                            $dateTime = $get('date_time') ? Carbon::parse($get('date_time')) : null;
+                            if ($dateTime?->isPast()) {
+                                $options[ExpenseStatus::Done->value] = ExpenseStatus::Done->getLabel();
+                            }
+                            
+                            return $options;
+                        })
                         ->label('Status'),
 
                     Forms\Components\Select::make('transport_type')
@@ -403,7 +416,7 @@ HTML;
                         }
 
                         $drivers = Driver::query()->find($record->driver_ids);
-                        return $drivers->map(fn($driver) => $driver->name)->join(', ');
+                        return $drivers->map(fn($driver) => "$driver->name ($driver->phone)")->join(', ');
                     })
                     ->sortable(),
 

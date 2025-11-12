@@ -5,11 +5,16 @@ namespace App\Filament\Resources;
 use Filament\Tables;
 use App\Models\Hotel;
 use App\Enums\RateEnum;
+use App\Models\Company;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Enums\CurrencyEnum;
+use Filament\Forms\Components;
 use Filament\Resources\Resource;
 use App\Tables\Columns\PeriodsColumn;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Enums\FiltersLayout;
+use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\HotelSalesResource\Pages;
 
 class HotelSalesResource extends Resource
@@ -21,12 +26,12 @@ class HotelSalesResource extends Resource
     protected static ?int $navigationSort = 5;
     protected static ?string $navigationGroup = 'Manual';
     protected static ?string $recordTitleAttribute = 'name';
-
+    
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'email', 'inn', 'company_name', 'address', 'phones.phone_number'];
     }
-
+    
     public static function form(Form $form): Form
     {
         return $form
@@ -34,7 +39,7 @@ class HotelSalesResource extends Resource
             
             ]);
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table
@@ -42,17 +47,60 @@ class HotelSalesResource extends Resource
             ->defaultPaginationPageOption(30)
             ->defaultSort('id', 'desc')
             ->striped()
+            ->filters([
+                Tables\Filters\Filter::make('filters')
+                    ->columnSpanFull()
+                    ->form([
+                        Components\Grid::make(6)->schema([
+                            Components\Select::make('currency')
+                                ->label('Currency')
+                                ->native(false)
+                                ->formatStateUsing(fn() => CurrencyEnum::UZS->value)
+                                ->options(CurrencyEnum::class),
+                            Components\Select::make('company_id')
+                                ->label('Company')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(Company::query()->pluck('name', 'id')->toArray()),
+                        ])
+                    ])
+                    ->query(function(Builder $query, $data) {
+                        return $query;
+                    })
+                    ->indicateUsing(function(array $data): array {
+                        $indicators = [];
+                        if ($companyId = $data['company_id']) {
+                            $company = Company::query()->where('id', $companyId)->first();
+                            $indicators['company_id'] = "Company: $company->name";
+                        }
+                        return $indicators;
+                    })
+            ], layout: FiltersLayout::AboveContent)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-
+                
                 PeriodsColumn::make('room_prices')
                     ->label('Room prices')
-                    ->getStateUsing(fn($record, $livewire) => [
-                        'hotel' => $record,
-                        'isFirst' => $record->is($livewire->getTableRecords()->first()),
-                    ]),
-
+                    ->getStateUsing(function($record, $livewire) {
+                        $filters = $livewire->tableFilters;
+                        
+                        $group = null;
+                        if ($companyId = $filters['filters']['company_id'] ?? null) {
+                            /** @var Company $company */
+                            $company = Company::query()->where('id', $companyId)->first();
+                            $group = $company->group;
+                        }
+                        
+                        return [
+                            'hotel' => $record,
+                            'isFirst' => $record->is($livewire->getTableRecords()->first()),
+                            'group' => $group,
+                            'currency' => $filters['filters']['currency'],
+                        ];
+                    }),
+                
                 Tables\Columns\TextColumn::make('email')
                     ->url(fn($record) => $record->email ? "mailto:{$record->email}" : null, true)
                     ->color('info')
@@ -73,20 +121,16 @@ class HotelSalesResource extends Resource
                     ->getStateUsing(fn($record) => RateEnum::tryFrom($record->rate)?->getLabel())
                     ->sortable(),
             ])
-            ->filters([
-                //
-            ])
             ->recordUrl(null)
             //            ->recordAction(HotelPeriodsAction::class)
             ->actions([
-//                Tables\Actions\EditAction::make(),
+                //                Tables\Actions\EditAction::make(),
                 //                HotelPeriodsAction::make()->label('')->icon(''),
-            ], position: Tables\Enums\ActionsPosition::BeforeColumns)
-            /*->bulkActions([
+            ], position: Tables\Enums\ActionsPosition::BeforeColumns)/*->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ])*/;
+            ])*/ ;
     }
     
     public static function canEdit(Model $record): bool

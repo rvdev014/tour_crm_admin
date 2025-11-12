@@ -4,11 +4,12 @@ namespace App\Filament\Resources\HotelSalesResource\Pages;
 
 use Filament\Actions;
 use App\Models\Hotel;
-use App\Enums\ExpenseType;
+use App\Models\Company;
 use Illuminate\Support\Arr;
 use App\Enums\CurrencyEnum;
 use App\Services\TourService;
-use App\Models\TourDayExpense;
+use App\Enums\RoomPersonType;
+use App\Services\ExpenseService;
 use Filament\Resources\Pages\ListRecords;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -35,6 +36,18 @@ class ListHotels extends ListRecords
     {
         $filters = $this->table->getFiltersForm()->getState(); // Get current filters
         $filters = Arr::get($filters, 'filters', []);
+        
+        $currency = $filters['currency'] ?? CurrencyEnum::UZS->value;
+        $isUsd = $currency == CurrencyEnum::USD->value;
+        $currencySymbol = $isUsd ? CurrencyEnum::USD->getSymbol() : CurrencyEnum::UZS->getSymbol();
+        
+        $companyId = $filters['company_id'] ?? null;
+        $group = null;
+        if ($companyId) {
+            /** @var Company $company */
+            $company = Company::query()->where('id', $companyId)->first();
+            $group = $company->group;
+        }
         
         /** @var Collection<Hotel> $hotels */
         $hotels = Hotel::query()->get();
@@ -67,8 +80,12 @@ class ListHotels extends ListRecords
                 $row['email'] = $hotel->email;
                 $row['room_type'] = $roomType->roomType->name;
                 $row['season_type'] = $roomType->season_type->getLabel();
-                $row['price_uz'] = TourService::formatMoney($roomType->price) . ' ' . CurrencyEnum::UZS->getSymbol();
-                $row['price_foreign'] = TourService::formatMoney($roomType->price_foreign) . ' ' . CurrencyEnum::UZS->getSymbol();
+                
+                $price = $roomType->getPriceByGroup($group, RoomPersonType::Uzbek);
+                $priceForeign = $roomType->getPriceByGroup($group, RoomPersonType::Foreign);
+                
+                $row['price_uz'] = TourService::formatMoney(ExpenseService::getPrice($price, $isUsd)) . ' ' . $currencySymbol;
+                $row['price_foreign'] = TourService::formatMoney(ExpenseService::getPrice($priceForeign, $isUsd)) . ' ' . $currencySymbol;
                 
                 $sheet->fromArray($row, null, "A{$rowIndex}");
                 $rowIndex++;

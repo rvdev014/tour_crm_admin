@@ -363,6 +363,16 @@ class ExpenseService
 
         return $result ?: 0;
     }
+    
+    public static function getPrice($price, bool $isUsd = true): float
+    {
+        if ($isUsd) {
+            $currencyUsd = ExpenseService::getUsdToUzsCurrency();
+            return round($price / $currencyUsd?->rate, 2);
+        }
+        
+        return $price;
+    }
 
     public static function getUsdToUzsCurrency(): ?Currency
     {

@@ -99,6 +99,36 @@ class WebTourRequestResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->filters([
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('User')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload(),
+                
+                Tables\Filters\SelectFilter::make('web_tour_id')
+                    ->label('Web Tour')
+                    ->relationship('webTour', 'name_en')
+                    ->searchable()
+                    ->preload(),
+                
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        WebTourStatus::New->value => WebTourStatus::New->getLabel(),
+                        WebTourStatus::Waiting->value => WebTourStatus::Waiting->getLabel(),
+                        WebTourStatus::Done->value => WebTourStatus::Done->getLabel(),
+                        WebTourStatus::Rejected->value => WebTourStatus::Rejected->getLabel(),
+                    ]),
+                
+                Tables\Filters\SelectFilter::make('tour_type')
+                    ->label('Tour Type')
+                    ->options([
+                        WebTourType::Small->value => WebTourType::Small->getLabel(),
+                        WebTourType::Private->value => WebTourType::Private->getLabel(),
+                        WebTourType::Custom->value => WebTourType::Custom->getLabel(),
+                    ]),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -106,6 +136,12 @@ class WebTourRequestResource extends Resource
                     
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('User')
+                    ->getStateUsing(function (WebTourRequest $record) {
+                        $link = "/admin/users/$record->user_id/edit";
+                        return "<a href='{$link}' target='_blank'>{$record->user->name} ({$record->user->email})</a>";
+                    })
+                    ->color('info')
+                    ->html()
                     ->searchable()
                     ->sortable(),
                     
@@ -161,36 +197,7 @@ class WebTourRequestResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('user_id')
-                    ->label('User')
-                    ->relationship('user', 'name')
-                    ->searchable()
-                    ->preload(),
-                    
-                Tables\Filters\SelectFilter::make('web_tour_id')
-                    ->label('Web Tour')
-                    ->relationship('webTour', 'name_en')
-                    ->searchable()
-                    ->preload(),
-                    
-                Tables\Filters\SelectFilter::make('status')
-                    ->label('Status')
-                    ->options([
-                        WebTourStatus::New->value => WebTourStatus::New->getLabel(),
-                        WebTourStatus::Waiting->value => WebTourStatus::Waiting->getLabel(),
-                        WebTourStatus::Done->value => WebTourStatus::Done->getLabel(),
-                        WebTourStatus::Rejected->value => WebTourStatus::Rejected->getLabel(),
-                    ]),
-                    
-                Tables\Filters\SelectFilter::make('tour_type')
-                    ->label('Tour Type')
-                    ->options([
-                        WebTourType::Small->value => WebTourType::Small->getLabel(),
-                        WebTourType::Private->value => WebTourType::Private->getLabel(),
-                        WebTourType::Custom->value => WebTourType::Custom->getLabel(),
-                    ]),
-            ])
+            ->recordUrl(null)
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

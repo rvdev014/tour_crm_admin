@@ -1,10 +1,12 @@
 @php
-    use App\Models\Hotel;use App\Services\ExpenseService;
+    use App\Models\Hotel;use App\Enums\CurrencyEnum;use App\Enums\RoomPersonType;use App\Services\ExpenseService;
 
     /** @var Hotel $hotel */
     $state = $getState();
     $hotel = $state['hotel'];
     $isFirst = $state['isFirst'];
+    $group = $state['group'] ?? null;
+    $currency = $state['currency'];
     $hotel->loadMissing('roomTypes');
 
 //    if ($hotel->roomTypes->isEmpty()) {
@@ -12,8 +14,8 @@
 //    }
 
     $roomTypes = $hotel->roomTypes?->take(2) ?? [];
-    $mainCurrencySymbol = ExpenseService::getMainCurrency()?->from?->getSymbol();
-
+    $isUsd = $currency == CurrencyEnum::USD->value;
+    $currencySymbol = $isUsd ? CurrencyEnum::USD->getSymbol() : CurrencyEnum::UZS->getSymbol();
 @endphp
 
 <div class="custom-table-wrapper">
@@ -37,8 +39,8 @@
                     <div class="flex-td">
                         @if ($roomType?->season_type)
                             <x-filament::badge
-                                :color="$roomType?->season_type->getColor()"
-                                size="sm"
+                                    :color="$roomType?->season_type->getColor()"
+                                    size="sm"
                             >
                                 {{ $roomType?->season_type->getLabel() }}
                             </x-filament::badge>
@@ -46,8 +48,13 @@
                     </div>
                 </td>
 
-                <td style="min-width: 150px">{{ number_format($roomType->price, 0, '.', ' ') }} {{ $mainCurrencySymbol }}</td>
-                <td style="min-width: 150px">{{ number_format($roomType->price_foreign, 0, '.', ' ') }} {{ $mainCurrencySymbol }}</td>
+                @php
+                    $price = $roomType->getPriceByGroup($group, RoomPersonType::Uzbek);
+                    $priceForeign = $roomType->getPriceByGroup($group, RoomPersonType::Foreign);
+                @endphp
+
+                <td style="min-width: 150px">{{ number_format(ExpenseService::getPrice($price, $isUsd), 0, '.', ' ') }} {{ $currencySymbol }}</td>
+                <td style="min-width: 150px">{{ number_format(ExpenseService::getPrice($priceForeign, $isUsd), 0, '.', ' ') }} {{ $currencySymbol }}</td>
 
             </tr>
         @endforeach

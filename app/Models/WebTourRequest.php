@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $travellers_count
  * @property TourType|null $tour_type
  * @property WebTourStatus $status
+ *
+ * @property User $user
  */
 class WebTourRequest extends Model
 {
