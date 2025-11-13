@@ -3,13 +3,20 @@
 namespace App\Filament\Resources;
 
 use Filament\Tables;
+use App\Models\Tour;
+use App\Models\City;
+use App\Models\User;
 use App\Models\Hotel;
 use App\Enums\RateEnum;
 use App\Models\Company;
+use App\Models\Country;
+use App\Enums\TourType;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Enums\CurrencyEnum;
+use App\Services\TourService;
 use Filament\Forms\Components;
+use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
 use App\Tables\Columns\PeriodsColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +29,7 @@ class HotelSalesResource extends Resource
     protected static ?string $model = Hotel::class;
     protected static ?string $label = 'Hotel Sales';
     
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     protected static ?int $navigationSort = 5;
     protected static ?string $navigationGroup = 'Manual';
     protected static ?string $recordTitleAttribute = 'name';
@@ -63,16 +70,37 @@ class HotelSalesResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->options(Company::query()->pluck('name', 'id')->toArray()),
+                            Components\Select::make('country_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(Country::all()->pluck('name', 'id')->toArray()),
+                            Components\Select::make('city_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(fn($get) => TourService::getCities($get('country_id'))),
                         ])
                     ])
                     ->query(function(Builder $query, $data) {
-                        return $query;
+                        return $query
+                            ->when(
+                                $data['country_id'],
+                                fn($query, $countryId) => $query->where('country_id', $countryId)
+                            )
+                            ->when($data['city_id'], fn($query, $cityId) => $query->where('city_id', $cityId));
                     })
                     ->indicateUsing(function(array $data): array {
                         $indicators = [];
                         if ($companyId = $data['company_id']) {
                             $company = Company::query()->where('id', $companyId)->first();
                             $indicators['company_id'] = "Company: $company->name";
+                        }
+                        if ($data['country_id'] ?? null) {
+                            $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
+                        }
+                        if ($data['city_id'] ?? null) {
+                            $indicators['city_id'] = 'City: ' . City::find($data['city_id'])->name;
                         }
                         return $indicators;
                     })

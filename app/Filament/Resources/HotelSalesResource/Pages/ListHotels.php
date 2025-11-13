@@ -37,6 +37,8 @@ class ListHotels extends ListRecords
         $filters = $this->table->getFiltersForm()->getState(); // Get current filters
         $filters = Arr::get($filters, 'filters', []);
         
+        $countryId = $filters['country_id'] ?? null;
+        $cityId = $filters['city_id'] ?? null;
         $currency = $filters['currency'] ?? CurrencyEnum::UZS->value;
         $isUsd = $currency == CurrencyEnum::USD->value;
         $currencySymbol = $isUsd ? CurrencyEnum::USD->getSymbol() : CurrencyEnum::UZS->getSymbol();
@@ -49,8 +51,16 @@ class ListHotels extends ListRecords
             $group = $company->group;
         }
         
+        $hotelsQuery = Hotel::query();
+        if ($countryId) {
+            $hotelsQuery->where('country_id', $countryId);
+        }
+        if ($cityId) {
+            $hotelsQuery->where('city_id', $cityId);
+        }
+        
         /** @var Collection<Hotel> $hotels */
-        $hotels = Hotel::query()->get();
+        $hotels = $hotelsQuery->get();
         
         $spreadsheet = new Spreadsheet();
         
