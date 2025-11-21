@@ -26,7 +26,13 @@ class WebTourRequestResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
     protected static ?string $navigationGroup = 'Website Management';
     protected static ?int $navigationSort = 3;
-
+    
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::$model::where('status', WebTourStatus::New->value)->count();
+        return $count > 0 ? (string)$count : null;
+    }
+    
     public static function canCreate(): bool
     {
         return false;
@@ -173,17 +179,16 @@ class WebTourRequestResource extends Resource
                     ->label('Start Date')
                     ->date()
                     ->sortable(),
-                    
-                Tables\Columns\BadgeColumn::make('status')
+                
+                Tables\Columns\TextColumn::make('status')
                     ->label('Status')
-                    ->formatStateUsing(fn (WebTourStatus $state): string => $state->getLabel())
-                    ->colors([
-                        'gray' => WebTourStatus::New,
-                        'warning' => WebTourStatus::Waiting,
-                        'success' => WebTourStatus::Done,
-                        'danger' => WebTourStatus::Rejected,
-                    ])
+                    ->badge()
                     ->sortable(),
+                
+                Tables\Columns\TextColumn::make('status_updated_by')
+                    ->formatStateUsing(function($record) {
+                        return $record->statusUpdatedBy?->name;
+                    }),
                     
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')

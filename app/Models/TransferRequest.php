@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $id
  * @property TransferRequestStatus $status
+ * @property int $status_updated_by
  * @property int|null $user_id
  * @property int $from
  * @property int $to
@@ -39,6 +40,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property TransferRequest|null $parent
  * @property Collection<TransferRequest> $children
  * @property User|null $user
+ * @property User|null $statusUpdatedBy
  * @property TransportClass|null $transportClass
  * @property City $fromCity
  * @property City $toCity
@@ -71,6 +73,11 @@ class TransferRequest extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+    
+    public function statusUpdatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'status_updated_by');
     }
 
     public function fromCity(): BelongsTo

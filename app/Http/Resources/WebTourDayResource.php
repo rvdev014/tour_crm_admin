@@ -23,6 +23,7 @@ class WebTourDayResource extends JsonResource
             'web_tour_id' => $this->web_tour_id,
             'day_number' => $this->day_number,
             'place_name' => $this->place_name,
+            'description' => $this->description,
             'date' => $this->date,
             'photo' => $this->photo ? asset('storage/' . $this->photo) : null,
             'created_at' => $this->created_at,

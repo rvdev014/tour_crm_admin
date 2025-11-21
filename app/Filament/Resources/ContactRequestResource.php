@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\WebTourStatus;
 use App\Filament\Resources\ContactRequestResource\Pages;
 use App\Filament\Resources\ContactRequestResource\RelationManagers;
 use App\Models\ContactRequest;
@@ -21,7 +22,12 @@ class ContactRequestResource extends Resource
     protected static ?string $navigationGroup = 'Website Management';
     protected static ?int $navigationSort = 2;
 
-
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::$model::where('status', WebTourStatus::New->value)->count();
+        return $count > 0 ? (string)$count : null;
+    }
+    
     public static function canCreate(): bool
     {
         return false;
@@ -68,6 +74,10 @@ class ContactRequestResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status_updated_by')
+                    ->formatStateUsing(function($record) {
+                        return $record->statusUpdatedBy?->name;
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

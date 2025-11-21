@@ -70,7 +70,7 @@ class ListHotels extends ListRecords
         
         $headers = [
             'name' => 'Name',
-            'email' => 'Email',
+//            'email' => 'Email',
             'room_type' => 'Room Type',
             'season_type' => 'Season Type',
             'price_uz' => 'Price Uz',
@@ -87,7 +87,7 @@ class ListHotels extends ListRecords
             foreach ($hotel->roomTypes as $roomType) {
                 $row = [];
                 $row['name'] = $hotel->name;
-                $row['email'] = $hotel->email;
+//                $row['email'] = $hotel->email;
                 $row['room_type'] = $roomType->roomType->name;
                 $row['season_type'] = $roomType->season_type->getLabel();
                 

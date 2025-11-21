@@ -29,10 +29,13 @@ class HotelSalesResource extends Resource
     protected static ?string $model = Hotel::class;
     protected static ?string $label = 'Hotel Sales';
     
+//    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+//    protected static ?int $navigationSort = 5;
+//    protected static ?string $navigationGroup = 'Manual';
+    
+    protected static ?string $recordTitleAttribute = 'name';
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     protected static ?int $navigationSort = 5;
-    protected static ?string $navigationGroup = 'Manual';
-    protected static ?string $recordTitleAttribute = 'name';
     
     public static function getGloballySearchableAttributes(): array
     {

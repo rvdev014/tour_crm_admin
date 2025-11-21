@@ -80,6 +80,11 @@ class WebTourResource extends Resource
                                 ->multiple()
                                 ->preload(),
                         ]),
+                        Forms\Components\Grid::make()->schema([
+                            Forms\Components\Textarea::make('description_ru')
+                                ->required(),
+                            Forms\Components\Textarea::make('description_en'),
+                        ]),
                     ]),
 
                 Forms\Components\Select::make('packagesIncluded')
@@ -191,9 +196,16 @@ class WebTourResource extends Resource
                     ->formatStateUsing(fn() => 'View prices')
                     ->html()
                     ->action(PricesAction::make()),
+                
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable(),
+                
+                Tables\Columns\TextColumn::make('status_updated_by')
+                    ->formatStateUsing(function($record) {
+                        return $record->statusUpdatedBy?->name;
+                    }),
+                
                 Tables\Columns\ImageColumn::make('photo')
                     ->height('60px'),
                 Tables\Columns\ToggleColumn::make('is_popular')

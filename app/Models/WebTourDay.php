@@ -19,6 +19,9 @@ use Illuminate\Support\Carbon;
  * @property string $place_name
  * @property string $place_name_ru
  * @property string|null $place_name_en
+ * @property string $description
+ * @property string $description_ru
+ * @property string|null $description_en
  * @property string|null $photo
  * @property string|null $date
  * @property Carbon|null $created_at
@@ -33,11 +36,6 @@ class WebTourDay extends Model
 
     protected $guarded = ['id'];
 
-    public function getPlaceNameAttribute(): string
-    {
-        return $this->getLocaleValue('place_name');
-    }
-
     public function webTour(): BelongsTo
     {
         return $this->belongsTo(WebTour::class);
@@ -46,5 +44,15 @@ class WebTourDay extends Model
     public function facilities(): BelongsToMany
     {
         return $this->belongsToMany(Facility::class, 'web_tour_day_facilities');
+    }
+    
+    public function getPlaceNameAttribute(): string
+    {
+        return $this->getLocaleValue('place_name');
+    }
+    
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->getLocaleValue('description');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\TourType;
 use App\Enums\WebTourStatus;
 use App\Enums\WebTourType;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,8 +21,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $travellers_count
  * @property TourType|null $tour_type
  * @property WebTourStatus $status
+ * @property int|null $status_updated_by
  *
+ * @property WebTour $webTour
  * @property User $user
+ * @property User $statusUpdatedBy
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class WebTourRequest extends Model
 {
@@ -37,6 +43,7 @@ class WebTourRequest extends Model
         'tour_type',
         'start_date',
         'status',
+        'status_updated_by',
     ];
 
     protected $casts = [
@@ -53,5 +60,10 @@ class WebTourRequest extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+    
+    public function statusUpdatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'status_updated_by');
     }
 }

@@ -164,6 +164,10 @@ class TourTpsResource extends Resource
                     Components\TextInput::make('package_name'),
                     Components\Textarea::make('comment'),
                 ]),
+                Components\Grid::make(4)->schema([
+                    Components\TextInput::make('fit')
+                        ->label('FIT'),
+                ]),
             ]),
             
             Components\Fieldset::make('Guide info')->schema([
@@ -338,7 +342,7 @@ class TourTpsResource extends Resource
                         }
                         
                         return $query
-                            ->when($data['year'], function ($query, $year) {
+                            ->when($data['year'], function($query, $year) {
                                 return $query->where(function($q) use ($year) {
                                     $q->whereYear('start_date', $year)
                                         ->orWhereYear('end_date', $year);
@@ -417,6 +421,7 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('company.name')
                     ->numeric()
                     ->sortable(),
+                Columns\TextColumn::make('fit'),
                 Columns\TextColumn::make('start_date')
                     ->date()
                     ->sortable(),

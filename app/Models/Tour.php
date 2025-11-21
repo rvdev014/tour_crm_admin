@@ -63,6 +63,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property float $price_result
  * @property float $guide_price_result
  * @property float $transport_price_result
+ * @property string $fit
  *
  * @property Company $company
  * @property User $createdBy

@@ -26,7 +26,8 @@ class HotelController extends Controller
                         ->whereRaw('LOWER(name) LIKE ?', ["%$search%"])
                         ->orWhereRaw('LOWER(email) LIKE ?', ["%$search%"])
                         ->orWhereRaw('LOWER(company_name) LIKE ?', ["%$search%"])
-                        ->orWhereRaw('LOWER(description) LIKE ?', ["%$search%"])
+                        ->orWhereRaw('LOWER(description_en) LIKE ?', ["%$search%"])
+                        ->orWhereRaw('LOWER(description_ru) LIKE ?', ["%$search%"])
                         ->orWhereRaw('LOWER(phone) LIKE ?', ["%$search%"])
                         ->orWhereRaw('LOWER(address) LIKE ?', ["%$search%"]);
                 });

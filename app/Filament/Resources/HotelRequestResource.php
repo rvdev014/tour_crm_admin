@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\WebTourStatus;
 use App\Filament\Resources\HotelRequestResource\Pages;
 use App\Filament\Resources\HotelRequestResource\RelationManagers;
 use App\Models\HotelRequest;
@@ -23,7 +24,13 @@ class HotelRequestResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?string $navigationGroup = 'Website Management';
     protected static ?int $navigationSort = 4;
-
+    
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::$model::where('status', WebTourStatus::New->value)->count();
+        return $count > 0 ? (string)$count : null;
+    }
+    
     public static function canCreate(): bool
     {
         return false;
@@ -83,7 +90,7 @@ class HotelRequestResource extends Resource
                     ->label('Hotel')
                     ->searchable()
                     ->sortable(),
-                    
+                
                 Tables\Columns\TextColumn::make('roomType.name')
                     ->label('Room Type')
                     ->searchable()
@@ -113,7 +120,16 @@ class HotelRequestResource extends Resource
                         $state = $column->getState();
                         return strlen($state) > 50 ? $state : null;
                     }),
-                    
+                
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->sortable(),
+                
+                Tables\Columns\TextColumn::make('status_updated_by')
+                    ->formatStateUsing(function($record) {
+                        return $record->statusUpdatedBy?->name;
+                    }),
+                
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()

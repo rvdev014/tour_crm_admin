@@ -287,7 +287,7 @@ class TourService
         $number = self::addHundred(self::tourNextId());
         
         $currentYear = $startDate ? Carbon::parse($startDate)->format('y') : date('y');
-        return "{$firstLetter}{$number}{$currentYear}{$lastLetter}";
+        return "{$firstLetter}{$number}-{$currentYear}{$lastLetter}";
     }
 
     public static function addHundred(int $number): string
