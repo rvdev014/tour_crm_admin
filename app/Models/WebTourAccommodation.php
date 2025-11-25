@@ -41,7 +41,7 @@ class WebTourAccommodation extends Model
         return $this->getLocaleValue('header');
     }
 
-    public function getDescriptionAttribute(): string
+    public function getDescriptionAttribute(): ?string
     {
         return $this->getLocaleValue('description');
     }

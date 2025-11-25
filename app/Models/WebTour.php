@@ -65,7 +65,7 @@ class WebTour extends Model
         return $this->getLocaleValue('name');
     }
 
-    public function getDescriptionAttribute(): string
+    public function getDescriptionAttribute(): ?string
     {
         return $this->getLocaleValue('description');
     }
