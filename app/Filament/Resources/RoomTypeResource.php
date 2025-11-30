@@ -38,6 +38,11 @@ class RoomTypeResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
+                        Forms\Components\Select::make('hotels')
+                            ->multiple()
+                            ->relationship('hotels', 'name')
+                            ->preload()
+                            ->columnSpanFull(),
                         Forms\Components\FileUpload::make('picture')
                             ->label('Picture')
                             ->image()
@@ -80,6 +85,11 @@ class RoomTypeResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
+                        Forms\Components\Select::make('hotels')
+                            ->multiple()
+                            ->relationship('hotels', 'name')
+                            ->preload()
+                            ->columnSpanFull(),
                         Forms\Components\FileUpload::make('picture')
                             ->label('Picture')
                             ->image()

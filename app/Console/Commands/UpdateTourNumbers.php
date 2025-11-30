@@ -28,7 +28,7 @@ class UpdateTourNumbers extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         /** @var Collection<Tour> $tours */
         $tours = Tour::query()->get();

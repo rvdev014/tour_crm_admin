@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -20,6 +21,11 @@ class RoomType extends Model
     public $timestamps = false;
 
     protected $fillable = ['name', 'picture', 'description'];
+
+    public function hotels(): BelongsToMany
+    {
+        return $this->belongsToMany(Hotel::class, 'hotel_room_type');
+    }
 
     public function hotelRoomTypes(): HasMany
     {
@@ -40,7 +46,8 @@ class RoomType extends Model
     {
         return !$this->hotelRoomTypes()->exists() 
             && !$this->tourRoomTypes()->exists() 
-            && !$this->tourDayExpenseRoomTypes()->exists();
+            && !$this->tourDayExpenseRoomTypes()->exists()
+            && !$this->hotels()->exists();
     }
 
     public function getDeleteErrorMessage(): string
@@ -60,6 +67,11 @@ class RoomType extends Model
         if ($this->tourDayExpenseRoomTypes()->exists()) {
             $count = $this->tourDayExpenseRoomTypes()->count();
             $relations[] = "{$count} tour day expense room type" . ($count > 1 ? 's' : '');
+        }
+
+        if ($this->hotels()->exists()) {
+            $count = $this->hotels()->count();
+            $relations[] = "{$count} hotel" . ($count > 1 ? 's' : '');
         }
         
         if (empty($relations)) {

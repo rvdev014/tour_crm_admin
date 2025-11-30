@@ -271,23 +271,45 @@ class TourService
         return ($transfersTableSequence?->next_id ?? 1);
     }
 
+//    public static function getGroupNumber(TourType $tourType, $startDate = null): string
+//    {
+//        $userName = auth()->user()->name;
+//        $firstLetter = substr($userName, 0, 1);
+//        //        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
+//
+//        if ($tourType == TourType::TPS) {
+//            //            $number = self::threeDigit(self::tourNextId());
+//            $lastLetter = 'T';
+//        } else {
+//            $lastLetter = 'C';
+//        }
+//
+//        $number = self::addHundred(self::tourNextId());
+//
+//        $currentYear = $startDate ? Carbon::parse($startDate)->format('y') : date('y');
+//        return "{$firstLetter}{$number}-{$currentYear}{$lastLetter}";
+//    }
+    
     public static function getGroupNumber(TourType $tourType, $startDate = null): string
     {
         $userName = auth()->user()->name;
-        $firstLetter = substr($userName, 0, 1);
-        //        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
-
+        $firstLetter = strtoupper(substr($userName, 0, 1));
+        
+        $date = $startDate ? Carbon::parse($startDate) : now();
+        $year = $date->year;
+        $shortYear = $date->format('y');
+        
+        $existingToursCount = Tour::query()->whereYear('start_date', $year)->count();
+        
+        $number = 101 + $existingToursCount;
+        
         if ($tourType == TourType::TPS) {
-            //            $number = self::threeDigit(self::tourNextId());
             $lastLetter = 'T';
         } else {
             $lastLetter = 'C';
         }
-
-        $number = self::addHundred(self::tourNextId());
         
-        $currentYear = $startDate ? Carbon::parse($startDate)->format('y') : date('y');
-        return "{$firstLetter}{$number}-{$currentYear}{$lastLetter}";
+        return "{$firstLetter}{$number}-{$shortYear}{$lastLetter}";
     }
 
     public static function addHundred(int $number): string

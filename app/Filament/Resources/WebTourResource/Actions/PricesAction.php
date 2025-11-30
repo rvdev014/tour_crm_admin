@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\TourResource\Actions;
+namespace App\Filament\Resources\WebTourResource\Actions;
 
 use Closure;
 use Filament\Actions\StaticAction;
