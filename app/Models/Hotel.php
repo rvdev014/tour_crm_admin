@@ -92,11 +92,6 @@ class Hotel extends Model
         ");
     }
 
-    public function roomTypesPivot(): BelongsToMany
-    {
-        return $this->belongsToMany(RoomType::class, 'hotel_room_type');
-    }
-
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);

@@ -24,7 +24,7 @@ class RoomTypeResource extends Resource
     {
         return ['name'];
     }
-
+    
     public static function form(Form $form): Form
     {
         return $form
@@ -50,7 +50,7 @@ class RoomTypeResource extends Resource
                     ->columnSpanFull(),
             ]);
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table
@@ -84,14 +84,14 @@ class RoomTypeResource extends Resource
                 ]),
             ]);
     }
-
+    
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-
+    
     public static function getPages(): array
     {
         return [
