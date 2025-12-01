@@ -1,0 +1,191 @@
+@php
+    use App\Enums\GuideType;use App\Models\Tour;
+    use App\Enums\ExpenseType;
+    use App\Enums\ExpenseStatus;
+    use App\Models\TourDayExpense;use App\Models\Transfer;
+
+    /** @var Tour $record */
+    $record->loadMissing('days.expenses');
+@endphp
+
+<div class="custom-table-wrapper">
+    <table class="custom-table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Cities</th>
+            <th>Hotel</th>
+            <th>Guide</th>
+            <th>Flight</th>
+            <th>Train</th>
+            <th>Transfer</th>
+            <th>Lunch</th>
+            <th>Dinner</th>
+            <th>Extra</th>
+        </tr>
+        </thead>
+        @foreach($record->days as $day)
+
+            @php
+                $hotel = $day->getExpense(ExpenseType::Hotel);
+
+                if ($record->guide_type == GuideType::Escort) {
+                    $guideName = $record->guide_name;
+                    $guideStatus = ExpenseStatus::Confirmed;
+                } else {
+                    $expense = $day->getExpense(ExpenseType::Guide);
+                    // TODO: Guide
+                    $guideName = $expense?->guides->map(fn($guide) => $guide->name)->join(', ');
+                    $guideStatus = $expense?->status;
+                }
+
+                $flightExpense = $day->getExpense(ExpenseType::Flight);
+                $train = $day->getExpense(ExpenseType::Train);
+
+                $transport = $day->getExpense(ExpenseType::Transport);
+
+                $transfer = null;
+                $driverNames = [];
+                if ($transport) {
+                    /** @var Transfer $transfer */
+                    $transfer = Transfer::query()->where('tour_day_expense_id', $transport?->id)->first();
+
+                    // Get driver names if driver_ids exist
+                    if ($transfer && $transfer->driver_ids) {
+                        $driverNames = \App\Models\Driver::whereIn('id', $transfer->driver_ids)->pluck('name')->toArray();
+                    }
+                }
+
+                $lunch = $day->getExpense(ExpenseType::Lunch);
+                $dinner = $day->getExpense(ExpenseType::Dinner);
+                $extra = $day->getExpense(ExpenseType::Extra);
+            @endphp
+
+            <tr>
+                <td>{{ $day->date->format('d.m.Y') }}</td>
+
+                <td>{{ $day->city->name }}</td>
+
+                <td>
+                    <div class="flex-td">
+                        <p>{{ $hotel?->hotel?->name  }}</p>
+                        @if ($hotel?->status)
+                            <x-filament::badge
+                                :color="$hotel->status->getColor()"
+                                size="sm"
+                            >
+                                {{ $hotel->status->getLabel() }}
+                            </x-filament::badge>
+                        @endif
+                    </div>
+                </td>
+
+                <td>
+                    <div class="flex-td">
+                        <p>{{ $guideName  }}</p>
+                        @if ($guideStatus)
+                            <x-filament::badge
+                                :color="$guideStatus->getColor()"
+                                size="sm"
+                            >
+                                {{ $guideStatus->getLabel() }}
+                            </x-filament::badge>
+                        @endif
+                    </div>
+                </td>
+
+                <td>
+                    <p>{{ $flightExpense?->plane_route }}</p>
+                    <div class="flex-td" style="margin-top: 5px; flex-direction: row; justify-content: center">
+                        <p style="margin-bottom: 0;">{{ $flightExpense?->departure_time }}</p>&nbsp;&nbsp;
+                        @if ($flightExpense?->status)
+                            <x-filament::badge
+                                :color="$flightExpense->status->getColor()"
+                                size="md"
+                            >
+                                {{ $flightExpense->status->getLabel() }}
+                            </x-filament::badge>
+                        @endif
+                    </div>
+                </td>
+
+                <td>
+                    <p>{{ $train?->train?->name }}</p>
+                    <div class="flex-td" style="margin-top: 5px; flex-direction: row; justify-content: center">
+                        <p style="margin-bottom: 0;">{{ $train?->departure_time }}</p>&nbsp;&nbsp;
+                        @if ($train?->status)
+                            <x-filament::badge
+                                :color="$train?->status->getColor()"
+                                size="md"
+                            >
+                                {{ $train?->status->getLabel() }}
+                            </x-filament::badge>
+                        @endif
+                    </div>
+                </td>
+
+                <td>
+                    <div class="flex-td">
+                        @if ($transfer)
+                            <a target="_blank"
+                               href="/admin/transfers/{{ $transfer->id }}/edit">{{ $transfer->number }}</a>
+                            @if (!empty($driverNames))
+                                <p>{{ implode(', ', $driverNames) }}</p>
+                            @endif
+                            @if ($transfer->nameplate)
+                                <p>{{ $transfer->nameplate }}</p>
+                            @endif
+                        @endif
+                    </div>
+                </td>
+
+                <td>
+                    <div class="flex-td">
+                        <p>{{ $lunch?->restaurant?->name  }}</p>
+                        @if ($lunch?->status)
+                            <x-filament::badge
+                                :color="$lunch->status->getColor()"
+                                size="sm"
+                            >
+                                {{ $lunch->status->getLabel() }}
+                            </x-filament::badge>
+                        @endif
+                    </div>
+                </td>
+
+                <td>
+                    <div class="flex-td">
+                        <p>{{ $dinner?->restaurant?->name  }}</p>
+                        @if ($dinner?->status)
+                            <x-filament::badge
+                                :color="$dinner->status->getColor()"
+                                size="sm"
+                            >
+                                {{ $dinner->status->getLabel() }}
+                            </x-filament::badge>
+                        @endif
+                    </div>
+                </td>
+
+                <td>
+                    <div class="flex-td">
+                        <p>{{ $extra?->other_name }}</p>
+                        @if ($extra?->status)
+                            <x-filament::badge
+                                :color="$extra->status->getColor()"
+                                size="sm"
+                            >
+                                {{ $extra->status->getLabel() }}
+                            </x-filament::badge>
+                        @endif
+                    </div>
+                </td>
+
+            </tr>
+        @endforeach
+    </table>
+</div>
+
+
+
+
