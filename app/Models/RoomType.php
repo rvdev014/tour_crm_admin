@@ -24,7 +24,7 @@ class RoomType extends Model
 
     public function hotels(): BelongsToMany
     {
-        return $this->belongsToMany(Hotel::class, 'hotel_room_type');
+        return $this->belongsToMany(Hotel::class, 'hotel_room_types');
     }
 
     public function hotelRoomTypes(): HasMany

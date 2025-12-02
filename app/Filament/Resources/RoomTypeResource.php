@@ -2,16 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\RoomType;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
 use App\Filament\Resources\RoomTypeResource\Pages;
 use App\Filament\Resources\RoomTypeResource\RelationManagers;
-use App\Models\RoomType;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RoomTypeResource extends Resource
 {
@@ -36,7 +34,10 @@ class RoomTypeResource extends Resource
                     ->multiple()
                     ->relationship('hotels', 'name')
                     ->preload()
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->saveRelationshipsUsing(function (RoomType $record, $state) {
+                        $record->hotels()->syncWithPivotValues($state, ['price' => 0]);
+                    }),
                 Forms\Components\FileUpload::make('picture')
                     ->label('Picture')
                     ->image()

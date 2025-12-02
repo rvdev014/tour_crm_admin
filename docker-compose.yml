@@ -34,7 +34,7 @@ services:
       - ./_docker/data/postgres:/var/lib/postgresql/data
   #            - postgres:/var/lib/postgresql/data
     ports:
-      - "55432:5432"
+      - "${DB_EXPOSE_PORT:-5432}:5432"
 
 #  pgadmin:
 #    image: dpage/pgadmin4:latest
