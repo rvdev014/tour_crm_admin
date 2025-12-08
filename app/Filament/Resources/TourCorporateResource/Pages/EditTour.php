@@ -21,8 +21,14 @@ class EditTour extends EditRecord
 
         $allExpenses = ExpenseService::getAllExpensesCorporateBasic($formState);
         $data['status'] = ExpenseService::getTourStatus($allExpenses);
-
-        $expensesTotal = ExpenseService::updateExpensesPricesCorporate($this->record, $data);
+        
+//        $expensesTotal = ExpenseService::updateExpensesPricesCorporate($this->record, $data);
+        
+        $expensesTotal = 0;
+        foreach ($allExpenses as $expense) {
+            $expensePrice = $expense['price_converted'] ?? $expense['price'] ?? 0;
+            $expensesTotal += $expensePrice;
+        }
         $data['expenses_total'] = $expensesTotal;
 
         return $data;

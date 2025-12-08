@@ -196,6 +196,7 @@ class TourCorporateResource extends Resource
                                         $set(
                                             'hotel_total_nights',
                                             TourService::calculateHotelNights(
+                                                $get('hotel_id'),
                                                 $get('date'),
                                                 $get('hotel_checkin_time'),
                                                 $get('hotel_checkout_date_time')
@@ -235,6 +236,7 @@ class TourCorporateResource extends Resource
                                             $set(
                                                 'hotel_total_nights',
                                                 TourService::calculateHotelNights(
+                                                    $get('hotel_id'),
                                                     $get('date'),
                                                     $get('hotel_checkin_time'),
                                                     $get('hotel_checkout_date_time')
@@ -248,6 +250,7 @@ class TourCorporateResource extends Resource
                                             $set(
                                                 'hotel_total_nights',
                                                 TourService::calculateHotelNights(
+                                                    $get('hotel_id'),
                                                     $get('date'),
                                                     $get('hotel_checkin_time'),
                                                     $get('hotel_checkout_date_time')

@@ -18,6 +18,7 @@ use App\Models\RoomType;
 use App\Models\Transfer;
 use App\Models\GroupItem;
 use App\Models\TourHotel;
+use App\Models\HotelRule;
 use App\Enums\ExpenseType;
 use App\Models\MuseumItem;
 use App\Models\Restaurant;
@@ -611,34 +612,107 @@ HTML;
 
         return $enumClass::from($value)->getLabel();
     }
-
-    public static function calculateHotelNights(?string $date, ?string $checkIn, ?string $checkOutDateTime): float
+    
+    public static function calculateHotelNights($hotelId, ?string $date, ?string $checkIn, ?string $checkOutDateTime): float
     {
-        if (!$date || !$checkIn || !$checkOutDateTime) {
+        /** @var Hotel $hotel */
+        $hotel = Hotel::query()->find($hotelId);
+        if (!$hotel || !$date || !$checkIn || !$checkOutDateTime) {
             return 0;
         }
-
-        $date = Carbon::parse($date);
-        $hotelCheckinDateTime = Carbon::parse($date->format('Y-m-d') . ' ' . $checkIn);
+        
+        $hotelCheckinDateTime = Carbon::parse($date);
+        $hotelCheckinDateTime->setTimeFromTimeString($checkIn);
         $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);
-
+        $additionalNights = 0.0;
+        
         if ($hotelCheckinDateTime->greaterThan($hotelCheckoutDateTime)) {
             return 0;
         }
-
+        
+        // 1. Расчет базового количества дней
         $diffInDays = $hotelCheckinDateTime->clone()->startOfDay()->diffInDays(
             $hotelCheckoutDateTime->clone()->startOfDay()
         );
-
-        if ($hotelCheckinDateTime->format('H:i') < '14:00') {
-            $diffInDays += 0.5;
+        
+        // 2. Применение правил раннего заезда (Early Check-in)
+        // Стандартное время заезда (Check-in) в большинстве отелей - 14:00
+        $standardCheckInTime = Carbon::createFromFormat('H:i', '14:00');
+        $checkInTime = Carbon::createFromFormat('H:i', $checkIn);
+        
+        if ($checkInTime->lessThan($standardCheckInTime)) {
+            $checkInRules = $hotel->rules->where('rule_type', 'early_check_in');
+            
+            foreach ($checkInRules as $rule) {
+                // Если время заезда попадает в интервал правила
+                if ($checkInTime->greaterThanOrEqualTo($rule->start_time) && $checkInTime->lessThan($rule->end_time)) {
+                    if ($rule->price_impact_type === 'percentage') {
+                        // 100% -> +1 день; 50% -> +0.5 дня
+                        $additionalNights += ($rule->impact_value / 100.0);
+                    }
+                    // Для раннего заезда другие типы impact_type, вероятно, не используются.
+                    break; // Найдено подходящее правило, выходим
+                }
+            }
         }
-        if ($hotelCheckoutDateTime->format('H:i') > '12:00') {
-            $diffInDays += 0.5;
+        
+        
+        // 3. Применение правил позднего выезда (Late Check-out)
+        // Стандартное время выезда (Check-out) в большинстве отелей - 12:00
+        $standardCheckOutTime = Carbon::createFromFormat('H:i', '12:00');
+        $checkOutTime = Carbon::createFromFormat('H:i', $hotelCheckoutDateTime->format('H:i'));
+        
+        if ($checkOutTime->greaterThan($standardCheckOutTime)) {
+            $checkOutRules = $hotel->rules->where('rule_type', HotelRule::TYPE_LATE_CHECK_OUT);
+            foreach ($checkOutRules as $rule) {
+                // Если время выезда попадает в интервал правила
+                if ($checkOutTime->greaterThan($rule->start_time) && $checkOutTime->lessThanOrEqualTo($rule->end_time)) {
+                    
+                    if ($rule->price_impact_type === HotelRule::IMPACT_HOURLY) {
+                        // Считаем часы превышения стандартного времени выезда (12:00)
+                        $excessHours = $checkOutTime->diffInHours($standardCheckOutTime);
+                        
+                        // Каждый час дает дополнительную долю дня (10% = 0.1 дня)
+                        $additionalNights += $excessHours * ($rule->impact_value / 100.0);
+                    }
+                    
+                    // Если бы было "поздний выезд до 18:00 - +0.5 дня", тут был бы 'fixed_nights'
+                    
+                    break; // Найдено подходящее правило, выходим
+                }
+            }
         }
-
-        return $diffInDays;
+        
+        return $diffInDays + $additionalNights;
     }
+    
+//    public static function calculateHotelNights(?string $date, ?string $checkIn, ?string $checkOutDateTime): float
+//    {
+//        if (!$date || !$checkIn || !$checkOutDateTime) {
+//            return 0;
+//        }
+//
+//        $date = Carbon::parse($date);
+//        $hotelCheckinDateTime = Carbon::parse($date->format('Y-m-d') . ' ' . $checkIn);
+//        $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);
+//
+//        if ($hotelCheckinDateTime->greaterThan($hotelCheckoutDateTime)) {
+//            return 0;
+//        }
+//
+//        $diffInDays = $hotelCheckinDateTime->clone()->startOfDay()->diffInDays(
+//            $hotelCheckoutDateTime->clone()->startOfDay()
+//        );
+//
+//        if ($hotelCheckinDateTime->format('H:i') < '14:00') {
+//            $diffInDays += 0.5;
+//        }
+//        if ($hotelCheckoutDateTime->format('H:i') > '12:00') {
+//            $diffInDays += 0.5;
+//        }
+//
+//        return $diffInDays;
+//    }
 
     public static function getTransferByExpense($expense)
     {

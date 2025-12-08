@@ -305,6 +305,7 @@ class HotelResource extends Resource
         return [
             RelationManagers\RoomTypesRelationManager::class,
             RelationManagers\ReviewsRelationManager::class,
+            RelationManagers\HotelRulesRelationManager::class,
         ];
     }
     
