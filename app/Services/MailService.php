@@ -72,7 +72,7 @@ class MailService
             /** @var Hotel $hotel */
             $hotel = Hotel::find($expense->hotel_id);
             if (!empty($hotel->email)) {
-                $hotelItem = $hotelsData->get($hotel->id);
+                $hotelItem = $hotelsData->get($expense->id);
                 if (!$hotelItem) {
                     continue; // Skip if hotel data is not available
                 }
@@ -85,13 +85,12 @@ class MailService
                 })->implode('/');
 
                 $subject = "$tour->group_number | $firstArrivalTime-$lastDepartureTime | $rooming";
-
                 $mailable = new HotelMail(
                     $subject,
                     $date,
                     $expense,
                     $tour->getTotalPax(),
-                    $hotelsData->get($hotel->id)
+                    $hotelItem
                 );
                 Mail::to($hotel->email)->send($mailable);
             }

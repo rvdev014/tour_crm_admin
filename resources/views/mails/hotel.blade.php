@@ -71,7 +71,7 @@ $rooming = $placeholders['roomingArr'];
 <div style="width: 100%; max-width: 900px; margin: 0 auto; padding: 10px;">
 
     <div class="header">
-        <img src="{{ asset('img/logo.jpg') }}" alt="Logo" height="50"><br>
+        <img src="{{ asset('img/logo.png') }}" alt="Logo" height="70"><br>
         <strong>EAST ASIA POINT TRAVEL & TOURS</strong><br>
     </div>
 

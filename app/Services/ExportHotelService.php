@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Tour;
 use App\Models\Hotel;
 use App\Models\TourDay;
+use App\Models\HotelRule;
 use App\Enums\ExpenseType;
 use App\Models\TourRoomType;
 use App\Enums\RoomPersonType;
@@ -82,101 +83,58 @@ class ExportHotelService
         $roomAmounts = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->name => $rt->amount]);
         $roomAmountsById = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->id => $rt->amount]);
 
-        $prevHotelExpense = null;
-
         /** @var Collection<TourDay> $tourDays */
         $tourDays = $tour->days()->orderBy('date')->get();
         foreach ($tourDays as $tourDay) {
             /** @var TourDayExpense $hotelExpense */
-            $hotelExpense = $tourDay->expenses->first(fn(TourDayExpense $exp) => $exp->type === ExpenseType::Hotel);
-            if (!$hotelExpense) {
-                continue;
+            $hotelExpenses = $tourDay->expenses->first(fn(TourDayExpense $exp) => $exp->type === ExpenseType::Hotel);
+            foreach ($hotelExpenses as $hotelExpense) {
+                $date = $tourDay->date;
+                $city = $tourDay->city->name;
+                $hotel = $hotelExpense->hotel;
+                $hotelPrices = self::getHotelPrices(
+                    hotelExpense: $hotelExpense,
+                    date: $date,
+                    roomAmounts: $roomAmountsById,
+                    personType: $personType,
+                );
+                
+                if ($hotelExpense->hotel_checkin_time) {
+                    $date->setTimeFromTimeString($hotelExpense->hotel_checkin_time);
+                }
+                
+                $hotelItem = [
+                    'tour_number' => $tour->group_number,
+                    'payment_method' => $tour->payment_type?->getLabel(),
+                    'hotel' => $hotelExpense->hotel,
+                    'hotelId' => $hotelExpense->hotel_id,
+                    'hotelName' => $hotel->name,
+                    'hotelPrices' => $hotelPrices,
+                    'hotelTotalPrice' => $hotelPrices->sum(),
+                    'guests' => $tour->company->name,
+                    'total_nights' => $hotelExpense->hotel_total_nights,
+                    'date' => $date->format('d.m.Y H:i'),
+                    'city' => $city,
+                    'country' => $countryName,
+                    'pax' => $tourPax,
+                    'groupNum' => $groupNum,
+                    'rooming' => $roomAmounts,
+                    'arrivals' => [
+                        $date->format('d.m.Y H:i')
+                    ],
+                    'departures' => [
+                        $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time ?? '00:00')->format(
+                            'd.m.Y H:i'
+                        )
+                    ],
+                    'operator' => $tour->createdBy->name ?? '-',
+                    'contract_number' => $hotel?->contract_number ?? null,
+                    'contract_date' => $hotel?->contract_date ?? null,
+                ];
+                
+                $result->put($hotelExpense->id, $hotelItem);
             }
-
-            $date = $tourDay->date;
-            $city = $tourDay->city->name;
-            $hotel = $hotelExpense->hotel;
-            $hotelPrices = self::getHotelPrices(
-                hotelExpense: $hotelExpense,
-                date: $date,
-                roomAmounts: $roomAmountsById,
-                personType: $personType,
-            );
-
-            if ($hotelExpense->hotel_checkin_time) {
-                $date->setTimeFromTimeString($hotelExpense->hotel_checkin_time);
-            }
-
-            $hotelItem = [
-                'tour_number' => $tour->group_number,
-                'payment_method' => $tour->payment_type?->getLabel(),
-                'hotel' => $hotelExpense->hotel,
-                'hotelId' => $hotelExpense->hotel_id,
-                'hotelName' => $hotel->name,
-                'hotelPrices' => $hotelPrices,
-                'hotelTotalPrice' => $hotelPrices->sum(),
-                'guests' => $tour->company->name,
-                'total_nights' => $hotelExpense->hotel_total_nights,
-                'date' => $date->format('d.m.Y H:i'),
-                'city' => $city,
-                'country' => $countryName,
-                'pax' => $tourPax,
-                'groupNum' => $groupNum,
-                'rooming' => $roomAmounts,
-                'arrivals' => [
-                    $date->format('d.m.Y H:i')
-                ],
-                'departures' => [
-                    $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time ?? '00:00')->format(
-                        'd.m.Y H:i'
-                    )
-                ],
-                'operator' => $tour->createdBy->name ?? '-',
-                'contract_number' => $hotel?->contract_number ?? null,
-                'contract_date' => $hotel?->contract_date ?? null,
-            ];
-
-            //            $existingHotel = $result->get($hotelExpense->hotel_id);
-            //            if ($existingHotel) {
-            //                // If the hotel is the same as the previous day, it's not an arrival or departure
-            //                if ($prevHotelExpense && $prevHotelExpense['hotelId'] === $hotelExpense->hotel_id) {
-            //                    continue;
-            //                }
-            //
-            //                // If the hotel is different from the previous day, it's a new arrival
-            //                $existingHotel['arrivals'][] = $date->format('d.m.Y H:i');
-            //                $result->put($hotelExpense->hotel_id, $existingHotel);
-            //
-            //                // And departure for previous hotel
-            //                if ($prevHotelExpense) {
-            //                    $prevHotel = $result->get($prevHotelExpense['hotelId']);
-            //                    $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time)->format('d.m.Y  H:i');
-            //                    $result->put($prevHotelExpense['hotelId'], $prevHotel);
-            //                }
-            //            } else {
-            //                // If the hotel is different from the previous day, it's a new hotel
-            //                // Add departures to the previous hotel
-            //                if ($prevHotelExpense) {
-            //                    $prevHotel = $result->get($prevHotelExpense['hotelId']);
-            ////                    $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time)->format('d.m.Y H:i');
-            //                    $result->put($prevHotelExpense['hotelId'], $prevHotel);
-            //                }
-            //
-            //                // First day of hotel
-            //                $hotelItem['arrivals'][] = $date->format('d.m.Y H:i');
-            //                $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time)->format('d.m.Y H:i');
-            //                $result->put($hotelExpense->hotel_id, $hotelItem);
-            //            }
-
-            $result->put($hotelExpense->hotel_id, $hotelItem);
-            $prevHotelExpense = $hotelItem;
         }
-
-        //        $lastHotelItem = $result->last();
-        //        if ($lastHotelItem) {
-        //            $lastHotelItem['departures'][] = $tour->end_date->format('d.m.Y H:i');
-        //            $result->put($lastHotelItem['hotelId'], $lastHotelItem);
-        //        }
 
         return $result;
     }
@@ -193,102 +151,55 @@ class ExportHotelService
         $roomAmounts = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->name => $rt->amount]);
         $roomAmountsById = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->id => $rt->amount]);
 
-        $prevHotelExpense = null;
-
         foreach ($tour->groups as $group) {
             /** @var TourDayExpense $hotelExpense */
-            $hotelExpense = $group->getExpense(ExpenseType::Hotel);
-            if (!$hotelExpense) {
-                continue;
+            $hotelExpenses = $group->getExpenses(ExpenseType::Hotel);
+            foreach ($hotelExpenses as $hotelExpense) {
+                $date = $hotelExpense->date;
+                $city = $hotelExpense->city?->name;
+                $hotel = $hotelExpense->hotel;
+                
+                $hotelPrices = self::getHotelPrices(
+                    hotelExpense: $hotelExpense,
+                    date: $date,
+                    roomAmounts: $roomAmountsById,
+                    personType: $personType
+                );
+                
+                if ($hotelExpense->hotel_checkin_time) {
+                    $date->setTimeFromTimeString($hotelExpense->hotel_checkin_time);
+                }
+                
+                $hotelItem = [
+                    'tour_number' => $tour->group_number,
+                    'payment_method' => $tour->payment_type->getLabel(),
+                    'hotel' => $hotelExpense->hotel,
+                    'hotelId' => $hotelExpense->hotel_id,
+                    'hotelName' => $hotel?->name,
+                    'hotelPrices' => $hotelPrices,
+                    'total_nights' => $hotelExpense->hotel_total_nights,
+                    'hotelTotalPrice' => $hotelPrices->sum(),
+                    'guests' => $hotelExpense->tourGroup->passengers->pluck('name')->implode(', '),
+                    'date' => $date->format('d.m.Y H:i'),
+                    'city' => $city,
+                    'country' => $countryName,
+                    'pax' => $tourPax,
+                    'groupNum' => $groupNum,
+                    'rooming' => $roomAmounts,
+                    'arrivals' => [
+                        $date->format('d.m.Y H:i')
+                    ],
+                    'departures' => [
+                        Carbon::parse($hotelExpense->hotel_checkout_date_time)->format('d.m.Y H:i')
+                    ],
+                    'operator' => $tour->createdBy->name ?? '-',
+                    'contract_number' => $hotel?->contract_number ?? null,
+                    'contract_date' => $hotel?->contract_date ?? null,
+                ];
+                
+                $result->put($hotelExpense->id, $hotelItem);
             }
-
-            $date = $hotelExpense->date;
-            $city = $hotelExpense->city?->name;
-            $hotel = $hotelExpense->hotel;
-
-            $hotelPrices = self::getHotelPrices(
-                hotelExpense: $hotelExpense,
-                date: $date,
-                roomAmounts: $roomAmountsById,
-                personType: $personType
-            );
-
-            if ($hotelExpense->hotel_checkin_time) {
-                $date->setTimeFromTimeString($hotelExpense->hotel_checkin_time);
-            }
-
-            $hotelItem = [
-                'tour_number' => $tour->group_number,
-                'payment_method' => $tour->payment_type->getLabel(),
-                'hotel' => $hotelExpense->hotel,
-                'hotelId' => $hotelExpense->hotel_id,
-                'hotelName' => $hotel?->name,
-                'hotelPrices' => $hotelPrices,
-                'total_nights' => $hotelExpense->hotel_total_nights,
-                'hotelTotalPrice' => $hotelPrices->sum(),
-                'guests' => $hotelExpense->tourGroup->passengers->pluck('name')->implode(', '),
-                'date' => $date->format('d.m.Y H:i'),
-                'city' => $city,
-                'country' => $countryName,
-                'pax' => $tourPax,
-                'groupNum' => $groupNum,
-                'rooming' => $roomAmounts,
-                'arrivals' => [
-                    $date->format('d.m.Y H:i')
-                ],
-                'departures' => [
-                    Carbon::parse($hotelExpense->hotel_checkout_date_time)->format('d.m.Y H:i')
-                ],
-                'operator' => $tour->createdBy->name ?? '-',
-                'contract_number' => $hotel?->contract_number ?? null,
-                'contract_date' => $hotel?->contract_date ?? null,
-            ];
-
-            //            $existingHotel = $result->get($hotelExpense->hotel_id);
-            //            if ($existingHotel) {
-            //                // If the hotel is the same as the previous day, it's not an arrival or departure
-            //                if ($prevHotelExpense && $prevHotelExpense['hotelId'] === $hotelExpense->hotel_id) {
-            //                    continue;
-            //                }
-            //
-            //                // If the hotel is different from the previous day, but exists in the result, it's a new arrival
-            //                $existingHotel['arrivals'][] = $date->format('d.m.Y H:i');
-            //                $result->put($hotelExpense->hotel_id, $existingHotel);
-            //
-            //                // And departure for previous hotel
-            //                if ($prevHotelExpense) {
-            //                    $prevHotel = $result->get($prevHotelExpense['hotelId']);
-            //                    $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString(
-            //                        $hotelExpense->hotel_checkout_time
-            //                    )->format('d.m.Y H:i');
-            //                    $result->put($prevHotelExpense['hotelId'], $prevHotel);
-            //                }
-            //            } else {
-            //                // If the hotel is different from the previous day, it's a new hotel
-            //                // Add departures to the previous hotel
-            //                if ($prevHotelExpense) {
-            //                    $prevHotel = $result->get($prevHotelExpense['hotelId']);
-            //                    //                    $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString($hotelExpense->hotel_checkout_time)->format('d.m.Y H:i');
-            //                    $result->put($prevHotelExpense['hotelId'], $prevHotel);
-            //                }
-            //
-            //                // First day of hotel
-            //                $hotelItem['arrivals'][] = $date->format('d.m.Y H:i');
-            //                $prevHotel['departures'][] = $date->clone()->setTimeFromTimeString(
-            //                    $hotelExpense->hotel_checkout_time
-            //                )->format('d.m.Y H:i');
-            //                $result->put($hotelExpense->hotel_id, $hotelItem);
-            //            }
-
-            $result->put($hotelExpense->hotel_id, $hotelItem);
-            $prevHotelExpense = $hotelItem;
         }
-
-        //        $lastHotelItem = $result->last();
-        //        if ($lastHotelItem) {
-        //            $lastHotelItem['departures'][] = $tour->end_date->format('d.m.Y H:i');
-        //            $result->put($lastHotelItem['hotelId'], $lastHotelItem);
-        //        }
 
         return $result;
     }
@@ -384,7 +295,10 @@ class ExportHotelService
 
         $firstArrivalTime = Carbon::parse($arrivals->first())->format('H:i');
         $lastDepartureTime = Carbon::parse($departures->last())->format('H:i');
-
+        
+        [$rules_1_content, $rules_2_content, $rules_3_content] = self::getHotelRulesStr($hotel);
+//        dd($rules);
+        
         $placeholders = [
             'name' => $hotel->name,
             'guest_name' => $passengerName,
@@ -404,6 +318,9 @@ class ExportHotelService
 
             'arrival_time' => $firstArrivalTime,
             'departure_time' => $lastDepartureTime,
+            'rules_1' => $rules_1_content,
+            'rules_2' => $rules_2_content,
+            'rules_3' => $rules_3_content,
         ];
 
         foreach ($placeholders as $placeholder => $value) {
@@ -413,6 +330,78 @@ class ExportHotelService
         return $templateProcessor;
     }
 
+    public static function getHotelRulesStr(Hotel $hotel): array
+    {
+        $rule_1_content = '';
+        $rule_2_content = '';
+        $rule_3_content = '';
+        
+        $ruleIndex = 1;
+        
+        // Берем только первые три правила из коллекции
+        // array_slice гарантирует, что мы итерируемся не более чем по 3 элементам.
+        $firstThreeRules = $hotel->rules->slice(0, 3);
+        
+        foreach ($firstThreeRules as $rule) {
+            
+            // Переменные для текущего правила
+            $title = '';
+            $description = '';
+            
+            // --- 1. Логика Формирования Правил ---
+            
+            if ($rule->rule_type === HotelRule::TYPE_EARLY_CHECK_IN) {
+                $startTime = substr($rule->start_time, 0, 5); // 06:00
+                $endTime = substr($rule->end_time, 0, 5);     // 14:00
+                
+                if ($rule->impact_value == 100 && $rule->start_time === '00:00:00') {
+                    $title = "Ранний заезд до {$endTime}";
+                    $description = "оплачивается 100% стоимости номера\n(питание входит в стоимость)";
+                } elseif ($rule->impact_value == 50) {
+                    $title = "Ранний заезд после {$startTime} и до {$endTime}";
+                    $description = "оплачивается 50% от стоимости номера\n(питание входит в стоимость)";
+                }
+            } elseif ($rule->rule_type === HotelRule::TYPE_LATE_CHECK_OUT) {
+                $startTime = substr($rule->start_time, 0, 5); // 13:00
+                $endTime = substr($rule->end_time, 0, 5);     // 23:00
+                
+                $title = "Поздний выезд после {$startTime} и до {$endTime}";
+                
+                if ($rule->price_impact_type === HotelRule::IMPACT_PERCENTAGE) {
+                    // Используем значение из модели
+                    $description = "почасовая оплата берется в размере {$rule->impact_value}%";
+                } elseif ($rule->price_impact_type === HotelRule::IMPACT_HOURLY) {
+                    $description = "почасовая оплата берется в размере {$rule->impact_value}%";
+                }
+            }
+            
+            // --- 2. Присвоение Контента Переменным ---
+            
+            // Форматируем содержимое: Сначала Заголовок, затем Новая строка (\n), затем Описание
+            // (Убедитесь, что title не пустой, хотя по логике он всегда должен быть)
+            if ($title) {
+                $fullContent = "{$title}\n{$description}";
+                
+                switch ($ruleIndex) {
+                    case 1:
+                        $rule_1_content = $fullContent;
+                        break;
+                    case 2:
+                        $rule_2_content = $fullContent;
+                        break;
+                    case 3:
+                        $rule_3_content = $fullContent;
+                        break;
+                }
+            }
+            
+            $ruleIndex++;
+        }
+        
+        // Удаляем последние две новые строки, чтобы не было лишнего отступа в конце
+        return [$rule_1_content, $rule_2_content, $rule_3_content];
+    }
+    
     public static function getNumberSuffix(int $number): string
     {
         $lastDigit = $number % 10;

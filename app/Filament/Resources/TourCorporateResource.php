@@ -76,6 +76,7 @@ class TourCorporateResource extends Resource
                         ->preload()
                         ->options(PaymentType::class)
                         ->reactive(),
+                    
                     Components\Select::make('payment_status')
                         ->native(false)
                         ->searchable()
@@ -141,6 +142,7 @@ class TourCorporateResource extends Resource
                         ->collapsed(fn($record) => !empty($record->id))
                         ->columnSpanFull()
                         ->collapsible()
+                        ->cloneable()
                         ->itemLabel(function($get, $uuid) {
                             $current = Arr::get($get('expenses'), $uuid);
                             $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
