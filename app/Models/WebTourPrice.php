@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TourPriceStatus;
+use App\Services\ExpenseService;
 use App\Enums\WebTourPriceStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,8 @@ class WebTourPrice extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+    
+    protected $appends = ['price_usd'];
 
     protected $casts = [
         'from_date' => 'date',
@@ -40,5 +43,11 @@ class WebTourPrice extends Model
     public function webTour(): BelongsTo
     {
         return $this->belongsTo(WebTour::class);
+    }
+    
+    public function getPriceUsdAttribute(): float
+    {
+        $currencyUsd = ExpenseService::getUsdToUzsCurrency();
+        return round($this->price / ($currencyUsd?->rate ?? 1), 2);
     }
 }

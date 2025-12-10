@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Enums\WebTourPriceStatus;
 use App\Enums\WebTourStatus;
-use App\Filament\Resources\TourResource\Actions\PricesAction;
 use App\Filament\Resources\WebTourResource\Pages;
 use App\Filament\Resources\WebTourResource\RelationManagers;
 use App\Models\Package;
@@ -14,6 +13,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use App\Filament\Resources\WebTourResource\Actions\PricesAction;
 
 class WebTourResource extends Resource
 {
