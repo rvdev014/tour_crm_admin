@@ -75,7 +75,7 @@ class RoomTypesRelationManager extends RelationManager
                         /** @var HotelRoomType $record */
                         $requiredSeasonType = $record->season_type;
                         
-                        $periods = HotelPeriod::query()
+                        $periods = $record->hotel->periods()
                             ->where('season_type', $requiredSeasonType)
                             ->get(['start_date', 'end_date']);
                         
