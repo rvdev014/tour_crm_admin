@@ -89,6 +89,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->role === UserRole::Accountant;
     }
 
+    public function isOperator(): bool
+    {
+        return $this->role === UserRole::Operator;
+    }
+
+    public function isSeniorOperator(): bool
+    {
+        return $this->role === UserRole::SeniorOperator;
+    }
+
     public function getAvatarUrlAttribute(): ?string
     {
         if (!$this->avatar) {

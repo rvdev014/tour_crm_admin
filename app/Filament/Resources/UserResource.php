@@ -22,7 +22,12 @@ class UserResource extends Resource
     protected static ?int $navigationSort = 9;
     protected static ?string $navigationGroup = 'Settings';
     protected static ?string $recordTitleAttribute = 'name';
-
+    
+    public static function canViewAny(): bool
+    {
+        return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
+    }
+    
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'email', 'role'];
@@ -43,13 +48,14 @@ class UserResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
                     ->email()
+                    ->required()
                     ->suffixAction(function($record) {
                         if (!$record?->email) {
                             return [];

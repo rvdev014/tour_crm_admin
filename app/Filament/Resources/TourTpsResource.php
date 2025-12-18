@@ -55,7 +55,7 @@ class TourTpsResource extends Resource
     
     public static function form(Form $form): Form
     {
-        return $form->schema([
+        return $form->disabled(fn() => auth()->user()->isOperator())->schema([
             Components\Fieldset::make('Tour details')->schema([
                 Hidden::make('price_currency'),
                 Hidden::make('guide_price_currency'),
@@ -418,6 +418,7 @@ class TourTpsResource extends Resource
             ->columns([
                 Columns\TextColumn::make('group_number')
                     ->searchable(),
+                Columns\TextColumn::make('country.name'),
                 Columns\TextColumn::make('company.name')
                     ->numeric()
                     ->sortable(),
@@ -428,6 +429,13 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('end_date')
                     ->date()
                     ->sortable(),
+                Columns\TextColumn::make('guide_name')
+                    ->formatStateUsing(function(Tour $tour) {
+                        if ($tour->guide_type == GuideType::Escort) {
+                            return $tour->guide_name . ($tour->guide_phone ? " ($tour->guide_phone)" : "");
+                        }
+                        return 'LOCAL GUIDE';
+                    }),
                 Columns\TextColumn::make('status')
                     ->badge(),
                 Columns\TextColumn::make('total_price')

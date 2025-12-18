@@ -26,7 +26,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Components\Grid::make()->schema([
                     Components\Hidden::make('index'),
@@ -514,7 +514,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

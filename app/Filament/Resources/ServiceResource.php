@@ -20,10 +20,15 @@ class ServiceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-bell';
     protected static ?string $navigationGroup = 'Website Management';
     protected static ?int $navigationSort = 7;
-
+    
+    public static function canViewAny(): bool
+    {
+        return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
+    }
+    
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('name_ru')
                     ->required()
@@ -68,7 +73,7 @@ class ServiceResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

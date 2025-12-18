@@ -26,7 +26,7 @@ class HotelBookingResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 //
             ]);
@@ -87,7 +87,7 @@ class HotelBookingResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

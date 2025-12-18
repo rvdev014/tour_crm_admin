@@ -10,6 +10,7 @@ enum UserRole:int implements HasLabel, HasColor
     case Admin = 0;
     case Operator = 1;
     case Accountant = 2;
+    case SeniorOperator = 3;
     case User = 10;
 
     public function getLabel(): string
@@ -18,6 +19,7 @@ enum UserRole:int implements HasLabel, HasColor
             self::Admin    => 'Admin',
             self::Operator => 'Operator',
             self::Accountant => 'Accountant',
+            self::SeniorOperator => 'Senior Operator',
             self::User => 'User',
         };
     }
@@ -29,6 +31,7 @@ enum UserRole:int implements HasLabel, HasColor
             self::Operator => 'green',
             self::Accountant => 'blue',
             self::User => 'gray',
+            self::SeniorOperator => 'orange',
         };
     }
 }
