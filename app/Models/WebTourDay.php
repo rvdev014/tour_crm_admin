@@ -46,7 +46,7 @@ class WebTourDay extends Model
         return $this->belongsToMany(Facility::class, 'web_tour_day_facilities');
     }
     
-    public function getPlaceNameAttribute(): string
+    public function getPlaceNameAttribute(): ?string
     {
         return $this->getLocaleValue('place_name');
     }
