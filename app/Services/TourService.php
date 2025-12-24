@@ -14,6 +14,7 @@ use App\Models\Museum;
 use App\Enums\TourType;
 use App\Models\Company;
 use App\Models\Country;
+use App\Models\Setting;
 use App\Models\RoomType;
 use App\Models\Transfer;
 use App\Models\GroupItem;
@@ -27,6 +28,7 @@ use App\Enums\TransportType;
 use App\Models\TourDayExpense;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Number;
+use App\Enums\DefaultSettings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Grid;
@@ -721,5 +723,11 @@ HTML;
         }
 
         return Transfer::query()->where('tour_day_expense_id', $expense['id'])->first();
+    }
+    
+    public static function getTourSborValue(): int
+    {
+        $settings = Setting::query()->where('key', DefaultSettings::TOUR_SBOR->value)->first();
+        return (int)$settings?->value;
     }
 }

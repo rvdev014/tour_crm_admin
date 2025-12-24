@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             CompanySeeder::class,
             RoomTypeSeeder::class,
+            SettingSeeder::class,
         ]);
     }
 }

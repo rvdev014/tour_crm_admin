@@ -34,6 +34,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $description_ru
  * @property string $description
  * @property string $comment
+ * @property bool $nds_included
+ * @property int $tour_sbor
  *
  * @property City $city
  * @property Country $country
@@ -73,6 +75,8 @@ class Hotel extends Model
         'description_ru',
         'latitude',
         'longitude',
+        'nds_included',
+        'tour_sbor',
     ];
 
     protected $casts = [

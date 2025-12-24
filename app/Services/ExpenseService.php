@@ -192,6 +192,7 @@ class ExpenseService
 
                     $hotelTotal = 0;
                     $roomAmounts = $roomAmounts ?: ExpenseService::getRoomingAmounts($data);
+                    
                     foreach ($roomAmounts as $roomTypeId => $amount) {
                         if (empty($amount)) {
                             continue;

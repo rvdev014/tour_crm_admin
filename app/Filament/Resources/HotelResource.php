@@ -121,6 +121,17 @@ class HotelResource extends Resource
                                 ->required(),
                         ),
                     
+                    Forms\Components\Checkbox::make('nds_included')
+                        ->inline(false)
+                        ->label('NDS included'),
+                    
+                    Forms\Components\Select::make('tour_sbor')
+                        ->options([
+                            5 => '5%',
+                            10 => '10%',
+                            15 => '15%',
+                        ]),
+                    
                     Forms\Components\Select::make('rate')
                         ->options(function() {
                             $options = [];
