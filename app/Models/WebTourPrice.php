@@ -31,7 +31,10 @@ class WebTourPrice extends Model
 
     protected $guarded = ['id'];
     
-    protected $appends = ['price_usd'];
+    protected $appends = [
+        'price_usd',
+        'price_uzs',
+    ];
 
     protected $casts = [
         'from_date' => 'date',
