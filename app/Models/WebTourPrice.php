@@ -48,7 +48,7 @@ class WebTourPrice extends Model
     public function getPriceAttribute(): float
     {
         $currencyUsd = ExpenseService::getUsdToUzsCurrency();
-        return round($this->price * ($currencyUsd?->rate ?? 1), 2);
+        return round($this->getAttribute('price') * ($currencyUsd?->rate ?? 1), 2);
     }
     
     public function getPriceUsdAttribute(): float
