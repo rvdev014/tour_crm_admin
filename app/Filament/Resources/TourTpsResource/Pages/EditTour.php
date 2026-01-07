@@ -23,7 +23,7 @@ class EditTour extends EditRecord
         ExpenseService::convertExpensePrice($data, 'transport_price');
 
         $totalPax = $data['pax'] + ($data['leader_pax'] ?? 0);
-
+        
         $data['price_result'] = $data['price_converted'] ?? $data['price'] ?? 0;
         $data['total_price'] = round($data['price_result'] * $totalPax, 2);
 
@@ -67,9 +67,9 @@ class EditTour extends EditRecord
                 ->label('Export All')
                 ->icon('heroicon-o-document-text')
                 ->url(route('export-all', $this->record)),
-            Actions\DeleteAction::make()
-                ->label('Delete')
-                ->icon('heroicon-o-trash'),
+//            Actions\DeleteAction::make()
+//                ->label('Delete')
+//                ->icon('heroicon-o-trash'),
             /*
             Actions\Action::make('export_hotel')
                 ->label('Hotels')

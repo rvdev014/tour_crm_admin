@@ -28,7 +28,7 @@ class DaysRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Components\Grid::make(3)->schema([
                     Components\DatePicker::make('date')
@@ -671,7 +671,7 @@ class DaysRelationManager extends RelationManager
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

@@ -21,7 +21,12 @@ class ContactRequestResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-phone';
     protected static ?string $navigationGroup = 'Website Management';
     protected static ?int $navigationSort = 2;
-
+    
+    public static function canViewAny(): bool
+    {
+        return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
+    }
+    
     public static function getNavigationBadge(): ?string
     {
         $count = static::$model::where('status', WebTourStatus::New->value)->count();
@@ -40,7 +45,7 @@ class ContactRequestResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
@@ -95,7 +100,7 @@ class ContactRequestResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

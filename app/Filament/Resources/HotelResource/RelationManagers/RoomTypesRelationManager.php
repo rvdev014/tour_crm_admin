@@ -22,7 +22,7 @@ class RoomTypesRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\Select::make('room_type_id')
                     ->native(false)
@@ -74,21 +74,21 @@ class RoomTypesRelationManager extends RelationManager
                     ->getStateUsing(function($record) {
                         /** @var HotelRoomType $record */
                         $requiredSeasonType = $record->season_type;
-                        
-                        $periods = HotelPeriod::query()
+
+                        $periods = $record->hotel->periods()
                             ->where('season_type', $requiredSeasonType)
                             ->get(['start_date', 'end_date']);
-                        
+
                         if ($periods->isEmpty()) {
                             return '';
                         }
-                        
+
                         $ranges = $periods->map(function ($period) {
                             $start = Carbon::parse($period->start_date)->format('d.m');
                             $end = Carbon::parse($period->end_date)->format('d.m');
                             return "{$start} - {$end}";
                         });
-                        
+
                         return $ranges->implode(', ');
                     }),
                 Tables\Columns\TextColumn::make('price')
@@ -109,11 +109,11 @@ class RoomTypesRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()->authorize(fn() => auth()->user()->isAdmin())
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

@@ -20,10 +20,15 @@ class PackageResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
     protected static ?string $navigationGroup = 'Website Management';
     protected static ?int $navigationSort = 5;
-
+    
+    public static function canViewAny(): bool
+    {
+        return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
+    }
+    
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('name_ru')
                     ->required()
@@ -57,11 +62,11 @@ class PackageResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()->authorize(fn() => auth()->user()->isAdmin())
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

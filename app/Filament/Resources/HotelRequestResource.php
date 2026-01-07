@@ -25,6 +25,11 @@ class HotelRequestResource extends Resource
     protected static ?string $navigationGroup = 'Website Management';
     protected static ?int $navigationSort = 4;
     
+    public static function canViewAny(): bool
+    {
+        return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
+    }
+    
     public static function getNavigationBadge(): ?string
     {
         $count = static::$model::where('status', WebTourStatus::New->value)->count();
@@ -38,7 +43,7 @@ class HotelRequestResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\Select::make('hotel_id')
                     ->label('Hotel')
@@ -163,11 +168,11 @@ class HotelRequestResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()->authorize(fn() => auth()->user()->isAdmin())
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

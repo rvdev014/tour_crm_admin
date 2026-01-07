@@ -45,7 +45,7 @@ class HotelResource extends Resource
     
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('name')
@@ -120,6 +120,17 @@ class HotelResource extends Resource
                                 })
                                 ->required(),
                         ),
+                    
+                    Forms\Components\Checkbox::make('nds_included')
+                        ->inline(false)
+                        ->label('NDS included'),
+                    
+                    Forms\Components\Select::make('tour_sbor')
+                        ->options([
+                            5 => '5%',
+                            10 => '10%',
+                            15 => '15%',
+                        ]),
                     
                     Forms\Components\Select::make('rate')
                         ->options(function() {
@@ -295,7 +306,7 @@ class HotelResource extends Resource
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

@@ -89,7 +89,7 @@ class WebTour extends Model
 
     public function days(): HasMany
     {
-        return $this->hasMany(WebTourDay::class);
+        return $this->hasMany(WebTourDay::class)->orderBy('created_at')->orderBy('id');
     }
 
     public function prices(): HasMany

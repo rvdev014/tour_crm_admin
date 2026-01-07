@@ -48,7 +48,7 @@ class TourCorporateResource extends Resource
     
     public static function form(Form $form): Form
     {
-        return $form->schema([
+        return $form->disabled(fn() => auth()->user()->isOperator())->schema([
             Components\Fieldset::make('Tour details')->schema([
                 
                 Components\Grid::make(4)->schema([

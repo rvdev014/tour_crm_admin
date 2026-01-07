@@ -25,6 +25,11 @@ class DriverResource extends Resource
     protected static ?string $navigationGroup = 'Settings';
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function canViewAny(): bool
+    {
+        return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
+    }
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'phone', 'chat_id'];
@@ -39,7 +44,7 @@ class DriverResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
@@ -101,6 +106,7 @@ class DriverResource extends Resource
                         ->successNotificationTitle('Drivers were successfully deleted')
                         ->color('danger')
                         ->requiresConfirmation()
+                        ->authorize(fn() => auth()->user()->isAdmin())
                         ->action(function ($records) {
                             try {
                                 $records->each(fn(Model $record) => $record->delete());
@@ -135,7 +141,7 @@ class DriverResource extends Resource
                             }
                         })
                         ->deselectRecordsAfterCompletion(),
-//                    Tables\Actions\DeleteBulkAction::make(),
+//                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ]);
     }

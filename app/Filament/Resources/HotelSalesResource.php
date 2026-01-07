@@ -44,7 +44,7 @@ class HotelSalesResource extends Resource
     
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
             
             ]);
@@ -159,7 +159,7 @@ class HotelSalesResource extends Resource
                 //                HotelPeriodsAction::make()->label('')->icon(''),
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)/*->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
                 ]),
             ])*/ ;
     }

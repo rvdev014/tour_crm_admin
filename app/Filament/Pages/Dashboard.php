@@ -20,12 +20,12 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->isAdmin();
+        return auth()->user()->isAdmin() || auth()->user()->isSeniorOperator();
     }
 
     public static function canAccess(): bool
     {
-        return auth()->user()->isAdmin();
+        return auth()->user()->isAdmin() || auth()->user()->isSeniorOperator();
     }
 
     public function filtersForm(Form $form): Form
@@ -36,7 +36,7 @@ class Dashboard extends \Filament\Pages\Dashboard
         $startMonth = $startDate ? Carbon::parse($startDate) : now()->startOfMonth();
         $endMonth = $endDate ? Carbon::parse($endDate) : now()->endOfMonth();
 
-        return $form->schema([
+        return $form->disabled(fn() => auth()->user()->isOperator())->schema([
             Grid::make(3)->schema([
                 DatePicker::make('start_date')
                     ->formatStateUsing(fn() => $startMonth->format('d-m-Y'))

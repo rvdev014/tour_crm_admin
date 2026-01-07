@@ -126,7 +126,8 @@ class HotelResource extends JsonResource
                     'name' => $roomTypeName,
                     'picture' => $roomType?->picture ? asset('storage/' . $roomType->picture) : null,
                     'description' => $roomType?->description,
-                    'price' => round($price / ($currencyUsd?->rate ?? 1), 2)
+                    'price' => $price,
+                    'price_usd' => round($price / ($currencyUsd?->rate ?? 1), 2)
                 ];
             })
             ->values()
