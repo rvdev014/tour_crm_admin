@@ -100,6 +100,8 @@ class WebTour extends Model
     public function currentPrice(): HasOne
     {
         return $this->hasOne(WebTourPrice::class)
+            ->where('from_date', '<=', now())
+            ->where('to_date', '>=', now())
             ->where('deadline', '>=', now())
             ->orderBy('price');
     }

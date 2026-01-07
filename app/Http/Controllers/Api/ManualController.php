@@ -5,9 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Enums\TransferRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BannerResource;
-use App\Models\Facility;
-use App\Models\User;
-use Illuminate\Support\Carbon;
 use App\Http\Resources\ReviewResource;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\TransferRequestResource;
@@ -16,16 +13,18 @@ use App\Http\Resources\WebTourResource;
 use App\Models\Banner;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Facility;
 use App\Models\Hotel;
 use App\Models\RoomType;
 use App\Models\Service;
 use App\Models\TransferRequest;
 use App\Models\TransportClass;
+use App\Models\User;
 use App\Models\WebTour;
 use App\Services\TransferService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class ManualController extends Controller
 {
@@ -35,7 +34,10 @@ class ManualController extends Controller
         $search = trim(mb_strtolower($search));
         $isPopular = $request->get('is_popular');
 
-        $webTours = WebTour::query()
+        $cityId = $request->get('city');
+        $sort = $request->get('sort'); // 'cheapest' или 'most_expensive'
+
+        $query = WebTour::query()
             ->with([
                 'days' => fn($query) => $query->with(['facilities']),
                 'currentPrice',
@@ -51,8 +53,31 @@ class ManualController extends Controller
             })
             ->when($isPopular !== null, function ($query) use ($isPopular) {
                 $query->where('is_popular', filter_var($isPopular, FILTER_VALIDATE_BOOLEAN));
-            })
-            ->paginate(15);
+            });
+
+//        if (!empty($cityId)) {
+//            $query->where('city_id', $cityId);
+//        }
+
+        if (!empty($sort)) {
+            $now = now()->format('Y-m-d');
+            $sortDirection = $sort === 'cheap' ? 'asc' : 'desc';
+            $query
+                ->addSelect([
+                    'today_price' => function ($subquery) use ($now) {
+                        $subquery->select('price')
+                            ->from('web_tour_prices')
+                            ->whereColumn('web_tour_id', 'web_tours.id') // Связь с родителем
+                            ->where('from_date', '<=', $now)           // Начало периода
+                            ->where('to_date', '>=', $now)             // Конец периода
+                            ->orderBy('price', 'asc')                  // Если на одну дату есть 2 цены, берем минимальную
+                            ->limit(1);
+                    }
+                ])
+                ->orderByRaw("today_price $sortDirection NULLS LAST");
+        }
+
+        $webTours = $query->paginate(10);
 
         return response()->json([
             'data' => WebTourResource::collection($webTours->items()),

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreHotelRequestRequest;
 use App\Http\Resources\HotelResource;
 use App\Http\Resources\ReviewResource;
-use App\Models\Group;
 use App\Models\Hotel;
 use App\Models\HotelRequest;
 use Illuminate\Http\JsonResponse;
@@ -56,39 +55,31 @@ class HotelController extends Controller
             $query->whereHas('facilities', fn($q) => $q->whereIn('facilities.id', $facilityIds));
         }
 
-//        $roomTypeName = ['Single'];
-
         if (!empty($sort)) {
             $now = now()->format('Y-m-d');
-            $websiteGroup = Group::query()->where('name', 'website')->firstOrFail();
-            if (!$websiteGroup) {
-                throw new \Exception('Group "website" not found');
-            }
             $sortDirection = $sort === 'cheap' ? 'asc' : 'desc';
-            $groupPercent = $websiteGroup->percent;
             $query
-                ->addSelect(['today_price' => function ($subquery) use ($now) {
-                    $subquery->select('price')
-                        ->from('hotel_room_types')
-                        ->join('hotel_periods', function ($join) {
-                            $join->on('hotel_periods.hotel_id', '=', 'hotel_room_types.hotel_id')
-                                ->on('hotel_periods.season_type', '=', 'hotel_room_types.season_type');
-                        })
-                        ->whereColumn('hotel_room_types.hotel_id', 'hotels.id')
-                        ->where('hotel_periods.start_date', '<=', $now)
-                        ->where('hotel_periods.end_date', '>=', $now)
-                        ->orderBy('price', 'asc')
-                        ->limit(1);
-                }])
-                // 3. Apply the Sort
+                ->addSelect([
+                    'today_price' => function ($subquery) use ($now) {
+                        $subquery->select('price')
+                            ->from('hotel_room_types')
+                            ->join('hotel_periods', function ($join) {
+                                $join->on('hotel_periods.hotel_id', '=', 'hotel_room_types.hotel_id')
+                                    ->on('hotel_periods.season_type', '=', 'hotel_room_types.season_type');
+                            })
+                            ->whereColumn('hotel_room_types.hotel_id', 'hotels.id')
+                            ->where('hotel_periods.start_date', '<=', $now)
+                            ->where('hotel_periods.end_date', '>=', $now)
+                            ->orderBy('price', 'asc')
+                            ->limit(1);
+                    }
+                ])
                 ->orderBy('today_price', $sortDirection);
         }
 
         $hotels = $query
             ->orderByRaw('rate DESC NULLS LAST')
             ->paginate(10);
-
-//        dd($hotels);
 
         return response()->json([
             'data' => HotelResource::collection($hotels->items()),
