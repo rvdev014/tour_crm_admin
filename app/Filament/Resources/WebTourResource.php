@@ -8,6 +8,7 @@ use App\Filament\Resources\WebTourResource\Pages;
 use App\Filament\Resources\WebTourResource\RelationManagers;
 use App\Models\Package;
 use App\Models\WebTour;
+use App\Services\TourService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,12 +23,12 @@ class WebTourResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-map';
     protected static ?string $navigationGroup = 'Website Management';
     protected static ?int $navigationSort = 1;
-    
+
     public static function canViewAny(): bool
     {
         return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form->disabled(fn() => auth()->user()->isOperator())
@@ -69,12 +70,18 @@ class WebTourResource extends Resource
                     ->columnSpanFull()
                     ->addActionAlignment('end')
                     ->schema([
-                        Forms\Components\Grid::make()->schema([
+                        Forms\Components\Grid::make(3)->schema([
                             Forms\Components\TextInput::make('place_name_ru')
                                 ->required()
                                 ->maxLength(255),
                             Forms\Components\TextInput::make('place_name_en')
                                 ->maxLength(255),
+                            Forms\Components\Select::make('city_id')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->relationship('city', 'name')
+                                ->options(fn($get) => TourService::getCities()),
                         ]),
 //                        Forms\Components\DateTimePicker::make('date'),
                         Forms\Components\Grid::make()->schema([
@@ -201,16 +208,16 @@ class WebTourResource extends Resource
                     ->formatStateUsing(fn() => 'View prices')
                     ->html()
                     ->action(WebTourResource\Actions\PricesAction::make()),
-                
+
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('status_updated_by')
                     ->formatStateUsing(function($record) {
                         return $record->statusUpdatedBy?->name;
                     }),
-                
+
                 Tables\Columns\ImageColumn::make('photo')
                     ->height('60px'),
                 Tables\Columns\ToggleColumn::make('is_popular')

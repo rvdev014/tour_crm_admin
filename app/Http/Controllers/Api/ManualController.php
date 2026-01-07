@@ -55,9 +55,11 @@ class ManualController extends Controller
                 $query->where('is_popular', filter_var($isPopular, FILTER_VALIDATE_BOOLEAN));
             });
 
-//        if (!empty($cityId)) {
-//            $query->where('city_id', $cityId);
-//        }
+        if (!empty($cityId)) {
+            $query->whereHas('days', function ($subQ) use ($cityId) {
+                $subQ->where('city_id', $cityId);
+            });
+        }
 
         if (!empty($sort)) {
             $now = now()->format('Y-m-d');
