@@ -195,7 +195,7 @@ class WebTourResource extends Resource
                     ->label('Date and prices')
                     ->formatStateUsing(fn() => 'View prices')
                     ->html()
-                    ->action(PricesAction::make()),
+                    ->action(WebTourResource\Actions\PricesAction::make()),
                 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()

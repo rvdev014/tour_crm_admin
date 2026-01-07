@@ -18,8 +18,14 @@ class HotelController extends Controller
         $search = $request->get('search', '');
         $search = trim(mb_strtolower($search));
 
-        $hotels = Hotel::query()
-            ->with(['country', 'city', 'facilities', 'attachments', 'roomTypes.roomType'])
+        // Получаем параметры фильтрации
+        $cityId = $request->get('city');
+        $roomTypes = $request->get('room_types');
+        $rate = $request->get('rate');
+        $facilityIds = $request->get('facilities'); // Ожидаем массив ID
+        $sort = $request->get('sort'); // 'cheapest' или 'most_expensive'
+
+        $query = Hotel::query()
             ->when($search, function($query) use ($search) {
                 $query->where(function($q) use ($search) {
                     $q
@@ -32,7 +38,25 @@ class HotelController extends Controller
                         ->orWhereRaw('LOWER(address) LIKE ?', ["%$search%"]);
                 });
             })
-            ->paginate(10);
+            ->orderBy('rate', $sort == 'cheap' ? 'asc' : 'desc');
+
+        if (!empty($cityId)) {
+            $query->where('city_id', $cityId);
+        }
+
+        if (!empty($roomTypes)) {
+            $query->whereHas('roomTypes', fn($q) => $q->whereIn('room_type_id', $roomTypes));
+        }
+
+        if (!empty($rate)) {
+            $query->where('rate', $rate);
+        }
+
+        if (!empty($facilityIds)) {
+            $query->whereHas('facilities', fn($q) => $q->whereIn('id', $facilityIds));
+        }
+
+        $hotels = $query->paginate(10);
 
         return response()->json([
             'data' => HotelResource::collection($hotels->items()),

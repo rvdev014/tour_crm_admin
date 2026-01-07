@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\TransferRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BannerResource;
+use App\Models\Facility;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use App\Http\Resources\ReviewResource;
@@ -148,6 +149,12 @@ class ManualController extends Controller
     {
         $cities = City::query()->get();
         return response()->json(['data' => $cities]);
+    }
+
+    public function getFacilities(): JsonResponse
+    {
+        $facilities = Facility::query()->get();
+        return response()->json(['data' => $facilities]);
     }
 
     public function getRoomTypes(): JsonResponse

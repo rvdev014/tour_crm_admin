@@ -34,7 +34,8 @@ class HotelResource extends JsonResource
             'company_name' => $this->company_name,
             'address' => $this->address,
             'rate' => $this->rate,
-            'price' => $this->getPrice(),
+            'price' => $this->getPrice(false),
+            'price_usd' => $this->getPrice(),
             'website_price' => $this->website_price,
             'photo' => $this->getPhoto(),
             'photos' => $this->getPhotos(),
@@ -61,7 +62,7 @@ class HotelResource extends JsonResource
         return $this->attachments->first()?->getUrl();
     }
 
-    private function getPrice(): ?float
+    private function getPrice($isUsd = true): ?float
     {
         $seasonType = ExpenseService::getSeasonType($this->resource, now());
 
@@ -77,7 +78,11 @@ class HotelResource extends JsonResource
         $price = $hotelRoomType?->getPriceByGroup($group);
 
         $currencyUsd = ExpenseService::getUsdToUzsCurrency();
-        return round($price / ($currencyUsd?->rate ?? 1), 2);
+        if ($isUsd) {
+            return round($price / ($currencyUsd?->rate ?? 1), 2);
+        }
+        
+        return $price;
     }
 
     private function getPhone()

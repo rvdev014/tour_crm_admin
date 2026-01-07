@@ -29,7 +29,7 @@ class PricesAction extends Action
 
         $this->modalSubmitAction(
             fn(StaticAction $action, $record) => $action->url(
-                route('filament.admin.resources.tours.edit', $record->id)
+                route('filament.admin.resources.web-tours.edit', $record->id)
             )->label(__('filament-actions::edit.single.label'))
         );
         $this->modalCancelAction(

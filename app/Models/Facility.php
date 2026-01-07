@@ -23,6 +23,7 @@ class Facility extends Model
     use HasFactory, HasLocaleFields;
 
     protected $guarded = ['id'];
+    protected $appends = ['name'];
 
     protected $casts = [
         'created_at' => 'datetime',

@@ -85,9 +85,12 @@ class MailService
                 })->implode('/');
 
                 $subject = "$tour->group_number | $firstArrivalTime-$lastDepartureTime | $rooming";
+                
+                $datePrev = Carbon::parse($date)->subDay()->format('Y-m-d');
+                
                 $mailable = new HotelMail(
                     $subject,
-                    $date,
+                    $datePrev,
                     $expense,
                     $tour->getTotalPax(),
                     $hotelItem

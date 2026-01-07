@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\HotelResource\RelationManagers;
 
+use Carbon\Carbon;
+use App\Models\HotelPeriod;
 use App\Enums\RoomPersonType;
 use App\Enums\RoomSeasonType;
 use App\Models\Hotel;
@@ -9,6 +11,7 @@ use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use App\Models\HotelRoomType;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -67,6 +70,27 @@ class RoomTypesRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),
                 Tables\Columns\TextColumn::make('season_type')->badge(),
+                Tables\Columns\TextColumn::make('period_ranges')
+                    ->getStateUsing(function($record) {
+                        /** @var HotelRoomType $record */
+                        $requiredSeasonType = $record->season_type;
+                        
+                        $periods = HotelPeriod::query()
+                            ->where('season_type', $requiredSeasonType)
+                            ->get(['start_date', 'end_date']);
+                        
+                        if ($periods->isEmpty()) {
+                            return '';
+                        }
+                        
+                        $ranges = $periods->map(function ($period) {
+                            $start = Carbon::parse($period->start_date)->format('d.m');
+                            $end = Carbon::parse($period->end_date)->format('d.m');
+                            return "{$start} - {$end}";
+                        });
+                        
+                        return $ranges->implode(', ');
+                    }),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Price Uz')
                     ->money()
