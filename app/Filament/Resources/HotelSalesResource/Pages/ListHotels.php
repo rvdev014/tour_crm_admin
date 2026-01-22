@@ -89,7 +89,7 @@ class ListHotels extends ListRecords
                 $row['name'] = $hotel->name;
 //                $row['email'] = $hotel->email;
                 $row['room_type'] = $roomType->roomType->name;
-                $row['season_type'] = $roomType->season_type->getLabel();
+                $row['season_type'] = $roomType->season_type?->getLabel();
                 
                 $price = $roomType->getPriceByGroup($group, RoomPersonType::Uzbek);
                 $priceForeign = $roomType->getPriceByGroup($group, RoomPersonType::Foreign);

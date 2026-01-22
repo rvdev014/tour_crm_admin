@@ -302,15 +302,12 @@ class TourService
         $year = $date->year;
         $shortYear = $date->format('y');
         
-        $existingToursCount = Tour::query()->whereYear('start_date', $year)->count();
+        $number = DB::transaction(function () use ($year) {
+            $lastNumber = Tour::query()->whereYear('start_date', $year)->count();
+            return 100 + $lastNumber;
+        });
         
-        $number = 101 + $existingToursCount;
-        
-        if ($tourType == TourType::TPS) {
-            $lastLetter = 'T';
-        } else {
-            $lastLetter = 'C';
-        }
+        $lastLetter = ($tourType === TourType::TPS) ? 'T' : 'C';
         
         return "{$firstLetter}{$number}-{$shortYear}{$lastLetter}";
     }

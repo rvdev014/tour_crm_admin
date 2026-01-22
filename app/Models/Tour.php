@@ -101,13 +101,7 @@ class Tour extends Model
     protected static function booted(): void
     {
         static::creating(function (Tour $tour) {
-            // Always call TourService::getGroupNumber to ensure uniqueness
-            if (empty($tour->id)) {
-                $tour->group_number = static::generateUniqueGroupNumber($tour->type, $tour->start_date);
-            } else {
-                // If group_number is manually set, still ensure it's unique
-                $tour->group_number = static::ensureUniqueGroupNumber($tour);
-            }
+            $tour->group_number = static::generateUniqueGroupNumber($tour->type, $tour->start_date);
         });
 
         static::updating(function (Tour $tour) {

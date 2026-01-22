@@ -3,11 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Tour;
-use App\Enums\TourType;
-use App\Services\TourService;
-use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class UpdateTourNumbers extends Command
 {
@@ -30,25 +27,35 @@ class UpdateTourNumbers extends Command
      */
     public function handle(): void
     {
-        /** @var Collection<Tour> $tours */
-        $tours = Tour::query()->get();
+        echo "Начало перенумерации за 2026 год...\n";
         
-        foreach ($tours as $tour) {
-            $username = $tour->createdBy?->name ?? null;
-            $firstLetter = substr($username, 0, 1);
-            if ($tour->type == TourType::TPS) {
-                $lastLetter = 'T';
-            } else {
-                $lastLetter = 'C';
-            }
-            
-            $number = TourService::addHundred($tour->id);
-            
-            $currentYear = $tour->start_date ? Carbon::parse($tour->start_date)->format('y') : date('y');
-            $tour->group_number = "{$firstLetter}{$number}-{$currentYear}{$lastLetter}";
-            $tour->save();
-            
-            $this->info('Tour ID ' . $tour->id . ' group number updated to ' . $tour->group_number);
-        }
+        $counter = 100;
+        
+        Tour::query()
+            ->whereYear('start_date', 2026)
+            ->orderBy('created_at', 'asc')
+            ->chunkById(50, function($tours) use (&$counter) {
+                foreach ($tours as $tour) {
+                    // Первая буква (Менеджер)
+                    $firstLetter = substr($tour->group_number, 0, 1);
+                    
+                    // Последняя буква (T или C)
+                    $lastLetter = substr($tour->group_number, -1);
+                    
+                    // Формируем новый номер
+                    $newGroupNumber = "{$firstLetter}{$counter}-26{$lastLetter}";
+                    
+                    // Обновляем напрямую через DB, чтобы не сработали Observer-ы и события
+                    DB::table('tours')
+                        ->where('id', $tour->id)
+                        ->update(['group_number' => $newGroupNumber]);
+                    
+                    echo "ID {$tour->id}: {$tour->group_number} -> {$newGroupNumber}\n";
+                    
+                    $counter++;
+                }
+            });
+        
+        echo "Готово! Обработано туров: " . ($counter - 101) . "\n";
     }
 }

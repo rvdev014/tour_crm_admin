@@ -87,7 +87,7 @@ class ExportHotelService
         $tourDays = $tour->days()->orderBy('date')->get();
         foreach ($tourDays as $tourDay) {
             /** @var TourDayExpense $hotelExpense */
-            $hotelExpenses = $tourDay->expenses->first(fn(TourDayExpense $exp) => $exp->type === ExpenseType::Hotel);
+            $hotelExpenses = $tourDay->expenses->filter(fn(TourDayExpense $exp) => $exp->type === ExpenseType::Hotel);
             foreach ($hotelExpenses as $hotelExpense) {
                 $date = $tourDay->date;
                 $city = $tourDay->city->name;

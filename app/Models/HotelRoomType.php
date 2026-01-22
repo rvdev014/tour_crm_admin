@@ -13,12 +13,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $hotel_id
  * @property int $room_type_id
+ * @property int $period_id
  * @property RoomSeasonType $season_type
  * @property RoomPersonType $person_type
  * @property float $price
  * @property float $price_foreign
  *
  * @property RoomType $roomType
+ * @property HotelPeriod $period
  * @property Hotel $hotel
  */
 class HotelRoomType extends Model
@@ -30,6 +32,7 @@ class HotelRoomType extends Model
     protected $fillable = [
         'hotel_id',
         'room_type_id',
+        'period_id',
         'price',
         'price_foreign',
         'season_type',
@@ -44,6 +47,11 @@ class HotelRoomType extends Model
     public function hotel(): BelongsTo
     {
         return $this->belongsTo(Hotel::class);
+    }
+    
+    public function period(): BelongsTo
+    {
+        return $this->belongsTo(HotelPeriod::class);
     }
 
     public function roomType(): BelongsTo
