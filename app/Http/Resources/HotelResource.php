@@ -64,10 +64,12 @@ class HotelResource extends JsonResource
 
     private function getPrice($isUsd = true): ?float
     {
-        $seasonType = ExpenseService::getSeasonType($this->resource, now());
+        $period = ExpenseService::getHotelPeriod($this->resource, now());
 
         /** @var HotelRoomType $hotelRoomType */
-        $hotelRoomType = $this->roomTypes()->where('season_type', $seasonType)->first();
+        $hotelRoomType = $this->roomTypes()
+            ->where('hotel_period_id', $period->id)
+            ->first();
 
         /** @var Group $group */
         $group = Group::query()->where('name', 'website')->first();

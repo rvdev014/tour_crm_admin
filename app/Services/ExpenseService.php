@@ -187,7 +187,7 @@ class ExpenseService
                 /** @var Hotel $hotel */
                 $hotel = Hotel::query()->find($data['hotel_id']);
                 if ($hotel) {
-                    $seasonType = ExpenseService::getSeasonType($hotel, $day ? $day['date'] : $data['date']);
+                    $period = ExpenseService::getHotelPeriod($hotel, $day ? $day['date'] : $data['date']);
                     $personType = ExpenseService::getPersonType($countryId);
 
                     $hotelTotal = 0;
@@ -213,7 +213,7 @@ class ExpenseService
                         /** @var HotelRoomType $hotelRoomType */
                         $hotelRoomType = $hotel->roomTypes()
                             ->where('room_type_id', $roomTypeId)
-                            ->where('season_type', $seasonType)
+                            ->where('hotel_period_id', $period->id)
                             ->first();
 
                         if (!$hotelRoomType) {
@@ -297,16 +297,16 @@ class ExpenseService
         }
     }
 
-    public static function getSeasonType(Hotel $hotel, $date): ?RoomSeasonType
+    public static function getHotelPeriod(Hotel $hotel, $date): ?HotelPeriod
     {
         $hotelDate = Carbon::parse($date);
-        /** @var HotelPeriod $currentSeason */
-        $currentSeason = $hotel->periods()
+        /** @var HotelPeriod $currentPeriod */
+        $currentPeriod = $hotel->periods()
             ->where('start_date', '<=', $hotelDate)
             ->where('end_date', '>=', $hotelDate)
             ->first();
 
-        return $currentSeason?->season_type;
+        return $currentPeriod;
     }
 
     public static function convertExpensePrice(&$data, $attribute): void

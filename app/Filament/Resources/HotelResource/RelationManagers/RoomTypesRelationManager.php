@@ -38,7 +38,7 @@ class RoomTypesRelationManager extends RelationManager
                                         fn($query) => $query->whereNot('id', $get('id'))
                                     )
                                     ->where('room_type_id', $value)
-                                    ->where('season_type', $get('season_type'))
+                                    ->where('hotel_period_id', $get('hotel_period_id'))
                                     ->exists()
                             ) {
                                 $fail('The selected room type is already associated with the hotel.');

@@ -246,12 +246,12 @@ class ExportService
                 }
 
                 $hotel = $hotelExpense->hotel;
-                $seasonType = ExpenseService::getSeasonType($hotel, $tourDay->date);
+                $period = ExpenseService::getHotelPeriod($hotel, $tourDay->date);
 
                 /** @var HotelRoomType $hotelRoomType */
                 $hotelRoomType = $hotel->roomTypes()
                     ->where('room_type_id', $roomType['id'])
-                    ->where('season_type', $seasonType)
+                    ->where('hotel_period_id', $period->id)
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
@@ -647,12 +647,12 @@ class ExportService
             // Room types, Amount, Price, Total
             foreach ($tourRoomTypes as $roomType) {
                 $hotel = $hotelExpense->hotel;
-                $seasonType = ExpenseService::getSeasonType($hotel, $hotelExpense->date);
+                $period = ExpenseService::getHotelPeriod($hotel, $hotelExpense->date);
 
                 /** @var HotelRoomType $hotelRoomType */
                 $hotelRoomType = $hotel->roomTypes()
                     ->where('room_type_id', $roomType['id'])
-                    ->where('season_type', $seasonType)
+                    ->where('hotel_period_id', $period->id)
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;

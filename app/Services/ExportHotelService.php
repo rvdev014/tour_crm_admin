@@ -36,13 +36,13 @@ class ExportHotelService
                        $companyId = null
     ): Collection {
         $hotelPrices = collect();
-        $seasonType = ExpenseService::getSeasonType($hotelExpense->hotel, $date);
+        $period = ExpenseService::getHotelPeriod($hotelExpense->hotel, $date);
 
         foreach ($roomAmounts as $roomTypeId => $amount) {
             /** @var HotelRoomType $hotelRoomType */
             $hotelRoomType = $hotelExpense->hotel->roomTypes()
                 ->where('room_type_id', $roomTypeId)
-                ->where('season_type', $seasonType)
+                ->where('hotel_period_id', $period->id)
                 ->first();
 
             if ($hotelRoomType) {
