@@ -70,6 +70,7 @@ class RoomTypesRelationManager extends RelationManager
     {
         return $table
             ->striped()
+            ->defaultPaginationPageOption(25)
             ->recordTitleAttribute('roomType.name')
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),

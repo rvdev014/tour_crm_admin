@@ -39,10 +39,10 @@
                     <div class="flex-td">
                         @if ($roomType?->season_type)
                             <x-filament::badge
-                                    :color="$roomType?->season_type->getColor()"
+                                    :color="$roomType?->period?->season_type->getColor()"
                                     size="sm"
                             >
-                                {{ $roomType?->season_type->getLabel() }}
+                                {{ $roomType?->period?->season_type->getLabel() }}
                             </x-filament::badge>
                         @endif
                     </div>
