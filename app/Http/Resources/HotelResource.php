@@ -65,7 +65,10 @@ class HotelResource extends JsonResource
     private function getPrice($isUsd = true): ?float
     {
         $period = ExpenseService::getHotelPeriod($this->resource, now());
-
+        if (!$period) {
+            return 0;
+        }
+        
         /** @var HotelRoomType $hotelRoomType */
         $hotelRoomType = $this->roomTypes()
             ->where('hotel_period_id', $period->id)

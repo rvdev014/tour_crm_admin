@@ -247,7 +247,14 @@ class ExportService
 
                 $hotel = $hotelExpense->hotel;
                 $period = ExpenseService::getHotelPeriod($hotel, $tourDay->date);
-
+                if (!$period) {
+                    $roomTypes[] = ['value' => '', 'colspan' => 1];
+                    $amounts[] = ['value' => '', 'colspan' => 1];
+                    $prices[] = ['value' => '', 'colspan' => 1];
+                    $totals[] = ['value' => '', 'colspan' => 1];
+                    continue;
+                }
+                
                 /** @var HotelRoomType $hotelRoomType */
                 $hotelRoomType = $hotel->roomTypes()
                     ->where('room_type_id', $roomType['id'])
@@ -648,7 +655,14 @@ class ExportService
             foreach ($tourRoomTypes as $roomType) {
                 $hotel = $hotelExpense->hotel;
                 $period = ExpenseService::getHotelPeriod($hotel, $hotelExpense->date);
-
+                if (!$period) {
+                    $roomTypes[] = ['value' => '', 'colspan' => 1];
+                    $amounts[] = ['value' => '', 'colspan' => 1];
+                    $prices[] = ['value' => '', 'colspan' => 1];
+                    $totals[] = ['value' => '', 'colspan' => 1];
+                    continue;
+                }
+                
                 /** @var HotelRoomType $hotelRoomType */
                 $hotelRoomType = $hotel->roomTypes()
                     ->where('room_type_id', $roomType['id'])

@@ -37,7 +37,10 @@ class ExportHotelService
     ): Collection {
         $hotelPrices = collect();
         $period = ExpenseService::getHotelPeriod($hotelExpense->hotel, $date);
-
+        if (!$period) {
+            return $hotelPrices;
+        }
+        
         foreach ($roomAmounts as $roomTypeId => $amount) {
             /** @var HotelRoomType $hotelRoomType */
             $hotelRoomType = $hotelExpense->hotel->roomTypes()

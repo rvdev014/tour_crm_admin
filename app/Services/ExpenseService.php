@@ -186,51 +186,56 @@ class ExpenseService
             case ExpenseType::Hotel->value:
                 /** @var Hotel $hotel */
                 $hotel = Hotel::query()->find($data['hotel_id']);
-                if ($hotel) {
-                    $period = ExpenseService::getHotelPeriod($hotel, $day ? $day['date'] : $data['date']);
-                    $personType = ExpenseService::getPersonType($countryId);
-
-                    $hotelTotal = 0;
-                    $roomAmounts = $roomAmounts ?: ExpenseService::getRoomingAmounts($data);
-                    
-                    foreach ($roomAmounts as $roomTypeId => $amount) {
-                        if (empty($amount)) {
-                            continue;
-                        }
-
-                        $totalNights = $data['hotel_total_nights'] ?? 1;
-
-                        // For TPS tours: if check-in time is before 14:00, calculate as 1.5 days instead of 1
-//                        if ($isTps && $totalNights == 1 && !empty($data['hotel_checkin_time'])) {
-//                            $checkinTime = \Carbon\Carbon::parse($data['hotel_checkin_time']);
-//                            if ($checkinTime->format('H:i') < '14:00') {
-//                                $totalNights = 1.5;
-//                            }
-//                        }
-
-//                        $totalNights += 1;
-
-                        /** @var HotelRoomType $hotelRoomType */
-                        $hotelRoomType = $hotel->roomTypes()
-                            ->where('room_type_id', $roomTypeId)
-                            ->where('hotel_period_id', $period->id)
-                            ->first();
-
-                        if (!$hotelRoomType) {
-                            continue;
-                        }
-
-                        if ($isTps) {
-                            $hotelPrice = $hotelRoomType->getPrice($personType);
-                        } else {
-                            $hotelPrice = $hotelRoomType->getPriceWithPercent($companyId, $personType);
-                        }
-                        $hotelTotal += $hotelPrice * $amount * $totalNights;
-                    }
-
-                    $data['price'] = $hotelTotal;
+                if (!$hotel) {
+                    return $data;
                 }
-
+                
+                $period = ExpenseService::getHotelPeriod($hotel, $day ? $day['date'] : $data['date']);
+                if (!$period) {
+                    return $data;
+                }
+                
+                $personType = ExpenseService::getPersonType($countryId);
+                
+                $hotelTotal = 0;
+                $roomAmounts = $roomAmounts ?: ExpenseService::getRoomingAmounts($data);
+                
+                foreach ($roomAmounts as $roomTypeId => $amount) {
+                    if (empty($amount)) {
+                        continue;
+                    }
+                    
+                    $totalNights = $data['hotel_total_nights'] ?? 1;
+                    
+                    // For TPS tours: if check-in time is before 14:00, calculate as 1.5 days instead of 1
+                    //                        if ($isTps && $totalNights == 1 && !empty($data['hotel_checkin_time'])) {
+                    //                            $checkinTime = \Carbon\Carbon::parse($data['hotel_checkin_time']);
+                    //                            if ($checkinTime->format('H:i') < '14:00') {
+                    //                                $totalNights = 1.5;
+                    //                            }
+                    //                        }
+                    
+                    //                        $totalNights += 1;
+                    
+                    /** @var HotelRoomType $hotelRoomType */
+                    $hotelRoomType = $hotel->roomTypes()
+                        ->where('room_type_id', $roomTypeId)
+                        ->where('hotel_period_id', $period->id)
+                        ->first();
+                    
+                    if (!$hotelRoomType) {
+                        continue;
+                    }
+                    
+                    if ($isTps) {
+                        $hotelPrice = $hotelRoomType->getPrice($personType);
+                    } else {
+                        $hotelPrice = $hotelRoomType->getPriceWithPercent($companyId, $personType);
+                    }
+                    $hotelTotal += $hotelPrice * $amount * $totalNights;
+                }
+                
+                $data['price'] = $hotelTotal;
                 return $data;
 
             case ExpenseType::Museum->value:
