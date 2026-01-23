@@ -2,24 +2,21 @@
 
 namespace App\Filament\Resources\HotelResource\RelationManagers;
 
-use Carbon\Carbon;
-use App\Models\HotelPeriod;
-use App\Enums\RoomPersonType;
-use App\Enums\RoomSeasonType;
-use App\Models\Hotel;
 use Closure;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Tables;
+use App\Models\Hotel;
 use Filament\Forms\Get;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use App\Models\HotelPeriod;
 use App\Models\HotelRoomType;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
-use Filament\Tables\Table;
 
 class RoomTypesRelationManager extends RelationManager
 {
     protected static string $relationship = 'roomTypes';
-
+    
     public function form(Form $form): Form
     {
         return $form->disabled(fn() => auth()->user()->isOperator())
@@ -48,9 +45,16 @@ class RoomTypesRelationManager extends RelationManager
                             }
                         },
                     ]),
-                Forms\Components\Select::make('season_type')
-                    ->required()
-                    ->options(RoomSeasonType::class),
+                Forms\Components\Select::make('hotel_period_id')
+                    ->label('Hotel Period')
+                    ->options(fn(Forms\Get $get) => HotelPeriod::query()
+                        ->where('hotel_id', $this->getOwnerRecord()->id)
+                        ->get()
+                        ->pluck('extended_label', 'id')
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 Forms\Components\TextInput::make('price')
                     ->label('Price Uz')
                     ->required()
@@ -61,7 +65,7 @@ class RoomTypesRelationManager extends RelationManager
                     ->maxLength(255),
             ]);
     }
-
+    
     public function table(Table $table): Table
     {
         return $table
@@ -69,27 +73,14 @@ class RoomTypesRelationManager extends RelationManager
             ->recordTitleAttribute('roomType.name')
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),
-                Tables\Columns\TextColumn::make('season_type')->badge(),
-                Tables\Columns\TextColumn::make('period_ranges')
-                    ->getStateUsing(function($record) {
+                Tables\Columns\TextColumn::make('period.season_type')
+                    ->label('Period')
+                    ->badge() // Превращает текст в цветной бадж
+                    // Цвет и иконка подтянутся из Enum автоматически,
+                    // так как колонка ссылается на поле с типом RoomSeasonType
+                    ->formatStateUsing(function($state, $record) {
                         /** @var HotelRoomType $record */
-                        $requiredSeasonType = $record->season_type;
-
-                        $periods = $record->hotel->periods()
-                            ->where('season_type', $requiredSeasonType)
-                            ->get(['start_date', 'end_date']);
-
-                        if ($periods->isEmpty()) {
-                            return '';
-                        }
-
-                        $ranges = $periods->map(function ($period) {
-                            $start = Carbon::parse($period->start_date)->format('d.m');
-                            $end = Carbon::parse($period->end_date)->format('d.m');
-                            return "{$start} - {$end}";
-                        });
-
-                        return $ranges->implode(', ');
+                        return $record->period?->getExtendedLabelAttribute() ?? '-';
                     }),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Price Uz')
@@ -99,7 +90,7 @@ class RoomTypesRelationManager extends RelationManager
                     ->label('Price Foreign')
                     ->money()
                     ->numeric(),
-//                Tables\Columns\TextColumn::make('person_type')->badge(),
+                //                Tables\Columns\TextColumn::make('person_type')->badge(),
             ])
             ->filters([
                 //
