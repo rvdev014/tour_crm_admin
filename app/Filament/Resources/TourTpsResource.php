@@ -55,7 +55,7 @@ class TourTpsResource extends Resource
     
     public static function form(Form $form): Form
     {
-        return $form->disabled(fn() => auth()->user()->isOperator())->schema([
+        return $form->schema([
             Components\Fieldset::make('Tour details')->schema([
                 Hidden::make('price_currency'),
                 Hidden::make('guide_price_currency'),
@@ -237,7 +237,16 @@ class TourTpsResource extends Resource
                     ->collapsible()
                     ->collapsed(),
             ])
-        ]);
+        ])->disabled(function($record) {
+            if (!$record) {
+                return false;
+            }
+            
+            if (auth()->user()->isOperator()) {
+                return $record->created_by != auth()->id();
+            }
+            return false;
+        });
     }
     
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput

@@ -26,7 +26,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form->disabled(fn() => auth()->user()->isOperator())
+        return $form
             ->schema([
                 Components\Grid::make()->schema([
                     Components\Hidden::make('index'),

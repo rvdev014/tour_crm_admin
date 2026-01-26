@@ -31,7 +31,7 @@ class WebTourResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form->disabled(fn() => auth()->user()->isOperator())
+        return $form
             ->schema([
                 Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('name_ru')

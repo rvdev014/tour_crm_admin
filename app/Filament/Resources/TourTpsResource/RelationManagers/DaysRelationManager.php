@@ -28,7 +28,7 @@ class DaysRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form->disabled(fn() => auth()->user()->isOperator())
+        return $form
             ->schema([
                 Components\Grid::make(3)->schema([
                     Components\DatePicker::make('date')

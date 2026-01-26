@@ -48,7 +48,7 @@ class TourCorporateResource extends Resource
     
     public static function form(Form $form): Form
     {
-        return $form->disabled(fn() => auth()->user()->isOperator())->schema([
+        return $form->schema([
             Components\Fieldset::make('Tour details')->schema([
                 
                 Components\Grid::make(4)->schema([
@@ -528,7 +528,16 @@ class TourCorporateResource extends Resource
                         );
                     })*/
                 ]),
-        ]);
+        ])->disabled(function($record) {
+            if (!$record) {
+                return false;
+            }
+            
+            if (auth()->user()->isOperator()) {
+                return $record->created_by != auth()->id();
+            }
+            return false;
+        });
     }
     
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput

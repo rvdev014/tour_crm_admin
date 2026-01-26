@@ -80,7 +80,7 @@ class TransferResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form->disabled(fn() => auth()->user()->isOperator())
+        return $form
             ->schema([
                 Hidden::make('sell_price_currency'),
                 Hidden::make('buy_price_currency'),
