@@ -8,11 +8,16 @@
     $group = $state['group'] ?? null;
     $currency = $state['currency'];
     $year = $state['year'];
-    $hotel->load([
-        'roomTypes' => function ($query) use ($group, $year) {
-            $query->whereHas('period', fn ($q) => $q->whereYear('start_date', $year));
-        }
-    ]);
+
+    if (!empty($year)) {
+        $hotel->load([
+            'roomTypes' => function ($query) use ($group, $year) {
+                $query->whereHas('period', fn ($q) => $q->whereYear('start_date', $year));
+            }
+        ]);
+    } else {
+        $hotel->loadMissing('roomTypes');
+    }
 
 //    if ($hotel->roomTypes->isEmpty()) {
 //        return;

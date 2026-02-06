@@ -269,11 +269,11 @@ class HotelResource extends Resource
                             Forms\Components\Select::make('currency')
                                 ->label('Currency')
                                 ->native(false)
-                                ->formatStateUsing(fn() => CurrencyEnum::UZS->value)
+                                ->default(CurrencyEnum::UZS->value)
                                 ->options(CurrencyEnum::class),
                             Forms\Components\Select::make('year')
                                 ->label('Year')
-                                ->formatStateUsing(fn() => (int)date('Y'))
+                                ->default(date('Y'))
                                 ->native(false)
                                 ->options(function() {
                                     $currentYear = (int)date('Y');
@@ -291,6 +291,12 @@ class HotelResource extends Resource
                     })
                     ->indicateUsing(function(array $data): array {
                         $indicators = [];
+                        if (isset($data['currency'])) {
+                            $indicators[] = 'Currency: ' . CurrencyEnum::tryFrom($data['currency'])?->getLabel();
+                        }
+                        if (isset($data['year'])) {
+                            $indicators[] = 'Year: ' . $data['year'];
+                        }
                         return $indicators;
                     })
             ], layout: FiltersLayout::AboveContent)

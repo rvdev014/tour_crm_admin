@@ -297,6 +297,7 @@ class TourTpsResource extends Resource
                             Components\Select::make('year')
                                 ->label('Year')
                                 ->native(false)
+                                ->default((int)date('Y'))
                                 ->options(function() {
                                     $currentYear = (int)date('Y');
                                     $startYear = $currentYear - 5;

@@ -208,6 +208,12 @@ class TourCorporateResource extends Resource
                                     ->reactive(),
                                 Components\Select::make('city_id')
                                     ->native(false)
+                                    ->label(function($get) {
+                                        if ($get('type') == ExpenseType::Train->value) {
+                                            return 'City from';
+                                        }
+                                        return 'City';
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->options(fn($get) => TourService::getCities())
@@ -334,7 +340,7 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('City')
+                                        ->label('City to')
                                         ->options(TourService::getCities())
                                         ->reactive(),
                                     
@@ -371,7 +377,7 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('City')
+                                        ->label('City to')
                                         ->options(TourService::getCities())
                                         ->reactive(),
                                     
@@ -559,7 +565,7 @@ class TourCorporateResource extends Resource
     {
         return $table
             ->striped()
-            ->defaultSort('start_date', 'asc')
+            ->defaultSort('created_at', 'desc')
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
             ->filters([
@@ -578,6 +584,7 @@ class TourCorporateResource extends Resource
                             Components\Select::make('year')
                                 ->label('Year')
                                 ->native(false)
+                                ->default((int)date('Y'))
                                 ->options(function() {
                                     $currentYear = (int)date('Y');
                                     $startYear = $currentYear - 5;
@@ -629,8 +636,7 @@ class TourCorporateResource extends Resource
                         return $query
                             ->when($data['year'], function ($query, $year) {
                                 return $query->where(function($q) use ($year) {
-                                    $q->whereYear('start_date', $year)
-                                        ->orWhereYear('end_date', $year);
+                                    $q->whereYear('created_at', $year);
                                 });
                             })
                             ->when($data['city_id'], fn($query, $cityId) => $query->where('city_id', $cityId))

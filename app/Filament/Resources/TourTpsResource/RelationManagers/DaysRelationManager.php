@@ -114,6 +114,12 @@ class DaysRelationManager extends RelationManager
                                 ->reactive(),
                             Components\Select::make('city_id')
                                 ->native(false)
+                                ->label(function($get) {
+                                    if ($get('type') == ExpenseType::Train->value) {
+                                        return 'City from';
+                                    }
+                                    return 'City';
+                                })
                                 ->searchable()
                                 ->preload()
                                 ->options(fn($get) => TourService::getCities())
@@ -219,7 +225,7 @@ class DaysRelationManager extends RelationManager
                                     ->native(false)
                                     ->searchable()
                                     ->preload()
-                                    ->label('City')
+                                    ->label('City to')
                                     ->options(TourService::getCities())
                                     ->reactive(),
 
@@ -340,7 +346,7 @@ class DaysRelationManager extends RelationManager
                                     ->native(false)
                                     ->searchable()
                                     ->preload()
-                                    ->label('City')
+                                    ->label('City to')
                                     ->options(TourService::getCities())
                                     ->reactive(),
 
