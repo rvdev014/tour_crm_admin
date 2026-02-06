@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\CompanyType;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property int $id
@@ -18,13 +20,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $group_id
  *
  * @property Group $group
+ * @property Collection<Tour> $tours
  */
 class Company extends Model
 {
     use HasFactory;
-
+    
     public $timestamps = false;
-
+    
     protected $fillable = [
         'name',
         'inn',
@@ -34,13 +37,18 @@ class Company extends Model
         'additional_percent',
         'group_id'
     ];
-
+    
     protected $casts = [
         'type' => CompanyType::class,
     ];
-
+    
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+    
+    public function tours(): HasMany
+    {
+        return $this->hasMany(Tour::class);
     }
 }

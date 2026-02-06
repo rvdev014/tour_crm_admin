@@ -64,8 +64,7 @@ class HotelController extends Controller
                         $subquery->select('price')
                             ->from('hotel_room_types')
                             ->join('hotel_periods', function ($join) {
-                                $join->on('hotel_periods.hotel_id', '=', 'hotel_room_types.hotel_id')
-                                    ->on('hotel_periods.season_type', '=', 'hotel_room_types.season_type');
+                                $join->on('hotel_periods.id', '=', 'hotel_room_types.hotel_period_id');
                             })
                             ->whereColumn('hotel_room_types.hotel_id', 'hotels.id')
                             ->where('hotel_periods.start_date', '<=', $now)

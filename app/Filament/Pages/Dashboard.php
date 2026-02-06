@@ -13,7 +13,7 @@ use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Illuminate\Support\Carbon;
 
-class Dashboard extends \Filament\Pages\Dashboard
+class Dashboard
 {
     use HasFiltersForm;
 

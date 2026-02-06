@@ -23,3 +23,5 @@ backups
 build.sh
 
 storage/debugbar
+
+*.sql
