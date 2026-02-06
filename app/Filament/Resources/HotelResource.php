@@ -6,7 +6,6 @@ use Filament\Forms;
 use Filament\Tables;
 use App\Models\Hotel;
 use App\Enums\RateEnum;
-use App\Models\Company;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Enums\CurrencyEnum;
@@ -174,19 +173,53 @@ class HotelResource extends Resource
                 ]),
                 
                 Forms\Components\Grid::make()->schema([
-                    Forms\Components\FileUpload::make('photos')
-                        ->multiple()
-                        ->formatStateUsing(function($record) {
-                            if (!$record) {
-                                return [];
-                            }
-                            /** @var Hotel $record */
-                            $value = $record->attachments->map(fn($attachment) => $attachment->file_path);
-                            return $value->toArray();
-                        })
-                        ->storeFiles(false)
-                        ->columnSpan(1)
-                        ->image(),
+                    
+                    Forms\Components\Section::make('Галерея изображений') // 1. Обертка-аккордеон
+//                    ->description('Загрузите фотографии (можно скроллить список)')
+                        ->collapsible() // Делаем сворачиваемым
+                        ->collapsed(false) // Открыт по умолчанию (или true, если хотите закрыть)
+//                        ->badge(fn($get) => count($get('photos') ?? []) . ' фото') // Показываем счетчик
+                        ->schema([
+                            
+                            Forms\Components\Group::make() // 2. Обертка-скролл
+                                ->schema([
+                                    Forms\Components\FileUpload::make('photos')
+                                        ->multiple()
+                                        ->formatStateUsing(function($record) {
+                                            if (!$record) {
+                                                return [];
+                                            }
+                                            /** @var Hotel $record */
+                                            $value = $record->attachments->map(fn($attachment) => $attachment->file_path);
+                                            return $value->toArray();
+                                        })
+                                        ->storeFiles(false)
+                                        ->columnSpan(1)
+                                        ->image()
+                                        ->panelLayout('grid'),
+                                ])
+                                ->extraAttributes([
+                                    // Tailwind классы для скролла:
+                                    // max-h-[500px] - ограничение высоты (можете менять число)
+                                    // overflow-y-auto - вертикальный скролл при переполнении
+                                    // p-1 - небольшой отступ, чтобы фокус не обрезался
+                                    'class' => 'max-h-[500px] overflow-y-auto p-1 custom-scrollbar',
+                                    'style' => 'max-height: 500px;!important;', // Фиксированная высота 300px
+                                ]),
+                        
+                        ]),
+//
+//                    Forms\Components\Group::make()
+//                        ->schema([
+//
+//                        ])
+//                        ->extraAttributes([
+//                            // max-h-60 (240px) или max-h-96 (384px)
+//                            // overflow-y-auto добавляет скролл, если контент не влезает
+//                            'class' => 'max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-xl p-2',
+//                            'style' => 'height: 300px;!important;', // Фиксированная высота 300px
+//                        ])
+//                        ->columnSpanFull(),
                     
                     Forms\Components\Grid::make(2)->schema([
                         Forms\Components\Textarea::make('description_en')
