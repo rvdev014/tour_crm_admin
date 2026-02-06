@@ -62,7 +62,6 @@ class HotelRoomType extends Model
     public function getPrice($personType): int|float
     {
         $hotelPrice = $personType === RoomPersonType::Uzbek ? $this->price : $this->price_foreign;
-        
         if ($this->hotel->nds_included) {
             $hotelPrice += $hotelPrice * 12 / 100;
         }

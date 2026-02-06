@@ -54,32 +54,71 @@ class HotelController extends Controller
         if (!empty($facilityIds)) {
             $query->whereHas('facilities', fn($q) => $q->whereIn('facilities.id', $facilityIds));
         }
-
+        
         if (!empty($sort)) {
             $now = now()->format('Y-m-d');
             $sortDirection = $sort === 'cheap' ? 'asc' : 'desc';
+            
+            // 1. Получаем константы из сервисов, чтобы передать их в SQL
+            $tourSborValue = \App\Services\TourService::getTourSborValue(); // Например: 34000 (сумы) или 3 (доллары)
+            
+            // Получаем процент наценки группы 'website'.
+            // Предполагаем, что он фиксированный. Если он зависит от цены, это усложнит SQL.
+            $websiteGroup = \App\Models\Group::where('name', 'website')->first();
+            $groupPercent = $websiteGroup ? $websiteGroup->value : 0; // Например, 10 (процентов)
+            $groupMultiplier = 1 + ($groupPercent / 100); // Например, 1.10
+            
             $query
                 ->addSelect([
-                    'today_price' => function ($subquery) use ($now) {
-                        $subquery->select('price')
+                    'today_price' => function ($subquery) use ($now, $tourSborValue, $groupMultiplier) {
+                        // Формула из PHP:
+                        // Base = price_foreign
+                        // WithNds = Base * (nds_included ? 1.12 : 1)
+                        // WithSbor = WithNds + (TourSborValue * tour_sbor_percent / 100)
+                        // Final = WithSbor * GroupMultiplier
+                        
+                        $subquery
+                            ->selectRaw('
+                        (
+                            (
+                                -- 1. Базовая цена + НДС (12%)
+                                CAST(hotel_room_types.price_foreign AS DECIMAL(15,2)) * (CASE WHEN hotels.nds_included = true THEN 1.12 ELSE 1.0 END)
+                            )
+                            +
+                            (
+                                -- 2. Турсбор (Фикс * Процент отеля / 100)
+                                ? * COALESCE(hotels.tour_sbor, 0) / 100
+                            )
+                        ) * ? as calculated_total
+                    ', [$tourSborValue, $groupMultiplier]) // Передаем переменные в запрос
+                            
                             ->from('hotel_room_types')
-                            ->join('hotel_periods', function ($join) {
+                            ->join('hotel_periods', function ($join) use ($now) {
                                 $join->on('hotel_periods.id', '=', 'hotel_room_types.hotel_period_id');
                             })
                             ->whereColumn('hotel_room_types.hotel_id', 'hotels.id')
                             ->where('hotel_periods.start_date', '<=', $now)
                             ->where('hotel_periods.end_date', '>=', $now)
-                            ->orderBy('price', 'asc')
+                            
+                            // --- НОВАЯ СОРТИРОВКА ---
+                            // 1. Сначала выбираем самый короткий период (end_date - start_date ASC)
+                            ->orderByRaw('("hotel_periods"."end_date" - "hotel_periods"."start_date") ASC')
+                            
+                            // 2. Если длины одинаковые, берем самую дешевую комнату
+                            ->orderBy('hotel_room_types.price_foreign', 'asc')
                             ->limit(1);
                     }
                 ])
-                ->orderBy('today_price', $sortDirection);
+                // Сортируем результат
+                ->orderByRaw("today_price $sortDirection NULLS LAST");
         }
 
         $hotels = $query
             ->orderByRaw('rate DESC NULLS LAST')
             ->paginate(10);
 
+//        dd($hotels->items());
+        
         return response()->json([
             'data' => HotelResource::collection($hotels->items()),
             'pagination' => [

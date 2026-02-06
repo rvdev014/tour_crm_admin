@@ -309,8 +309,16 @@ class ExpenseService
         $currentPeriod = $hotel->periods()
             ->where('start_date', '<=', $hotelDate)
             ->where('end_date', '>=', $hotelDate)
+            // Сортируем: сначала те, у которых разница в днях меньше (самые короткие)
+            // В Postgres/MySQL можно сортировать по разнице дат, но проще сделать это в PHP,
+            // так как периодов обычно мало (1-3 шт).
+            ->get()
+            ->sortBy(function ($period) {
+                // Считаем длину периода в днях
+                return Carbon::parse($period->end_date)->diffInDays(Carbon::parse($period->start_date));
+            })
             ->first();
-
+        
         return $currentPeriod;
     }
 

@@ -85,16 +85,7 @@ class Hotel extends Model
 
     public function roomTypes(): HasMany
     {
-        return $this->hasMany(HotelRoomType::class)
-            ->orderByRaw("
-            CASE season_type
-                WHEN 3 THEN 1
-                WHEN 4 THEN 2
-                WHEN 5 THEN 3
-                WHEN 2 THEN 4
-                ELSE 5
-            END
-        ");
+        return $this->hasMany(HotelRoomType::class)->orderBy('price_foreign', 'asc');
     }
 
     public function country(): BelongsTo
