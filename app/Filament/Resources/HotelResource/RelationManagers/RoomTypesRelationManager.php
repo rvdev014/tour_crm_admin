@@ -11,11 +11,18 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\HotelPeriod;
 use App\Models\HotelRoomType;
+use Filament\Tables\Enums\FiltersLayout;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\RelationManagers\RelationManager;
 
 class RoomTypesRelationManager extends RelationManager
 {
     protected static string $relationship = 'roomTypes';
+    
+    //    public function filterTableQuery(Builder $query): Builder
+    //    {
+    //        return $query->whereHas('period', fn($q) => $q->whereYear('start_date', now()->year));
+    //    }
     
     public function form(Form $form): Form
     {
@@ -72,6 +79,24 @@ class RoomTypesRelationManager extends RelationManager
             ->striped()
             ->defaultPaginationPageOption(25)
             ->recordTitleAttribute('roomType.name')
+            ->filters([
+                Tables\Filters\SelectFilter::make('year')
+                    ->label('Год периода')
+                    ->options(function () {
+                        $years = range(now()->subYears(2)->year, now()->addYears(2)->year);
+                        return array_combine($years, $years);
+                    })
+                    ->default(now()->year) // Установка 2026 по умолчанию
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            fn (Builder $query, $date): Builder => $query->whereHas('period', function ($q) use ($date) {
+                                $q->whereYear('start_date', $date);
+                            })
+                        );
+                    })
+            ])
+            ->filtersLayout(FiltersLayout::AboveContent)
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),
                 Tables\Columns\TextColumn::make('period.season_type')
@@ -92,9 +117,6 @@ class RoomTypesRelationManager extends RelationManager
                     ->money()
                     ->numeric(),
                 //                Tables\Columns\TextColumn::make('person_type')->badge(),
-            ])
-            ->filters([
-                //
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),

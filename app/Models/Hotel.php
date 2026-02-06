@@ -41,6 +41,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Country $country
  * @property Collection<HotelRoomType> $roomTypes
  * @property Collection<HotelPeriod> $periods
+ * @property Collection<HotelPeriod> $currentYearPeriods
  * @property Collection<ManualPhone> $phones
  * @property Collection<Facility> $facilities
  * @property Collection<Attachment> $attachments
@@ -101,6 +102,11 @@ class Hotel extends Model
     public function periods(): HasMany
     {
         return $this->hasMany(HotelPeriod::class)->orderBy('id');
+    }
+    
+    public function currentYearPeriods(): HasMany
+    {
+        return $this->hasMany(HotelPeriod::class)->whereYear('start_date', now()->year);
     }
 
     public function phones(): MorphMany

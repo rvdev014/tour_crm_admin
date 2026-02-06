@@ -7,7 +7,12 @@
     $isFirst = $state['isFirst'];
     $group = $state['group'] ?? null;
     $currency = $state['currency'];
-    $hotel->loadMissing('roomTypes');
+    $year = $state['year'];
+    $hotel->load([
+        'roomTypes' => function ($query) use ($group, $year) {
+            $query->whereHas('period', fn ($q) => $q->whereYear('start_date', $year));
+        }
+    ]);
 
 //    if ($hotel->roomTypes->isEmpty()) {
 //        return;
