@@ -463,11 +463,20 @@ class DaysRelationManager extends RelationManager
 
                         // Extra
                         Components\Fieldset::make('Extra info')->schema([
-                            Components\Grid::make(3)->schema([
+                            Components\Grid::make(4)->schema([
                                 Components\TextInput::make('other_name')
                                     ->label('Name'),
 
                                 self::getExpensePriceInput(),
+
+                                Components\Select::make('status')
+                                    ->options(ExpenseStatus::class)
+                                    ->default(ExpenseStatus::New->value)
+                                    ->required()
+                                    ->native(false)
+                                    ->searchable()
+                                    ->preload()
+                                    ->label('Status'),
 
                                 Components\Textarea::make('comment')->label('Comment'),
                             ]),

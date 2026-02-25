@@ -414,6 +414,15 @@ class ExpensesThroughDaysRelationManager extends RelationManager
 
                         self::getExpensePriceInput(),
 
+                        Components\Select::make('status')
+                            ->options(ExpenseStatus::class)
+                            ->default(ExpenseStatus::New->value)
+                            ->required()
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->label('Status'),
+
                         Components\Textarea::make('comment')->label('Comment'),
                     ]),
                 ])->visible(fn($get) => $get('type') == ExpenseType::Extra->value),

@@ -51,6 +51,7 @@ services:
   mailhog:
     image: mailhog/mailhog
     restart: always
+    platform: linux/amd64
     ports:
       - "${MAILHOG_PORT}:8025"
       - "1025:1025"
