@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\WebTourPriceType;
 use App\Enums\WebTourPriceStatus;
 use App\Enums\WebTourStatus;
 use App\Filament\Resources\WebTourResource\Pages;
@@ -33,7 +34,7 @@ class WebTourResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(3)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('name_ru')
                         ->required()
                         ->maxLength(255),
@@ -42,6 +43,11 @@ class WebTourResource extends Resource
                     Forms\Components\Select::make('status')
                         ->options(WebTourStatus::class)
                         ->default(WebTourStatus::New),
+                    Forms\Components\Select::make('type')
+                        ->options(WebTourPriceType::class)
+                        ->default(WebTourPriceType::Default)
+                        ->live() // Required to dynamically show/hide the repeaters below
+                        ->required(),
                 ]),
 
                 Forms\Components\Grid::make(1)->schema([
@@ -151,6 +157,7 @@ class WebTourResource extends Resource
                     ->relationship('prices')
                     ->columnSpanFull()
                     ->addActionAlignment('end')
+                    ->visible(fn ($get) => $get('type') === WebTourPriceType::Default || $get('type') === null)
                     ->schema([
                         Forms\Components\Grid::make(3)->schema([
                             Forms\Components\DatePicker::make('from_date')
@@ -165,6 +172,26 @@ class WebTourResource extends Resource
                                 ->numeric(),
                             Forms\Components\Select::make('status')
                                 ->options(WebTourPriceStatus::class)
+                        ]),
+                    ]),
+                
+                // --- CONDITIONAL REPEATER 2: FREE PRICES ---
+                Forms\Components\Repeater::make('freePrices')
+                    ->relationship('freePrices')
+                    ->columnSpanFull()
+                    ->addActionAlignment('end')
+                    ->visible(fn ($get) => $get('type') === WebTourPriceType::Free)
+                    ->schema([
+                        Forms\Components\Grid::make(2)->schema([
+                            Forms\Components\TextInput::make('pax_count')
+                                ->label('Pax Count')
+                                ->required()
+                                ->numeric()
+                                ->minValue(1),
+                            Forms\Components\TextInput::make('price')
+                                ->label('Price')
+                                ->required()
+                                ->numeric(),
                         ]),
                     ]),
 

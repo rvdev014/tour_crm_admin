@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\TourStatus;
+use App\Enums\WebTourType;
 use App\Enums\WebTourStatus;
 use App\Traits\HasLocaleFields;
+use App\Enums\WebTourPriceType;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +33,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $description_en
  * @property string|null $photo
  * @property bool $is_popular
+ * @property WebTourPriceType $type
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
@@ -40,6 +43,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<WebTourPackage> $packagesIncluded
  * @property-read Collection<WebTourPackage> $packagesNotIncluded
  * @property-read Collection<WebTourPrice> $prices
+ * @property-read Collection<WebTourFreePrice> $freePrices
  * @property-read WebTourPrice $currentPrice
  * @property-read Collection<WebTour> $similarTours
  * @property-read Collection<SimilarTour> $similarToursRel
@@ -58,6 +62,7 @@ class WebTour extends Model
         'deadline' => 'datetime',
         'status' => WebTourStatus::class,
         'is_popular' => 'boolean',
+        'type' => WebTourPriceType::class,
     ];
 
     public function getNameAttribute(): string
@@ -95,6 +100,11 @@ class WebTour extends Model
     public function prices(): HasMany
     {
         return $this->hasMany(WebTourPrice::class);
+    }
+    
+    public function freePrices(): HasMany
+    {
+        return $this->hasMany(WebTourFreePrice::class);
     }
 
     public function currentPrice(): HasOne
