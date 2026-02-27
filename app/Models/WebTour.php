@@ -62,7 +62,7 @@ class WebTour extends Model
         'deadline' => 'datetime',
         'status' => WebTourStatus::class,
         'is_popular' => 'boolean',
-        'type' => WebTourPriceType::class,
+//        'type' => WebTourPriceType::class,
     ];
 
     public function getNameAttribute(): string
