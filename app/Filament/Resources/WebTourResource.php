@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Illuminate\Support\Arr;
 use App\Enums\WebTourPriceType;
 use App\Enums\WebTourPriceStatus;
 use App\Enums\WebTourStatus;
@@ -74,6 +75,12 @@ class WebTourResource extends Resource
                 Forms\Components\Repeater::make('days')
                     ->relationship('days')
                     ->columnSpanFull()
+                    ->itemLabel(function ($get, $uuid) {
+                        $index = array_search($uuid, array_keys($get('days'))) ?? 0;
+                        $index++;
+                        
+                        return "Day - $index";
+                    })
                     ->addActionAlignment('end')
                     ->schema([
                         Forms\Components\Grid::make(3)->schema([

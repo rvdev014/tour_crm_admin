@@ -122,7 +122,7 @@ class HotelResource extends Resource
                     
                     Forms\Components\Checkbox::make('nds_included')
                         ->inline(false)
-                        ->label('NDS included'),
+                        ->label('NDS'),
                     
                     Forms\Components\Select::make('tour_sbor')
                         ->options([
