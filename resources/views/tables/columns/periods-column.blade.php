@@ -3,11 +3,11 @@
 
     /** @var Hotel $hotel */
     $state = $getState();
-    $hotel = $state['hotel'];
-    $isFirst = $state['isFirst'];
+    $hotel = $state['hotel'] ?? null;
+    $isFirst = $state['isFirst'] ?? false;
     $group = $state['group'] ?? null;
-    $currency = $state['currency'];
-    $year = $state['year'];
+    $currency = $state['currency'] ?? CurrencyEnum::UZS->value;
+    $year = $state['year'] ?? null;
 
     if (!empty($year)) {
         $hotel->load([

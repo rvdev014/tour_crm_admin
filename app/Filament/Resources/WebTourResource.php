@@ -51,10 +51,15 @@ class WebTourResource extends Resource
                         ->required(),
                 ]),
 
-                Forms\Components\Grid::make(1)->schema([
+                Forms\Components\Grid::make(4)->schema([
                     Forms\Components\Toggle::make('is_popular')
                         ->label('Popular Tour')
                         ->default(false),
+                    
+                    Forms\Components\Select::make('categories')
+                        ->relationship('categories', 'name_ru')
+                        ->multiple()
+                        ->preload(),
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
