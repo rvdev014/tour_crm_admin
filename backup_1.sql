@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict G71mB24tGqc0QyJ58QgJS4yMjfcaKGF0QCNx15yMR5uDK0xpUWPissn4gYjv7iA
+\restrict ygVORFwMfbpUvBqLo6JTbPIsY2hbzFmH1ZTBsDhvQassWaOg2ivrUAzOGR0Gz6R
 
 -- Dumped from database version 17.6 (Ubuntu 17.6-1.pgdg24.04+1)
 -- Dumped by pg_dump version 17.6 (Ubuntu 17.6-1.pgdg24.04+1)
@@ -179,6 +179,42 @@ ALTER SEQUENCE public.buy_requests_id_seq OWNER TO developer;
 --
 
 ALTER SEQUENCE public.buy_requests_id_seq OWNED BY public.buy_requests.id;
+
+
+--
+-- Name: categories; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.categories (
+    id bigint NOT NULL,
+    name_ru character varying(255) NOT NULL,
+    name_en character varying(255),
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.categories OWNER TO developer;
+
+--
+-- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: developer
+--
+
+CREATE SEQUENCE public.categories_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.categories_id_seq OWNER TO developer;
+
+--
+-- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: developer
+--
+
+ALTER SEQUENCE public.categories_id_seq OWNED BY public.categories.id;
 
 
 --
@@ -2437,6 +2473,40 @@ ALTER SEQUENCE public.web_tour_accommodations_id_seq OWNED BY public.web_tour_ac
 
 
 --
+-- Name: web_tour_categories; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.web_tour_categories (
+    id bigint NOT NULL,
+    web_tour_id bigint NOT NULL,
+    category_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.web_tour_categories OWNER TO developer;
+
+--
+-- Name: web_tour_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: developer
+--
+
+CREATE SEQUENCE public.web_tour_categories_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.web_tour_categories_id_seq OWNER TO developer;
+
+--
+-- Name: web_tour_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: developer
+--
+
+ALTER SEQUENCE public.web_tour_categories_id_seq OWNED BY public.web_tour_categories.id;
+
+
+--
 -- Name: web_tour_day_facilities; Type: TABLE; Schema: public; Owner: developer
 --
 
@@ -2513,6 +2583,43 @@ ALTER SEQUENCE public.web_tour_days_id_seq OWNER TO developer;
 --
 
 ALTER SEQUENCE public.web_tour_days_id_seq OWNED BY public.web_tour_days.id;
+
+
+--
+-- Name: web_tour_free_prices; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.web_tour_free_prices (
+    id bigint NOT NULL,
+    web_tour_id bigint NOT NULL,
+    pax_count integer NOT NULL,
+    price numeric(12,2) NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.web_tour_free_prices OWNER TO developer;
+
+--
+-- Name: web_tour_free_prices_id_seq; Type: SEQUENCE; Schema: public; Owner: developer
+--
+
+CREATE SEQUENCE public.web_tour_free_prices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.web_tour_free_prices_id_seq OWNER TO developer;
+
+--
+-- Name: web_tour_free_prices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: developer
+--
+
+ALTER SEQUENCE public.web_tour_free_prices_id_seq OWNED BY public.web_tour_free_prices.id;
 
 
 --
@@ -2653,7 +2760,8 @@ CREATE TABLE public.web_tours (
     photo character varying(255),
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    is_popular boolean DEFAULT false NOT NULL
+    is_popular boolean DEFAULT false NOT NULL,
+    type character varying(255) DEFAULT 'default'::character varying NOT NULL
 );
 
 
@@ -2699,6 +2807,13 @@ ALTER TABLE ONLY public.banners ALTER COLUMN id SET DEFAULT nextval('public.bann
 --
 
 ALTER TABLE ONLY public.buy_requests ALTER COLUMN id SET DEFAULT nextval('public.buy_requests_id_seq'::regclass);
+
+
+--
+-- Name: categories id; Type: DEFAULT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.categories ALTER COLUMN id SET DEFAULT nextval('public.categories_id_seq'::regclass);
 
 
 --
@@ -3080,6 +3195,13 @@ ALTER TABLE ONLY public.web_tour_accommodations ALTER COLUMN id SET DEFAULT next
 
 
 --
+-- Name: web_tour_categories id; Type: DEFAULT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.web_tour_categories ALTER COLUMN id SET DEFAULT nextval('public.web_tour_categories_id_seq'::regclass);
+
+
+--
 -- Name: web_tour_day_facilities id; Type: DEFAULT; Schema: public; Owner: developer
 --
 
@@ -3091,6 +3213,13 @@ ALTER TABLE ONLY public.web_tour_day_facilities ALTER COLUMN id SET DEFAULT next
 --
 
 ALTER TABLE ONLY public.web_tour_days ALTER COLUMN id SET DEFAULT nextval('public.web_tour_days_id_seq'::regclass);
+
+
+--
+-- Name: web_tour_free_prices id; Type: DEFAULT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.web_tour_free_prices ALTER COLUMN id SET DEFAULT nextval('public.web_tour_free_prices_id_seq'::regclass);
 
 
 --
@@ -3832,6 +3961,258 @@ COPY public.attachments (id, file_name, file_path, file_type, file_size, attacha
 717	721015304.jpg	attachments/FAcZTNrKKtzFh4uHx2nISVrXvEDxn6vx80gU3foy.jpg	application/octet-stream	69231	205	App\\Models\\Hotel
 718	721011414.jpg	attachments/SMdAl2uaU2VWBTPtdT6Ac4pa2f4xEUp0sgTFFVX9.jpg	application/octet-stream	94070	205	App\\Models\\Hotel
 719	607345193.jpg	attachments/UshIDB4Rl46Xu04ueExCjRrmyNwcSKyyB96dSDHt.jpg	application/octet-stream	130921	205	App\\Models\\Hotel
+720	664453963.jpg	attachments/6Pnqe2AJznekClAjdcYYbEp5BUPyACdTArCHvg0Y.jpg	application/octet-stream	94295	87	App\\Models\\Hotel
+721	590965123.jpg	attachments/CIWHJXpdPuSKjNzek65QM4bac7M9IA7DletwgWlm.jpg	application/octet-stream	106186	87	App\\Models\\Hotel
+722	615852051.jpg	attachments/UZLKIpqlJURQyMIfcyyUmS81YoOVQ6ORRMmwTTPq.jpg	application/octet-stream	81425	87	App\\Models\\Hotel
+723	615852032.jpg	attachments/v1BmnwZOWTEDZZUbJOJeU8zsASs3WPLXJZCFgFXo.jpg	application/octet-stream	66229	87	App\\Models\\Hotel
+724	664454290.jpg	attachments/peLZ7DhvyZ299UuIZzx8waeIaGfcHNIIO4ticXYk.jpg	application/octet-stream	115274	87	App\\Models\\Hotel
+725	594744770.jpg	attachments/kvXOtws1QFH9dJRAUeWZF94lQ5pdGzwYId9kC3g4.jpg	application/octet-stream	79236	87	App\\Models\\Hotel
+726	664454246.jpg	attachments/NAxKs0X1rwPPaidsez1eHjxO9iWkTbVbXAqhq23P.jpg	application/octet-stream	59712	87	App\\Models\\Hotel
+727	632454620.jpg	attachments/DWjCOq9Mf803XUtXelawNJXNbms9Wz13cM926DQf.jpg	application/octet-stream	75184	87	App\\Models\\Hotel
+728	632442019.jpg	attachments/wWZ6rIGgxmLQpc437pVkuoSvRUcG2nE4xHtL2gYj.jpg	application/octet-stream	62396	87	App\\Models\\Hotel
+729	632442022.jpg	attachments/udY7LBlFuPFLsfrzCFebNGLT8BoUiM32yLDsxJHK.jpg	application/octet-stream	61094	87	App\\Models\\Hotel
+730	632436030.jpg	attachments/EsfXGlsNq7rVHznhnw0okC2xJKNbIZlDH6IVRUZV.jpg	application/octet-stream	62254	87	App\\Models\\Hotel
+731	632442023.jpg	attachments/FWAa4x6oHzgy36VZxMSfPb3UdZXdynYVUj8ahnRo.jpg	application/octet-stream	52384	87	App\\Models\\Hotel
+732	632435760.jpg	attachments/abVyflomlLP1Ow8k5ZXAyfakIyWjDGf9a0fRaKlY.jpg	application/octet-stream	62868	87	App\\Models\\Hotel
+733	632435763.jpg	attachments/ttLCsAMXP5pC39nLNRKL9pnAFN2HQV5zV8iSowps.jpg	application/octet-stream	90067	87	App\\Models\\Hotel
+734	588893849.jpg	attachments/G5CCXi7z6Wv4fUBpRNzImEsCs8oiMD7S0xQGwPJB.jpg	application/octet-stream	69799	87	App\\Models\\Hotel
+735	606590046.jpg	attachments/AR4VsEhgjyC1GxjmRhTXTNkFKTfi2IS5zV5ZWoPB.jpg	application/octet-stream	65215	87	App\\Models\\Hotel
+736	492961953.jpg	attachments/0zwAaoYYigtVZOIOlzfQeXUqcIDNHQX4vjSRII0Z.jpg	application/octet-stream	133537	87	App\\Models\\Hotel
+737	2026-02-04 16.43.49.jpg	attachments/oZK3sFA9CDbuf0ArlBC4QjXQUqHZM8WQo4WuWfZf.jpg	application/octet-stream	166305	91	App\\Models\\Hotel
+738	2026-02-04 16.43.39.jpg	attachments/3lXoP8NS3wq9J9UZWs0cZ44TkPArrhzspPbq0GHb.jpg	application/octet-stream	120060	91	App\\Models\\Hotel
+739	2026-02-04 16.43.30.jpg	attachments/42kuwa2Rs11XQqmbq8iJ9xxLDZ6xBWjaTOxk4YMq.jpg	application/octet-stream	147588	91	App\\Models\\Hotel
+740	2026-02-04 16.43.34.jpg	attachments/JvodTEp450bAKDo5WayGTcdG5s54M2vJZ6nDFojm.jpg	application/octet-stream	160304	91	App\\Models\\Hotel
+741	2026-02-04 16.43.19.jpg	attachments/wgR9a191yneD2a5B3Q2O4nDXpLgrxm6ggRpTcoLY.jpg	application/octet-stream	113321	91	App\\Models\\Hotel
+742	2026-02-04 16.43.23.jpg	attachments/htFINqH7WMoPAuTPqixmjUZzS7JLbrG3sBxdSORH.jpg	application/octet-stream	106475	91	App\\Models\\Hotel
+743	2026-02-04 16.43.15.jpg	attachments/ZYoXVTz6hMNKuFsoTBiXzFLhSWJBvgUfrwRe12qp.jpg	application/octet-stream	137053	91	App\\Models\\Hotel
+744	2026-02-04 16.43.11.jpg	attachments/A13v8wX4m7XMvc5XsgVXvI0DMSEmWK7asPR5xdxS.jpg	application/octet-stream	161956	91	App\\Models\\Hotel
+745	2026-02-04 16.43.05.jpg	attachments/gVNtaQyJeWQnmAUecoENyCnNOuJTNfUvIfpghiyj.jpg	application/octet-stream	136272	91	App\\Models\\Hotel
+746	2026-02-04 16.43.03.jpg	attachments/wEyOXqcaE8ypUYV2zse8FrW1toZVcoY8uzmIlS7o.jpg	application/octet-stream	109474	91	App\\Models\\Hotel
+747	2026-02-04 16.42.59.jpg	attachments/70JKZxgWjAMY7Mhn0HpEEqoGI4gTREQug6Pm5Pe5.jpg	application/octet-stream	91346	91	App\\Models\\Hotel
+748	2026-02-04 16.42.50.jpg	attachments/eltxWWvYH0QN9WmJxDhZDejHnDZkDmuA436eZSjN.jpg	application/octet-stream	215041	91	App\\Models\\Hotel
+749	2026-02-04 16.42.28.jpg	attachments/CRkS1abrJLoLYykwmfwrsFuI2EJo2h3oKyuuGMhi.jpg	application/octet-stream	160695	91	App\\Models\\Hotel
+750	523796032.jpg	attachments/PwelGReKwZU7yZkYBwncR5NDTwBfLhjK1AU82Icn.jpg	application/octet-stream	82895	158	App\\Models\\Hotel
+751	511892296.jpg	attachments/hgjoq5o4gU3tWQe150o8bjw0lkM7N3onikLH8nOw.jpg	application/octet-stream	87734	158	App\\Models\\Hotel
+752	588449029.jpg	attachments/7z5PQ1CmESpkPSO6UJ51r5tauktJKbVo4ffFDYqs.jpg	application/octet-stream	46484	158	App\\Models\\Hotel
+753	511892254.jpg	attachments/QUDdPI6dcQAWqB1qoeMXjYqx9B52MaYeiHbWoauJ.jpg	application/octet-stream	58167	158	App\\Models\\Hotel
+754	511916237.jpg	attachments/er7jd802yIoav9atjWYTA9whjNorx6MU65fnMknn.jpg	application/octet-stream	156741	158	App\\Models\\Hotel
+755	630793648.jpg	attachments/ulDzrk7LRmQaETpQGFv33HxaIxO2jgrUtQ2iOnsw.jpg	application/octet-stream	109116	158	App\\Models\\Hotel
+756	511892212.jpg	attachments/w2VrHategBezpRLkfKknyuL2Fsv7MhwTmW1I9vKl.jpg	application/octet-stream	67551	158	App\\Models\\Hotel
+757	511892240.jpg	attachments/baw0zDDIh4MPScbDbDlL7J759Pf1TPQKCNu4ZAFs.jpg	application/octet-stream	60042	158	App\\Models\\Hotel
+758	511892305.jpg	attachments/QQGzYZllX8oVoGy3RQWQ8VoQqfhtVocGqCyyhz4P.jpg	application/octet-stream	84882	158	App\\Models\\Hotel
+759	511916219.jpg	attachments/5M9fZwbN2MP8Tx1WbdW4nr8IDhTpD7NZa0cotM9e.jpg	application/octet-stream	55164	158	App\\Models\\Hotel
+760	514318020.jpg	attachments/38ywcZRZ6mQ2OcNwAuffYwIeGhBytXSuXZHg60Uh.jpg	application/octet-stream	63062	158	App\\Models\\Hotel
+761	720175059.jpg	attachments/UXSg8vpiasbQcmRONLQxBd4ocxBH4zO7c7pITfHU.jpg	application/octet-stream	85985	158	App\\Models\\Hotel
+762	415134418.jpg	attachments/LCNpOWmWKKG4oIsBJ56Cbdn1RkeWHmAIsWZHF8UR.jpg	application/octet-stream	48251	133	App\\Models\\Hotel
+763	415134376.jpg	attachments/CES68NAs1GA9Ed1VNstI37pKYpy1inPROL3fW8Sw.jpg	application/octet-stream	27895	133	App\\Models\\Hotel
+764	415134371.jpg	attachments/gN1CgGMoBr1H3wF71lHFLz6k4LuasK3f4UdLKJFD.jpg	application/octet-stream	29402	133	App\\Models\\Hotel
+765	415134504.jpg	attachments/7O5DOPCpSTDqUnlKsG05CGemhO5pJTDygNtwJLi3.jpg	application/octet-stream	52241	133	App\\Models\\Hotel
+766	415134840.jpg	attachments/PUVuSTTsBA7lOJ77k2WIrCtuuNOR0wgQ6p1MMprs.jpg	application/octet-stream	51310	133	App\\Models\\Hotel
+767	474875067.jpg	attachments/mQNHH0tnHQtrKGbGtGPOICXwAmpn8TkaTj0gpeER.jpg	application/octet-stream	78798	133	App\\Models\\Hotel
+768	490794265.jpg	attachments/fC3xKn2wyqnqg4OVzJNS7lIIYYrYIWKjuhoajdDD.jpg	application/octet-stream	56003	133	App\\Models\\Hotel
+769	490794265 (1).jpg	attachments/EXESUvPlyxDnZttLO5Mya2YVhdOY2QcrWFz6KGf5.jpg	application/octet-stream	56003	133	App\\Models\\Hotel
+770	470998009.jpg	attachments/nXbtO9m79W1aV1891hBe2Xc0aZpJpI3dsZ35Sf0i.jpg	application/octet-stream	89737	133	App\\Models\\Hotel
+771	490794118.jpg	attachments/UNFgdYzPKb2KtUJdI67bpkk8JFCU4MQo6PuyegFl.jpg	application/octet-stream	101844	133	App\\Models\\Hotel
+772	415135076.jpg	attachments/MSA4QHbZXVE2MCaSq1oRp4rfHXQwqqV5mwH6llSe.jpg	application/octet-stream	103410	133	App\\Models\\Hotel
+773	565069150.jpg	attachments/AWwP4XJzB9zm8i9246foPYfhf70bZAPRq4NnxhpJ.jpg	application/octet-stream	60742	133	App\\Models\\Hotel
+774	490201670.jpg	attachments/3S5wxr1bhrGvrfmsrQPw5AXBtyAFajhx6LnBggrH.jpg	application/octet-stream	49580	107	App\\Models\\Hotel
+775	471409590.jpg	attachments/4sBsuujgLiU5iDSznbrKLeZX1Yk5wCpX7105w7nP.jpg	application/octet-stream	66417	107	App\\Models\\Hotel
+776	490015123.jpg	attachments/Jea89tsleOD5h49P0O562N57NlC5DbLu4esV6wG5.jpg	application/octet-stream	85041	107	App\\Models\\Hotel
+777	490015276.jpg	attachments/zJXFypox3qZxLVVT2qcdIv8u4DJpTyMQkOY28pmW.jpg	application/octet-stream	74423	107	App\\Models\\Hotel
+778	490012906.jpg	attachments/I5fVTDG3qSNG0jxxDocIH7qvMTeVrxxerWFNCtd0.jpg	application/octet-stream	61144	107	App\\Models\\Hotel
+779	490198860.jpg	attachments/ODUHyHDU5TjzKjUVKeDHlWyUVbpV8qR1U4oEW83j.jpg	application/octet-stream	101318	107	App\\Models\\Hotel
+780	490201184.jpg	attachments/zpjs96uVYki0yfVqxxa51iFB1ImYMebrDCJiKugf.jpg	application/octet-stream	93476	107	App\\Models\\Hotel
+781	450190420.jpg	attachments/4SEFDiMHSua3dC7TCeJqsRDL2rx7YGTorgy0gmMu.jpg	application/octet-stream	128808	107	App\\Models\\Hotel
+782	318718958.jpg	attachments/GBDwFENm9XXAVYBFytOWpnlkuCiSX6T0uAU1P93R.jpg	application/octet-stream	79182	107	App\\Models\\Hotel
+783	471409737.jpg	attachments/foPz6HHFfIoozFhTQP3zlxnPgSPEk0eewt739wK1.jpg	application/octet-stream	86598	107	App\\Models\\Hotel
+784	490198526.jpg	attachments/UZJccOmeWWdhiDsJcPSkoStkfbdHPIwIeLt9TIXB.jpg	application/octet-stream	86837	107	App\\Models\\Hotel
+785	490202065.jpg	attachments/p54cp9sCWzKdAqS2RoUuwjmyg7T1pXPH1tOkuuK2.jpg	application/octet-stream	62110	107	App\\Models\\Hotel
+786	33721684.jpg	attachments/KPOI03kgBgQYZBOOfGIJKpW8yd15LCcBWosAGKFR.jpg	application/octet-stream	141336	107	App\\Models\\Hotel
+787	482496248.jpg	attachments/JQmbFrVj7zmVWLhImK9NGY6Y7hZ0aicAPurvqUrV.jpg	application/octet-stream	54097	137	App\\Models\\Hotel
+788	482551267.jpg	attachments/awoGmozgsGcOFUwMX0AdenDolw00mXK1EkBC1jrJ.jpg	application/octet-stream	62423	137	App\\Models\\Hotel
+789	489210328.jpg	attachments/fmtAOvONVPDLfhVjcRgrsk35iV4rppuXNpIqte67.jpg	application/octet-stream	116927	137	App\\Models\\Hotel
+790	486533716.jpg	attachments/eRxuFAcBkupFrlq4yG1005NFzVRglClTz69EehVF.jpg	application/octet-stream	119858	137	App\\Models\\Hotel
+791	492514344.jpg	attachments/kmmdLoZO2vn26sxzFYhw68IjjmMrxgNr3OoaaVZL.jpg	application/octet-stream	92623	137	App\\Models\\Hotel
+792	536168066.jpg	attachments/1bMGzzKm9wOpKSeJJuesvlyWABrBRgq9gFydwKFO.jpg	application/octet-stream	76651	137	App\\Models\\Hotel
+793	536167240.jpg	attachments/9wEjnMSOExDziGx42jYqjVjNxvbyuHH0L72OzRC5.jpg	application/octet-stream	73915	137	App\\Models\\Hotel
+794	536168467.jpg	attachments/CFHTkx3gxFc3GnNUqcyheaqXwQXJW2itInZBLC97.jpg	application/octet-stream	110402	137	App\\Models\\Hotel
+795	489210382.jpg	attachments/QhqmrsjcMcnRy7k6p9AlZ8iDtRGOniYEMVxlvKin.jpg	application/octet-stream	65602	137	App\\Models\\Hotel
+796	536166848.jpg	attachments/0pVERA6JEHlRRSdGOyAgcvW8llEqrDrL1XqZ4K0O.jpg	application/octet-stream	95187	137	App\\Models\\Hotel
+797	517016638.jpg	attachments/0tacj6YCQkOvdEigjC6FCXvwTojRh6fgJCfnhyjF.jpg	application/octet-stream	47295	140	App\\Models\\Hotel
+798	708780096.jpg	attachments/9hNCQTcfWY11ovDAwlOFypFthAQRPmlMUM6tAVi3.jpg	application/octet-stream	86130	140	App\\Models\\Hotel
+799	486546996.jpg	attachments/CqWj08YcCXxxVeyDDrDC6VJctlirX8VDx9vQqaXI.jpg	application/octet-stream	84730	140	App\\Models\\Hotel
+800	486502963.jpg	attachments/Hn3OwxyaddXylgQB1T699dEomHuGtGE8e54XWn6K.jpg	application/octet-stream	80450	140	App\\Models\\Hotel
+801	486502825.jpg	attachments/kwBRgmi6uqA6yLHP19VNskdw8gDaJVMwM7tcoghG.jpg	application/octet-stream	122856	140	App\\Models\\Hotel
+802	486502790.jpg	attachments/ekyBJ2WX19Y3rZZt9xxlRYRI5dDQzEb803vLqg2k.jpg	application/octet-stream	116134	140	App\\Models\\Hotel
+803	486502770.jpg	attachments/diXk0c3CdEFkaRHBgd52ZQujqCHjhyJf5X3tkH0C.jpg	application/octet-stream	116127	140	App\\Models\\Hotel
+804	486502749.jpg	attachments/AhVIdkRozInVAET3QNwh3kT2dP6yHOtm1TrtV8Rl.jpg	application/octet-stream	120491	140	App\\Models\\Hotel
+805	486502657.jpg	attachments/eSQPSf2GEJeKrm0UdA9kjbrW5KANyKNTLgidjagY.jpg	application/octet-stream	87755	140	App\\Models\\Hotel
+806	486497969.jpg	attachments/nneSMSLhcvMtokhwziclXTvothhCk2nRExKKIdoW.jpg	application/octet-stream	66738	140	App\\Models\\Hotel
+807	486497728.jpg	attachments/lslS1977UDLT9vFNHa0BDNJ5hK26fRqKMLwI9Vhq.jpg	application/octet-stream	82136	140	App\\Models\\Hotel
+808	707946462.jpg	attachments/aq17LB6eqJMziElj6qOXscBnavNdKHIMq6ugdLCB.jpg	application/octet-stream	84915	140	App\\Models\\Hotel
+809	486502664.jpg	attachments/cmm5aBNX27K7yKEJddqJQuQSoLoD9uXbRu45764m.jpg	application/octet-stream	95866	140	App\\Models\\Hotel
+810	775235087.jpg	attachments/NUpMmW1t3P0ZXP8VGM9SqnXqQoopn1Seue21gs6I.jpg	application/octet-stream	79504	140	App\\Models\\Hotel
+811	466557734.jpg	attachments/8SMAmxKDPUB0LQxr3jTyRGTpcfR2zwofitGOP8ns.jpg	application/octet-stream	71477	140	App\\Models\\Hotel
+812	466567301.jpg	attachments/mHZ3DlO0PZM3G1X9O2DV8xEpAJ9ZaVcJlaMnqjOf.jpg	application/octet-stream	81731	140	App\\Models\\Hotel
+813	486500888.jpg	attachments/xVkPqDJWzmXMkjFYiU33kpdUnz5nXCjsMVR3meEG.jpg	application/octet-stream	104535	140	App\\Models\\Hotel
+814	640616240.jpg	attachments/cUnfiKzz59pfvPa6dxlGv7JaxHPLguHD5n1uLwFq.jpg	application/octet-stream	88436	140	App\\Models\\Hotel
+815	486502728.jpg	attachments/lFMYSN3tHK8POD0k7agAq2vwAjNmQ06ESXQxN8pr.jpg	application/octet-stream	118049	140	App\\Models\\Hotel
+816	486502477.jpg	attachments/BmKreDIutKVQRtffRB7PysYE9hV2nAvkzTvByvOS.jpg	application/octet-stream	92236	140	App\\Models\\Hotel
+817	466557758.jpg	attachments/mE4J3ldeO3RtVjUoGBxDnDviHL9HojhM0UUg2JSc.jpg	application/octet-stream	81732	140	App\\Models\\Hotel
+818	486498503.jpg	attachments/JFCgpyRovF9aRimNkKJ0zFf0Wba81oThePaOqFjE.jpg	application/octet-stream	79386	140	App\\Models\\Hotel
+819	461431499.jpg	attachments/zFDMNjgYbEV37ySBs8m4VCZJmgZjJclC3niU1QQy.jpg	application/octet-stream	101023	140	App\\Models\\Hotel
+820	12.jpg	attachments/GFSVlqr4R92dN2N8ysWgHveUvQibyciOZN80Xapy.jpg	application/octet-stream	202321	122	App\\Models\\Hotel
+821	11.jpg	attachments/Mi687Wy2uSWLNw727vtp2NQsqfX0i8h7eKVCqW0b.jpg	application/octet-stream	209506	122	App\\Models\\Hotel
+822	IMG_5797.jpg	attachments/6hC32HcvaTWFmsQHRfpOlldsTMSiBXyeVaXaSsNu.jpg	application/octet-stream	218888	122	App\\Models\\Hotel
+823	IMG_5992.jpg	attachments/6pnJokaxzu6P3eJwYI1Xgh9FqEls7NTWMPdh6n3q.jpg	application/octet-stream	307587	122	App\\Models\\Hotel
+824	IMG_3859.jpg	attachments/ji1qzuui5UJjAva0U5oBHtbpCRHXbS7fhwGYuGmY.jpg	application/octet-stream	237359	122	App\\Models\\Hotel
+825	IMG_5994.jpg	attachments/zKBzVHngdXl8hz0EmkcaRztFQXUmbJap1SQq6Gag.jpg	application/octet-stream	276345	122	App\\Models\\Hotel
+826	IMG_5422.jpg	attachments/56YpUIatFLJSite1orBPJmvZ2IQZJfe724xXcQ4D.jpg	application/octet-stream	218898	122	App\\Models\\Hotel
+827	photo_2024-08-11_21-43-03.jpg	attachments/EdLH5TfTpHlwvGkKrXcN4H8XbxWcqX6iv4yk55hy.jpg	application/octet-stream	205401	122	App\\Models\\Hotel
+828	Рисунок7.jpg	attachments/shIGFldQSvuS5bJTyAMbVLiRCtkAEuumTVijWAom.jpg	application/octet-stream	172628	122	App\\Models\\Hotel
+829	Рисунок3-2.jpg	attachments/3euommHZmJMTI1GEu8gJS0j9nRTipzqc2YOiauoY.jpg	application/octet-stream	218655	122	App\\Models\\Hotel
+830	Рисунок9-1.jpg	attachments/obt35SxVOhUaZeA53hElZSNG0lrGidqOz7W69kvO.jpg	application/octet-stream	297765	122	App\\Models\\Hotel
+831	IMG_3449.jpg	attachments/HmSHEQQgcnKXCASxvR8tbT2sjE9E1NYEQG32BImU.jpg	application/octet-stream	197944	122	App\\Models\\Hotel
+832	IMG_3451.jpg	attachments/kMyXFHCgK70o0RkDAd6WmwSaX2d45mihHBUaVGQ8.jpg	application/octet-stream	181191	122	App\\Models\\Hotel
+833	IMG_3494.jpg	attachments/9IWXi8Dh5fSaCRkhTVWH7xaPBSRI9A9Un2oYV3SP.jpg	application/octet-stream	266951	122	App\\Models\\Hotel
+834	Рисунок1.jpg	attachments/wYReaVNhf0usEWhKTH3ELVZ0r54DHNIfJSN7ULf7.jpg	application/octet-stream	215000	122	App\\Models\\Hotel
+835	IMG_3624.jpg	attachments/MydycudubKTl137UZJkHSHkOYl7bKlty7TuBHl2U.jpg	application/octet-stream	285756	122	App\\Models\\Hotel
+836	Рисунок5.jpg	attachments/qNSGBMwVUHb2vZ3IaytKgYoIPU8y6JhgIYfo9Vx9.jpg	application/octet-stream	223551	122	App\\Models\\Hotel
+837	Рисунок9.jpg	attachments/iINaM93dTH2eJ8TNVWenDW4NgXAZsm5hsoj54OKX.jpg	application/octet-stream	210590	122	App\\Models\\Hotel
+838	Рисунок10.jpg	attachments/4PIDVyz4Otq3NJQYCv7l4WQpQo41aqlDFv1z4F25.jpg	application/octet-stream	216997	122	App\\Models\\Hotel
+839	Рисунок7-1.jpg	attachments/VuL99ybed06C0jjs3PtY0fAe4h96XZKApeHXLDCS.jpg	application/octet-stream	276794	122	App\\Models\\Hotel
+840	Screenshot-2023-11-16-013025-topaz-enhance-2x-scaled.jpg	attachments/ZyurX5hqiZyqXTZHwvu1B02UhWxWrmx44H49A4he.jpg	application/octet-stream	730227	122	App\\Models\\Hotel
+841	Рисунок2.jpg	attachments/yibG6PNHQ2eMZjdYNNCpRRCT9boDp3X2IKlZ8WT5.jpg	application/octet-stream	282624	122	App\\Models\\Hotel
+842	Screenshot-2023-11-16-013052-topaz-enhance-2x-scaled.jpg	attachments/0iFuwo46AOpMSgO5g0EdTaQdJEN9KRTl9ZNJJ5kI.jpg	application/octet-stream	764131	122	App\\Models\\Hotel
+843	Screenshot-2023-11-16-012933-topaz-enhance-2x.jpg	attachments/KOLg5hwZA1rQbBjBeONnPWZdzh1JY3UeYbynsSay.jpg	application/octet-stream	546021	122	App\\Models\\Hotel
+844	730520287.jpg	attachments/T1GHnfqRdDxyHxZB0Jgk42cj3Qwq5F13wPirGPs3.jpg	application/octet-stream	55353	155	App\\Models\\Hotel
+845	730502432.jpg	attachments/t6t13M4sgON1yDv8kl1xOOY0Gqakzw2Wz3q4QiYc.jpg	application/octet-stream	65581	155	App\\Models\\Hotel
+846	470749989.jpg	attachments/FRK2VhTRkuPAgyngzkln5d2e72YKNgqVVg6ijQMV.jpg	application/octet-stream	44527	155	App\\Models\\Hotel
+847	732006200.jpg	attachments/rziymYnKPLq5KyVq7oS1LuleZBkNrDjziPNZZbwU.jpg	application/octet-stream	54303	155	App\\Models\\Hotel
+848	730485422.jpg	attachments/Dnzn17U30e5ffx0waUbxsH7A9yA7bDU04dyhsZR4.jpg	application/octet-stream	56741	155	App\\Models\\Hotel
+849	730487767.jpg	attachments/ePPOYvwlSsnLRWQ65DL4in4NLgMxAa3pc4rRgcbL.jpg	application/octet-stream	65839	155	App\\Models\\Hotel
+850	643842146.jpg	attachments/ZPmyHWzKVtQMNX8UQ7sRKmR0j46GBUEOmuFKvHbI.jpg	application/octet-stream	133190	155	App\\Models\\Hotel
+851	469350000.jpg	attachments/wRd2THlgRfgQ5DoSZIIZCshBHPNc5OuniJrid0eS.jpg	application/octet-stream	141726	155	App\\Models\\Hotel
+852	730533482.jpg	attachments/tSPe1iTV96eNr9TfE9C0uWS5GTmPXWFWl0IgiSif.jpg	application/octet-stream	79263	155	App\\Models\\Hotel
+853	730534226.jpg	attachments/b94pmo5kJsVtQDhhxSfhzncPSWK5z4kFRbBLY5Hp.jpg	application/octet-stream	63250	155	App\\Models\\Hotel
+854	469355755.jpg	attachments/nBVHuz7ZNdl2YXIvNsxWBptVA3VZvComuP9qToqp.jpg	application/octet-stream	123682	155	App\\Models\\Hotel
+855	673327555.jpg	attachments/3oJRSRWrfweUqgMF7Pss9PMbSgSogaidtHzTlPUF.jpg	application/octet-stream	81005	155	App\\Models\\Hotel
+856	469355144.jpg	attachments/P8Ch1A7KN1Wed3uDZXNLOAlNhMG1HcbtJDmGTUF2.jpg	application/octet-stream	141028	155	App\\Models\\Hotel
+857	673327471.jpg	attachments/O8XcVEi9sSpDSwglNHiop1OQrCH0Tysn5BsCmXNF.jpg	application/octet-stream	80602	155	App\\Models\\Hotel
+858	309257817.jpg	attachments/ob4CGWYLLDPboTd9ae8fHatp16dkb7S7IwOtcFjJ.jpg	application/octet-stream	155595	162	App\\Models\\Hotel
+859	146938086.jpg	attachments/DjeH7v5ZINGyarmitJqUPd1zPEg6FuFampBbdO1f.jpg	application/octet-stream	66290	162	App\\Models\\Hotel
+860	459876639.jpg	attachments/RyqhDEoG1ZY8I3KJkKBWmxOoZaecAm9Hi9evsJhm.jpg	application/octet-stream	123511	162	App\\Models\\Hotel
+861	459875375.jpg	attachments/maF4xsS4024Lh21Ec7FkPin5aRz47WRYHvPQM726.jpg	application/octet-stream	81225	162	App\\Models\\Hotel
+862	218049243.jpg	attachments/XkYrq0QNHtyHbfhM1Mpe0srspbSvb5J1l5sEu8Y5.jpg	application/octet-stream	192605	162	App\\Models\\Hotel
+863	459875379.jpg	attachments/m86KG7NaTw530dia8xFTyg5mZo5TdhsjXETjKpRO.jpg	application/octet-stream	92847	162	App\\Models\\Hotel
+864	459867239.jpg	attachments/or3IfWdOduMsTuvux6s7pEqmA87gXnrXFL0kpEnA.jpg	application/octet-stream	76813	162	App\\Models\\Hotel
+865	199478712.jpg	attachments/RJEOYXLfbrwGNGOtH2tISbyndlZhAW2Cxs0zpKEF.jpg	application/octet-stream	82982	162	App\\Models\\Hotel
+866	23176133.jpg	attachments/jOS9kp7xBZpMAiBMkLzX8dz2jJ1ATgIQc6Crq0Bw.jpg	application/octet-stream	60302	162	App\\Models\\Hotel
+867	517923160.jpg	attachments/IRf5Wfn8c35moogU7LKu0h1Wvu0jo8veFzT3J2ZH.jpg	application/octet-stream	89749	162	App\\Models\\Hotel
+868	23176590.jpg	attachments/aCfZVwue3tscot2tCBVwP3E1qoh5GqBCYS773ryq.jpg	application/octet-stream	63960	162	App\\Models\\Hotel
+869	23176607.jpg	attachments/DYnzySeyZ0wbmYv8DkxSemtDbWbMG3acsrnyA55u.jpg	application/octet-stream	84257	162	App\\Models\\Hotel
+870	23176644.jpg	attachments/jDgu06KK1pXmUacsDz6xOQjP8xyd03toRRNJNZvV.jpg	application/octet-stream	89475	162	App\\Models\\Hotel
+871	230922020.jpg	attachments/7wkSkk0OXt6bvHJX0YYrf09E7RDVGiFvWEcSfApM.jpg	application/octet-stream	73710	162	App\\Models\\Hotel
+872	517922992.jpg	attachments/W8PUp3WGynVT39RYQb4JZ9hbY9vAKweySFZxyAMy.jpg	application/octet-stream	79392	162	App\\Models\\Hotel
+873	675815160.jpg	attachments/4xn4d6lQqCAsNiMWa5QlE2rEuxgKY3aHOp6snzul.jpg	application/octet-stream	66594	162	App\\Models\\Hotel
+874	184156774.jpg	attachments/0qZWxwCXCptDe7SHk2zbFwn5GDIGLZvE8Yz1DJWM.jpg	application/octet-stream	180126	162	App\\Models\\Hotel
+875	517923050.jpg	attachments/h8kLGWVw1uhaspQ1cgLDAFCFq5UmWQnFPFXNFHxk.jpg	application/octet-stream	79975	162	App\\Models\\Hotel
+876	23176637.jpg	attachments/mB0nvrM4UaFEzSDRLynJcuozMkwBCgSKp1C8Qrbf.jpg	application/octet-stream	81704	162	App\\Models\\Hotel
+877	459877658.jpg	attachments/txrrT8kKJrz7dXepJw8H2s1r8x3pDSFs0pTi5hMx.jpg	application/octet-stream	87070	162	App\\Models\\Hotel
+878	23176517.jpg	attachments/WF54p1TnksaDp45ymaYraRvTMTmNoQlfplypuzBk.jpg	application/octet-stream	70688	162	App\\Models\\Hotel
+879	352183037.jpg	attachments/HfYgju9u4TlL3Y9uS9U5fv2Vssis1MGdou9Lpalu.jpg	application/octet-stream	102226	162	App\\Models\\Hotel
+880	695398679.jpg	attachments/5Cgxxa92Tw7kQiywqWDiTNaa1DRzGDtn15cI3lri.jpg	application/octet-stream	85699	162	App\\Models\\Hotel
+881	536449154.jpg	attachments/KVFYBw1JlsXmNBnDsQudlbzwjw4a40nSp6N3GGwY.jpg	application/octet-stream	189713	162	App\\Models\\Hotel
+882	500776245.jpg	attachments/8wPj2vEWiET2evKAaOtrLelYZ3DIS55qwaqnG0gA.jpg	application/octet-stream	75029	99	App\\Models\\Hotel
+883	543721316.jpg	attachments/T2jK6K8h1OKl8sHktPKpJgv0cOA9s8J9SHCtRwIm.jpg	application/octet-stream	121079	99	App\\Models\\Hotel
+884	500776168.jpg	attachments/y8EKHJBteNxd3VwmzI8eubWFgbQwYLV9Xiau1BwP.jpg	application/octet-stream	71032	99	App\\Models\\Hotel
+885	499880269.jpg	attachments/AZlMx7SErv3IiAGM8pMUrb7DmqAN8mLgcVKr8v5D.jpg	application/octet-stream	78785	99	App\\Models\\Hotel
+886	499705661.jpg	attachments/CtE8Lgxtbno3DmD7lB0l2WG7eysv8EQsygi50tr5.jpg	application/octet-stream	76900	99	App\\Models\\Hotel
+887	499708837.jpg	attachments/pFKEfZrNJPRwkepNsyqyezPMNjFAsemdSNAh5R3k.jpg	application/octet-stream	86691	99	App\\Models\\Hotel
+888	499709044.jpg	attachments/A24npBWZ9QYWmYIDsRaImFOsDkPW767JQF8tlc7q.jpg	application/octet-stream	72648	99	App\\Models\\Hotel
+889	500420294.jpg	attachments/qmyiVKLBECwRyUvP50aka8n4wX4JNSDY0mBbM2qI.jpg	application/octet-stream	74874	99	App\\Models\\Hotel
+890	497103161.jpg	attachments/WytshhKNFs3x9JdxDW4gHGGGpqXybmSjGRfcnW5T.jpg	application/octet-stream	163465	99	App\\Models\\Hotel
+891	500090721.jpg	attachments/XLUkZG89UOo55K8fVuy2XkBBSTPxG4Vmy5cOecm5.jpg	application/octet-stream	87297	99	App\\Models\\Hotel
+892	496485295.jpg	attachments/pDZ8FOWIGh0pWbsdu38T4mqOv05368gSQeCOsdVH.jpg	application/octet-stream	168511	99	App\\Models\\Hotel
+893	496484239.jpg	attachments/nC2aQxSZnDyZzg945KbPr0WfpvdMuSiHtiQvUx5C.jpg	application/octet-stream	113629	99	App\\Models\\Hotel
+894	500776119.jpg	attachments/b9f5GnWUGdc2gotsqibVnXaPxlpv7WhqgLeB12YI.jpg	application/octet-stream	98662	99	App\\Models\\Hotel
+895	496485530.jpg	attachments/UhWmIh7wuYl6OyIkYgbBSC3PRitcgA5mNdAEcfSH.jpg	application/octet-stream	120681	99	App\\Models\\Hotel
+896	499879939.jpg	attachments/9GLTdBdk1mvjpklEBnpuRbwJ6SUph19s96uMQVLT.jpg	application/octet-stream	168859	99	App\\Models\\Hotel
+897	500776335.jpg	attachments/lO34CIRNkoRS5G7r36b1woXKl6ObJWYfpB5sT41N.jpg	application/octet-stream	118771	99	App\\Models\\Hotel
+898	500776227.jpg	attachments/4BBxhGUqGKeHXo9oRk4pLfQX2Lmii3AmMOzDjU5Y.jpg	application/octet-stream	75186	99	App\\Models\\Hotel
+899	499740258.jpg	attachments/fOHsq879kDQ3ggTFGJvcRTysCQTVE3FkEPILO2IT.jpg	application/octet-stream	97295	99	App\\Models\\Hotel
+900	492937032.jpg	attachments/u5MPhplPsqr2BKgfB7lxef5rTDgX5EIlZeiYTCTr.jpg	application/octet-stream	137391	99	App\\Models\\Hotel
+901	24605797.jpg	attachments/s0HmryEkTvUIFIf3Dq2pnx1lL9lOCZ234IpEHKea.jpg	application/octet-stream	61656	44	App\\Models\\Hotel
+902	24607406.jpg	attachments/cnHBDRv7q9gqquM7O05Y0ZTQZKuNSFUYnLcgzxqa.jpg	application/octet-stream	61429	44	App\\Models\\Hotel
+903	24615428.jpg	attachments/PmJN35cRZPIq7czlCqYJ5mKvwPdsMRJXRQT2hLVO.jpg	application/octet-stream	66827	44	App\\Models\\Hotel
+904	406891425.jpg	attachments/HD0T8bPwN5xZqyjFwOuwosgmJwlCt2MSdgmkKJ1U.jpg	application/octet-stream	52060	44	App\\Models\\Hotel
+905	406891641.jpg	attachments/ucJwtz5YgB6VB2u6rPULujQ6EGko9ewXCVV0anUk.jpg	application/octet-stream	48427	44	App\\Models\\Hotel
+906	406892305.jpg	attachments/c9uZLQa478ZPFATltbMAah50oUud5ySzbppNzvOO.jpg	application/octet-stream	70842	44	App\\Models\\Hotel
+907	501483037.jpg	attachments/gZZ9vSuummgW6e03waihBnIDXcWKvBRbYnYlsci3.jpg	application/octet-stream	74633	44	App\\Models\\Hotel
+908	501482809.jpg	attachments/F6KtRwTbwji3rYV604YmkCCteNvuxTVu5gZCpKVM.jpg	application/octet-stream	65249	44	App\\Models\\Hotel
+909	501483295.jpg	attachments/AUojRO4OUes9Bmh6mEr2gDmTjO3mVyZaVAbMotMb.jpg	application/octet-stream	47112	44	App\\Models\\Hotel
+910	501483298.jpg	attachments/dPLkV0AhjuFImKQDQZ5VxU5oHlVmUmqQCzdshMQG.jpg	application/octet-stream	57866	44	App\\Models\\Hotel
+911	651446533.jpg	attachments/4Q2ZcTsGPSr1XMC6xDqGT2tGZDNzt3ftYmP7Sj4e.jpg	application/octet-stream	88597	44	App\\Models\\Hotel
+912	651446535.jpg	attachments/8Qn5JsHN7OYhQALOWkLZ9ob1fo6iZXNz2ulNHdBF.jpg	application/octet-stream	106676	44	App\\Models\\Hotel
+913	651447240.jpg	attachments/4urWxW9g3q8lYZX3EgDnHrQAa4kAP6cW5RwZnzOi.jpg	application/octet-stream	55269	44	App\\Models\\Hotel
+914	695165604.jpg	attachments/1A3zmTzymWxnjICNvGTGrOLB2GXnUZjKoXVhcLl7.jpg	application/octet-stream	67887	209	App\\Models\\Hotel
+915	693650045.jpg	attachments/kSkJjG4oeYmECfSjnvnFy38rIFGWcRIE2hKTXYT8.jpg	application/octet-stream	46069	209	App\\Models\\Hotel
+916	688942236.jpg	attachments/JjGBpocqojCwfbOh3HPMW9CkupTQP2WylPX043y3.jpg	application/octet-stream	66388	209	App\\Models\\Hotel
+917	693633571.jpg	attachments/qsBF7HRFycJ63pqjVnlK8xTS4BR3SFPhjcDLt80E.jpg	application/octet-stream	117904	209	App\\Models\\Hotel
+918	688942233.jpg	attachments/2MPoWQgc3mCinWCDYf2kZonIMLi7lFghTUBrUbuZ.jpg	application/octet-stream	59319	209	App\\Models\\Hotel
+919	688942230.jpg	attachments/D2Ho8PtP1sfQuwqeBySEhIMEOPR9imrGdhTCJAGV.jpg	application/octet-stream	52964	209	App\\Models\\Hotel
+920	686977371.jpg	attachments/ZxPUix95UeMLiFV8SaYcEEEwvh6D3134ghm6ZF2D.jpg	application/octet-stream	78103	209	App\\Models\\Hotel
+921	688940667.jpg	attachments/L6mpIx3sKHIE0veqxnbcEvpKCG9cHfTwVbvICypI.jpg	application/octet-stream	71100	209	App\\Models\\Hotel
+922	688954728.jpg	attachments/RJlRWtpiFimbvWGFvS7TtDVUFpAV79X9GWcq4Bjk.jpg	application/octet-stream	63055	209	App\\Models\\Hotel
+923	695170859.jpg	attachments/ofmgEbx8Ybfocoa2fOM8v50EgcQ2htNwG3xJLFj7.jpg	application/octet-stream	92910	209	App\\Models\\Hotel
+924	695167790.jpg	attachments/eIdQZfFOvpw6SPOTz6QUkEAJ6hW3a745mDZTp09K.jpg	application/octet-stream	96593	209	App\\Models\\Hotel
+925	694528876.jpg	attachments/y66K1PVmodqik0WyVcTg4kiR1KQejD1ajZLglOdS.jpg	application/octet-stream	73987	209	App\\Models\\Hotel
+926	348034496.jpg	attachments/JuRStt5Fx0oVNLy1i589hpnotp15WKV0nkNigCiu.jpg	application/octet-stream	59370	169	App\\Models\\Hotel
+927	348214442.jpg	attachments/HKgABGXKAGsRY6Ukdw3mwfpQF1LBrSp9PtzdgFMe.jpg	application/octet-stream	48209	169	App\\Models\\Hotel
+928	347983527.jpg	attachments/P3CvNsH44OTd3DTo0CbQGgHhapo7bYt8VGrDuWyl.jpg	application/octet-stream	36667	169	App\\Models\\Hotel
+929	348034497.jpg	attachments/BbFsLkqEPjtuO8VjeQWUdT2zYPWzxsX5d1L6twsz.jpg	application/octet-stream	51495	169	App\\Models\\Hotel
+930	347900015.jpg	attachments/gddKq2aDNFAiWJ3eOUV0u79kDrnlW1y9BrWqFFaD.jpg	application/octet-stream	53609	169	App\\Models\\Hotel
+931	347900023.jpg	attachments/nsSIGhaO5AFcaHSijUWYX2KbncRBC1mHulEqDYuR.jpg	application/octet-stream	86559	169	App\\Models\\Hotel
+932	347366510.jpg	attachments/kDBDhhLAnuKCbAcUaQ76zQX1xg2pc2BVe6uZJZHK.jpg	application/octet-stream	73756	169	App\\Models\\Hotel
+933	491391923.jpg	attachments/AcpgT0Gq5EZzEE4e9jXK97rERFehe6Vj9QKEfvQj.jpg	application/octet-stream	105968	169	App\\Models\\Hotel
+934	347366509.jpg	attachments/LSMaFVbgUE1atWcRi2itaggEuQnBAsP8DWr4fZ0y.jpg	application/octet-stream	74213	169	App\\Models\\Hotel
+935	347900021.jpg	attachments/wUmzK6zqeyeqZU04fwBgdS6mpd1DwOgYvR6J1raJ.jpg	application/octet-stream	69916	169	App\\Models\\Hotel
+936	347366508.jpg	attachments/l5CmbOVMvmqitSzpe7u1vU2FwnkMsd6e2QAsYniG.jpg	application/octet-stream	105474	169	App\\Models\\Hotel
+937	491391913.jpg	attachments/kwcEwmaJwJGEs0ppQba2q3oiw82LZGg5QdhVONEx.jpg	application/octet-stream	114329	169	App\\Models\\Hotel
+938	347366498.jpg	attachments/8vtBzZqBG0HXYpnXEkTlevksUCme5x2hMtAkTJlS.jpg	application/octet-stream	108427	169	App\\Models\\Hotel
+939	347366513.jpg	attachments/tnkdQyQH2rQTBByGOTZm2dOF6AIqtXK5ElrDXTch.jpg	application/octet-stream	74756	169	App\\Models\\Hotel
+940	699113984.jpg	attachments/Web4lBqEVbl24O87UJkBhUPow2zCzQIRl2OCmH8e.jpg	application/octet-stream	102378	25	App\\Models\\Hotel
+941	699113993.jpg	attachments/UI6XOayPrvgvZ6Zo2vY4LDLAZ7uG0SOY8yEzUl5T.jpg	application/octet-stream	142453	25	App\\Models\\Hotel
+942	699113997.jpg	attachments/nz7p537pwk2KDXg7Df9DLQJRwOa9XROcX4E4ZyGG.jpg	application/octet-stream	121671	25	App\\Models\\Hotel
+943	469326616.jpg	attachments/ukfIZmomvHfkCqt5Rs1dwnTZ3dQv9Y0zCeuCDj31.jpg	application/octet-stream	115233	25	App\\Models\\Hotel
+944	169690327.jpg	attachments/7n32TBIC0LhnVOQPJKtpecToRB8U4DSJydhp3nXS.jpg	application/octet-stream	88531	25	App\\Models\\Hotel
+945	204109859.jpg	attachments/WGcgl7Aj7I1lOV5zK5RBX5GUJA061AsH5iYOdYwd.jpg	application/octet-stream	87445	25	App\\Models\\Hotel
+946	199320073.jpg	attachments/YiLDuUmrSuXKM6pvXRbha4lQJ1iKAmsvzXGrxroM.jpg	application/octet-stream	83030	25	App\\Models\\Hotel
+947	469329234.jpg	attachments/a6KnojCdqEk3ALD129MQrnrCXVadLgqGX2jpQRmT.jpg	application/octet-stream	105976	25	App\\Models\\Hotel
+948	169690186.jpg	attachments/a2k8W9bk8Xzbg6EIE1cOWigslRPgNiA5eONiqP7y.jpg	application/octet-stream	92812	25	App\\Models\\Hotel
+949	469607631.jpg	attachments/iBSGuh7A7TBYDkM3AuLUASkXft7PzSIVzensotvj.jpg	application/octet-stream	110805	25	App\\Models\\Hotel
+950	467699969.jpg	attachments/pweIi4vpDpi7mQLt7gNwwiTZfreZ4fHJlcv0OeFC.jpg	application/octet-stream	194768	25	App\\Models\\Hotel
+951	573289203.jpg	attachments/OVMvp2CkRSN2hGQeeIN8qItq6AtccQoVqOt4A748.jpg	application/octet-stream	59484	117	App\\Models\\Hotel
+952	576551987.jpg	attachments/LJFL0A2xtzyVNhMae3jvHCV7gvjxztCLhEM8BGZA.jpg	application/octet-stream	63750	117	App\\Models\\Hotel
+953	576538401.jpg	attachments/nTzgRRafWLpSpIggZS8HOqk1UBWddio6KTCGDogL.jpg	application/octet-stream	172746	117	App\\Models\\Hotel
+954	576548433.jpg	attachments/H6B8JgQMHUH2Dc9DpGm6PHBfTBX48Qtxxf8bSyKw.jpg	application/octet-stream	93175	117	App\\Models\\Hotel
+955	576556213.jpg	attachments/lG3g7VlyLGdl2ToqVFWkL31RuJgwaFTAWzashWag.jpg	application/octet-stream	93564	117	App\\Models\\Hotel
+956	576545184.jpg	attachments/1s5bifaHXkh6mf8KJgLCbbde4yrOmOhUajaPQ5dE.jpg	application/octet-stream	169080	117	App\\Models\\Hotel
+957	573289054.jpg	attachments/IRp2w34pI286X3cjvri4gfCqWH6DWq0Gdzss70lS.jpg	application/octet-stream	129645	117	App\\Models\\Hotel
+958	576556264.jpg	attachments/DN6bj7AZRuDj6KHCXUc442l7GIRLRV8LO12VEoPI.jpg	application/octet-stream	88734	117	App\\Models\\Hotel
+959	Double Room_Green park.jpg	attachments/GYz7HNKRZH7a66YSAhhREeJ9dB2QHhvhWqhNqBRq.jpg	application/octet-stream	288800	210	App\\Models\\Hotel
+960	Single Room_Green park Hotel.jpg	attachments/GM7QkYYls7FVUzrRJhSKyPGSZFaZ6BZA5ZeuNF5i.jpg	application/octet-stream	283803	210	App\\Models\\Hotel
+961	Twin_Green Park.jpg	attachments/YtH1KkuAA4FQY9uo22lpwlrM7PyIzzzBWAXvoMlu.jpg	application/octet-stream	349580	210	App\\Models\\Hotel
+962	caption.jpg	attachments/k3jUwjwogzGafxZ9mCYkDDFeHNm15qvJneVqE22L.jpg	application/octet-stream	66552	214	App\\Models\\Hotel
+963	25a4dd2a.jpg	attachments/s15Axy5aIv4ocTOTwFgjq1VzOzZAlt7qNGulodpp.jpg	application/octet-stream	112797	214	App\\Models\\Hotel
+964	fe5968be_edited_b80e.jpg	attachments/kR6tRPtpVTB9lWkD5It7NgzOM2JsELgkWsUXVvv2.jpg	application/octet-stream	147427	214	App\\Models\\Hotel
+965	fe801ed2.jpg	attachments/DLnqOa2mUMoVHbXkvPN98K3NdGK6dwenH9wOlaVB.jpg	application/octet-stream	117590	214	App\\Models\\Hotel
+966	Fasad.webp	attachments/pZIWepDO257JtKTDj6a2xHX6wOKS91J4d00JLicp.webp	application/octet-stream	71952	85	App\\Models\\Hotel
+967	barth room_Annex.webp	attachments/GII9razBNCQzB7SodRBwNcb7GTr1SLcbi6fDQLFx.webp	application/octet-stream	34650	85	App\\Models\\Hotel
+968	Double Room_Annex.webp	attachments/TfST8HgF306yCca0Gk5IVm2dkzkBY7th8ixEcpyx.webp	application/octet-stream	46896	85	App\\Models\\Hotel
+969	Hall_Annex.webp	attachments/aKj5pRgSoKWqruWc8sLa8CaHhFXtsaz7gnnJWTXO.webp	application/octet-stream	78934	85	App\\Models\\Hotel
+970	restaurant_Annex.webp	attachments/Hr5ROlqlGiFp22m7GS90uReRouLR325buerZTEEW.webp	application/octet-stream	59504	85	App\\Models\\Hotel
+971	Twin Room_Annex.webp	attachments/NPlovUVIBmePzzav7BsZj3wJXNrip2BYFhMAWcrW.webp	application/octet-stream	49412	85	App\\Models\\Hotel
 \.
 
 
@@ -3840,8 +4221,8 @@ COPY public.attachments (id, file_name, file_path, file_type, file_size, attacha
 --
 
 COPY public.banners (id, header_ru, header_en, description_ru, description_en, link, photo, created_at, updated_at) FROM stdin;
-1	8-дневный классический тур по Узбекистану	8-day Uzbekistan Classic Tour	Исследуйте Узбекистан с его гостеприимными людьми, минаретами с голубыми куполами, мавзолеями, полными истории, и местной кухней, которая стала неотделимой от культур Ташкента, Самарканда, Бухары и Хивы. Почувствуйте очарование Востока сами!\n	Explore Uzbekistan, with its welcoming people, blue-domed minarets, mausoleums full of history, and local cuisines that have become inseparable from the cultures of Tashkent, Samarkand, Bukhara, and Khiva. Feel the charm of the East for yourself!	\N	01K1X5ZZDR01BER62PSWWDK36G.jpg	2025-08-05 13:16:07	2025-08-05 13:16:07
-4	Узбекистан	Uzbekistan	Узбекистан — сердце Великого шёлкового пути.\nОтправьтесь в путешествие сквозь века, посетив легендарные города Хиву, Бухару и Самарканд — одни из самых значимых центров древнего Шёлкового пути. Тщательно восстановленные исторические ансамбли впечатляют своим величием и атмосферой прошлого. Окунитесь в уникальное сочетание древних традиций и современной жизни, прогуляйтесь по колоритным базарам и откройте для себя архитектурные шедевры, украшенные золотыми и бирюзовыми узорами, сверкающими под солнцем пустыни.	Uzbekistan is the heart of the Great Silk Road.\nTravel back in time as you explore the legendary cities of Khiva, Bukhara, and Samarkand — some of the most important centers of the ancient Silk Road. Carefully restored historical monuments showcase their former grandeur, while centuries-old traditions blend seamlessly with modern life. Wander through vibrant bazaars and discover architectural masterpieces adorned with gold and turquoise, shimmering under the desert sun.	\N	01KDD7AW0447PGFTXGFHQ0BADD.jpg	2025-12-26 11:40:04	2025-12-26 11:40:04
+1	8-дневный классический тур по Узбекистану	8-day Uzbekistan Classic Tour	Исследуйте Узбекистан с его гостеприимными людьми, минаретами с голубыми куполами, мавзолеями, полными истории, и местной кухней, которая стала неотделимой от культур Ташкента, Самарканда, Бухары и Хивы. Почувствуйте очарование Востока сами!\n	Explore Uzbekistan, with its welcoming people, blue-domed minarets, mausoleums full of history, and local cuisines that have become inseparable from the cultures of Tashkent, Samarkand, Bukhara, and Khiva. Feel the charm of the East for yourself!	https://www.letsgouzbekistan.com/tours/2	01K1X5ZZDR01BER62PSWWDK36G.jpg	2025-08-05 13:16:07	2026-02-06 06:51:25
+4	Узбекистан	Uzbekistan	Узбекистан — сердце Великого шёлкового пути.\nОтправьтесь в путешествие сквозь века, посетив легендарные города Хиву, Бухару и Самарканд — одни из самых значимых центров древнего Шёлкового пути. Тщательно восстановленные исторические ансамбли впечатляют своим величием и атмосферой прошлого. Окунитесь в уникальное сочетание древних традиций и современной жизни, прогуляйтесь по колоритным базарам и откройте для себя архитектурные шедевры, украшенные золотыми и бирюзовыми узорами, сверкающими под солнцем пустыни.	Uzbekistan is the heart of the Great Silk Road.\nTravel back in time as you explore the legendary cities of Khiva, Bukhara, and Samarkand — some of the most important centers of the ancient Silk Road. Carefully restored historical monuments showcase their former grandeur, while centuries-old traditions blend seamlessly with modern life. Wander through vibrant bazaars and discover architectural masterpieces adorned with gold and turquoise, shimmering under the desert sun.	https://www.letsgouzbekistan.com/	01KDD7AW0447PGFTXGFHQ0BADD.jpg	2025-12-26 11:40:04	2026-03-01 08:20:05
 \.
 
 
@@ -3850,6 +4231,14 @@ COPY public.banners (id, header_ru, header_en, description_ru, description_en, l
 --
 
 COPY public.buy_requests (id, user_id, web_tour_id, start_date, status, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: categories; Type: TABLE DATA; Schema: public; Owner: developer
+--
+
+COPY public.categories (id, name_ru, name_en, created_at, updated_at) FROM stdin;
 \.
 
 
@@ -3900,6 +4289,20 @@ COPY public.cities (id, name, country_id) FROM stdin;
 42	Ashagabat	1
 43	Kungrad	1
 44	Ashgabat 	23
+45	Almaty	24
+46	Astana	24
+47	Charyn Canyon	25
+48	Karakol	25
+49	Kochkor	25
+50	Son-Kul 	25
+51	Bishkek 	25
+52	Darvaza Gas Crater	23
+53	Mary	23
+54	Merv	23
+55	Penjikent	22
+56	Dushanbe	22
+57	San Paulo 	9
+58	Khujand	22
 \.
 
 
@@ -3969,6 +4372,9 @@ COPY public.companies (id, name, inn, additional_percent, comment, type, email, 
 66	Tian Ma Zuo (天马座）	\N	\N	WeChat :Shan17y 	1	\N	\N
 68	KCTUBE" MCHJ	306901908	\N	\N	2	\N	\N
 67	Turkish Airlanes	201086536	\N	\N	2	\N	\N
+69	Tour de Monde	\N	\N	atendimento06@tdm.tur.br\natendimento01@tdm.tur.br\njane@tdm.tur.br	1	paulo@tdm.tur.br	\N
+70	PRIMA REISEN GMBH	\N	\N	\N	1	\N	\N
+71	Gil Travel	\N	\N	\N	1	rebecca@giltravel.com	\N
 \.
 
 
@@ -4007,6 +4413,9 @@ COPY public.countries (id, name) FROM stdin;
 22	Tadjikistan
 23	Turkmenistan
 19	Switzerland
+24	Kazakhstan
+25	Kyrgyzstan
+26	Brazil
 \.
 
 
@@ -4015,7 +4424,7 @@ COPY public.countries (id, name) FROM stdin;
 --
 
 COPY public.currencies (id, "from", "to", rate, created_at, updated_at, is_main) FROM stdin;
-1	UZS	USD	12000	2025-03-20 12:46:14	2026-01-21 13:14:54	t
+1	UZS	USD	12200	2025-03-20 12:46:14	2026-02-14 07:44:52	t
 \.
 
 
@@ -4058,6 +4467,7 @@ COPY public.drivers (id, name, phone, car_number, car_model, chat_id, created_at
 34	Ilkhom Chazor	+998997803883	\N	\N	5 536 969 268	2025-09-15 06:46:03	2025-09-15 06:46:03
 35	Dilshodbek	+998997428212	\N	\N	\N	2025-10-07 09:10:12	2025-10-07 09:10:12
 36	Bakhtiyor 	+998909445565	\N	\N	2755626	2025-11-18 11:00:15	2025-11-18 11:00:15
+37	Otabek (Minor)	+998977903332	\N	\N	978 861 724	2026-03-10 10:10:23	2026-03-10 10:10:23
 \.
 
 
@@ -4192,6 +4602,25 @@ COPY public.expense_guides (id, tour_day_expense_id, name, phone) FROM stdin;
 133	1694	Diyora	+998991384801
 131	1687	Xayriddinov Abduqodir	+998951062660
 132	1690	Xayriddinov Abduqodir	+998951062660
+134	2210	Abdulloh	+998934320425
+135	2216	Ulugbek	+998976140447
+137	2225	Ulugbek	+998933484208
+138	2219	Abdulloh	+998934320425
+139	2228	Ulugbek	+998933484208
+140	2231	Ravshan	+998934701514
+141	2242	Abdulloh	+998934320425
+142	2249	Mr. Ulug'bek 	+998976140447
+143	2253	Mr. Ulug'bek	+998976140447
+144	2257	Mr. Ulug'bek	+998976140447
+145	2262	Mrs. Gulchehra	+998914108019
+146	2266	Mrs. Gulcherha	+998914108019
+147	2269	Mrs. Gulchehra	+998914108019
+148	2275	Ms. Charos	+998995596818
+149	2279	Ms. Charos	+998995596818
+150	2292	Ulugbek	+998976140447
+151	2299	Shaxnoza	+998914465580
+152	2301	Shaxnoza 	+998914465580
+153	2307	Charos	+998995596818
 \.
 
 
@@ -4828,6 +5257,285 @@ COPY public.hotel_facilities (id, hotel_id, facility_id, created_at, updated_at)
 558	205	12	\N	\N
 559	205	19	\N	\N
 560	205	16	\N	\N
+561	87	22	\N	\N
+562	87	37	\N	\N
+563	87	14	\N	\N
+564	87	21	\N	\N
+565	87	10	\N	\N
+566	87	24	\N	\N
+567	87	2	\N	\N
+568	87	12	\N	\N
+569	87	19	\N	\N
+570	87	20	\N	\N
+571	87	35	\N	\N
+572	87	36	\N	\N
+573	87	34	\N	\N
+574	87	17	\N	\N
+575	87	9	\N	\N
+576	87	15	\N	\N
+577	87	38	\N	\N
+578	87	43	\N	\N
+579	87	39	\N	\N
+580	87	11	\N	\N
+581	87	40	\N	\N
+582	87	16	\N	\N
+583	91	37	\N	\N
+584	91	14	\N	\N
+585	91	21	\N	\N
+586	91	10	\N	\N
+587	91	24	\N	\N
+588	91	2	\N	\N
+589	91	19	\N	\N
+590	91	35	\N	\N
+591	91	36	\N	\N
+592	91	34	\N	\N
+593	91	26	\N	\N
+594	91	13	\N	\N
+595	91	17	\N	\N
+596	91	29	\N	\N
+597	91	15	\N	\N
+598	91	38	\N	\N
+599	91	11	\N	\N
+600	91	39	\N	\N
+601	158	10	\N	\N
+602	158	2	\N	\N
+603	158	17	\N	\N
+604	158	15	\N	\N
+605	158	38	\N	\N
+606	158	11	\N	\N
+607	133	10	\N	\N
+608	133	24	\N	\N
+609	133	17	\N	\N
+610	133	15	\N	\N
+611	107	10	\N	\N
+612	107	24	\N	\N
+613	107	2	\N	\N
+614	137	10	\N	\N
+615	137	25	\N	\N
+616	137	24	\N	\N
+617	137	2	\N	\N
+618	137	9	\N	\N
+619	137	15	\N	\N
+620	137	38	\N	\N
+621	137	34	\N	\N
+622	140	22	\N	\N
+623	140	37	\N	\N
+624	140	14	\N	\N
+625	140	21	\N	\N
+626	140	10	\N	\N
+627	140	24	\N	\N
+628	140	2	\N	\N
+629	140	12	\N	\N
+630	140	19	\N	\N
+631	140	16	\N	\N
+632	140	20	\N	\N
+633	140	31	\N	\N
+634	140	35	\N	\N
+635	140	26	\N	\N
+636	140	36	\N	\N
+637	140	13	\N	\N
+638	140	34	\N	\N
+639	140	17	\N	\N
+640	140	29	\N	\N
+641	140	9	\N	\N
+642	140	15	\N	\N
+643	140	38	\N	\N
+644	140	40	\N	\N
+645	140	11	\N	\N
+646	140	39	\N	\N
+647	140	43	\N	\N
+648	140	32	\N	\N
+649	122	14	\N	\N
+650	122	21	\N	\N
+651	122	10	\N	\N
+652	122	24	\N	\N
+653	122	2	\N	\N
+654	122	12	\N	\N
+655	122	19	\N	\N
+656	122	36	\N	\N
+657	122	20	\N	\N
+658	122	26	\N	\N
+659	122	34	\N	\N
+660	122	13	\N	\N
+661	122	17	\N	\N
+662	122	29	\N	\N
+663	122	9	\N	\N
+664	122	15	\N	\N
+665	122	41	\N	\N
+666	122	40	\N	\N
+667	122	43	\N	\N
+668	122	11	\N	\N
+669	122	39	\N	\N
+670	122	38	\N	\N
+671	155	14	\N	\N
+672	155	10	\N	\N
+673	155	24	\N	\N
+674	155	2	\N	\N
+675	155	19	\N	\N
+676	155	36	\N	\N
+677	155	17	\N	\N
+678	155	9	\N	\N
+679	155	15	\N	\N
+680	155	11	\N	\N
+681	162	22	\N	\N
+682	162	37	\N	\N
+683	162	14	\N	\N
+684	162	21	\N	\N
+685	162	10	\N	\N
+686	162	24	\N	\N
+687	162	2	\N	\N
+688	162	12	\N	\N
+689	162	19	\N	\N
+690	162	26	\N	\N
+691	162	35	\N	\N
+692	162	20	\N	\N
+693	162	31	\N	\N
+694	162	45	\N	\N
+695	162	34	\N	\N
+696	162	15	\N	\N
+697	162	17	\N	\N
+698	162	13	\N	\N
+699	162	36	\N	\N
+700	162	9	\N	\N
+701	162	38	\N	\N
+702	162	43	\N	\N
+703	162	39	\N	\N
+704	162	11	\N	\N
+705	99	37	\N	\N
+706	99	22	\N	\N
+707	99	14	\N	\N
+708	99	21	\N	\N
+709	99	44	\N	\N
+710	99	10	\N	\N
+711	99	24	\N	\N
+712	99	2	\N	\N
+713	99	12	\N	\N
+714	99	19	\N	\N
+715	99	20	\N	\N
+716	99	31	\N	\N
+717	99	35	\N	\N
+718	99	26	\N	\N
+719	99	13	\N	\N
+720	99	34	\N	\N
+721	99	36	\N	\N
+722	99	29	\N	\N
+723	99	17	\N	\N
+724	99	9	\N	\N
+725	99	15	\N	\N
+726	99	43	\N	\N
+727	99	39	\N	\N
+728	99	38	\N	\N
+729	99	11	\N	\N
+730	44	10	\N	\N
+731	44	24	\N	\N
+732	44	2	\N	\N
+733	44	36	\N	\N
+734	44	9	\N	\N
+735	44	15	\N	\N
+736	44	8	\N	\N
+737	44	38	\N	\N
+738	44	39	\N	\N
+739	44	11	\N	\N
+740	44	42	\N	\N
+741	44	34	\N	\N
+742	209	10	\N	\N
+743	209	24	\N	\N
+744	209	2	\N	\N
+745	209	19	\N	\N
+746	209	36	\N	\N
+747	209	34	\N	\N
+748	209	17	\N	\N
+749	209	15	\N	\N
+750	209	8	\N	\N
+751	209	42	\N	\N
+752	209	13	\N	\N
+753	209	38	\N	\N
+754	209	9	\N	\N
+755	209	11	\N	\N
+756	169	14	\N	\N
+757	169	21	\N	\N
+758	169	10	\N	\N
+759	169	24	\N	\N
+760	169	2	\N	\N
+761	169	19	\N	\N
+762	169	20	\N	\N
+763	169	36	\N	\N
+764	169	34	\N	\N
+765	169	17	\N	\N
+766	169	13	\N	\N
+767	169	15	\N	\N
+768	169	11	\N	\N
+769	169	43	\N	\N
+770	25	10	\N	\N
+771	25	21	\N	\N
+772	25	2	\N	\N
+773	25	24	\N	\N
+774	25	19	\N	\N
+775	25	36	\N	\N
+776	25	34	\N	\N
+777	25	13	\N	\N
+778	25	17	\N	\N
+779	25	9	\N	\N
+780	25	15	\N	\N
+781	25	11	\N	\N
+782	117	14	\N	\N
+783	117	44	\N	\N
+784	117	21	\N	\N
+785	117	10	\N	\N
+786	117	24	\N	\N
+787	117	2	\N	\N
+788	117	19	\N	\N
+789	117	16	\N	\N
+790	117	35	\N	\N
+791	117	31	\N	\N
+792	117	36	\N	\N
+793	117	45	\N	\N
+794	117	13	\N	\N
+795	117	34	\N	\N
+796	117	17	\N	\N
+797	117	29	\N	\N
+798	117	9	\N	\N
+799	117	15	\N	\N
+800	117	38	\N	\N
+801	117	11	\N	\N
+802	210	22	\N	\N
+803	210	37	\N	\N
+804	210	21	\N	\N
+805	210	10	\N	\N
+806	210	2	\N	\N
+807	210	12	\N	\N
+808	210	19	\N	\N
+809	210	36	\N	\N
+810	210	34	\N	\N
+811	210	29	\N	\N
+812	210	33	\N	\N
+813	210	32	\N	\N
+814	214	22	\N	\N
+815	214	37	\N	\N
+816	214	21	\N	\N
+817	214	10	\N	\N
+818	214	2	\N	\N
+819	214	23	\N	\N
+820	214	24	\N	\N
+821	214	19	\N	\N
+822	214	20	\N	\N
+823	214	35	\N	\N
+824	214	9	\N	\N
+825	214	15	\N	\N
+826	214	34	\N	\N
+827	214	38	\N	\N
+828	214	11	\N	\N
+829	85	10	\N	\N
+830	85	2	\N	\N
+831	85	23	\N	\N
+832	85	19	\N	\N
+833	85	35	\N	\N
+834	85	36	\N	\N
+835	85	17	\N	\N
+836	85	29	\N	\N
+837	85	34	\N	\N
+838	85	8	\N	\N
+839	85	38	\N	\N
 \.
 
 
@@ -4878,7 +5586,6 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 69	65	3	2025-08-01	2025-11-30	2025-03-17 11:52:56	2025-03-17 11:52:56
 71	67	4	2025-01-01	2025-12-31	2025-03-17 19:06:13	2025-03-17 19:06:13
 72	70	4	2025-01-01	2025-12-31	2025-03-18 11:34:13	2025-03-18 11:34:13
-73	71	4	2025-01-01	2025-12-31	2025-03-18 11:39:26	2025-03-18 11:39:26
 74	72	3	2025-03-16	2025-06-15	2025-03-18 12:12:11	2025-03-18 12:12:11
 75	72	3	2025-08-01	2025-11-15	2025-03-18 12:12:11	2025-03-18 12:12:11
 76	72	3	2025-12-25	2025-12-31	2025-03-18 12:12:11	2025-03-18 12:12:11
@@ -4917,6 +5624,30 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 670	190	1	2026-06-16	2026-07-31	2026-01-28 11:16:57	2026-01-28 11:16:57
 671	190	1	2026-11-16	2026-11-30	2026-01-28 11:16:57	2026-01-28 11:16:57
 683	205	4	2026-01-16	2026-12-31	2026-01-30 13:16:13	2026-01-30 13:16:13
+689	91	3	2026-03-10	2026-11-15	2026-02-04 11:46:27	2026-02-04 11:46:27
+690	91	1	2026-02-01	2026-03-09	2026-02-04 11:46:27	2026-02-04 11:46:27
+691	91	1	2026-11-16	2026-12-31	2026-02-04 11:46:27	2026-02-04 11:46:27
+692	99	1	2026-01-01	2026-02-28	2026-02-09 14:07:26	2026-02-09 14:07:26
+693	99	1	2026-12-01	2026-12-31	2026-02-09 14:07:26	2026-02-09 14:07:26
+694	99	2	2026-03-01	2026-03-31	2026-02-09 14:07:26	2026-02-09 14:07:26
+695	99	2	2026-06-01	2026-08-31	2026-02-09 14:07:26	2026-02-09 14:07:26
+696	99	2	2026-11-02	2026-11-30	2026-02-09 14:07:26	2026-02-09 14:07:26
+697	99	3	2026-04-01	2026-05-31	2026-02-09 14:07:26	2026-02-09 14:07:26
+698	99	3	2026-09-01	2026-11-01	2026-02-09 14:07:26	2026-02-09 14:07:26
+704	207	4	2026-01-01	2026-12-31	2026-02-13 07:32:09	2026-02-13 07:32:09
+718	44	4	2026-02-16	2026-12-31	2026-02-17 10:02:28	2026-02-17 10:02:28
+722	25	4	2026-02-16	2026-12-31	2026-02-17 12:02:40	2026-02-17 12:02:40
+734	210	3	2026-03-15	2026-06-15	2026-02-19 06:58:35	2026-02-19 06:58:35
+735	210	3	2026-08-15	2026-10-31	2026-02-19 06:58:35	2026-02-19 06:58:35
+736	210	1	2026-01-01	2026-03-14	2026-02-19 06:58:35	2026-02-19 06:58:35
+737	210	1	2026-06-16	2026-08-14	2026-02-19 06:58:35	2026-02-19 06:58:35
+738	210	1	2026-11-01	2026-12-31	2026-02-19 06:58:35	2026-02-19 06:58:35
+745	211	4	2026-01-26	2026-12-31	2026-02-20 12:05:01	2026-02-20 12:05:01
+751	214	3	2026-04-01	2026-06-15	2026-02-23 06:15:01	2026-02-23 06:15:01
+752	214	3	2026-08-15	2026-10-31	2026-02-23 06:15:01	2026-02-23 06:15:01
+753	214	1	2026-01-01	2026-03-31	2026-02-23 06:15:01	2026-02-23 06:15:01
+754	214	1	2026-06-16	2026-08-14	2026-02-23 06:15:01	2026-02-23 06:15:01
+755	214	1	2026-11-01	2026-12-31	2026-02-23 06:15:01	2026-02-23 06:15:01
 611	78	1	2026-01-05	2026-04-30	2026-01-22 10:55:10	2026-01-22 10:55:10
 122	80	3	2025-03-01	2025-05-31	2025-03-22 08:41:18	2025-03-22 08:41:18
 123	80	3	2025-08-15	2025-11-15	2025-03-22 08:41:18	2025-03-22 08:41:18
@@ -4940,10 +5671,6 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 149	25	4	2025-01-01	2025-12-31	2025-03-23 23:05:44	2025-03-23 23:05:44
 151	27	4	2025-01-01	2025-12-31	2025-03-24 00:07:34	2025-03-24 00:07:34
 152	15	4	2025-01-01	2025-12-31	2025-03-24 00:24:00	2025-03-24 00:24:00
-153	87	1	2025-01-22	2025-03-02	2025-03-24 01:02:29	2025-03-24 01:02:29
-154	87	1	2025-06-09	2025-08-24	2025-03-24 01:02:29	2025-03-24 01:02:29
-155	87	1	2025-11-24	2025-12-31	2025-03-24 01:02:29	2025-03-24 01:02:29
-156	87	3	2025-03-03	2025-06-08	2025-03-24 01:02:29	2025-03-24 01:02:29
 159	88	3	2025-04-01	2025-05-31	2025-03-25 11:00:58	2025-03-25 11:00:58
 160	88	3	2025-09-01	2025-10-31	2025-03-25 11:00:58	2025-03-25 11:00:58
 161	88	2	2025-03-01	2025-03-31	2025-03-25 11:00:58	2025-03-25 11:00:58
@@ -4961,9 +5688,6 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 633	201	1	2026-11-01	2026-12-31	2026-01-23 12:40:56	2026-01-23 12:40:56
 640	58	3	2026-03-20	2026-06-20	2026-01-27 08:15:23	2026-01-27 08:15:23
 641	58	3	2026-09-01	2026-11-20	2026-01-27 08:15:23	2026-01-27 08:15:23
-181	91	3	2025-03-10	2025-11-15	2025-03-27 11:56:32	2025-03-27 11:56:32
-182	91	1	2025-01-01	2025-03-10	2025-03-27 11:56:32	2025-03-27 11:56:32
-183	91	1	2025-11-15	2025-12-31	2025-03-27 11:56:32	2025-03-27 11:56:32
 184	92	4	2025-03-01	2025-11-30	2025-03-27 12:57:33	2025-03-27 12:57:33
 185	93	4	2025-03-01	2025-12-31	2025-03-27 13:36:01	2025-03-27 13:36:01
 186	94	3	2025-04-01	2025-06-30	2025-03-31 04:23:27	2025-03-31 04:23:27
@@ -5021,6 +5745,12 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 679	204	1	2026-01-01	2026-02-28	2026-01-28 11:50:51	2026-01-28 11:50:51
 680	204	1	2026-07-01	2026-07-31	2026-01-28 11:50:51	2026-01-28 11:50:51
 681	204	1	2026-11-01	2026-12-31	2026-01-28 11:50:51	2026-01-28 11:50:51
+684	87	3	2026-03-23	2026-06-21	2026-02-02 10:05:48	2026-02-02 10:05:48
+685	87	3	2026-09-01	2026-11-30	2026-02-02 10:05:48	2026-02-02 10:05:48
+686	87	1	2026-02-01	2026-03-23	2026-02-02 10:05:48	2026-02-02 10:05:48
+687	87	1	2026-06-02	2026-08-31	2026-02-02 10:05:48	2026-02-02 10:05:48
+688	87	1	2026-12-01	2026-12-31	2026-02-02 10:05:48	2026-02-02 10:05:48
+699	14	4	2026-01-01	2026-12-31	2026-02-10 12:37:54	2026-02-10 12:43:58
 229	4	3	2025-08-16	2025-11-14	2025-03-31 10:24:26	2025-03-31 10:24:26
 230	10	3	2025-03-01	2025-05-31	2025-03-31 10:38:50	2025-03-31 10:38:50
 231	10	3	2025-08-01	2025-10-31	2025-03-31 10:38:50	2025-03-31 10:38:50
@@ -5052,11 +5782,11 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 652	202	3	2026-03-01	2026-05-31	2026-01-27 08:57:42	2026-01-27 08:57:42
 653	202	3	2026-09-01	2026-11-30	2026-01-27 08:57:42	2026-01-27 08:57:42
 270	106	4	2025-04-01	2025-12-31	2025-04-10 06:36:00	2025-04-10 06:36:00
-271	107	4	2025-01-01	2025-12-31	2025-04-11 15:03:32	2025-04-11 15:03:32
 654	202	1	2026-01-01	2026-02-28	2026-01-27 08:57:42	2026-01-27 08:57:42
 663	46	5	2026-04-28	2026-04-30	2026-01-28 09:00:21	2026-01-28 09:00:21
 664	46	5	2026-09-08	2026-09-10	2026-01-28 09:00:21	2026-01-28 09:00:21
 665	46	5	2026-10-06	2026-10-08	2026-01-28 09:00:21	2026-01-28 09:00:21
+331	133	4	2026-01-01	2026-12-31	2025-05-27 05:28:04	2026-02-06 11:34:28
 277	109	1	2025-01-01	2025-03-15	2025-04-11 15:17:07	2025-04-11 15:17:07
 278	109	1	2025-07-16	2025-08-15	2025-04-11 15:17:07	2025-04-11 15:17:07
 279	109	1	2025-11-16	2025-12-31	2025-04-11 15:17:07	2025-04-11 15:17:07
@@ -5080,6 +5810,7 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 297	116	1	2025-11-16	2025-12-31	2025-04-21 12:17:33	2025-04-21 12:17:33
 298	117	4	2025-04-01	2025-12-31	2025-04-22 09:26:15	2025-04-22 09:26:15
 299	118	4	2025-01-01	2025-12-31	2025-04-22 13:19:42	2025-04-22 13:19:42
+271	107	4	2026-01-01	2026-12-31	2025-04-11 15:03:32	2026-02-06 12:09:18
 301	119	1	2025-01-01	2025-03-15	2025-05-01 06:04:00	2025-05-01 06:04:00
 302	119	1	2025-12-01	2025-12-31	2025-05-01 06:04:00	2025-05-01 06:04:00
 303	119	2	2025-06-15	2025-08-15	2025-05-01 06:04:00	2025-05-01 06:04:00
@@ -5109,19 +5840,23 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 327	129	3	2025-08-16	2025-11-15	2025-05-09 10:41:32	2025-05-09 10:41:32
 328	130	4	2025-01-01	2025-12-31	2025-05-12 13:03:27	2025-05-12 13:03:27
 329	131	4	2025-01-01	2025-12-31	2025-05-14 13:54:32	2025-05-14 13:54:32
-331	133	4	2025-01-01	2025-12-31	2025-05-27 05:28:04	2025-05-27 05:28:04
 339	139	3	2025-03-01	2025-11-30	2025-06-01 09:33:35	2025-06-01 09:33:35
 340	139	1	2025-01-01	2025-03-01	2025-06-01 09:33:35	2025-06-01 09:33:35
 341	139	1	2025-12-01	2025-12-31	2025-06-01 09:33:35	2025-06-01 09:33:35
+709	208	1	2026-01-01	2026-02-28	2026-02-16 07:44:21	2026-02-16 07:44:21
 343	140	4	2025-03-01	2025-12-31	2025-06-02 10:35:05	2025-06-02 10:35:05
 344	141	4	2025-01-01	2025-12-31	2025-06-03 12:43:08	2025-06-03 12:43:08
+710	208	1	2026-07-01	2026-07-31	2026-02-16 07:44:21	2026-02-16 07:44:21
 346	143	4	2025-05-21	2025-12-31	2025-06-10 07:23:37	2025-06-10 07:23:37
-348	145	1	2025-01-01	2025-03-15	2025-06-10 12:20:59	2025-06-10 12:20:59
-349	145	1	2025-07-01	2025-08-31	2025-06-10 12:20:59	2025-06-10 12:20:59
-350	145	1	2025-11-16	2025-12-31	2025-06-10 12:20:59	2025-06-10 12:20:59
-351	145	3	2025-03-16	2025-06-30	2025-06-10 12:20:59	2025-06-10 12:20:59
 347	144	1	2026-01-01	2026-03-14	2025-06-10 11:32:04	2025-12-26 11:09:42
-352	145	3	2025-09-01	2025-11-15	2025-06-10 12:20:59	2025-06-10 12:20:59
+711	208	1	2026-12-01	2026-12-31	2026-02-16 07:44:21	2026-02-16 07:44:21
+712	208	2	2026-03-01	2026-03-15	2026-02-16 07:44:21	2026-02-16 07:44:21
+720	209	4	2026-02-16	2026-12-31	2026-02-17 10:14:58	2026-02-17 10:14:58
+723	117	4	2026-02-17	2026-12-31	2026-02-17 12:54:30	2026-02-17 12:54:30
+739	155	3	2026-03-01	2026-06-20	2026-02-19 09:16:56	2026-02-19 09:16:56
+740	155	3	2026-08-25	2026-11-15	2026-02-19 09:16:56	2026-02-19 09:16:56
+741	155	1	2026-01-01	2026-02-28	2026-02-19 09:16:56	2026-02-19 09:16:56
+742	155	1	2026-06-21	2026-08-24	2026-02-19 09:16:56	2026-02-19 09:16:56
 353	146	4	2025-01-01	2025-12-31	2025-06-14 09:10:04	2025-06-14 09:10:04
 354	147	1	2025-06-17	2025-08-15	2025-06-17 05:28:06	2025-06-17 05:28:06
 355	147	1	2025-11-16	2025-12-31	2025-06-17 05:28:06	2025-06-17 05:28:06
@@ -5151,9 +5886,7 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 380	157	1	2025-01-01	2025-02-28	2025-06-28 10:17:33	2025-06-28 10:17:33
 381	157	1	2025-11-01	2025-12-31	2025-06-28 10:17:33	2025-06-28 10:17:33
 382	157	3	2025-03-01	2025-10-31	2025-06-28 10:17:33	2025-06-28 10:17:33
-383	158	4	2025-01-01	2025-12-31	2025-06-30 07:48:24	2025-06-30 07:48:24
 384	159	4	2025-01-01	2025-12-31	2025-07-01 09:00:07	2025-07-01 09:00:07
-385	160	1	2025-07-01	2025-07-31	2025-07-01 09:48:05	2025-07-01 09:48:05
 386	161	4	2025-01-01	2025-12-31	2025-07-02 07:45:39	2025-07-02 07:45:39
 388	163	4	2025-07-01	2025-07-01	2025-07-14 13:36:58	2025-07-14 13:36:58
 635	39	3	2026-03-01	2026-05-31	2026-01-26 12:29:49	2026-01-26 12:29:49
@@ -5180,6 +5913,7 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 408	172	1	2025-01-01	2025-02-28	2025-08-05 05:33:34	2025-08-05 05:33:34
 409	172	1	2025-06-01	2025-07-31	2025-08-05 05:33:34	2025-08-05 05:33:34
 410	172	1	2025-12-01	2025-12-31	2025-08-05 05:33:34	2025-08-05 05:33:34
+383	158	4	2026-01-01	2026-12-01	2025-06-30 07:48:24	2026-02-06 11:19:46
 412	173	4	2025-08-01	2025-08-31	2025-08-05 13:09:04	2025-08-05 13:09:04
 414	174	4	2025-01-01	2025-12-31	2025-08-08 09:24:14	2025-08-08 09:24:14
 418	176	4	2025-08-26	2025-12-31	2025-08-29 07:12:26	2025-08-29 07:12:26
@@ -5241,6 +5975,11 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 502	194	1	2026-06-15	2026-08-15	2025-12-24 10:21:41	2025-12-24 10:21:41
 503	194	1	2026-11-15	2026-12-31	2025-12-24 10:21:41	2025-12-24 10:21:41
 666	40	4	2026-01-10	2026-12-31	2026-01-28 10:01:46	2026-01-28 10:01:46
+702	50	4	2026-01-01	2026-12-31	2026-02-13 06:56:23	2026-02-13 06:56:23
+713	208	2	2026-06-15	2026-06-30	2026-02-16 14:15:47	2026-02-16 14:15:47
+714	208	2	2026-08-01	2026-08-15	2026-02-16 14:15:47	2026-02-16 14:15:47
+715	208	2	2026-11-15	2026-11-30	2026-02-16 14:15:47	2026-02-16 14:15:47
+716	208	3	2026-03-15	2026-06-15	2026-02-16 14:15:47	2026-02-16 14:15:47
 511	164	3	2026-03-15	2026-06-30	2025-12-25 12:29:42	2025-12-25 12:29:42
 512	164	3	2026-08-01	2026-11-15	2025-12-25 12:29:42	2025-12-25 12:29:42
 513	164	1	2026-01-01	2026-03-15	2025-12-25 12:29:42	2025-12-25 12:29:42
@@ -5286,6 +6025,13 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 555	90	2	2026-03-01	2026-03-14	2026-01-16 14:13:36	2026-01-16 14:13:36
 556	90	1	2026-11-16	2026-12-31	2026-01-16 14:13:36	2026-01-16 14:13:36
 557	90	1	2026-06-16	2026-08-15	2026-01-16 14:13:36	2026-01-16 14:13:36
+717	208	3	2026-08-15	2026-11-15	2026-02-16 14:15:47	2026-02-16 14:15:47
+721	169	4	2026-02-01	2026-12-31	2026-02-17 11:52:32	2026-02-17 11:52:32
+724	122	3	2026-03-01	2026-06-30	2026-02-19 05:54:22	2026-02-19 05:54:22
+725	122	3	2026-09-01	2026-11-30	2026-02-19 05:54:22	2026-02-19 05:54:22
+726	122	1	2026-01-01	2026-02-28	2026-02-19 05:54:22	2026-02-19 05:54:22
+727	122	1	2026-07-01	2026-08-31	2026-02-19 05:54:22	2026-02-19 05:54:22
+728	122	1	2026-12-01	2026-12-31	2026-02-19 05:54:22	2026-02-19 05:54:22
 565	196	1	2026-12-01	2026-12-31	2026-01-19 12:45:42	2026-01-19 12:45:42
 566	196	1	2026-01-01	2026-02-28	2026-01-19 12:45:42	2026-01-19 12:45:42
 567	196	1	2026-06-01	2026-08-31	2026-01-19 12:45:42	2026-01-19 12:45:42
@@ -5293,13 +6039,13 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 569	196	2	2026-11-01	2026-11-30	2026-01-19 12:45:42	2026-01-19 12:45:42
 570	196	3	2026-04-01	2026-05-31	2026-01-19 12:45:42	2026-01-19 12:45:42
 571	196	3	2026-09-01	2026-10-31	2026-01-19 12:45:42	2026-01-19 12:45:42
+743	155	1	2026-11-16	2026-12-31	2026-02-19 09:16:56	2026-02-19 09:16:56
 578	197	3	2026-03-16	2026-06-15	2026-01-19 13:04:32	2026-01-19 13:04:32
 579	197	3	2026-08-16	2026-11-15	2026-01-19 13:04:32	2026-01-19 13:04:32
 580	197	3	2026-12-15	2026-12-31	2026-01-19 13:04:32	2026-01-19 13:04:32
 581	197	1	2026-01-01	2026-03-15	2026-01-19 13:04:32	2026-01-19 13:04:32
 582	197	1	2026-06-16	2026-08-15	2026-01-19 13:04:32	2026-01-19 13:04:32
 583	197	1	2026-11-16	2026-12-14	2026-01-19 13:04:32	2026-01-19 13:04:32
-584	160	1	2026-07-01	2026-07-31	2026-01-20 14:37:02	2026-01-20 14:37:02
 586	198	4	2026-01-01	2026-12-31	2026-01-21 11:40:22	2026-01-21 11:40:22
 591	199	1	2026-01-01	2026-02-28	2026-01-21 12:33:10	2026-01-21 12:33:10
 592	199	2	2026-07-01	2026-08-31	2026-01-21 12:33:10	2026-01-21 12:33:10
@@ -5316,6 +6062,15 @@ COPY public.hotel_periods (id, hotel_id, season_type, start_date, end_date, crea
 607	200	1	2026-01-01	2026-02-19	2026-01-22 09:45:47	2026-01-22 09:45:47
 608	200	3	2026-07-01	2026-08-20	2026-01-22 09:45:47	2026-01-22 09:45:47
 609	200	1	2026-11-01	2026-12-31	2026-01-22 09:45:47	2026-01-22 09:45:47
+762	215	3	2026-03-16	2026-06-15	2026-02-26 06:56:49	2026-02-26 06:56:49
+763	215	3	2026-08-16	2026-11-15	2026-02-26 06:56:49	2026-02-26 06:56:49
+764	215	3	2026-12-15	2026-12-31	2026-02-26 06:56:49	2026-02-26 06:56:49
+765	215	1	2026-01-01	2026-03-15	2026-02-26 06:56:49	2026-02-26 06:56:49
+766	215	1	2026-06-16	2026-08-15	2026-02-26 06:56:49	2026-02-26 06:56:49
+767	215	1	2026-11-16	2026-12-14	2026-02-26 06:56:49	2026-02-26 06:56:49
+773	85	4	2026-01-01	2026-12-31	2026-03-01 09:01:13	2026-03-01 09:01:13
+775	216	4	2026-01-01	2026-12-31	2026-03-11 07:23:15	2026-03-11 07:23:15
+777	217	4	2026-01-01	2026-12-31	2026-03-13 11:52:35	2026-03-13 11:52:35
 \.
 
 
@@ -5340,38 +6095,63 @@ COPY public.hotel_room_type (hotel_id, room_type_id) FROM stdin;
 --
 
 COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, person_type, price_foreign, hotel_period_id) FROM stdin;
-1750	1080000.00	20	1	\N	\N	1080000	619
-1760	500000.00	201	1	\N	\N	550000	629
-1780	400000.00	39	1	\N	\N	400000	638
-1790	450000.00	58	1	\N	\N	590000	643
-1800	715000.00	202	1	\N	\N	715000	651
-1810	300000.00	203	1	\N	\N	420000	656
-1820	850000.00	79	1	\N	\N	850000	658
+2004	0.00	214	1	\N	\N	600000	751
+1780	0.00	39	1	\N	\N	400000	638
+1800	0.00	202	1	\N	\N	715000	651
 35	1265000.00	11	3	4	\N	1825050	150
-1830	1350000.00	89	1	\N	\N	1350000	536
-1840	1050000.00	89	1	\N	\N	1050000	541
-1850	1350000.00	46	1	\N	\N	1350000	31
-1860	1720000.00	46	1	\N	\N	1720000	38
-1870	2200000.00	46	1	\N	\N	2200000	40
-1880	820000.00	190	1	\N	\N	820000	667
-1890	690000.00	204	1	\N	\N	690000	677
-1900	500000.00	191	2	\N	\N	600000	454
+1959	700000.00	209	13	\N	\N	700000	720
+78	0.00	23	2	4	\N	2000000	\N
+1980	0.00	122	1	\N	\N	2061800	724
+1929	0.00	99	1	\N	\N	1600000	696
+1760	0.00	201	1	\N	\N	550000	629
+1890	0.00	204	1	\N	\N	690000	677
 148	990100.00	44	3	4	2	1098100	\N
 149	555900.00	44	9	4	2	591900	\N
 150	742200.00	44	10	4	2	814200	\N
 151	690300.00	44	11	4	2	715100	\N
+1810	0.00	203	1	\N	\N	420000	656
 152	803800.00	44	17	4	2	875800	\N
+154	0.00	48	2	4	2	765000	106
+57	0.00	18	2	4	\N	1100000	62
+96	0.00	30	2	4	\N	930000	610
+2	0.00	1	2	4	\N	775000	259
+1969	0.00	164	2	\N	\N	900000	511
+147	0.00	44	2	4	2	752600	\N
+2000	0.00	211	2	\N	\N	900000	745
+1979	0.00	117	2	\N	\N	1100000	723
+1900	0.00	191	2	\N	\N	600000	454
 165	720000.00	38	9	3	2	\N	\N
 166	850000.00	38	10	3	2	\N	\N
+1910	0.00	87	2	\N	\N	1700000	687
+164	0.00	38	2	3	2	\N	\N
+1990	0.00	210	1	\N	\N	750000	736
+1919	0.00	158	1	\N	\N	500000	383
+163	0.00	38	1	3	2	\N	\N
+1939	0.00	208	1	\N	\N	800000	716
+1913	0.00	91	1	\N	\N	740000	689
+11	0.00	4	1	3	\N	906250	228
+39	0.00	7	1	1	\N	1606250	59
+83	0.00	27	1	4	\N	556250	151
+1820	0.00	79	1	\N	\N	850000	658
+1830	0.00	89	1	\N	\N	1350000	536
+1840	0.00	89	1	\N	\N	1050000	541
+1750	0.00	20	1	\N	\N	1080000	619
+1850	0.00	46	1	\N	\N	1350000	31
 89	1000000.00	28	3	4	\N	1050000	29
 90	1050000.00	28	15	4	\N	1050000	29
 58	850000.00	18	9	4	\N	850000	62
 59	1200000.00	18	10	4	\N	1200000	62
 60	1500000.00	18	6	4	\N	1500000	62
+1860	0.00	46	1	\N	\N	1720000	38
+1870	0.00	46	1	\N	\N	2200000	40
+146	0.00	44	1	4	2	530300	\N
 61	1700000.00	18	7	4	\N	1700000	62
 155	765000.00	48	3	4	2	1275000	106
 81	841500.00	25	12	4	\N	877500	149
 82	1011000.00	25	13	4	\N	1083000	149
+1880	0.00	190	1	\N	\N	820000	667
+1790	0.00	58	1	\N	\N	590000	643
+1949	0.00	208	2	\N	\N	800000	709
 85	1004500.00	27	3	4	\N	1168750	151
 86	801500.00	27	11	4	\N	856250	151
 120	900500.00	19	3	4	\N	1120500	200
@@ -5379,38 +6159,38 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 55	1400000.00	17	3	4	\N	1600000	201
 176	1703000.00	57	17	4	\N	1812500	9
 3	839460.00	1	3	4	\N	938500	259
-163	0.00	38	1	3	2	\N	\N
-78	2000000.00	23	2	4	\N	2000000	\N
-164	0.00	38	2	3	2	\N	\N
-147	0.00	44	2	4	2	752600	\N
 174	901500.00	57	10	4	\N	1112500	9
 173	801500.00	57	9	4	\N	1006250	9
-146	0.00	44	1	4	2	530300	\N
 175	1401500.00	57	11	4	\N	1456250	9
-2	0.00	1	2	4	\N	775000	259
-11	0.00	4	1	3	\N	906250	228
-96	930000.00	30	2	4	\N	930000	610
 97	1125000.00	30	3	4	\N	1125000	610
-154	0.00	48	2	4	2	765000	106
-39	0.00	7	1	1	\N	1606250	59
-83	0.00	27	1	4	\N	556250	151
 136	1012500.00	41	3	3	2	1344500	370
-57	0.00	18	2	4	\N	1100000	62
-1751	1140000.00	20	2	\N	\N	1140000	619
-1761	700000.00	201	2	\N	\N	750000	629
-1781	550000.00	39	2	\N	\N	550000	638
-1791	650000.00	58	2	\N	\N	770000	643
-1801	845000.00	202	2	\N	\N	845000	651
-1811	500000.00	203	2	\N	\N	660000	656
-1821	1090000.00	79	2	\N	\N	1090000	658
-1831	1550000.00	89	2	\N	\N	1550000	536
-1841	1250000.00	89	2	\N	\N	1250000	541
-1851	1550000.00	46	2	\N	\N	1550000	31
-1861	1920000.00	46	2	\N	\N	1920000	38
-1871	2400000.00	46	2	\N	\N	2400000	40
-1881	1050000.00	190	2	\N	\N	1050000	667
-1891	880000.00	204	2	\N	\N	880000	677
-1901	600000.00	205	1	\N	\N	600000	683
+1911	0.00	87	1	\N	\N	1450000	688
+1960	0.00	169	1	\N	\N	550000	721
+1970	0.00	164	1	\N	\N	600000	512
+1901	0.00	205	1	\N	\N	600000	683
+1950	800000.00	208	81	\N	\N	800000	709
+2001	900000.00	211	3	\N	\N	1100000	745
+1940	0.00	208	2	\N	\N	1000000	717
+2005	0.00	214	2	\N	\N	900000	751
+1781	0.00	39	2	\N	\N	550000	638
+1801	0.00	202	2	\N	\N	845000	651
+1930	0.00	99	2	\N	\N	1900000	696
+1891	0.00	204	2	\N	\N	880000	677
+1991	0.00	210	2	\N	\N	900000	736
+1920	0.00	158	2	\N	\N	700000	383
+1914	0.00	91	2	\N	\N	985000	689
+1821	0.00	79	2	\N	\N	1090000	658
+1831	0.00	89	2	\N	\N	1550000	536
+1841	0.00	89	2	\N	\N	1250000	541
+1751	0.00	20	2	\N	\N	1140000	619
+1851	0.00	46	2	\N	\N	1550000	31
+1861	0.00	46	2	\N	\N	1920000	38
+1871	0.00	46	2	\N	\N	2400000	40
+1881	0.00	190	2	\N	\N	1050000	667
+1791	0.00	58	2	\N	\N	770000	643
+1981	0.00	122	2	\N	\N	2523600	724
+1761	0.00	201	2	\N	\N	750000	629
+1811	0.00	203	2	\N	\N	660000	656
 206	504500.00	59	3	1	\N	868750	24
 207	461500.00	59	12	1	\N	706250	24
 208	563000.00	59	13	1	\N	862500	24
@@ -5419,42 +6199,106 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 213	604500.00	59	3	3	\N	1008750	27
 214	721500.00	59	12	3	\N	836250	27
 215	673000.00	59	13	3	\N	1012500	27
-1752	805000.00	20	1	\N	\N	805000	621
-1762	500000.00	201	1	\N	\N	550000	630
-1772	650000.00	9	1	\N	\N	650000	634
-1782	450000.00	52	1	\N	\N	600000	639
-1792	450000.00	58	1	\N	\N	590000	644
-1802	715000.00	202	1	\N	\N	715000	654
-1812	1045000.00	79	1	\N	\N	1045000	660
-1822	850000.00	79	1	\N	\N	850000	659
-1832	1350000.00	89	1	\N	\N	1350000	537
-1842	1050000.00	89	1	\N	\N	1050000	542
-1852	1350000.00	46	1	\N	\N	1350000	33
-1862	1720000.00	46	1	\N	\N	1720000	39
-1872	2200000.00	46	1	\N	\N	2200000	663
-1882	820000.00	190	1	\N	\N	820000	668
-1892	690000.00	204	1	\N	\N	690000	678
-1902	850000.00	205	2	\N	\N	850000	683
+2006	1250000.00	214	15	\N	\N	1250000	751
+2002	0.00	214	1	\N	\N	\N	\N
+1802	0.00	202	1	\N	\N	715000	654
+1941	0.00	208	81	\N	\N	\N	\N
+1951	950000.00	208	82	\N	\N	950000	709
+1921	0.00	99	1	\N	\N	1500000	692
+1931	0.00	99	1	\N	\N	2000000	697
+1992	850000.00	210	15	\N	\N	850000	736
+1423	0.00	99	1	\N	\N	1456250	252
+1424	0.00	99	1	\N	\N	1456250	253
+1892	0.00	204	1	\N	\N	690000	678
+1915	0.00	91	1	\N	\N	690000	690
+1812	0.00	79	1	\N	\N	1045000	660
+1822	0.00	79	1	\N	\N	850000	659
+1832	0.00	89	1	\N	\N	1350000	537
+1842	0.00	89	1	\N	\N	1050000	542
+1752	0.00	20	1	\N	\N	805000	621
+1852	0.00	46	1	\N	\N	1350000	33
+1862	0.00	46	1	\N	\N	1720000	39
+1872	0.00	46	1	\N	\N	2200000	663
+1882	0.00	190	1	\N	\N	820000	668
+1792	0.00	58	1	\N	\N	590000	644
+1982	0.00	122	1	\N	\N	1661800	726
+1762	0.00	201	1	\N	\N	550000	630
+1492	0.00	113	1	\N	\N	587500	291
+1730	0.00	35	1	\N	\N	1150000	547
+988	0.00	35	1	1	\N	875000	548
+1733	0.00	35	1	\N	\N	875000	549
+449	0.00	68	1	1	\N	765000	197
+1296	0.00	68	1	\N	\N	765000	198
+1297	0.00	68	1	\N	\N	765000	199
+444	0.00	68	1	3	\N	865000	195
+1298	0.00	68	1	\N	\N	865000	196
+1736	0.00	144	1	\N	\N	1250000	519
+610	0.00	117	1	4	\N	750000	298
+1782	0.00	52	1	\N	\N	600000	639
+1497	0.00	148	1	\N	\N	667500	361
+1281	0.00	26	1	\N	\N	687500	214
+1282	0.00	26	1	\N	\N	687500	215
+1912	0.00	87	2	\N	\N	1700000	688
+1971	0.00	164	2	\N	\N	900000	512
+1961	0.00	169	2	\N	\N	900000	721
+1902	0.00	205	2	\N	\N	850000	683
+479	0.00	26	1	1	\N	537500	216
+1283	0.00	26	1	\N	\N	537500	217
+1284	0.00	26	1	\N	\N	537500	218
+1772	0.00	9	1	\N	\N	650000	634
+1635	0.00	3	1	\N	\N	1200000	526
+1636	0.00	3	1	\N	\N	1200000	527
+1637	0.00	3	1	\N	\N	1200000	528
+1427	0.00	110	1	\N	\N	707500	283
+1428	0.00	110	1	\N	\N	707500	284
+1426	0.00	109	1	\N	\N	497500	279
 352	851500.00	80	9	3	\N	887500	122
 353	953000.00	80	10	3	\N	1025000	122
-1753	935000.00	20	2	\N	\N	935000	621
-1763	700000.00	201	2	\N	\N	750000	630
-1773	800000.00	9	2	\N	\N	800000	634
-1783	650000.00	52	2	\N	\N	850000	639
-1793	650000.00	58	2	\N	\N	770000	644
-1803	845000.00	202	2	\N	\N	845000	654
-1813	1250000.00	79	2	\N	\N	1250000	660
-1823	1090000.00	79	2	\N	\N	1090000	659
-1833	1550000.00	89	2	\N	\N	1550000	537
-1843	1250000.00	89	2	\N	\N	1250000	542
-1853	1550000.00	46	2	\N	\N	1550000	33
-1863	1920000.00	46	2	\N	\N	1920000	39
-1873	2400000.00	46	2	\N	\N	2400000	663
-1883	1050000.00	190	2	\N	\N	1050000	668
-1893	880000.00	204	2	\N	\N	880000	678
+1942	0.00	208	82	\N	\N	\N	\N
+1962	650000.00	169	12	\N	\N	650000	721
+1993	1050000.00	210	21	\N	\N	1050000	736
+765	0.00	151	2	2	\N	1162500	366
+1493	0.00	113	2	\N	\N	675000	290
+1494	0.00	113	2	\N	\N	675000	291
+1422	0.00	123	2	\N	\N	1162500	315
+1916	0.00	91	2	\N	\N	935000	690
+1813	0.00	79	2	\N	\N	1250000	660
+2003	0.00	214	2	\N	\N	\N	\N
+1803	0.00	202	2	\N	\N	845000	654
+1922	0.00	99	2	\N	\N	1800000	692
+1932	0.00	99	2	\N	\N	2300000	697
+2007	1250000.00	214	21	\N	\N	1250000	751
+1952	0.00	44	1	\N	\N	500000	718
+1903	0.00	87	1	\N	\N	1850000	684
+1972	0.00	164	1	\N	\N	450000	513
+1823	0.00	79	2	\N	\N	1090000	659
+1833	0.00	89	2	\N	\N	1550000	537
+1843	0.00	89	2	\N	\N	1250000	542
+1753	0.00	20	2	\N	\N	935000	621
+1853	0.00	46	2	\N	\N	1550000	33
+1863	0.00	46	2	\N	\N	1920000	39
+1432	0.00	99	2	\N	\N	1762500	253
+1893	0.00	204	2	\N	\N	880000	678
+1873	0.00	46	2	\N	\N	2400000	663
+1883	0.00	190	2	\N	\N	1050000	668
+1793	0.00	58	2	\N	\N	770000	644
+1983	0.00	122	2	\N	\N	1923600	726
+1763	0.00	201	2	\N	\N	750000	630
+1783	0.00	52	2	\N	\N	850000	639
+1307	0.00	26	2	\N	\N	825000	217
 442	1003000.00	94	7	1	\N	1162500	191
 443	1203000.00	94	17	1	\N	1612500	191
+1308	0.00	26	2	\N	\N	825000	218
+1773	0.00	9	2	\N	\N	800000	634
+1717	0.00	3	2	\N	\N	1350000	521
+1718	0.00	3	2	\N	\N	1350000	522
+1719	0.00	3	2	\N	\N	1350000	523
+1720	0.00	3	2	\N	\N	1350000	524
+1721	0.00	3	2	\N	\N	1350000	525
+1722	0.00	3	2	\N	\N	1350000	526
+1723	0.00	3	2	\N	\N	1350000	527
 446	1020000.00	68	3	3	\N	1120000	195
+1724	0.00	3	2	\N	\N	1350000	528
 447	1350000.00	68	10	3	\N	1450000	195
 441	701500.00	94	12	1	\N	912500	191
 448	1550000.00	68	17	3	\N	1650000	195
@@ -5481,39 +6325,62 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 505	1753000.00	81	21	3	\N	1862500	127
 508	1001500.00	81	12	1	\N	1056250	220
 509	1203000.00	81	13	1	\N	1312500	220
-1754	1080000.00	20	1	\N	\N	1080000	620
-1764	400000.00	201	1	\N	\N	450000	631
-1774	550000.00	39	1	\N	\N	550000	635
-1784	500000.00	58	1	\N	\N	690000	640
-1794	775000.00	202	1	\N	\N	775000	652
-1804	1069200.00	14	1	\N	\N	1137240	63
-1814	1045000.00	79	1	\N	\N	1045000	661
-1824	550000.00	45	1	\N	\N	600000	128
-1834	1350000.00	89	1	\N	\N	1350000	538
-1844	550000.00	175	1	\N	\N	550000	416
-1854	1550000.00	46	1	\N	\N	1550000	34
-1864	2200000.00	46	1	\N	\N	2200000	41
-1874	2200000.00	46	1	\N	\N	2200000	664
-1884	600000.00	190	1	\N	\N	600000	669
-1894	590000.00	204	1	\N	\N	590000	679
+2008	0.00	214	1	\N	\N	560000	753
+1943	1000000.00	208	54	\N	\N	1200000	717
+1963	900000.00	169	13	\N	\N	900000	721
+1774	0.00	39	1	\N	\N	550000	635
+1994	1350000.00	210	49	\N	\N	1350000	736
+1794	0.00	202	1	\N	\N	775000	652
+1923	0.00	99	1	\N	\N	1500000	693
+1933	0.00	99	1	\N	\N	2000000	698
+1894	0.00	204	1	\N	\N	590000	679
+1984	0.00	210	1	\N	\N	800000	734
+1917	0.00	91	1	\N	\N	690000	691
+1814	0.00	79	1	\N	\N	1045000	661
+1834	0.00	89	1	\N	\N	1350000	538
+1754	0.00	20	1	\N	\N	1080000	620
+1854	0.00	46	1	\N	\N	1550000	34
+1864	0.00	46	1	\N	\N	2200000	41
+1874	0.00	46	1	\N	\N	2200000	664
+1884	0.00	190	1	\N	\N	600000	669
+1784	0.00	58	1	\N	\N	690000	640
+1764	0.00	201	1	\N	\N	450000	631
+1824	0.00	45	1	\N	\N	600000	128
+77	0.00	23	1	4	\N	1800000	\N
+1844	0.00	175	1	\N	\N	550000	416
+1804	0.00	14	1	\N	\N	1137240	63
+1953	0.00	44	2	\N	\N	650000	718
+1904	0.00	87	2	\N	\N	2100000	684
+1973	0.00	164	2	\N	\N	600000	513
 563	2453000.00	99	55	2	\N	2562500	254
-77	1800000.00	23	1	4	\N	1800000	\N
 562	2203000.00	99	54	2	\N	2256250	254
-1755	1140000.00	20	2	\N	\N	1140000	620
-1765	600000.00	201	2	\N	\N	650000	631
-1775	800000.00	39	2	\N	\N	800000	635
-1785	700000.00	58	2	\N	\N	950000	640
-1795	950000.00	202	2	\N	\N	950000	652
-1805	1177200.00	14	2	\N	\N	1312200	63
-1815	1250000.00	79	2	\N	\N	1250000	661
-1825	800000.00	45	2	\N	\N	900000	128
-1835	1550000.00	89	2	\N	\N	1550000	538
-1845	700000.00	175	2	\N	\N	700000	416
-1855	1750000.00	46	2	\N	\N	1750000	34
-1865	2400000.00	46	2	\N	\N	2400000	41
-1875	2400000.00	46	2	\N	\N	2400000	664
-1885	800000.00	190	2	\N	\N	800000	669
-1895	760000.00	204	2	\N	\N	760000	679
+1954	550000.00	44	12	\N	\N	550000	718
+1944	0.00	208	1	\N	\N	700000	713
+1995	1350000.00	210	50	\N	\N	1350000	736
+1905	0.00	87	1	\N	\N	1850000	685
+1974	0.00	164	1	\N	\N	450000	514
+1964	0.00	25	1	\N	\N	750000	722
+2009	0.00	214	2	\N	\N	800000	753
+1775	0.00	39	2	\N	\N	800000	635
+1795	0.00	202	2	\N	\N	950000	652
+1924	0.00	99	2	\N	\N	1800000	693
+1934	0.00	99	2	\N	\N	2300000	698
+1895	0.00	204	2	\N	\N	760000	679
+1985	0.00	210	2	\N	\N	1000000	734
+1918	0.00	91	2	\N	\N	935000	691
+1815	0.00	79	2	\N	\N	1250000	661
+1835	0.00	89	2	\N	\N	1550000	538
+1755	0.00	20	2	\N	\N	1140000	620
+1855	0.00	46	2	\N	\N	1750000	34
+1865	0.00	46	2	\N	\N	2400000	41
+1875	0.00	46	2	\N	\N	2400000	664
+1885	0.00	190	2	\N	\N	800000	669
+1785	0.00	58	2	\N	\N	950000	640
+1765	0.00	201	2	\N	\N	650000	631
+1825	0.00	45	2	\N	\N	900000	128
+1845	0.00	175	2	\N	\N	700000	416
+1805	0.00	14	2	\N	\N	1312200	63
+2027	701648.00	85	1	\N	\N	741200	773
 680	783460.00	125	3	4	\N	1778500	319
 683	1236500.00	126	3	4	\N	1512750	320
 686	1635000.00	127	54	4	\N	1689750	321
@@ -5526,96 +6393,86 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 698	1143000.00	113	7	3	\N	1335000	292
 701	654500.00	113	3	1	\N	812500	289
 702	601500.00	113	15	1	\N	727500	289
-1756	805000.00	20	1	\N	\N	805000	622
-1766	400000.00	201	1	\N	\N	450000	632
-1776	550000.00	39	1	\N	\N	550000	636
-1786	500000.00	58	1	\N	\N	690000	641
-1796	775000.00	202	1	\N	\N	775000	653
 1806	1188000.00	14	12	\N	\N	1263600	63
-1816	1045000.00	79	1	\N	\N	1045000	662
 1826	750000.00	45	11	\N	\N	800000	128
-1836	1350000.00	89	1	\N	\N	1350000	539
 1846	700000.00	175	9	\N	\N	700000	416
-1856	1550000.00	46	1	\N	\N	1550000	36
-1866	2200000.00	46	1	\N	\N	2200000	42
-1876	2200000.00	46	1	\N	\N	2200000	665
-1886	600000.00	190	1	\N	\N	600000	670
-1896	590000.00	204	1	\N	\N	590000	680
-895	600000.00	187	3	4	\N	750000	\N
+2010	1100000.00	214	15	\N	\N	1100000	753
+1955	700000.00	44	13	\N	\N	700000	718
+1986	1000000.00	210	15	\N	\N	1000000	734
+1776	0.00	39	1	\N	\N	550000	636
+1796	0.00	202	1	\N	\N	775000	653
+1925	0.00	99	1	\N	\N	1600000	694
+1896	0.00	204	1	\N	\N	590000	680
+1816	0.00	79	1	\N	\N	1045000	662
+1836	0.00	89	1	\N	\N	1350000	539
+1756	0.00	20	1	\N	\N	805000	622
+1856	0.00	46	1	\N	\N	1550000	36
+1866	0.00	46	1	\N	\N	2200000	42
+1876	0.00	46	1	\N	\N	2200000	665
+1886	0.00	190	1	\N	\N	600000	670
+1786	0.00	58	1	\N	\N	690000	641
+1766	0.00	201	1	\N	\N	450000	632
+1935	0.00	14	1	\N	\N	1137240	699
+1996	0.00	155	1	\N	\N	1204000	739
 893	0.00	187	1	4	\N	350000	\N
+1906	0.00	87	2	\N	\N	2100000	685
+1945	0.00	208	2	\N	\N	900000	713
+1975	0.00	164	2	\N	\N	600000	514
 894	0.00	187	2	4	\N	600000	\N
+1965	0.00	25	2	\N	\N	950000	722
+2028	803296.00	85	2	\N	\N	882400	773
+895	600000.00	187	3	4	\N	750000	\N
 801	1075200.00	155	68	1	\N	1075200	376
 804	1475832.00	156	3	4	\N	1475832	379
 807	1124500.00	157	3	3	\N	1232500	382
-1757	935000.00	20	2	\N	\N	935000	622
-1767	600000.00	201	2	\N	\N	650000	632
-1777	800000.00	39	2	\N	\N	800000	636
-1787	700000.00	58	2	\N	\N	950000	641
-1797	950000.00	202	2	\N	\N	950000	653
+2011	1100000.00	214	21	\N	\N	1100000	753
 1807	1308000.00	14	13	\N	\N	1458000	63
-1817	1250000.00	79	2	\N	\N	1250000	662
 1827	1000000.00	45	17	\N	\N	1200000	128
-978	1800000.00	89	1	3	\N	1800000	534
-979	2000000.00	89	2	3	\N	2000000	534
-1837	1550000.00	89	2	\N	\N	1550000	539
+978	0.00	89	1	3	\N	1800000	534
+1907	0.00	87	1	\N	\N	1450000	686
 1847	850000.00	175	10	\N	\N	850000	416
-1857	1750000.00	46	2	\N	\N	1750000	36
-1867	2400000.00	46	2	\N	\N	2400000	42
-1877	2400000.00	46	2	\N	\N	2400000	665
-1887	800000.00	190	2	\N	\N	800000	670
-1897	760000.00	204	2	\N	\N	760000	680
-966	2600000.00	50	1	4	\N	2600000	\N
-967	3000000.00	50	2	4	\N	3000000	\N
+1946	900000.00	208	81	\N	\N	900000	714
+1966	850000.00	25	12	\N	\N	850000	722
+1987	1200000.00	210	21	\N	\N	1200000	734
+1976	0.00	164	1	\N	\N	450000	515
+966	0.00	50	1	4	\N	2600000	\N
+1956	0.00	209	1	\N	\N	500000	720
+1777	0.00	39	2	\N	\N	800000	636
+1797	0.00	202	2	\N	\N	950000	653
+1926	0.00	99	2	\N	\N	1900000	694
+1897	0.00	204	2	\N	\N	760000	680
+1817	0.00	79	2	\N	\N	1250000	662
+979	0.00	89	2	3	\N	2000000	534
+1837	0.00	89	2	\N	\N	1550000	539
+1757	0.00	20	2	\N	\N	935000	622
+1857	0.00	46	2	\N	\N	1750000	36
 968	3000000.00	50	9	4	\N	3000000	\N
 969	3400000.00	50	10	4	\N	3400000	\N
 970	3200000.00	50	24	4	\N	3200000	\N
 971	3600000.00	50	25	4	\N	3600000	\N
 972	3400000.00	50	26	4	\N	3400000	\N
+1867	0.00	46	2	\N	\N	2400000	42
+1877	0.00	46	2	\N	\N	2400000	665
+1887	0.00	190	2	\N	\N	800000	670
+1787	0.00	58	2	\N	\N	950000	641
+1767	0.00	201	2	\N	\N	650000	632
+1936	0.00	14	2	\N	\N	1312200	699
+1997	0.00	155	2	\N	\N	1344000	739
+953	0.00	47	2	\N	\N	\N	\N
+967	0.00	50	2	4	\N	3000000	\N
+2029	600000.00	216	2	\N	\N	720000	775
 973	3800000.00	50	27	4	\N	3800000	\N
 974	3800000.00	50	28	4	\N	3800000	\N
 975	4200000.00	50	29	4	\N	4200000	\N
 976	5100000.00	50	30	4	\N	5100000	\N
 977	5500000.00	50	31	4	\N	5500000	\N
-953	0.00	47	2	\N	\N	\N	\N
-1758	805000.00	20	1	\N	\N	805000	623
-1768	400000.00	201	1	\N	\N	450000	633
-1778	400000.00	39	1	\N	\N	400000	637
-1788	450000.00	58	1	\N	\N	590000	642
-1798	715000.00	202	1	\N	\N	715000	650
 1808	1285200.00	14	9	\N	\N	1360800	63
-1818	850000.00	79	1	\N	\N	850000	657
-33	747500.00	11	1	4	\N	952200	150
-34	977500.00	11	2	4	\N	1301800	150
-1828	1800000.00	89	1	\N	\N	1800000	535
-1838	1050000.00	89	1	\N	\N	1050000	540
-1848	1350000.00	46	1	\N	\N	1350000	30
-1044	0.00	4	1	\N	\N	906250	229
-1045	0.00	7	1	\N	\N	1606250	60
-153	0.00	48	1	4	2	425000	106
-56	0.00	18	1	4	\N	750000	62
-87	0.00	28	1	4	\N	650000	29
-40	0.00	7	2	1	\N	2012500	59
-1046	0.00	7	2	\N	\N	2012500	60
-114	0.00	33	2	4	\N	865000	194
-113	0.00	33	1	4	\N	578000	194
-53	0.00	17	1	4	\N	800000	201
-79	0.00	25	1	4	\N	765500	149
-1	0.00	1	1	4	\N	555500	259
-84	0.00	27	2	4	\N	812500	151
-88	0.00	28	2	4	\N	900000	29
-118	0.00	19	1	4	\N	541500	200
-119	0.00	19	2	4	\N	859000	200
-80	0.00	25	2	4	\N	971000	149
-135	0.00	41	2	3	2	971000	370
-95	665000.00	30	1	4	\N	665000	610
-172	0.00	57	2	4	\N	1062500	9
-12	0.00	4	2	3	\N	1212500	228
-1047	0.00	4	2	\N	\N	1212500	229
-171	0.00	57	1	4	\N	806250	9
-134	0.00	41	1	3	2	7095000	370
-127	0.00	37	2	4	\N	600000	129
+1758	0.00	20	1	\N	\N	805000	623
 54	0.00	17	2	4	\N	1200000	201
-126	0.00	37	1	4	\N	556500	129
+1778	0.00	39	1	\N	\N	400000	637
+1798	0.00	202	1	\N	\N	715000	650
+1927	0.00	99	1	\N	\N	1600000	695
+1898	0.00	204	1	\N	\N	590000	681
 1050	504500.00	59	3	\N	\N	868750	25
 1051	504500.00	59	3	\N	\N	868750	26
 1052	461500.00	59	12	\N	\N	706250	25
@@ -5629,6 +6486,33 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1060	604500.00	59	3	\N	\N	1008750	28
 1061	721500.00	59	12	\N	\N	836250	28
 1062	673000.00	59	13	\N	\N	1012500	28
+1044	0.00	4	1	\N	\N	906250	229
+1045	0.00	7	1	\N	\N	1606250	60
+1818	0.00	79	1	\N	\N	850000	657
+1828	0.00	89	1	\N	\N	1800000	535
+1838	0.00	89	1	\N	\N	1050000	540
+1848	0.00	46	1	\N	\N	1350000	30
+1858	0.00	46	1	\N	\N	1550000	37
+1868	0.00	46	1	\N	\N	2400000	45
+1888	0.00	190	1	\N	\N	800000	671
+1788	0.00	58	1	\N	\N	590000	642
+1768	0.00	201	1	\N	\N	450000	633
+79	0.00	25	1	4	\N	765500	149
+1878	0.00	40	1	\N	\N	600000	666
+126	0.00	37	1	4	\N	556500	129
+171	0.00	57	1	4	\N	806250	9
+134	0.00	41	1	3	2	7095000	370
+53	0.00	17	1	4	\N	800000	201
+118	0.00	19	1	4	\N	541500	200
+33	0.00	11	1	4	\N	952200	150
+153	0.00	48	1	4	2	425000	106
+56	0.00	18	1	4	\N	750000	62
+87	0.00	28	1	4	\N	650000	29
+95	0.00	30	1	4	\N	665000	610
+1	0.00	1	1	4	\N	555500	259
+113	0.00	33	1	4	\N	578000	194
+80	0.00	25	2	4	\N	971000	149
+40	0.00	7	2	1	\N	2012500	59
 242	1501500.00	60	9	1	\N	1662500	46
 1084	1501500.00	60	9	\N	\N	1662500	47
 1085	1501500.00	60	9	\N	\N	1662500	48
@@ -5652,11 +6536,27 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 267	1203000.00	63	10	3	\N	1412500	57
 268	1404500.00	63	3	3	\N	1612500	57
 271	17501500.00	7	12	1	\N	1806250	59
-1858	1550000.00	46	1	\N	\N	1550000	37
-1868	2200000.00	46	1	\N	\N	2400000	45
-1878	400000.00	40	1	\N	\N	600000	666
-1888	600000.00	190	1	\N	\N	800000	671
-1898	590000.00	204	1	\N	\N	590000	681
+1937	500000.00	207	9	\N	\N	500000	704
+1947	1050000.00	208	82	\N	\N	1050000	713
+1967	1000000.00	25	13	\N	\N	1000000	722
+1988	1500000.00	210	49	\N	\N	1500000	734
+1998	0.00	155	83	\N	\N	\N	\N
+119	0.00	19	2	4	\N	859000	200
+34	0.00	11	2	4	\N	1301800	150
+12	0.00	4	2	3	\N	1212500	228
+1047	0.00	4	2	\N	\N	1212500	229
+84	0.00	27	2	4	\N	812500	151
+88	0.00	28	2	4	\N	900000	29
+1957	0.00	209	2	\N	\N	650000	720
+114	0.00	33	2	4	\N	865000	194
+2012	600000.00	215	1	\N	\N	680000	762
+2030	500000.00	216	1	\N	\N	600000	775
+1908	0.00	87	2	\N	\N	1700000	686
+1977	0.00	164	2	\N	\N	600000	515
+1046	0.00	7	2	\N	\N	2012500	60
+127	0.00	37	2	4	\N	600000	129
+172	0.00	57	2	4	\N	1062500	9
+135	0.00	41	2	3	2	971000	370
 1091	17501500.00	7	12	\N	\N	1806250	60
 272	2103000.00	7	13	1	\N	2212500	59
 1092	2103000.00	7	13	\N	\N	2212500	60
@@ -5674,7 +6574,25 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 282	4556250.00	7	21	3	\N	4612500	61
 283	5501500.00	7	23	3	\N	5565250	61
 284	5501500.00	7	40	3	\N	5612500	61
-289	740000.00	71	3	4	\N	790000	73
+247	0.00	61	1	4	\N	786250	51
+290	0.00	72	1	3	\N	1345000	74
+1132	0.00	72	1	\N	\N	1345000	75
+1133	0.00	72	1	\N	\N	1345000	76
+310	0.00	73	1	4	\N	637500	84
+285	0.00	70	1	4	\N	380000	72
+259	0.00	63	1	1	\N	806250	58
+264	0.00	63	1	3	\N	936250	57
+204	0.00	59	1	1	\N	556250	24
+1134	0.00	59	1	\N	\N	556250	25
+1135	0.00	59	1	\N	\N	556250	26
+211	0.00	59	1	3	\N	656500	27
+1136	0.00	59	1	\N	\N	656500	28
+294	0.00	43	1	1	\N	1006250	79
+1139	0.00	43	1	\N	\N	1006250	80
+1140	0.00	43	1	\N	\N	1006250	81
+303	0.00	43	1	3	\N	1106250	82
+1141	0.00	43	1	\N	\N	1106250	83
+240	0.00	60	1	1	\N	1406250	46
 297	1151500.00	43	9	1	\N	1206250	79
 1112	1151500.00	43	9	\N	\N	1206250	80
 1113	1151500.00	43	9	\N	\N	1206250	81
@@ -5704,65 +6622,35 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 309	1853000.00	43	17	3	\N	1962500	82
 1128	1853000.00	43	17	\N	\N	1962500	83
 312	604500.00	73	3	4	\N	912500	84
-290	0.00	72	1	3	\N	1345000	74
-1132	0.00	72	1	\N	\N	1345000	75
-1133	0.00	72	1	\N	\N	1345000	76
-287	0.00	71	1	4	\N	510000	73
-247	0.00	61	1	4	\N	786250	51
-285	0.00	70	1	4	\N	380000	72
-259	0.00	63	1	1	\N	806250	58
-204	0.00	59	1	1	\N	556250	24
-1134	0.00	59	1	\N	\N	556250	25
-1135	0.00	59	1	\N	\N	556250	26
-211	0.00	59	1	3	\N	656500	27
-1136	0.00	59	1	\N	\N	656500	28
-294	0.00	43	1	1	\N	1006250	79
-1139	0.00	43	1	\N	\N	1006250	80
-1140	0.00	43	1	\N	\N	1006250	81
-303	0.00	43	1	3	\N	1106250	82
-1141	0.00	43	1	\N	\N	1106250	83
-240	0.00	60	1	1	\N	1406250	46
 1142	0.00	60	1	\N	\N	1406250	47
 1143	0.00	60	1	\N	\N	1406250	48
 243	0.00	60	1	3	\N	1556250	49
 1144	0.00	60	1	\N	\N	1556250	50
 311	0.00	73	2	4	\N	710000	84
-310	0.00	73	1	4	\N	637500	84
-264	0.00	63	1	3	\N	936250	57
 295	0.00	43	2	1	\N	1262500	79
 1148	0.00	43	2	\N	\N	1262500	80
 1149	0.00	43	2	\N	\N	1262500	81
-288	0.00	71	2	4	\N	690000	73
-286	0.00	70	2	4	\N	550000	72
-260	0.00	63	2	1	\N	1112500	58
-265	0.00	63	2	3	\N	1212500	57
-291	0.00	72	2	3	\N	1570000	74
-1152	0.00	72	2	\N	\N	1570000	75
-1153	0.00	72	2	\N	\N	1570000	76
-293	0.00	72	2	1	\N	1346000	77
-1154	0.00	72	2	\N	\N	1346000	78
-248	0.00	61	2	4	\N	1124500	51
-304	0.00	43	2	3	\N	1362500	82
-1155	0.00	43	2	\N	\N	1362500	83
-205	0.00	59	2	1	\N	712500	24
-1156	0.00	59	2	\N	\N	712500	25
-1157	0.00	59	2	\N	\N	712500	26
-212	0.00	59	2	3	\N	832500	27
-1158	0.00	59	2	\N	\N	832500	28
-241	0.00	60	2	1	\N	1612500	46
-1159	0.00	60	2	\N	\N	1612500	47
-1160	0.00	60	2	\N	\N	1612500	48
-244	0.00	60	2	3	\N	1762500	49
-1161	0.00	60	2	\N	\N	1762500	50
-254	0.00	62	2	1	\N	800000	52
-1162	0.00	62	2	\N	\N	800000	53
-1163	0.00	62	2	\N	\N	800000	56
-257	0.00	62	2	3	\N	800000	54
-1164	0.00	62	2	\N	\N	800000	55
+2013	680000.00	215	2	\N	\N	750000	762
+2031	700000.00	216	10	\N	\N	940000	775
 277	0.00	7	1	3	\N	2056250	61
-278	0.00	7	2	3	\N	2412500	61
+397	0.00	85	1	4	\N	737500	146
+410	0.00	15	1	4	\N	779200	152
+405	0.00	12	1	4	\N	620000	148
+379	0.00	84	1	3	\N	773050	136
+1196	0.00	84	1	\N	\N	773050	137
+382	0.00	84	1	1	\N	638650	138
+1197	0.00	84	1	\N	\N	638650	139
+1198	0.00	84	1	\N	\N	638650	140
+338	0.00	65	1	1	\N	933500	65
+1199	0.00	65	1	\N	\N	933500	66
+1200	0.00	65	1	\N	\N	933500	67
+340	0.00	65	1	3	\N	936250	68
+1201	0.00	65	1	\N	\N	936250	69
+408	0.00	66	1	4	\N	715000	70
+373	0.00	82	1	3	\N	605050	130
 1175	851500.00	80	9	\N	\N	887500	123
 1176	953000.00	80	10	\N	\N	1025000	123
+1202	0.00	82	1	\N	\N	605050	131
 375	844500.00	82	3	3	\N	1221550	130
 1177	844500.00	82	3	\N	\N	1221550	131
 378	844500.00	82	3	1	\N	1120750	132
@@ -5780,9 +6668,9 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 407	1100000.00	12	3	4	\N	1100000	148
 409	1103000.00	27	17	4	\N	1212500	151
 412	783500.00	15	3	4	\N	1161600	152
-423	1400000.00	91	3	3	\N	1400000	181
-426	1300000.00	91	3	1	\N	130000	182
-1183	1300000.00	91	3	\N	\N	130000	183
+376	0.00	82	1	1	\N	638650	132
+1203	0.00	82	1	\N	\N	638650	133
+1204	0.00	82	1	\N	\N	638650	134
 430	1401500.00	94	6	3	\N	1556250	186
 1184	1401500.00	94	6	\N	\N	1556250	187
 431	1453000.00	94	7	3	\N	1762500	186
@@ -5803,67 +6691,51 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 438	1603000.00	94	17	2	\N	1812500	188
 1194	1603000.00	94	17	\N	\N	1812500	189
 1195	1603000.00	94	17	\N	\N	1812500	190
-405	0.00	12	1	4	\N	620000	148
-379	0.00	84	1	3	\N	773050	136
-1196	0.00	84	1	\N	\N	773050	137
-382	0.00	84	1	1	\N	638650	138
-1197	0.00	84	1	\N	\N	638650	139
-1198	0.00	84	1	\N	\N	638650	140
-338	0.00	65	1	1	\N	933500	65
-1199	0.00	65	1	\N	\N	933500	66
-1200	0.00	65	1	\N	\N	933500	67
-340	0.00	65	1	3	\N	936250	68
-1201	0.00	65	1	\N	\N	936250	69
-408	0.00	66	1	4	\N	715000	70
-422	0.00	91	2	3	\N	985000	181
-373	0.00	82	1	3	\N	605050	130
-1202	0.00	82	1	\N	\N	605050	131
-376	0.00	82	1	1	\N	638650	132
-1203	0.00	82	1	\N	\N	638650	133
-1204	0.00	82	1	\N	\N	638650	134
-397	0.00	85	1	4	\N	737500	146
-410	0.00	15	1	4	\N	779200	152
-350	0.00	80	1	3	\N	787500	122
-1205	0.00	80	1	\N	\N	787500	123
-421	0.00	91	1	3	\N	740000	181
-425	0.00	91	2	1	\N	935000	182
-1208	0.00	91	2	\N	\N	935000	183
-339	0.00	65	2	1	\N	1232500	65
-1209	0.00	65	2	\N	\N	1232500	66
-1210	0.00	65	2	\N	\N	1232500	67
-424	0.00	91	1	1	\N	690000	182
-1211	0.00	91	1	\N	\N	690000	183
-400	0.00	86	1	4	\N	520000	147
-341	0.00	65	2	3	\N	1400500	68
-1212	0.00	65	2	\N	\N	1400500	69
-380	0.00	84	2	3	\N	1109300	136
-1213	0.00	84	2	\N	\N	1109300	137
-383	0.00	84	2	1	\N	918900	138
-1214	0.00	84	2	\N	\N	918900	139
-1215	0.00	84	2	\N	\N	918900	140
-411	0.00	15	2	4	\N	998400	152
-406	0.00	12	2	4	\N	870000	148
-351	0.00	80	2	3	\N	975000	122
-1218	0.00	80	2	\N	\N	975000	123
-401	0.00	86	2	4	\N	860000	147
-398	0.00	85	2	4	\N	975000	146
+291	0.00	72	2	3	\N	1570000	74
+1152	0.00	72	2	\N	\N	1570000	75
+1153	0.00	72	2	\N	\N	1570000	76
+293	0.00	72	2	1	\N	1346000	77
+1154	0.00	72	2	\N	\N	1346000	78
+286	0.00	70	2	4	\N	550000	72
+260	0.00	63	2	1	\N	1112500	58
+265	0.00	63	2	3	\N	1212500	57
+205	0.00	59	2	1	\N	712500	24
+241	0.00	60	2	1	\N	1612500	46
+1159	0.00	60	2	\N	\N	1612500	47
+1160	0.00	60	2	\N	\N	1612500	48
+244	0.00	60	2	3	\N	1762500	49
+1161	0.00	60	2	\N	\N	1762500	50
+2014	600000.00	215	1	\N	\N	680000	763
+278	0.00	7	2	3	\N	2412500	61
+304	0.00	43	2	3	\N	1362500	82
+1155	0.00	43	2	\N	\N	1362500	83
+254	0.00	62	2	1	\N	800000	52
+1162	0.00	62	2	\N	\N	800000	53
+1163	0.00	62	2	\N	\N	800000	56
+257	0.00	62	2	3	\N	800000	54
+1164	0.00	62	2	\N	\N	800000	55
+248	0.00	61	2	4	\N	1124500	51
+1156	0.00	59	2	\N	\N	712500	25
+1157	0.00	59	2	\N	\N	712500	26
+212	0.00	59	2	3	\N	832500	27
+1158	0.00	59	2	\N	\N	832500	28
 427	0.00	94	1	3	\N	1056250	186
 1219	0.00	94	1	\N	\N	1056250	187
 433	0.00	94	1	2	\N	956250	188
 1220	0.00	94	1	\N	\N	956250	189
 1221	0.00	94	1	\N	\N	956250	190
 439	0.00	94	1	1	\N	7562500	191
-428	0.00	94	2	3	\N	1562500	186
-1223	0.00	94	2	\N	\N	1562500	187
-434	0.00	94	2	2	\N	1362500	188
-1224	0.00	94	2	\N	\N	1362500	189
-1225	0.00	94	2	\N	\N	1362500	190
-440	0.00	94	2	1	\N	1012500	191
-374	0.00	82	2	3	\N	974900	130
-1227	0.00	82	2	\N	\N	974900	131
-377	0.00	82	2	1	\N	868500	132
-1228	0.00	82	2	\N	\N	868500	133
-1229	0.00	82	2	\N	\N	868500	134
+400	0.00	86	1	4	\N	520000	147
+350	0.00	80	1	3	\N	787500	122
+1205	0.00	80	1	\N	\N	787500	123
+401	0.00	86	2	4	\N	860000	147
+406	0.00	12	2	4	\N	870000	148
+351	0.00	80	2	3	\N	975000	122
+1218	0.00	80	2	\N	\N	975000	123
+380	0.00	84	2	3	\N	1109300	136
+1213	0.00	84	2	\N	\N	1109300	137
+383	0.00	84	2	1	\N	918900	138
+1214	0.00	84	2	\N	\N	918900	139
 1230	1020000.00	68	3	\N	\N	1120000	196
 1231	1350000.00	68	10	\N	\N	1450000	196
 1232	1550000.00	68	17	\N	\N	1650000	196
@@ -5918,6 +6790,26 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 538	550000.00	97	11	4	\N	610000	235
 539	760000.00	97	17	4	\N	850000	235
 554	2401500.00	99	54	3	\N	2456250	256
+339	0.00	65	2	1	\N	1232500	65
+1209	0.00	65	2	\N	\N	1232500	66
+1210	0.00	65	2	\N	\N	1232500	67
+341	0.00	65	2	3	\N	1400500	68
+1212	0.00	65	2	\N	\N	1400500	69
+374	0.00	82	2	3	\N	974900	130
+1227	0.00	82	2	\N	\N	974900	131
+377	0.00	82	2	1	\N	868500	132
+1228	0.00	82	2	\N	\N	868500	133
+1229	0.00	82	2	\N	\N	868500	134
+2015	680000.00	215	2	\N	\N	750000	763
+398	0.00	85	2	4	\N	975000	146
+411	0.00	15	2	4	\N	998400	152
+428	0.00	94	2	3	\N	1562500	186
+1223	0.00	94	2	\N	\N	1562500	187
+434	0.00	94	2	2	\N	1362500	188
+1224	0.00	94	2	\N	\N	1362500	189
+1225	0.00	94	2	\N	\N	1362500	190
+440	0.00	94	2	1	\N	1012500	191
+1215	0.00	84	2	\N	\N	918900	140
 1271	2401500.00	99	54	\N	\N	2456250	257
 555	2653000.00	99	55	3	\N	2762500	256
 1272	2653000.00	99	55	\N	\N	2762500	257
@@ -5929,88 +6821,18 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1275	12001500.00	99	56	\N	\N	12056250	257
 559	12003000.00	99	57	3	\N	12112500	256
 1276	12003000.00	99	57	\N	\N	12112500	257
-553	0.00	99	2	3	\N	2262500	256
-1277	0.00	99	2	\N	\N	2262500	257
-534	0.00	97	1	4	\N	440000	235
+552	0.00	99	1	3	\N	1956250	256
+1285	0.00	99	1	\N	\N	1956250	257
+560	0.00	99	1	2	\N	1756250	254
+1286	0.00	99	1	\N	\N	1756250	255
+526	0.00	4	1	1	\N	831250	158
+1311	0.00	4	1	\N	\N	831250	226
+1312	0.00	4	1	\N	\N	831250	227
 476	0.00	26	1	3	\N	687500	210
 1278	0.00	26	1	\N	\N	687500	211
 1279	0.00	26	1	\N	\N	687500	212
 1280	0.00	26	1	\N	\N	687500	213
-1281	0.00	26	1	\N	\N	687500	214
-1282	0.00	26	1	\N	\N	687500	215
-479	0.00	26	1	1	\N	537500	216
-1283	0.00	26	1	\N	\N	537500	217
-1284	0.00	26	1	\N	\N	537500	218
-552	0.00	99	1	3	\N	1956250	256
-1285	0.00	99	1	\N	\N	1956250	257
-518	0.00	96	1	3	\N	656250	223
-560	0.00	99	1	2	\N	1756250	254
-1286	0.00	99	1	\N	\N	1756250	255
-454	0.00	5	1	3	\N	700000	202
-1287	0.00	5	1	\N	\N	700000	203
-460	0.00	5	1	2	\N	650000	204
-472	0.00	95	1	3	\N	540000	207
-474	0.00	95	1	1	\N	480000	208
-1288	0.00	95	1	\N	\N	480000	209
-528	0.00	10	1	3	\N	560000	230
-1289	0.00	10	1	\N	\N	560000	231
-531	0.00	10	1	1	\N	504000	232
-1290	0.00	10	1	\N	\N	504000	233
-1291	0.00	10	1	\N	\N	504000	234
-473	0.00	95	2	3	\N	700000	207
-501	0.00	81	2	3	\N	1056250	127
-1292	0.00	81	2	\N	\N	1056250	219
-500	0.00	81	1	3	\N	856250	127
-1293	0.00	81	1	\N	\N	856250	219
-506	0.00	81	1	1	\N	756250	220
-1294	0.00	81	1	\N	\N	756250	221
-1295	0.00	81	1	\N	\N	756250	222
-449	0.00	68	1	1	\N	765000	197
-1296	0.00	68	1	\N	\N	765000	198
-1297	0.00	68	1	\N	\N	765000	199
-444	0.00	68	1	3	\N	865000	195
-1298	0.00	68	1	\N	\N	865000	196
-529	0.00	10	2	3	\N	750400	230
-1299	0.00	10	2	\N	\N	750400	231
-535	0.00	97	2	4	\N	690000	235
-475	0.00	95	2	1	\N	600000	208
-1300	0.00	95	2	\N	\N	600000	209
-519	0.00	96	2	3	\N	812500	223
-461	0.00	5	2	2	\N	950000	204
-467	0.00	5	2	1	\N	850000	205
-1301	0.00	5	2	\N	\N	850000	206
-477	0.00	26	2	3	\N	1225000	210
-1302	0.00	26	2	\N	\N	1225000	211
-1303	0.00	26	2	\N	\N	1225000	212
-1304	0.00	26	2	\N	\N	1225000	213
-1305	0.00	26	2	\N	\N	1225000	214
-1306	0.00	26	2	\N	\N	1225000	215
-480	0.00	26	2	1	\N	825000	216
-1307	0.00	26	2	\N	\N	825000	217
-1308	0.00	26	2	\N	\N	825000	218
-445	0.00	68	2	3	\N	975000	195
-1309	0.00	68	2	\N	\N	975000	196
-522	0.00	96	1	1	\N	562500	224
-1310	0.00	96	1	\N	\N	562500	225
-526	0.00	4	1	1	\N	831250	158
-1311	0.00	4	1	\N	\N	831250	226
-1312	0.00	4	1	\N	\N	831250	227
-450	0.00	68	2	1	\N	875000	197
-1313	0.00	68	2	\N	\N	875000	198
-1314	0.00	68	2	\N	\N	875000	199
-523	0.00	96	2	1	\N	712500	224
-1315	0.00	96	2	\N	\N	712500	225
-507	0.00	81	2	1	\N	1012500	220
-1316	0.00	81	2	\N	\N	1012500	221
-1317	0.00	81	2	\N	\N	1012500	222
-527	0.00	4	2	1	\N	1102500	158
-1318	0.00	4	2	\N	\N	1102500	226
-1319	0.00	4	2	\N	\N	1102500	227
-455	0.00	5	2	3	\N	1200000	202
-1320	0.00	5	2	\N	\N	1200000	203
-532	0.00	10	2	1	\N	694400	232
-1321	0.00	10	2	\N	\N	694400	233
-1322	0.00	10	2	\N	\N	694400	234
+534	0.00	97	1	4	\N	440000	235
 1323	2453000.00	99	55	\N	\N	2562500	255
 1324	2203000.00	99	54	\N	\N	2256250	255
 564	3301500.00	99	11	2	\N	3356250	254
@@ -6025,6 +6847,65 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1329	1901500.00	99	54	\N	\N	2012500	252
 1330	1901500.00	99	54	\N	\N	2012500	253
 571	2153000.00	99	55	1	\N	2262500	251
+518	0.00	96	1	3	\N	656250	223
+522	0.00	96	1	1	\N	562500	224
+1310	0.00	96	1	\N	\N	562500	225
+454	0.00	5	1	3	\N	700000	202
+1287	0.00	5	1	\N	\N	700000	203
+460	0.00	5	1	2	\N	650000	204
+472	0.00	95	1	3	\N	540000	207
+474	0.00	95	1	1	\N	480000	208
+1288	0.00	95	1	\N	\N	480000	209
+528	0.00	10	1	3	\N	560000	230
+1289	0.00	10	1	\N	\N	560000	231
+531	0.00	10	1	1	\N	504000	232
+1290	0.00	10	1	\N	\N	504000	233
+1291	0.00	10	1	\N	\N	504000	234
+500	0.00	81	1	3	\N	856250	127
+1293	0.00	81	1	\N	\N	856250	219
+506	0.00	81	1	1	\N	756250	220
+1294	0.00	81	1	\N	\N	756250	221
+1295	0.00	81	1	\N	\N	756250	222
+477	0.00	26	2	3	\N	1225000	210
+1302	0.00	26	2	\N	\N	1225000	211
+527	0.00	4	2	1	\N	1102500	158
+1318	0.00	4	2	\N	\N	1102500	226
+1319	0.00	4	2	\N	\N	1102500	227
+445	0.00	68	2	3	\N	975000	195
+1309	0.00	68	2	\N	\N	975000	196
+450	0.00	68	2	1	\N	875000	197
+1313	0.00	68	2	\N	\N	875000	198
+1314	0.00	68	2	\N	\N	875000	199
+535	0.00	97	2	4	\N	690000	235
+519	0.00	96	2	3	\N	812500	223
+523	0.00	96	2	1	\N	712500	224
+461	0.00	5	2	2	\N	950000	204
+467	0.00	5	2	1	\N	850000	205
+1301	0.00	5	2	\N	\N	850000	206
+473	0.00	95	2	3	\N	700000	207
+1315	0.00	96	2	\N	\N	712500	225
+455	0.00	5	2	3	\N	1200000	202
+1320	0.00	5	2	\N	\N	1200000	203
+475	0.00	95	2	1	\N	600000	208
+1300	0.00	95	2	\N	\N	600000	209
+529	0.00	10	2	3	\N	750400	230
+1299	0.00	10	2	\N	\N	750400	231
+532	0.00	10	2	1	\N	694400	232
+1321	0.00	10	2	\N	\N	694400	233
+1322	0.00	10	2	\N	\N	694400	234
+501	0.00	81	2	3	\N	1056250	127
+1292	0.00	81	2	\N	\N	1056250	219
+507	0.00	81	2	1	\N	1012500	220
+1316	0.00	81	2	\N	\N	1012500	221
+1317	0.00	81	2	\N	\N	1012500	222
+2016	600000.00	215	1	\N	\N	680000	764
+553	0.00	99	2	3	\N	2262500	256
+1277	0.00	99	2	\N	\N	2262500	257
+1303	0.00	26	2	\N	\N	1225000	212
+1304	0.00	26	2	\N	\N	1225000	213
+1305	0.00	26	2	\N	\N	1225000	214
+1306	0.00	26	2	\N	\N	1225000	215
+480	0.00	26	2	1	\N	825000	216
 1331	2153000.00	99	55	\N	\N	2262500	252
 1332	2153000.00	99	55	\N	\N	2262500	253
 572	3001500.00	99	11	1	\N	3056250	251
@@ -6138,8 +7019,6 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1389	803000.00	116	65	\N	\N	1042500	295
 655	1061500.00	116	20	3	\N	1146250	294
 1390	1061500.00	116	20	\N	\N	1146250	295
-672	0.00	124	1	4	\N	835240	318
-679	0.00	125	2	4	\N	1223000	319
 656	1183000.00	116	66	3	\N	1312500	294
 1391	1183000.00	116	66	\N	\N	1312500	295
 663	1201500.00	123	13	3	\N	1312500	316
@@ -6166,79 +7045,74 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 675	900004.00	124	10	4	\N	1220744	318
 676	900004.00	124	3	4	\N	1349264	318
 677	900004.00	124	11	4	\N	1349264	318
-576	0.00	100	1	4	\N	450000	258
-678	0.00	125	1	4	\N	779500	319
-617	0.00	119	1	3	\N	1600000	305
-1404	0.00	119	1	\N	\N	1600000	306
+568	0.00	99	1	1	\N	1456250	251
+649	0.00	122	1	4	\N	1656250	308
 599	0.00	110	1	3	\N	777500	285
 1405	0.00	110	1	\N	\N	777500	286
+604	0.00	110	1	1	\N	707500	282
 590	0.00	109	1	3	\N	587500	280
 1406	0.00	109	1	\N	\N	587500	281
-580	0.00	101	1	3	\N	756250	260
-612	0.00	118	1	4	\N	500000	299
-651	0.00	34	1	3	\N	626250	309
-1407	0.00	34	1	\N	\N	626250	310
-657	0.00	34	1	1	\N	531250	311
-1408	0.00	34	1	\N	\N	531250	312
-578	0.00	92	1	4	\N	45	184
-649	0.00	122	1	4	\N	1656250	308
-659	0.00	123	1	3	\N	1026250	316
-1409	0.00	123	1	\N	\N	1026250	317
-666	0.00	123	1	1	\N	856250	313
-1410	0.00	123	1	\N	\N	856250	314
-1411	0.00	123	1	\N	\N	856250	315
-577	0.00	100	2	4	\N	650000	258
-673	0.00	124	2	4	\N	1027992	318
-585	0.00	101	1	1	\N	656250	261
-1412	0.00	101	1	\N	\N	656250	262
-610	0.00	117	1	4	\N	750000	298
-618	0.00	119	2	3	\N	1750000	305
-1413	0.00	119	2	\N	\N	1750000	306
-650	0.00	122	2	4	\N	2112500	308
-613	0.00	118	2	4	\N	800000	299
-652	0.00	34	2	3	\N	777500	309
-1414	0.00	34	2	\N	\N	777500	310
-581	0.00	101	2	3	\N	1012500	260
-591	0.00	109	2	3	\N	735000	280
-1415	0.00	109	2	\N	\N	735000	281
-600	0.00	110	2	3	\N	915000	285
-1416	0.00	110	2	\N	\N	915000	286
-579	0.00	92	2	4	\N	70	184
-660	0.00	123	2	3	\N	1192500	316
-1417	0.00	123	2	\N	\N	1192500	317
-628	0.00	119	2	2	\N	1550000	303
-1418	0.00	119	2	\N	\N	1550000	304
-605	0.00	110	2	1	\N	835000	282
-1419	0.00	110	2	\N	\N	835000	283
-1420	0.00	110	2	\N	\N	835000	284
-667	0.00	123	2	1	\N	1162500	313
-1421	0.00	123	2	\N	\N	1162500	314
-1422	0.00	123	2	\N	\N	1162500	315
-611	0.00	117	2	4	\N	900000	298
-568	0.00	99	1	1	\N	1456250	251
-1423	0.00	99	1	\N	\N	1456250	252
-1424	0.00	99	1	\N	\N	1456250	253
 595	0.00	109	1	1	\N	497500	277
-1425	0.00	109	1	\N	\N	497500	278
-1426	0.00	109	1	\N	\N	497500	279
-604	0.00	110	1	1	\N	707500	282
-1427	0.00	110	1	\N	\N	707500	283
-1428	0.00	110	1	\N	\N	707500	284
-561	0.00	99	2	2	\N	2062500	254
-1429	0.00	99	2	\N	\N	2062500	255
-586	0.00	101	2	1	\N	912500	261
-1430	0.00	101	2	\N	\N	912500	262
-569	0.00	99	2	1	\N	1762500	251
-1431	0.00	99	2	\N	\N	1762500	252
-1432	0.00	99	2	\N	\N	1762500	253
-658	0.00	34	2	1	\N	682500	311
-1433	0.00	34	2	\N	\N	682500	312
 1434	784500.00	113	3	\N	\N	952500	293
 1435	721500.00	113	15	\N	\N	877500	293
 1436	843000.00	113	21	\N	\N	1035000	293
 1437	1021500.00	113	6	\N	\N	1177500	293
 1438	1143000.00	113	7	\N	\N	1335000	293
 1439	654500.00	113	3	\N	\N	812500	290
+1425	0.00	109	1	\N	\N	497500	278
+576	0.00	100	1	4	\N	450000	258
+678	0.00	125	1	4	\N	779500	319
+617	0.00	119	1	3	\N	1600000	305
+580	0.00	101	1	3	\N	756250	260
+585	0.00	101	1	1	\N	656250	261
+672	0.00	124	1	4	\N	835240	318
+1404	0.00	119	1	\N	\N	1600000	306
+1412	0.00	101	1	\N	\N	656250	262
+612	0.00	118	1	4	\N	500000	299
+651	0.00	34	1	3	\N	626250	309
+1407	0.00	34	1	\N	\N	626250	310
+657	0.00	34	1	1	\N	531250	311
+1408	0.00	34	1	\N	\N	531250	312
+659	0.00	123	1	3	\N	1026250	316
+1409	0.00	123	1	\N	\N	1026250	317
+666	0.00	123	1	1	\N	856250	313
+1410	0.00	123	1	\N	\N	856250	314
+1411	0.00	123	1	\N	\N	856250	315
+578	0.00	92	1	4	\N	45	184
+561	0.00	99	2	2	\N	2062500	254
+650	0.00	122	2	4	\N	2112500	308
+660	0.00	123	2	3	\N	1192500	316
+1417	0.00	123	2	\N	\N	1192500	317
+667	0.00	123	2	1	\N	1162500	313
+1421	0.00	123	2	\N	\N	1162500	314
+673	0.00	124	2	4	\N	1027992	318
+577	0.00	100	2	4	\N	650000	258
+679	0.00	125	2	4	\N	1223000	319
+618	0.00	119	2	3	\N	1750000	305
+1413	0.00	119	2	\N	\N	1750000	306
+628	0.00	119	2	2	\N	1550000	303
+1418	0.00	119	2	\N	\N	1550000	304
+600	0.00	110	2	3	\N	915000	285
+1416	0.00	110	2	\N	\N	915000	286
+605	0.00	110	2	1	\N	835000	282
+591	0.00	109	2	3	\N	735000	280
+1415	0.00	109	2	\N	\N	735000	281
+581	0.00	101	2	3	\N	1012500	260
+586	0.00	101	2	1	\N	912500	261
+1430	0.00	101	2	\N	\N	912500	262
+613	0.00	118	2	4	\N	800000	299
+652	0.00	34	2	3	\N	777500	309
+1414	0.00	34	2	\N	\N	777500	310
+658	0.00	34	2	1	\N	682500	311
+1433	0.00	34	2	\N	\N	682500	312
+579	0.00	92	2	4	\N	70	184
+2017	680000.00	215	2	\N	\N	750000	764
+611	0.00	117	2	4	\N	900000	298
+1429	0.00	99	2	\N	\N	2062500	255
+569	0.00	99	2	1	\N	1762500	251
+1431	0.00	99	2	\N	\N	1762500	252
+1419	0.00	110	2	\N	\N	835000	283
+1420	0.00	110	2	\N	\N	835000	284
 1440	654500.00	113	3	\N	\N	812500	291
 1441	601500.00	113	15	\N	\N	727500	290
 1442	601500.00	113	15	\N	\N	727500	291
@@ -6251,11 +7125,11 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 705	953000.00	113	7	1	\N	1125000	289
 1447	953000.00	113	7	\N	\N	1125000	290
 1448	953000.00	113	7	\N	\N	1125000	291
+741	0.00	148	1	3	\N	717900	357
 724	410000.00	141	9	4	\N	510000	344
 725	600000.00	141	10	4	\N	700000	344
 726	530000.00	141	11	4	\N	630000	344
 727	730000.00	141	17	4	\N	830000	344
-774	0.00	153	1	4	\N	956250	369
 743	1007820.00	148	9	3	\N	1115500	357
 1449	1007820.00	148	9	\N	\N	1115500	358
 744	1231640.00	148	10	3	\N	1335000	357
@@ -6266,7 +7140,7 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 748	1231640.00	148	10	1	\N	1279000	359
 1453	1231640.00	148	10	\N	\N	1279000	360
 1454	1231640.00	148	10	\N	\N	1279000	361
-753	900000.00	133	3	4	\N	900000	331
+1475	0.00	148	1	\N	\N	717900	358
 756	900000.00	150	3	4	\N	1200000	363
 757	800000.00	150	15	4	\N	990000	363
 760	1504500.00	151	3	3	\N	1668750	364
@@ -6275,6 +7149,8 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1456	13015000.00	151	6	\N	\N	1356250	365
 762	1503000.00	151	7	3	\N	1612500	364
 1457	1503000.00	151	7	\N	\N	1612500	365
+691	0.00	113	1	3	\N	697500	292
+1476	0.00	113	1	\N	\N	697500	293
 766	1254500.00	151	3	2	\N	1418750	366
 767	1101500.00	151	6	2	\N	1212500	366
 768	1303000.00	151	7	2	\N	1412500	366
@@ -6283,11 +7159,12 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 773	1303000.00	151	7	1	\N	1412500	367
 776	1201500.00	153	9	4	\N	1256250	369
 777	1403000.00	153	10	4	\N	1512500	369
-775	0.00	153	2	4	\N	1312500	369
 780	1236500.00	106	3	4	\N	1512750	270
+792	0.00	155	1	3	\N	1290240	374
+1478	0.00	155	1	\N	\N	1290240	375
 786	900500.00	41	3	1	\N	1012500	371
 1460	900500.00	41	3	\N	\N	1012500	372
-789	956500.00	107	3	4	\N	1400500	271
+798	0.00	155	1	1	\N	1003520	376
 790	1433600.00	155	69	3	\N	1433600	374
 1461	1433600.00	155	69	\N	\N	1433600	375
 791	1576960.00	155	70	3	\N	1576960	374
@@ -6305,82 +7182,36 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 800	1290240.00	155	67	1	\N	1290240	376
 1469	1290240.00	155	67	\N	\N	1290240	377
 1470	1290240.00	155	67	\N	\N	1290240	378
+1479	0.00	155	1	\N	\N	1003520	377
+1480	0.00	155	1	\N	\N	1003520	378
+774	0.00	153	1	4	\N	956250	369
 722	0.00	141	1	4	\N	460000	344
-731	0.00	145	2	3	\N	1150000	351
-1472	0.00	145	2	\N	\N	1150000	352
-1473	0.00	145	2	\N	\N	1150000	467
-1474	0.00	145	2	\N	\N	1150000	468
-741	0.00	148	1	3	\N	717900	357
-1475	0.00	148	1	\N	\N	717900	358
 733	0.00	130	1	4	\N	650000	328
-691	0.00	113	1	3	\N	697500	292
-1476	0.00	113	1	\N	\N	697500	293
-787	0.00	107	1	4	\N	765500	271
 681	0.00	126	1	4	\N	840250	320
 778	0.00	106	1	4	\N	840250	270
 688	0.00	128	1	4	\N	555500	322
 684	0.00	127	1	4	\N	1244250	321
 758	0.00	151	1	3	\N	1156250	364
 1477	0.00	151	1	\N	\N	1156250	365
-792	0.00	155	1	3	\N	1290240	374
-1478	0.00	155	1	\N	\N	1290240	375
 754	0.00	150	1	4	\N	685000	363
-707	0.00	133	1	4	\N	555500	331
-763	0.00	152	1	4	\N	630000	368
-798	0.00	155	1	1	\N	1003520	376
-1479	0.00	155	1	\N	\N	1003520	377
-1480	0.00	155	1	\N	\N	1003520	378
-737	0.00	147	1	3	\N	517500	356
-735	0.00	146	1	4	\N	506250	353
-730	0.00	145	1	3	\N	950000	351
-1481	0.00	145	1	\N	\N	950000	352
 1482	0.00	145	1	\N	\N	950000	467
 1483	0.00	145	1	\N	\N	950000	468
+763	0.00	152	1	4	\N	630000	368
+737	0.00	147	1	3	\N	517500	356
+735	0.00	146	1	4	\N	506250	353
+1473	0.00	145	2	\N	\N	1150000	467
+1474	0.00	145	2	\N	\N	1150000	468
+2018	480000.00	215	1	\N	\N	550000	765
+775	0.00	153	2	4	\N	1312500	369
 742	0.00	148	2	3	\N	999000	357
 1484	0.00	148	2	\N	\N	999000	358
-785	0.00	41	2	1	\N	859000	371
-1485	0.00	41	2	\N	\N	859000	372
-706	0.00	129	1	3	\N	687500	326
-1486	0.00	129	1	\N	\N	687500	327
-764	0.00	151	1	2	\N	906250	366
-779	0.00	106	2	4	\N	952000	270
-759	0.00	151	2	3	\N	1412500	364
-1487	0.00	151	2	\N	\N	1412500	365
-765	0.00	151	2	2	\N	1162500	366
-685	0.00	127	2	4	\N	1479000	321
-723	0.00	141	2	4	\N	700000	344
-793	0.00	155	2	3	\N	1433600	374
-1488	0.00	155	2	\N	\N	1433600	375
-752	0.00	133	2	4	\N	750000	331
-740	0.00	147	2	1	\N	625000	354
-1489	0.00	147	2	\N	\N	625000	355
-788	0.00	107	2	4	\N	1027000	271
-734	0.00	130	2	4	\N	750000	328
-682	0.00	126	2	4	\N	1064500	320
-689	0.00	128	2	4	\N	775000	322
-692	0.00	113	2	3	\N	795000	292
-1490	0.00	113	2	\N	\N	795000	293
-699	0.00	113	1	1	\N	587500	289
-1491	0.00	113	1	\N	\N	587500	290
-1492	0.00	113	1	\N	\N	587500	291
-700	0.00	113	2	1	\N	675000	289
-1493	0.00	113	2	\N	\N	675000	290
-1494	0.00	113	2	\N	\N	675000	291
-755	0.00	150	2	4	\N	1055000	363
-736	0.00	146	2	4	\N	662500	353
-784	0.00	41	1	1	\N	597500	371
-1495	0.00	41	1	\N	\N	597500	372
 745	0.00	148	1	1	\N	667500	359
 1496	0.00	148	1	\N	\N	667500	360
-1497	0.00	148	1	\N	\N	667500	361
-799	0.00	155	2	1	\N	1146880	376
-1498	0.00	155	2	\N	\N	1146880	377
-1499	0.00	155	2	\N	\N	1146880	378
-738	0.00	147	2	3	\N	735000	356
-746	0.00	148	2	1	\N	887000	359
-1500	0.00	148	2	\N	\N	887000	360
-1501	0.00	148	2	\N	\N	887000	361
-769	0.00	151	1	1	\N	956250	367
+699	0.00	113	1	1	\N	587500	289
+1491	0.00	113	1	\N	\N	587500	290
+784	0.00	41	1	1	\N	597500	371
+1495	0.00	41	1	\N	\N	597500	372
+764	0.00	151	1	2	\N	906250	366
 1502	1075200.00	155	68	\N	\N	1075200	377
 1503	1075200.00	155	68	\N	\N	1075200	378
 810	956500.00	157	3	1	\N	1064500	380
@@ -6431,20 +7262,50 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 862	761600.00	172	3	1	\N	761600	408
 1522	761600.00	172	3	\N	\N	761600	409
 1523	761600.00	172	3	\N	\N	761600	410
-852	0.00	169	2	4	\N	800000	403
 865	1120000.00	177	3	3	\N	1120000	424
 1524	1120000.00	177	3	\N	\N	1120000	425
 868	1020000.00	177	3	1	\N	1020000	426
 1525	1020000.00	177	3	\N	\N	1020000	427
 1526	1020000.00	177	3	\N	\N	1020000	428
-858	0.00	172	2	3	\N	655200	406
-1527	0.00	172	2	\N	\N	655200	407
-863	0.00	177	1	3	\N	865000	424
-1528	0.00	177	1	\N	\N	865000	425
 877	400000.00	181	9	4	\N	450000	436
 878	430000.00	181	10	4	\N	550000	436
 881	956500.00	74	3	1	\N	1137400	99
 1529	956500.00	74	3	\N	\N	1137400	101
+706	0.00	129	1	3	\N	687500	326
+1486	0.00	129	1	\N	\N	687500	327
+769	0.00	151	1	1	\N	956250	367
+863	0.00	177	1	3	\N	865000	424
+1528	0.00	177	1	\N	\N	865000	425
+759	0.00	151	2	3	\N	1412500	364
+692	0.00	113	2	3	\N	795000	292
+1490	0.00	113	2	\N	\N	795000	293
+793	0.00	155	2	3	\N	1433600	374
+1488	0.00	155	2	\N	\N	1433600	375
+799	0.00	155	2	1	\N	1146880	376
+785	0.00	41	2	1	\N	859000	371
+682	0.00	126	2	4	\N	1064500	320
+723	0.00	141	2	4	\N	700000	344
+734	0.00	130	2	4	\N	750000	328
+779	0.00	106	2	4	\N	952000	270
+689	0.00	128	2	4	\N	775000	322
+858	0.00	172	2	3	\N	655200	406
+1527	0.00	172	2	\N	\N	655200	407
+685	0.00	127	2	4	\N	1479000	321
+755	0.00	150	2	4	\N	1055000	363
+740	0.00	147	2	1	\N	625000	354
+1485	0.00	41	2	\N	\N	859000	372
+1489	0.00	147	2	\N	\N	625000	355
+736	0.00	146	2	4	\N	662500	353
+2019	550000.00	215	2	\N	\N	620000	765
+746	0.00	148	2	1	\N	887000	359
+1500	0.00	148	2	\N	\N	887000	360
+1501	0.00	148	2	\N	\N	887000	361
+738	0.00	147	2	3	\N	735000	356
+852	0.00	169	2	4	\N	800000	403
+1487	0.00	151	2	\N	\N	1412500	365
+700	0.00	113	2	1	\N	675000	289
+1498	0.00	155	2	\N	\N	1146880	377
+1499	0.00	155	2	\N	\N	1146880	378
 1530	956500.00	74	3	\N	\N	1137400	103
 884	1124500.00	74	3	3	\N	1305400	100
 1531	1124500.00	74	3	\N	\N	1305400	102
@@ -6467,15 +7328,23 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 912	1804000.00	193	17	1	\N	1924000	464
 1539	1804000.00	193	17	\N	\N	1924000	465
 1540	1804000.00	193	17	\N	\N	1924000	466
+851	0.00	169	1	4	\N	450000	403
+292	0.00	72	1	1	\N	1121000	77
+1554	0.00	72	1	\N	\N	1121000	78
+466	0.00	5	1	1	\N	600000	205
+1561	0.00	5	1	\N	\N	600000	206
+627	0.00	119	1	2	\N	1420000	303
+1572	0.00	119	1	\N	\N	1420000	304
+845	0.00	167	1	3	\N	750650	394
 253	0.00	62	1	1	\N	650000	52
 1541	0.00	62	1	\N	\N	650000	53
 1542	0.00	62	1	\N	\N	650000	56
 875	0.00	181	1	4	\N	350000	436
+896	0.00	176	1	4	\N	445000	418
 819	0.00	161	1	4	\N	336000	386
 902	0.00	193	1	3	\N	1162000	462
 1543	0.00	193	1	\N	\N	1162000	463
-811	0.00	158	1	4	\N	499500	383
-845	0.00	167	1	3	\N	750650	394
+898	0.00	191	1	4	\N	350000	454
 873	0.00	180	1	4	\N	411800	434
 812	0.00	159	1	4	\N	837500	384
 879	0.00	74	1	1	\N	733800	99
@@ -6483,7 +7352,6 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1545	0.00	74	1	\N	\N	733800	103
 821	0.00	131	1	4	\N	306250	329
 802	0.00	156	1	4	\N	1155857	379
-851	0.00	169	1	4	\N	450000	403
 805	0.00	157	1	3	\N	653500	382
 808	0.00	157	1	1	\N	485500	380
 1546	0.00	157	1	\N	\N	485500	381
@@ -6496,69 +7364,45 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1550	0.00	162	1	\N	\N	2010000	396
 871	0.00	179	1	4	\N	280000	432
 885	0.00	185	1	4	\N	550000	444
-900	748000.00	192	2	4	\N	748000	456
+899	0.00	192	1	4	\N	616000	456
 869	0.00	178	1	4	\N	377200	430
-818	0.00	160	1	1	\N	200	385
-1551	0.00	160	1	\N	\N	200	584
-896	0.00	176	1	4	\N	445000	418
-899	616000.00	192	1	4	\N	616000	456
-880	0.00	74	2	1	\N	907600	99
-1552	0.00	74	2	\N	\N	907600	101
-1553	0.00	74	2	\N	\N	907600	103
-292	0.00	72	1	1	\N	1121000	77
-1554	0.00	72	1	\N	\N	1121000	78
+892	0.00	186	2	4	\N	932400	446
+864	0.00	177	2	3	\N	975000	424
+1560	0.00	177	2	\N	\N	975000	425
+876	0.00	181	2	4	\N	450000	436
+897	0.00	176	2	4	\N	740000	418
+820	0.00	161	2	4	\N	437500	386
 903	0.00	193	2	3	\N	1324000	462
 1555	0.00	193	2	\N	\N	1324000	463
 908	0.00	193	2	1	\N	1224000	464
 1556	0.00	193	2	\N	\N	1224000	465
 1557	0.00	193	2	\N	\N	1224000	466
-803	0.00	156	2	4	\N	1174857	379
-872	0.00	179	2	4	\N	588000	432
-886	0.00	185	2	4	\N	750000	444
 849	0.00	167	2	1	\N	974900	400
 1558	0.00	167	2	\N	\N	974900	401
+846	0.00	167	2	3	\N	1086900	394
 874	0.00	180	2	4	\N	723600	434
 813	0.00	159	2	4	\N	1075000	384
+880	0.00	74	2	1	\N	907600	99
+1552	0.00	74	2	\N	\N	907600	101
+1553	0.00	74	2	\N	\N	907600	103
+822	0.00	131	2	4	\N	612500	329
+803	0.00	156	2	4	\N	1174857	379
+806	0.00	157	2	3	\N	1027000	382
 824	0.00	162	2	3	\N	2415000	395
 1559	0.00	162	2	\N	\N	2415000	396
-876	0.00	181	2	4	\N	450000	436
-897	0.00	176	2	4	\N	740000	418
-822	0.00	131	2	4	\N	612500	329
-820	0.00	161	2	4	\N	437500	386
-864	0.00	177	2	3	\N	975000	424
-1560	0.00	177	2	\N	\N	975000	425
-466	0.00	5	1	1	\N	600000	205
-1561	0.00	5	1	\N	\N	600000	206
-867	0.00	177	2	1	\N	875000	426
-1562	0.00	177	2	\N	\N	875000	427
-1563	0.00	177	2	\N	\N	875000	428
-870	0.00	178	2	4	\N	784000	430
-846	0.00	167	2	3	\N	1086900	394
-892	0.00	186	2	4	\N	932400	446
 841	0.00	162	2	2	\N	2145000	397
 1570	0.00	162	2	\N	\N	2145000	398
 1571	0.00	162	2	\N	\N	2145000	399
-627	0.00	119	1	2	\N	1420000	303
-1572	0.00	119	1	\N	\N	1420000	304
-806	0.00	157	2	3	\N	1027000	382
+872	0.00	179	2	4	\N	588000	432
+886	0.00	185	2	4	\N	750000	444
+900	0.00	192	2	4	\N	748000	456
+870	0.00	178	2	4	\N	784000	430
+2020	480000.00	215	1	\N	\N	550000	766
 861	0.00	172	2	1	\N	593600	408
 1573	0.00	172	2	\N	\N	593600	409
-898	300000.00	191	1	4	\N	350000	454
-1574	0.00	172	2	\N	\N	593600	410
-637	0.00	119	1	1	\N	1450000	301
-1575	0.00	119	1	\N	\N	1450000	302
-739	0.00	147	1	1	\N	437500	354
-1576	0.00	147	1	\N	\N	437500	355
-891	0.00	186	1	4	\N	650000	446
-256	0.00	62	1	3	\N	650000	54
-1577	0.00	62	1	\N	\N	650000	55
-907	0.00	193	1	1	\N	1012000	464
-1578	0.00	193	1	\N	\N	1012000	465
-1579	0.00	193	1	\N	\N	1012000	466
-848	0.00	167	1	1	\N	672250	400
-1580	0.00	167	1	\N	\N	672250	401
-882	0.00	74	1	3	\N	845800	100
-1581	0.00	74	1	\N	\N	845800	102
+867	0.00	177	2	1	\N	875000	426
+1562	0.00	177	2	\N	\N	875000	427
+1563	0.00	177	2	\N	\N	875000	428
 918	900000.00	77	6	3	\N	900000	472
 1582	900000.00	77	6	\N	\N	900000	473
 919	1000000.00	77	7	3	\N	1000000	472
@@ -6569,63 +7413,6 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 921	900000.00	77	7	1	\N	900000	474
 1586	900000.00	77	7	\N	\N	900000	475
 1587	900000.00	77	7	\N	\N	900000	476
-928	0.00	145	1	1	\N	900000	348
-1588	0.00	145	1	\N	\N	900000	349
-1589	0.00	145	1	\N	\N	900000	350
-1590	0.00	145	1	\N	\N	900000	469
-1591	0.00	145	1	\N	\N	900000	470
-1592	0.00	145	1	\N	\N	900000	471
-866	0.00	177	1	1	\N	765000	426
-1593	0.00	177	1	\N	\N	765000	427
-1594	0.00	177	1	\N	\N	765000	428
-840	0.00	162	1	2	\N	1740000	397
-1595	0.00	162	1	\N	\N	1740000	398
-1596	0.00	162	1	\N	\N	1740000	399
-914	0.00	77	1	3	\N	650000	472
-1597	0.00	77	1	\N	\N	650000	473
-916	0.00	77	1	1	\N	550000	474
-1598	0.00	77	1	\N	\N	550000	475
-1599	0.00	77	1	\N	\N	550000	476
-922	0.00	182	1	3	\N	1100000	477
-924	0.00	182	1	1	\N	1000000	478
-1600	0.00	182	1	\N	\N	1000000	479
-926	0.00	29	1	3	\N	640000	480
-930	0.00	83	1	3	\N	775000	481
-1601	0.00	83	1	\N	\N	775000	482
-932	0.00	83	1	2	\N	600000	483
-1602	0.00	83	1	\N	\N	600000	484
-1603	0.00	83	1	\N	\N	600000	485
-1604	0.00	83	1	\N	\N	600000	486
-934	0.00	83	1	1	\N	500000	487
-1605	0.00	83	1	\N	\N	500000	488
-936	0.00	16	1	3	\N	960000	489
-1606	0.00	16	1	\N	\N	960000	490
-938	0.00	16	1	1	\N	720000	491
-1607	0.00	16	1	\N	\N	720000	492
-1608	0.00	16	1	\N	\N	720000	493
-1020	600000.00	195	1	3	\N	600000	597
-1609	600000.00	195	1	\N	\N	600000	598
-1610	600000.00	195	1	\N	\N	600000	599
-1021	850000.00	195	2	3	\N	850000	597
-1611	850000.00	195	2	\N	\N	850000	598
-1612	850000.00	195	2	\N	\N	850000	599
-989	1025000.00	35	2	1	\N	1025000	548
-1613	1025000.00	35	2	\N	\N	1025000	549
-990	1645000.00	90	1	3	\N	1645000	550
-1614	1645000.00	90	1	\N	\N	1645000	551
-991	1845000.00	90	2	3	\N	1845000	550
-1615	1845000.00	90	2	\N	\N	1845000	551
-1022	550000.00	195	1	2	\N	550000	596
-949	0.00	164	1	3	\N	600000	511
-1616	0.00	164	1	\N	\N	600000	512
-951	0.00	164	1	1	\N	450000	513
-1617	0.00	164	1	\N	\N	450000	514
-1618	0.00	164	1	\N	\N	450000	515
-954	1100000.00	144	2	1	\N	1200000	347
-1619	1100000.00	144	2	\N	\N	1200000	516
-1620	1100000.00	144	2	\N	\N	1200000	517
-958	1350000.00	144	2	3	\N	1350000	518
-1621	1350000.00	144	2	\N	\N	1350000	519
 960	0.00	3	1	3	\N	990000	529
 1627	0.00	3	1	\N	\N	990000	530
 962	0.00	3	1	1	\N	950000	531
@@ -6637,58 +7424,84 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1632	0.00	3	1	\N	\N	1200000	523
 1633	0.00	3	1	\N	\N	1200000	524
 1634	0.00	3	1	\N	\N	1200000	525
-1635	0.00	3	1	\N	\N	1200000	526
-1636	0.00	3	1	\N	\N	1200000	527
-1637	0.00	3	1	\N	\N	1200000	528
+637	0.00	119	1	1	\N	1450000	301
+1575	0.00	119	1	\N	\N	1450000	302
+1590	0.00	145	1	\N	\N	900000	469
+1591	0.00	145	1	\N	\N	900000	470
+1592	0.00	145	1	\N	\N	900000	471
+739	0.00	147	1	1	\N	437500	354
+936	0.00	16	1	3	\N	960000	489
+848	0.00	167	1	1	\N	672250	400
+1580	0.00	167	1	\N	\N	672250	401
+256	0.00	62	1	3	\N	650000	54
+907	0.00	193	1	1	\N	1012000	464
+1578	0.00	193	1	\N	\N	1012000	465
+882	0.00	74	1	3	\N	845800	100
+1581	0.00	74	1	\N	\N	845800	102
+840	0.00	162	1	2	\N	1740000	397
+1577	0.00	62	1	\N	\N	650000	55
+1579	0.00	193	1	\N	\N	1012000	466
+1606	0.00	16	1	\N	\N	960000	490
+990	0.00	90	1	3	\N	1645000	550
+1614	0.00	90	1	\N	\N	1645000	551
+914	0.00	77	1	3	\N	650000	472
+1597	0.00	77	1	\N	\N	650000	473
+916	0.00	77	1	1	\N	550000	474
+1598	0.00	77	1	\N	\N	550000	475
+1599	0.00	77	1	\N	\N	550000	476
+922	0.00	182	1	3	\N	1100000	477
+924	0.00	182	1	1	\N	1000000	478
+1600	0.00	182	1	\N	\N	1000000	479
+930	0.00	83	1	3	\N	775000	481
+1601	0.00	83	1	\N	\N	775000	482
+1595	0.00	162	1	\N	\N	1740000	398
+1596	0.00	162	1	\N	\N	1740000	399
+932	0.00	83	1	2	\N	600000	483
+1602	0.00	83	1	\N	\N	600000	484
+1603	0.00	83	1	\N	\N	600000	485
+1020	0.00	195	1	3	\N	600000	597
+1609	0.00	195	1	\N	\N	600000	598
+1610	0.00	195	1	\N	\N	600000	599
+1022	0.00	195	1	2	\N	550000	596
+1574	0.00	172	2	\N	\N	593600	410
+954	0.00	144	2	1	\N	1200000	347
+1619	0.00	144	2	\N	\N	1200000	516
+1620	0.00	144	2	\N	\N	1200000	517
+1576	0.00	147	1	\N	\N	437500	355
+866	0.00	177	1	1	\N	765000	426
+1593	0.00	177	1	\N	\N	765000	427
+1594	0.00	177	1	\N	\N	765000	428
+891	0.00	186	1	4	\N	650000	446
+926	0.00	29	1	3	\N	640000	480
+938	0.00	16	1	1	\N	720000	491
+1607	0.00	16	1	\N	\N	720000	492
+1608	0.00	16	1	\N	\N	720000	493
+1604	0.00	83	1	\N	\N	600000	486
+934	0.00	83	1	1	\N	500000	487
+1605	0.00	83	1	\N	\N	500000	488
+958	0.00	144	2	3	\N	1350000	518
+991	0.00	90	2	3	\N	1845000	550
+1615	0.00	90	2	\N	\N	1845000	551
+989	0.00	35	2	1	\N	1025000	548
+1613	0.00	35	2	\N	\N	1025000	549
+1021	0.00	195	2	3	\N	850000	597
+1611	0.00	195	2	\N	\N	850000	598
+1612	0.00	195	2	\N	\N	850000	599
+2021	550000.00	215	2	\N	\N	620000	766
 638	0.00	119	2	1	\N	1450000	301
 1638	0.00	119	2	\N	\N	1450000	302
 596	0.00	109	2	1	\N	625000	277
 1639	0.00	109	2	\N	\N	625000	278
 1640	0.00	109	2	\N	\N	625000	279
-929	0.00	145	2	1	\N	1100000	348
-1641	0.00	145	2	\N	\N	1100000	349
-1642	0.00	145	2	\N	\N	1100000	350
-1643	0.00	145	2	\N	\N	1100000	469
-1644	0.00	145	2	\N	\N	1100000	470
-1645	0.00	145	2	\N	\N	1100000	471
-770	0.00	151	2	1	\N	1212500	367
-809	0.00	157	2	1	\N	859000	380
-1646	0.00	157	2	\N	\N	859000	381
-883	0.00	74	2	3	\N	1019600	100
-1647	0.00	74	2	\N	\N	1019600	102
-927	0.00	29	2	3	\N	740000	480
+1621	0.00	144	2	\N	\N	1350000	519
+992	0.00	90	1	2	\N	1195000	552
+1659	0.00	90	1	\N	\N	1195000	553
+1660	0.00	90	1	\N	\N	1195000	554
 956	1500000.00	144	3	1	\N	1500000	347
 1648	1500000.00	144	3	\N	\N	1500000	516
 1649	1500000.00	144	3	\N	\N	1500000	517
 959	1750000.00	144	3	3	\N	1750000	518
 1650	1750000.00	144	3	\N	\N	1750000	519
-937	0.00	16	2	3	\N	1100000	489
-1651	0.00	16	2	\N	\N	1100000	490
-939	0.00	16	2	1	\N	870000	491
-1652	0.00	16	2	\N	\N	870000	492
-1653	0.00	16	2	\N	\N	870000	493
-915	0.00	77	2	3	\N	750000	472
-1654	0.00	77	2	\N	\N	750000	473
-917	0.00	77	2	1	\N	650000	474
-1655	0.00	77	2	\N	\N	650000	475
-1656	0.00	77	2	\N	\N	650000	476
-923	0.00	182	2	3	\N	1400000	477
-925	0.00	182	2	1	\N	1300000	478
-1657	0.00	182	2	\N	\N	1300000	479
-931	0.00	83	2	3	\N	900000	481
-1658	0.00	83	2	\N	\N	900000	482
-992	1195000.00	90	1	2	\N	1195000	552
-1659	1195000.00	90	1	\N	\N	1195000	553
-1660	1195000.00	90	1	\N	\N	1195000	554
-1661	1195000.00	90	1	\N	\N	1195000	555
-993	1395000.00	90	2	2	\N	1395000	552
-1662	1395000.00	90	2	\N	\N	1395000	553
-1663	1395000.00	90	2	\N	\N	1395000	554
-1664	1395000.00	90	2	\N	\N	1395000	555
-994	875000.00	90	1	1	\N	875000	556
-1665	875000.00	90	1	\N	\N	875000	557
-995	1075000.00	90	2	1	\N	1075000	556
-1666	1075000.00	90	2	\N	\N	1075000	557
 996	2245000.00	90	9	3	\N	2245000	550
 1667	2245000.00	90	9	\N	\N	2245000	551
 997	2445000.00	90	10	3	\N	2445000	550
@@ -6705,92 +7518,91 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1675	1475000.00	90	9	\N	\N	1475000	557
 1001	1675000.00	90	10	1	\N	1675000	556
 1676	1675000.00	90	10	\N	\N	1675000	557
-1002	1020000.00	196	1	3	\N	1020000	570
-1677	1020000.00	196	1	\N	\N	1020000	571
-1003	1380000.00	196	2	3	\N	1380000	570
-1678	1380000.00	196	2	\N	\N	1380000	571
-1004	900000.00	196	1	2	\N	900000	568
-1679	900000.00	196	1	\N	\N	900000	569
-1005	1260000.00	196	2	2	\N	1260000	568
-1680	1260000.00	196	2	\N	\N	1260000	569
-1006	780000.00	196	1	1	\N	780000	565
-1681	780000.00	196	1	\N	\N	780000	566
-1682	780000.00	196	1	\N	\N	780000	567
-1007	1140000.00	196	2	1	\N	1140000	565
-1683	1140000.00	196	2	\N	\N	1140000	566
-1684	1140000.00	196	2	\N	\N	1140000	567
-1008	1000000.00	197	1	3	\N	1200000	578
-1685	1000000.00	197	1	\N	\N	1200000	579
-1686	1000000.00	197	1	\N	\N	1200000	580
-1009	1150000.00	197	2	3	\N	1300000	578
-1687	1150000.00	197	2	\N	\N	1300000	579
-1688	1150000.00	197	2	\N	\N	1300000	580
-1010	700000.00	197	1	1	\N	850000	581
-1689	700000.00	197	1	\N	\N	850000	582
-1690	700000.00	197	1	\N	\N	850000	583
-1011	800000.00	197	2	1	\N	950000	581
-1691	800000.00	197	2	\N	\N	950000	582
-1692	800000.00	197	2	\N	\N	950000	583
+1661	0.00	90	1	\N	\N	1195000	555
+994	0.00	90	1	1	\N	875000	556
+1665	0.00	90	1	\N	\N	875000	557
+1002	0.00	196	1	3	\N	1020000	570
+1677	0.00	196	1	\N	\N	1020000	571
+1004	0.00	196	1	2	\N	900000	568
+1679	0.00	196	1	\N	\N	900000	569
+1006	0.00	196	1	1	\N	780000	565
+1681	0.00	196	1	\N	\N	780000	566
+1682	0.00	196	1	\N	\N	780000	567
+1008	0.00	197	1	3	\N	1200000	578
+1685	0.00	197	1	\N	\N	1200000	579
+1686	0.00	197	1	\N	\N	1200000	580
+1010	0.00	197	1	1	\N	850000	581
+1689	0.00	197	1	\N	\N	850000	582
+1690	0.00	197	1	\N	\N	850000	583
+809	0.00	157	2	1	\N	859000	380
+1646	0.00	157	2	\N	\N	859000	381
+993	0.00	90	2	2	\N	1395000	552
+1662	0.00	90	2	\N	\N	1395000	553
+1663	0.00	90	2	\N	\N	1395000	554
+1664	0.00	90	2	\N	\N	1395000	555
+1003	0.00	196	2	3	\N	1380000	570
+1678	0.00	196	2	\N	\N	1380000	571
+1005	0.00	196	2	2	\N	1260000	568
+1680	0.00	196	2	\N	\N	1260000	569
+1007	0.00	196	2	1	\N	1140000	565
+1683	0.00	196	2	\N	\N	1140000	566
+1684	0.00	196	2	\N	\N	1140000	567
+927	0.00	29	2	3	\N	740000	480
+937	0.00	16	2	3	\N	1100000	489
+1651	0.00	16	2	\N	\N	1100000	490
+939	0.00	16	2	1	\N	870000	491
+1652	0.00	16	2	\N	\N	870000	492
+915	0.00	77	2	3	\N	750000	472
+1654	0.00	77	2	\N	\N	750000	473
+917	0.00	77	2	1	\N	650000	474
+1655	0.00	77	2	\N	\N	650000	475
+1656	0.00	77	2	\N	\N	650000	476
+923	0.00	182	2	3	\N	1400000	477
+925	0.00	182	2	1	\N	1300000	478
+1657	0.00	182	2	\N	\N	1300000	479
+931	0.00	83	2	3	\N	900000	481
+1658	0.00	83	2	\N	\N	900000	482
 933	0.00	83	2	2	\N	700000	483
+1009	0.00	197	2	3	\N	1300000	578
+1687	0.00	197	2	\N	\N	1300000	579
+1653	0.00	16	2	\N	\N	870000	493
 1701	0.00	83	2	\N	\N	700000	484
 1702	0.00	83	2	\N	\N	700000	485
+1688	0.00	197	2	\N	\N	1300000	580
+1011	0.00	197	2	1	\N	950000	581
+1691	0.00	197	2	\N	\N	950000	582
+1692	0.00	197	2	\N	\N	950000	583
+2022	480000.00	215	1	\N	\N	550000	767
+770	0.00	151	2	1	\N	1212500	367
+1643	0.00	145	2	\N	\N	1100000	469
+1644	0.00	145	2	\N	\N	1100000	470
+1645	0.00	145	2	\N	\N	1100000	471
+883	0.00	74	2	3	\N	1019600	100
+1647	0.00	74	2	\N	\N	1019600	102
+995	0.00	90	2	1	\N	1075000	556
+1666	0.00	90	2	\N	\N	1075000	557
 1703	0.00	83	2	\N	\N	700000	486
 935	0.00	83	2	1	\N	600000	487
 1704	0.00	83	2	\N	\N	600000	488
-950	0.00	164	2	3	\N	900000	511
-1705	0.00	164	2	\N	\N	900000	512
-952	0.00	164	2	1	\N	600000	513
-1706	0.00	164	2	\N	\N	600000	514
-1707	0.00	164	2	\N	\N	600000	515
-1023	750000.00	195	2	2	\N	750000	596
-1024	550000.00	195	1	1	\N	550000	506
-1708	550000.00	195	1	\N	\N	550000	595
-1025	750000.00	195	2	1	\N	750000	506
-1709	750000.00	195	2	\N	\N	750000	595
+1948	0.00	208	1	\N	\N	650000	709
 1026	600000.00	200	12	3	\N	600000	605
 1710	600000.00	200	12	\N	\N	600000	606
 1711	600000.00	200	12	\N	\N	600000	608
-913	1100000.00	144	1	1	\N	1100000	347
-1712	1100000.00	144	1	\N	\N	1100000	516
-1713	1100000.00	144	1	\N	\N	1100000	517
-961	0.00	3	2	3	\N	1100000	529
-1714	0.00	3	2	\N	\N	1100000	530
-963	0.00	3	2	1	\N	1060000	531
-1715	0.00	3	2	\N	\N	1060000	532
-1716	0.00	3	2	\N	\N	1060000	533
-965	0.00	3	2	5	\N	1350000	520
-1717	0.00	3	2	\N	\N	1350000	521
-1718	0.00	3	2	\N	\N	1350000	522
-1719	0.00	3	2	\N	\N	1350000	523
-1720	0.00	3	2	\N	\N	1350000	524
-1721	0.00	3	2	\N	\N	1350000	525
-1722	0.00	3	2	\N	\N	1350000	526
-1723	0.00	3	2	\N	\N	1350000	527
-1724	0.00	3	2	\N	\N	1350000	528
-984	1300000.00	35	1	3	\N	1300000	543
-1727	1300000.00	35	1	\N	\N	1300000	544
-985	1525000.00	35	2	3	\N	1525000	543
-1728	1525000.00	35	2	\N	\N	1525000	544
-986	1150000.00	35	1	2	\N	1150000	545
-1729	1150000.00	35	1	\N	\N	1150000	546
-1730	1150000.00	35	1	\N	\N	1150000	547
-987	1337500.00	35	2	2	\N	1337500	545
-1731	1337500.00	35	2	\N	\N	1337500	546
-1732	1337500.00	35	2	\N	\N	1337500	547
-988	875000.00	35	1	1	\N	875000	548
-1733	875000.00	35	1	\N	\N	875000	549
-1012	1100000.00	198	1	4	\N	1100000	586
-1013	1400000.00	198	2	4	\N	1400000	586
-1014	1800000.00	199	1	3	\N	1800000	593
-1734	1800000.00	199	1	\N	\N	1800000	594
-1015	2050000.00	199	2	3	\N	2050000	593
-1735	2050000.00	199	2	\N	\N	2050000	594
-1016	1600000.00	199	1	2	\N	1600000	592
-1017	1850000.00	199	2	2	\N	1850000	592
-1018	1500000.00	199	1	1	\N	1500000	591
-1019	1750000.00	199	2	1	\N	1750000	591
-957	1250000.00	144	1	3	\N	1250000	518
-1736	1250000.00	144	1	\N	\N	1250000	519
+1909	0.00	87	1	\N	\N	1700000	687
+1968	0.00	164	1	\N	\N	600000	511
+913	0.00	144	1	1	\N	1100000	347
+1712	0.00	144	1	\N	\N	1100000	516
+1713	0.00	144	1	\N	\N	1100000	517
+957	0.00	144	1	3	\N	1250000	518
+1978	0.00	117	1	\N	\N	850000	723
+984	0.00	35	1	3	\N	1300000	543
+1727	0.00	35	1	\N	\N	1300000	544
+986	0.00	35	1	2	\N	1150000	545
+1729	0.00	35	1	\N	\N	1150000	546
+1024	0.00	195	1	1	\N	550000	506
+1708	0.00	195	1	\N	\N	550000	595
+1999	0.00	211	1	\N	\N	700000	745
+1012	0.00	198	1	4	\N	1061800	586
 1027	770000.00	200	13	3	\N	770000	605
 1737	770000.00	200	13	\N	\N	770000	606
 1738	770000.00	200	13	\N	\N	770000	608
@@ -6806,36 +7618,64 @@ COPY public.hotel_room_types (id, price, hotel_id, room_type_id, season_type, pe
 1035	1960000.00	78	11	3	\N	1960000	612
 1036	1560000.00	78	11	1	\N	1560000	611
 1037	1560000.00	78	17	1	\N	1560000	611
-1038	500000.00	138	1	3	\N	650000	613
-1741	500000.00	138	1	\N	\N	650000	614
-1039	800000.00	138	2	3	\N	800000	613
-1742	800000.00	138	2	\N	\N	800000	614
-1040	500000.00	138	1	1	\N	550000	615
-1743	500000.00	138	1	\N	\N	550000	616
-1744	500000.00	138	1	\N	\N	550000	617
-1041	800000.00	138	2	1	\N	700000	615
-1745	800000.00	138	2	\N	\N	700000	616
-1746	800000.00	138	2	\N	\N	700000	617
 1042	1000000.00	138	3	3	\N	1000000	613
 1747	1000000.00	138	3	\N	\N	1000000	614
 1043	1000000.00	138	3	1	\N	900000	615
 1748	1000000.00	138	3	\N	\N	900000	616
 1749	1000000.00	138	3	\N	\N	900000	617
-1759	935000.00	20	2	\N	\N	935000	623
-1769	600000.00	201	2	\N	\N	650000	633
-1779	550000.00	39	2	\N	\N	550000	637
-1789	650000.00	58	2	\N	\N	770000	642
-1799	845000.00	202	2	\N	\N	845000	650
 1809	1405200.00	14	10	\N	\N	1652400	63
-1819	1090000.00	79	2	\N	\N	1090000	657
-1829	2000000.00	89	2	\N	\N	2000000	535
-1839	1250000.00	89	2	\N	\N	1250000	540
-1849	1550000.00	46	2	\N	\N	1550000	30
-1859	1750000.00	46	2	\N	\N	1750000	37
-1869	2400000.00	46	2	\N	\N	2400000	45
-1879	600000.00	40	2	\N	\N	900000	666
-1889	800000.00	190	2	\N	\N	800000	671
-1899	760000.00	204	2	\N	\N	760000	681
+1014	0.00	199	1	3	\N	1800000	593
+1889	0.00	190	2	\N	\N	800000	671
+1938	700000.00	207	10	\N	\N	700000	704
+1958	550000.00	209	12	\N	\N	550000	720
+1989	1500000.00	210	50	\N	\N	1500000	734
+1734	0.00	199	1	\N	\N	1800000	594
+1016	0.00	199	1	2	\N	1600000	592
+1018	0.00	199	1	1	\N	1500000	591
+1038	0.00	138	1	3	\N	650000	613
+1741	0.00	138	1	\N	\N	650000	614
+1040	0.00	138	1	1	\N	550000	615
+1743	0.00	138	1	\N	\N	550000	616
+1744	0.00	138	1	\N	\N	550000	617
+1899	0.00	204	2	\N	\N	760000	681
+1819	0.00	79	2	\N	\N	1090000	657
+1829	0.00	89	2	\N	\N	2000000	535
+1759	0.00	20	2	\N	\N	935000	623
+1849	0.00	46	2	\N	\N	1550000	30
+1859	0.00	46	2	\N	\N	1750000	37
+1869	0.00	46	2	\N	\N	2400000	45
+1789	0.00	58	2	\N	\N	770000	642
+1769	0.00	201	2	\N	\N	650000	633
+961	0.00	3	2	3	\N	1100000	529
+1714	0.00	3	2	\N	\N	1100000	530
+963	0.00	3	2	1	\N	1060000	531
+1715	0.00	3	2	\N	\N	1060000	532
+985	0.00	35	2	3	\N	1525000	543
+1728	0.00	35	2	\N	\N	1525000	544
+987	0.00	35	2	2	\N	1337500	545
+1039	0.00	138	2	3	\N	800000	613
+1731	0.00	35	2	\N	\N	1337500	546
+1732	0.00	35	2	\N	\N	1337500	547
+1023	0.00	195	2	2	\N	750000	596
+1025	0.00	195	2	1	\N	750000	506
+1742	0.00	138	2	\N	\N	800000	614
+1709	0.00	195	2	\N	\N	750000	595
+1879	0.00	40	2	\N	\N	900000	666
+1013	0.00	198	2	4	\N	1523600	586
+1015	0.00	199	2	3	\N	2050000	593
+1735	0.00	199	2	\N	\N	2050000	594
+1017	0.00	199	2	2	\N	1850000	592
+1019	0.00	199	2	1	\N	1750000	591
+1041	0.00	138	2	1	\N	700000	615
+1745	0.00	138	2	\N	\N	700000	616
+1746	0.00	138	2	\N	\N	700000	617
+2023	550000.00	215	2	\N	\N	620000	767
+1779	0.00	39	2	\N	\N	550000	637
+1799	0.00	202	2	\N	\N	845000	650
+1928	0.00	99	2	\N	\N	1900000	695
+1839	0.00	89	2	\N	\N	1250000	540
+1716	0.00	3	2	\N	\N	1060000	533
+965	0.00	3	2	5	\N	1350000	520
 \.
 
 
@@ -6854,6 +7694,27 @@ COPY public.hotel_rules (id, hotel_id, rule_type, start_time, end_time, price_im
 8	195	late_check_out	12:00:00	18:00:00	percentage	50.00	f	2025-12-24 11:25:57	2025-12-24 11:25:57
 9	144	early_check_in	06:00:00	14:00:00	percentage	50.00	f	2025-12-26 10:58:01	2025-12-26 10:58:01
 10	144	late_check_out	12:00:00	18:00:00	percentage	50.00	f	2025-12-26 10:58:32	2025-12-26 10:58:32
+11	198	early_check_in	06:00:00	14:00:00	percentage	50.00	f	2026-02-02 10:49:43	2026-02-02 10:49:43
+12	198	late_check_out	12:00:00	18:00:00	percentage	50.00	f	2026-02-02 10:50:44	2026-02-02 10:50:44
+13	198	early_check_in	00:00:00	06:00:00	percentage	100.00	f	2026-02-02 10:53:19	2026-02-02 10:53:19
+14	87	early_check_in	08:00:00	15:00:00	percentage	50.00	f	2026-02-02 11:03:14	2026-02-02 11:03:14
+15	87	late_check_out	12:00:00	18:00:00	percentage	50.00	f	2026-02-02 11:03:39	2026-02-02 11:03:39
+16	50	early_check_in	09:00:00	15:00:00	percentage	50.00	f	2026-02-02 11:05:55	2026-02-02 11:05:55
+17	50	late_check_out	12:00:00	18:00:00	percentage	50.00	f	2026-02-02 11:06:22	2026-02-02 11:06:22
+18	207	early_check_in	07:00:00	12:00:00	percentage	50.00	f	2026-02-16 06:33:49	2026-02-16 06:33:49
+19	207	late_check_out	12:00:00	18:00:00	percentage	50.00	f	2026-02-16 06:34:18	2026-02-16 06:34:18
+20	44	early_check_in	08:00:00	14:00:00	percentage	50.00	f	2026-02-17 10:06:18	2026-02-17 10:06:18
+21	44	early_check_in	00:00:00	08:00:00	percentage	100.00	f	2026-02-17 10:06:40	2026-02-17 10:06:40
+22	44	late_check_out	14:00:00	18:00:00	percentage	50.00	f	2026-02-17 10:06:58	2026-02-17 10:06:58
+23	44	late_check_out	18:00:00	23:59:00	percentage	100.00	f	2026-02-17 10:07:12	2026-02-17 10:07:12
+24	25	early_check_in	06:00:00	14:00:00	percentage	50.00	f	2026-02-17 12:08:31	2026-02-17 12:08:31
+25	25	early_check_in	00:00:00	06:00:00	percentage	100.00	f	2026-02-17 12:09:06	2026-02-17 12:09:06
+26	25	late_check_out	12:00:00	16:00:00	percentage	50.00	f	2026-02-17 12:09:30	2026-02-17 12:09:30
+27	25	late_check_out	16:00:00	23:59:00	percentage	100.00	f	2026-02-17 12:09:48	2026-02-17 12:09:48
+28	122	early_check_in	06:00:00	14:00:00	percentage	50.00	f	2026-02-19 06:16:55	2026-02-19 06:16:55
+29	122	late_check_out	12:00:00	18:00:00	percentage	50.00	f	2026-02-19 06:17:36	2026-02-19 06:17:36
+30	214	early_check_in	07:00:00	14:00:00	percentage	50.00	f	2026-02-23 06:27:56	2026-02-23 06:27:56
+31	214	late_check_out	12:00:00	18:00:00	percentage	50.00	f	2026-02-23 06:28:21	2026-02-23 06:28:21
 \.
 
 
@@ -6863,7 +7724,9 @@ COPY public.hotel_rules (id, hotel_id, rule_type, start_time, end_time, price_im
 
 COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellation_days, company_name, address, rate, phone, comment, contract_number, contract_date, website_price, photo, description_en, latitude, longitude, description_ru, nds_included, tour_sbor) FROM stdin;
 57	Grand Fergana Hotel	1	6	grand_fergana@mail.ru	304532102	20	Matxalikov Abdunabi Fayzi MCHJ	Yangi Turon 15, Fergana 150100 Uzbekistan	3	+998910427555	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+215	Reikartz Hanzade Samarkand	1	2	uzsales@reikartz.com	\N	45	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	15
 47	Hotel The Elements	1	1	sales@thelementshotel.uz	303003239	45	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+216	Badyan Hotel Boutique	1	3	\N	\N	\N	\N	Bahouddin Nakshband street 158, Bukhara	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 27	Hotel Khiva Palace	1	4	khivapalace@mail.ru	301276479	40	Parusnik MCHJ	 Vokzalnaya Sq., Khiva Uzbekistan	3	+998881959090	Price included: Breakfast VAT and Tourist tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 33	Samarkand De Villa	1	2	hoteldevilla2024@gmail.com	311725752	45	Samarkand De Villa OK	Siyabskaya Street 14/16, Samarkand 141500 Uzbekistan	3	+998901913300	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 19	Hotel Amir Plaza	1	2	amirplazahotelsales@gmail.com	309265770	30	Ali Sirvan Textile MCHJ	121, Usto Umarkul Djurakulov street, Samarkand, Uzbekistan	3	+998992500039	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -6874,7 +7737,6 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 63	Paradise Plaza Luxury 	1	3	info@paradiseplaza.com	205807339	30	Djafar Jasur Bek MCHJ	Bahouddin Naqshband 162 Street, 200100, Bukhara, Uzbekistan	3	+998908450007	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 37	Art Residence 	1	1	artresidencehotel6@gmail.com	310919867	45	Art Rezindence Hotel MCHJ	Uzbekistan. Tashkent, Mirzo-Ulugbek district, 131 Parkentskaya Street.	3	+998954115050	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 12	Hotel Hayot Plaza	1	1	hayatplaza2@gmail.com	306465761	\N	Grand Osiyo Plaza MCHJ	Proyezd ,13, Shivli 1, Tashkent 100000 Uzbekistan	3	+998951445151	Price included: Breakfast, VAT and tourist tax (15%)	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-25	Silk Road Kokand	1	14	info@silkroadkokand.com	305283769	45	Silk Road-Kokand MCHJ	Turkiston St., 57A, Kokand 150700 Uzbekistan	3	+998993633366	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 67	Rahmatulla Guesthouse	1	28	info@nuratau.com	9999999	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 10	Hotel Zukhro Boutique 	1	4	zukhrohotel@mail.ru	303830326	45	Xiva Zuhra OK	Khiva city Ichan qala, Buyoqchilar str, 53	\N	+998977016080	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 38	Hotel ART Regency  	1	1	artmedia@mail.ru	301624392	45	OOO ARTMEDIA CLIMAT	\N	3	+998951449022	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -6889,7 +7751,9 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 41	Grand Vizir	1	4	grandvizirhotel@gmail.com	305852280	45	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 23	Hotel Farovon	1	4	reservation@farovonkhiva.uz	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	15
 30	Hotel Volida 	1	3	hotel-volida@mail.ru	305202242	45	Hotel Volida OK	Khuzha Porso Str. 1, Bukhara 200118 Uzbekistan	3	+998905105055	\N	18/26 	2026-01-10	\N	\N	Comfortable Accommodations: Hotel Volida Boutique in Bukhara offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a work desk, TV, and free WiFi, ensuring a pleasant stay.\n\nDining Experience: Guests can enjoy a variety of breakfast options, including continental, buffet, vegetarian, vegan, halal, and gluten-free. The family-friendly restaurant serves traditional and modern cuisines in a welcoming ambiance.\n\nConvenient Facilities: The hotel features a terrace, restaurant, and free WiFi. Additional services include private check-in and check-out, a 24-hour front desk, and free on-site parking. Bicycle parking and a tour desk are also available.\n\nPrime Location: Located 3.7 mi from Bukhara International Airport, the hotel is highly rated for its convenient location and excellent staff support. Nearby attractions include the Ark and Lyabi House.	39.77422600	64.42327300	Комфортное размещение: Бутик-отель Hotel Volida Boutique в Бухаре предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть рабочий стол, телевизор и бесплатный Wi-Fi, что обеспечивает приятное пребывание.\n\nКулинарные впечатления: Гости могут насладиться разнообразными вариантами завтрака, включая континентальный, шведский стол, вегетарианский, веганский, халяльный и безглютеновый. В семейном ресторане подают блюда традиционной и современной кухни в уютной атмосфере.\n\nУдобные услуги: В отеле есть терраса, ресторан и бесплатный Wi-Fi. Дополнительные услуги включают индивидуальную регистрацию заезда и отъезда, круглосуточную стойку регистрации и бесплатную парковку на территории. Также доступны парковка для велосипедов и экскурсионное бюро.\n\nОтличное расположение: Отель, расположенный в 6 км от международного аэропорта Бухары, высоко оценивается за удобное расположение и отличную поддержку персонала. Среди близлежащих достопри	t	\N
+210	Green park Hotel 	1	1	greenparkhotel@gmail.com	308860056	30	"Green Park Plaza" MCHJ	Tashkent, Yakkasarai district, 5, 2 Jamshid Shoshiy street	3	\N	\N	54/26	2026-02-10	\N	\N	Green Park Hotel is a modern hotel located in the center of Tashkent, in the quiet and green Yakkasaray District. The hotel offers 50 comfortable rooms, a restaurant serving daily breakfasts, a bar, a summer lounge area, a conference hall, high-speed Wi-Fi, and secure parking. An excellent choice for both leisure and business travelers.	\N	\N	Green Park Hotel — современный отель в центре Ташкент, расположенный в тихом и зелёном Яккасарайский район. К услугам гостей 50 комфортабельных номеров, ресторан с ежедневными завтраками, бар, летняя лаунж-зона, конференц-зал, высокоскоростной Wi-Fi и охраняемая парковка. Отличный выбор для туристических и деловых поездок.	f	15
 81	The Tower Hotel	1	1	sales.thetower@gmail.com	307840058	45	The Tower Hotel MCHJ	Kichik Beshag‘och str, Yakkasaroy district , Tashkent, 100070	3	+998908139392	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+217	Twins Hotel Khiva	1	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 73	Hotel Latifa Begim Heritage	1	3	latifa@gmail.com	310156679	45	OK Latifa Begim Heritage	Old City, Levi Boboxonov 10, 200118, Bukhara	2	+998936555870	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 60	Wyndham Tashkent	1	1	reservation@wyndhamtashkent.com	204135417	30	Ipak Yo'li-Turizm MCHJ QK	 C-4, No. 7/8, Amir Temur Str., 100000, Tashkent	4	+998781203700	included: Breakfast, VAT and Tourist Tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 80	Hotel Medina Town	1	1	medinatownhotel@gmail.com	302424522	45	\N	58A Mukimi str, Tashkent, Uzbekistan	3	+998958858333	Price Included: Breakfast, VAT and  Tourist Tax (10%)\n\n\n	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -6898,38 +7762,30 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 82	Zargaron Plaza	1	3	zargaronplaza@gmail.com	301812831	45	"Zargaron Lyuks" MCHJ	Bakhouddin Nakshbandi Str. 256, Bukhara Узбекистан	3	+998943226323	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 84	Minorai Kalon	1	3	zargaronplaza1@gmail.com	301812831	45	Zargaron Lyuks MCHJ	H.Ibodova St. 11, Bukhara 100121 Uzbekistan	3	+998652230352	zargaronplaza@gmail.com	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 86	Hotel Grand Castle	1	9	hotel@grandcastle.uz	302354318	45	Buyuk Qala MCHJ	48/1 Pahlavon Mahmud St., Urgench, Khorezm region	3	+998781137757	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-44	Jipek Joli 	1	10	bookingjipekjloli@gmail.com	205788925	45	Ayim-Tur OK	Tatibaev Street 50, Nukus 230100 Uzbekistan	3	+998551070555	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 66	QIZILQUM SAFARI YURT CAMP	1	26	qizilqum-safari@mail.ru	300700806	45	Qizilqum Safari MCHJ	Kanimex District, Navoi 210500, Uzbekistan	\N	+998943724455	Price included: Accommodation, Breakfast, lunch, dinner, water Camel riding (10 min), Folk show Akin and tourist tax 	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 15	Hotel Arslan Boutique 	1	4	buotiquearslan@gmail.com	311113184	45	Hotel Arslan Boutique Khiva OK	\N	3	+998973633747	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 4	Hotel Gabrielle International	1	1	hotelgabrielle@gmail.com	307162442	7	СП ООО Gabrielle Invest	Shota Rustaveli St., 43 A Khumo St., 1, Yakkasaroy District, Tashkent 100070 Uzbekistan	3	+998981159191	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 88	Hotel Emirhan	1	2	hotelemirhan@gmail.com	302416950	45	OOO Shaxzod Plaza	Dahbet Street 46A, Samarkand 140120 Uzbekistan	3	+998901904000	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-91	Hotel City 	1	2	infocitysamarkand@gmail.com	306223889	35	ООО «Aurora City Plus»	University Boulevard Street 19 A, Samarkand 140129 Uzbekistan	3	+998979191731	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 94	Hotel DiliMah	1	2	booking@dilimahhotel.com	300614889	30	Sole Vita MCHJ	Mirzo Ulugbek street, 79A, Samarkand, Uzbekistan	4	+998937200025	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 95	Hotel Sherdor 	1	2	Sherdorhotel1@gmail.com	306505458	45	Diliman Travel Gold Servis MCHJ	Panzhakent Rd 17, 140101, Samarkand, Uzbekistan	3	+998509989554	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 74	Hotel Human	1	1	humanhotel2022@gmail.com	308591881	30	Human-Hotel OK	52 Kichik Mirabad Street, Tashkent, Uzbekistan	3	+998995230090	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-71	Hotel Sayyoh	1	1	info@sayyoh-hotel.uz	303498905	2	Winter Holidays OOO	Al-Horazmiy Street 4/1 Block 16, Chilanzar, Tashkent 100002 Uzbekistan	3	+998951702733	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 92	Shirin House Guest House	1	30	sanjok_fra@inbox.ru	310368501	30	"SHIRIN ETHNO HOUSE" OK	Kokili Kalon Str 9A, Bukhara 200118 Uzbekistan	\N	+998912440776	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 96	Hotel Husma Hotel & SPA	1	1	reservation@husmahotel.uz	305980044	45	OOO AFZUN IBRAT SERVIS	\N	3	+998770009000	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 97	Hotel Gold Palace	1	11	goldpalacehoteltermez01@gmail.com	304383716	45	Gulchera Malika MCHJ	26-uy, Shifokor mahallasi, Ibn Sino ko’chasi, Termez,Uzbekistan	3	+998881540220	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-87	Holiday INN Tashkent	1	1	reservation@hitc.uz	310912085	45	"HITC" MCHJ XK	100017, Tashkent Shayhantakhur  district, Ukchi street, 3. 	3	+998774010358	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 93	"Minor Boutique"	1	4	khivaminor@bk.ru	310683206	\N	\N	\N	\N	+998977903332	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 26	Hotel Gur Emir Palace 	1	2	guremirhotel@gmail.com	308273249	45	Maracanda Hotel MCHJ	Shohruh Mirzo Street 126, Samarkand 140101 Uzbekistan	3	+998910308088	\N	№ 23\\01 	2025-01-01	\N	\N	\N	\N	\N	\N	f	\N
 89	Hotel Movenpick Samarkand	1	2	HC076-SL@accor.com	301442905	30	Rehistan Plaza MCHJ	53 Shokhrukh Street, Samarkand 140100 Uzbekistan	5	+998933306061	\N	\N	\N	\N	\N	Get the celebrity treatment with world-class service at Mövenpick Samarkand\nElegant Accommodation: Mövenpick Samarkand in Samarkand offers a 5-star experience with modern rooms featuring air-conditioning, private bathrooms, and free WiFi. Each room includes a minibar, TV, and wardrobe, ensuring comfort and convenience.\n\nExceptional Facilities: Guests can enjoy a sauna, fitness centre, seasonal outdoor and indoor swimming pools, and a hammam. Additional amenities include a terrace, garden, and free on-site private parking. The hotel provides a paid shuttle service, lift, and 24-hour front desk.\n\nDining Experience: The modern restaurant serves lunch, dinner, and high tea with local specialities, warm dishes, fresh pastries, and a variety of beverages. A buffet breakfast is available, featuring local specialities, warm dishes, juice, fresh pastries, pancakes, cheese, and fruits.\nPrime Location: Located 7 km from Samarkand International Airport	\N	\N	Почувствуйте себя знаменитостью благодаря великолепному сервису в Mövenpick Samarkand\nЭлегантное размещение: Отель Mövenpick Samarkand в Самарканде предлагает 5-звездочное размещение в современных номерах с кондиционером, собственной ванной комнатой и бесплатным Wi-Fi. В каждом номере есть мини-бар, телевизор и шкаф, обеспечивающие комфорт и удобство.\nИсключительные удобства: Гости могут посетить сауну, фитнес-центр, сезонные открытый и крытый бассейны, а также хаммам. Среди дополнительных удобств — терраса, сад и бесплатная частная парковка на территории. В отеле предоставляются платный трансфер, лифт и круглосуточная стойка регистрации.\nГастрономический опыт: В современном ресторане подают обед, ужин и послеобеденный чай с местными деликатесами, горячими блюдами, свежей выпечкой и разнообразными напитками. Гостям предлагается завтрак "шведский стол" с местными специалитетами, горячими блюдами, соками, свежей выпечкой, блинами, сырами и фруктами. Отличное расположение\n\n	f	15
 68	Arhan Palace Premium 1	1	2	manager@arhanpalace.uz	305855009	45	ROYAL HOTEL MCHJ	Mir Said Baraka Kuchasi Dom 81, Samarkand 700300 Uzbekistan	3	+998985777973	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-85	Hotel Annex	1	4	annexhotel11@gmail.com	203625384	45	MIrzo Boshi OK	Zargarlar Street 121, Khiva 220900 Uzbekistan	3	+998953663000	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-99	Crowne Plaza	1	1	reservation@cptashkent.com	302790314	45	Yanis CPH MCHJ	Zulfiyahonim Str 17, 100011, Tashkent	4	+998951030005	price included: Breakfast VAT & tourist tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+211	Art Minor Hotel	1	4	\N	312233541	\N	"Art Minor Hotel" MCHJ	Kaptarxona MFY, Po'stindoz ko'chasi, 34-uy	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 100	Hotel Breshim	1	3	hotel-breshim@mail.ru	304961179	45	Shoxi Amir OK	Xalvopazon 6, Bukhara 200100 Uzbekistan	2	+998934593445	Price included: breakfast VAT & Tourist Tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 101	Hotel Said Islom Khoja	1	4	saidislomkhoja@mail.ru	203885474	45	Kadamboy Matkarimov XK	 Khiva 220900 Uzbekistan	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 102	Hotel Crystal 	1	3	crystal.hotel@mail.ru	306443916	45	Izra Mishal MCHJ	Mohitobon No. 60, Bukhara 200130 Uzbekistan	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 111	Hotel Antaliya Grand Plaza	1	9	reservation@antalyagrandpalace.com	\t 304721112	45	"SHAVOT GRAND PLAZA" MCHJ XK	Xonka Ko’chasi No:1, Urgench, Uzbekistan	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 112	Malika Prime	1	2	malika-hotel@mail.ru	202615002	\N	OOO Mauzo	\N	3	\N	ДОГОВОР № 19/11-24А\n19 ноября 2024 г	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-133	Prestige Terrace Hotel	1	3	bukharaprestige@mail.com	309408780	45	СП "Prestige Terrace Hotel"	Buxoro St 8, Bukhara 200111 Uzbekistan	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 128	Hotel Minor Boutique	1	4	khivaminor@bk.ru	307191906	45	Khiva Minor Boutique Hotel OK	Islam Khodja 66, Khiva 220900 Uzbekistan	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-117	Club 777	1	6	club.hotel.777@mail.ru	\N	\N	\N	\N	3	\N	Rates incl VAT + Tourism tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 118	Hotel Shirin Plaza	1	3	shirinplaza@gmail.com	302653641	45	"BUXARA SHIRIN PLAZA FAYZ" MCHJ	Bakhowuddin Nakshbandi St. 16, Bukhara 200100 Uzbekistan	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 17	Hotel Al Madina 	1	2	almadina.samarkand@gmail.com	309621004)	45	Munavvara Plaza Samarkand MCHJ	Amir Temur ko'chasi 35-uy, Samarkand 140100 Uzbekistan	3	+998951850055	Price Included: Breakfast, VAT & Tourist tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 119	Hotel Mercure 	1	3	HC0E8-RE@accor.com	307257759	45	"AYVAN PALACE" MCHJ	Buxoro shahar Samarqand ko’chasi 206 uy	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-122	T-City	1	1	nfo@t-citypresidentialhotel.uz	308062154	60	Hotel MGMT MCHJ	Uzbekistan, Tashkent, Islam Karimov street, SQB Tower	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 113	Hotel Reikartz Xon Tashkent`	1	1	uzsales@reikartz.com	309265770	45	OOO "HMC U"	Kichik Mirobod 10, Tashkent 100090 Uzbekistan	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 124	Hotel Bogi Shamol	1	34	hotel.bogishamol.1@gmail.com	\N	45	\N	Andijon shahar, Milliy tiklanish, 38-A	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 125	Hotel Grand Emir Residence	1	3	suxrob@list.ru	303129064	45	Ra'no Grand Service OK	Hofiz Tanish Bukhari 11, Bukhara 200104 Uzbekistan	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -6943,13 +7799,12 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 59	Reikartz Bahor Bukharaa	1	3	uzsales@reikartz.com	309265770	45	OOO @"HMC U"	Bahouddin Naqshbandi St 354, Bukhara 200109 Uzbekistan	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 130	Hotel Bekabad 	1	12	karimjan.75@mail.ru	200847499	45	Muhammad Hoji Bobo XK	Bekabad, Istiklol str. 44, Bekabad City, Tashkent Region	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 139	Hotel Turon	1	4	\N	305620127	45	OOO 'Mabrur Travel"	74, Omadli street, 220900 Khiva 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-140	Intercontinental Tashkent	1	1	tasat.reservations@ihg.com	306 777 698	45	ИП ООО “UZTUR INVESTMENT AND DEVELOPMENT 	Shakhrisabz Street 2, Tashkent, Uzbekistan, 100000	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+99	Crowne Plaza	1	1	reservation@cptashkent.com	302790314	45	Yanis CPH MCHJ	Zulfiyahonim Str 17, 100011, Tashkent	4	+998951030005	\N	\N	\N	\N	\N	Comfortable Accommodations: Crowne Plaza Tashkent by IHG in Tashkent offers family rooms with garden or city views. Each room includes air-conditioning, a private bathroom, and modern amenities.\n\nExceptional Facilities: Guests enjoy spa facilities, a sauna, fitness centre, indoor swimming pool, and a lush garden. Additional services include beauty treatments, wellness packages, and a hot tub.\n\nDining Experience: The modern restaurant serves Italian cuisine for lunch and dinner. Breakfast options include continental, American, buffet, and à la carte. Live music and themed dinner nights enhance the dining experience.\n\nConvenient Location: Located 9 km from Islam Karimov Tashkent International Airport, the hotel provides free on-site private parking and easy access to local attractions.	41.33098600	69.27198100	Комфортное размещение: Отель Crowne Plaza Tashkent by IHG в Ташкенте предлагает семейные номера с видом на сад или город. В каждом номере есть кондиционер, собственная ванная комната и современные удобства.\n\nИсключительные удобства: Гости могут пользоваться спа-центром, сауной, фитнес-центром, крытым бассейном и пышным садом. Дополнительные услуги включают косметические процедуры, оздоровительные программы и джакузи.\n\nГастрономический опыт: В современном ресторане подают блюда итальянской кухни на обед и ужин. На завтрак предлагается континентальное, американское, буфетное или меню а-ля карт. Живая музыка и тематические ужины дополняют впечатления от трапезы.\n\nУдобное расположение: Отель находится в 9 км от Международного аэропорта Ташкента имени Ислама Каримова и предлагает бесплатную частную парковку на территории, а также платный трансфер. Поблизости расположены Музей Амира Тимура и Ташкентское метро.	f	15
 45	Hotel Bek Bekabad	1	12	info@bekobod.com	306384444	45	LUCKY-ROAD" MCHJ	Nurli yo'l" MFY 64-daha hududi Бекабад Бекабадский район, 100506	3	+998903913337	\N	M12/01/26	2026-01-01	\N	\N	\N	\N	\N	\N	f	10
 106	Hotel Ko'k Saroy Plaza	1	2	kuksaroyplazahotel@gmail.com	7777777	45	OOO DIDI GROUP FOODS	Dahkbed Yuli Street, Samarkand 140100 Uzbekistan	3	\N	Rates includes: Breakfast, VAT & Tourist tax (15%)	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 143	2020 hotel	1	12	\N	307581412	45	Sultan Strit F MCHJ	Bekobod 	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 131	Hotel Metallurg	1	12	hotel@uzbeksteel.uz	200462568	45	\N	Tashkent region,  Bekabad city, str. Uzbekistan,585	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-137	New Minor Hotel	1	4	khivaminor@bk.ru	310683206	45	New Minor Hotel MCHJ	Islam Khuja, 75, Khiva 220900 Uzbekistan	6	\N	Rates includes: Breakfast, VAT & Tourist tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-107	Hotel Emir	1	3	mild@emirtravel.com	203305023	45	Emir Travel XK	Husaenov Street 17, Bukhara 200118 Uzbekistan	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+155	HOTEL SAPIENS 	1	1	sapienshotel@gmail.com	306 472 041 	45	ООО “Newton’s Gravity”	  1 Mirabad str.,45. Yakkasaray district, Tashkent, Uzbekistan.	6	\N	\N	S014/26	2026-02-10	\N	\N	Comfortable Accommodations: Sapiens Hotel in Tashkent offers comfortable rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a balcony, refrigerator, and free WiFi, ensuring a pleasant stay.\n\nDining and Leisure: Guests can enjoy a restaurant serving European cuisine in a modern ambience, offering brunch, lunch, and dinner. The hotel features a bar, terrace, and outdoor seating area, providing relaxing spaces.\n\nConvenient Facilities: The hotel provides free WiFi, a garden, terrace, and private check-in and check-out services. Additional facilities include a coffee shop, outdoor seating area, and free on-site parking.\n\nPrime Location: Located 6 km from Islam Karimov Tashkent International Airport and near an ice-skating rink, the hotel offers easy access to local attractions. Highly rated for its bar, breakfast, and attentive staff.	\N	\N	Комфортное размещение: Отель Sapiens Hotel в Ташкенте предлагает комфортабельные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть балкон, холодильник и бесплатный Wi-Fi, что обеспечивает приятное пребывание.\n\nПитание и отдых: Гости могут насладиться блюдами европейской кухни в ресторане отеля с современной атмосферой, где подают бранч, обед и ужин. В отеле есть бар, терраса и зона отдыха на открытом воздухе, предоставляющие места для релаксации.\n\nУдобные услуги: В отеле предоставляется бесплатный Wi-Fi, есть сад, терраса и услуги индивидуальной регистрации заезда и отъезда. Дополнительные удобства включают кофейню, зону отдыха на открытом воздухе и бесплатную парковку на территории.\n\nОтличное расположение: Отель находится в 6 км от Международного аэропорта Ташкента имени Ислама Каримова и недалеко от катка, что обеспечивает легкий доступ к местным достопримечательностям. Высоко оценен за бар, завтрак и внимательный персонал.	f	\N
 146	Turkiston 	1	1	hotelresidencepark@gmail.com	201122919	45	"Turkiston Mehmonxonalar Kompleksi" DUK	64, Yunus Radjabiy street, Tashkent, Uzbekistan	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 147	Reikartz Abis	1	1	uzsales@reikartz.uz	309265770	1	OOO "HMC U"	Адрес: Республика Узбекистан, г. Ташкент, Яккасарайский район, ул. А.Каххара, дом 150.	3	\N	В срок менее чем за 24 часа до даты запланированного заезда, и / или в случае не заезда -\nТуроператор уплачивает Исполнителю штраф в размере 100% цены первых аннулированных\nсуток проживания;	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 148	Hotel Aliz Boulevard	1	2	info.alizhotel@gmail.com	309986554	45	"ALIZ HOTEL" ok	Alishera Navoi St, 53, Samarkand 140100 Uzbekistan	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -6957,29 +7812,26 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 151	Hotel Ramada Encore by Wyndham 	1	1	reservation@ramadaencoretashkent.com	306851384	45	Optimum Invest Corp MCHJ	Mironshox Str., 7 Passage, 14, Tashkent 1000015 Uzbekistan	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 153	Azimut Hotel Moderno Tashkent	1	1	reservations.tashkent@azimuthotels.com	3111198111	30	Moderno Palace MCHJ	Shota Rustaveli St., 136/1, Tashkent 100059 Uzbekistan	3	\N	Rates includes: Breakfast, VAT & tourist tax (15%)	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 154	Hotel Sarhad	1	3	\N	311972770	45	Hotel Sarhad OK	   Save  M. Karimov St., 21b, Bukhara 200100 Uzbekistan	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-155	HOTEL SAPIENS 	1	1	sapienshotel@gmail.com	306 472 041 	45	ООО “Newton’s Gravity”	  1 Mirabad str.,45. Yakkasaray district, Tashkent, Uzbekistan.	4	\N	Rate incluges breakfast, VAT & Tourist Tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 156	HOTEL MINIATURA BOUTIQUE	1	3	miniatureboutique@mail.ru	309380645	60	"MINIATURA BOUTIQUE" OK	Sarrafon 1- Muyilish 6-Uy, Bukhara 200100 Uzbekistan	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-158	Hotel Ansi Boutique	1	3	hotelansi-77@mail.ru	306994548	45	Feruza Biryuza Omad Ok	Eshoni Pir Str. No. 29, Bukhara 200100 Uzbekistan	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 157	Hotel Polvon-Qori Boutique	1	4	hotelpolvonqori@gmail.com	\t 205139434	45	"XIVA LA`LI OPA" XK	P. Qoriy St. 24 Front of Side East Gate of Old Town, Khiva 220900 Uzbekistan	6	\N	Rate includes breafst, VAT and Tourist Tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 159	Hotel Gloria	1	1	marketing@gloriahotel.uz	7777777	45	OOO "GLORIA MAX"	\N	\N	\N	Rate includes breakfast, VAT and Tourist tax	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 170	Hotel Hanifa Boutique 	1	2	tamihani1215@naver.com	\N	45	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-160	Abdurashid	1	1	naneba1996@sdqwe.uz	000777000	1	1231	1231	6	\N	1231331	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 161	Halol Shirin Fayz	1	7	\N	308816852	20	Halol-Shirin-Fayz MCHJ	37, Shodlik Street, Shirin, Uzbekistan 	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 152	Regal Hotel by Grand	1	8	\N	З08505622	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 165	Hotel Platinum	1	40	\N	305017242	45	"Sherzod Amirxon Hamkor" MCHJ	Gulistan city	2	\N	\N	50/31	2025-07-15	\N	\N	\N	\N	\N	\N	f	\N
 166	Garden House	1	8	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 167	Hotel Asia Samarkand 	1	2	reservation.samarkand@asiahotels.uz	206360120 	45	ООО «Hotel Asia Samarkand»	Kosh Khovuz St. 50, Samarkand 703000 Uzbekistan	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-162	Lotte City Tashkent Palace 	1	1	lotte_tashkent@mail.ru	301424000	30	Tashkent Palace New MCHJ	Buyuk Turon Street 56, Tashkent 100029 Uzbekistan	4	\N	Rate includes breakfast,12% VAT and tourist tax	120T	2025-04-08	\N	\N	\N	\N	\N	\N	f	\N
 168	The Heritage	1	1	\N	307845232	45	ИП ООО "SAYRAM GOLD LUX"	42, Yakkasaray Str. 44, Тashkent, Uzbekistan	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-169	Hotel Pana	1	10	pana_hotel@mail.ru	303439344	45	OOO "GRAND CASTLE" 	 Miymandos №2, Nukus 230100 Uzbekistan	3	\N	Price includes breakfast, VAT and tourist tax	116	2025-07-28	\N	\N	\N	\N	\N	\N	f	\N
 172	Hotel Porso	1	3	hotelporso@mail.ru	301829310	45	Parsa Fayz OK	H. Porso Street, Bukhara 200104 Uzbekistan	6	\N	\N	32	2025-03-01	\N	\N	\N	\N	\N	\N	f	\N
 173	Art Minor	1	4	\N	\N	45	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 174	Hotel Buran	1	19	ASL@MAIL.RU	302411429	45	"KIMYO SAVDO MINERAL QURILISH" MCHJ	Yangishaxar mahallasi, KumKurgan district, Surxandarya, Uzbekistan	2	\N	\N	 59 	2025-08-08	\N	\N	\N	\N	\N	\N	f	\N
 171	Hotel Sofia	1	3	\N	\N	45	\N	\N	6	\N	\N	14/25	2025-01-01	\N	\N	\N	\N	\N	\N	f	\N
 176	Fergana Hotel 	1	6	ferghanahotel@gmail.com	306465761	\N	GRAND OSIYO PLAZA	Moturidiy street 30B/1, Fergana, Fergana	2	\N	\N	136F	2025-08-26	\N	\N	\N	\N	\N	\N	f	\N
+158	Hotel Ansi Boutique	1	3	hotelansi-77@mail.ru	306994548	45	Feruza Biryuza Omad Ok	Eshoni Pir Str. No. 29, Bukhara 200100 Uzbekistan	6	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: Hotel Ansi Boutique W&S terrace in Bukhara offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a balcony or terrace, ensuring a pleasant stay.\n\nDining Experience: Guests can enjoy European cuisine at the family-friendly restaurant, featuring a traditional and modern ambience. Breakfast options include a buffet, à la carte, and halal, with fresh pastries, fruits, and warm dishes.\n\nConvenient Facilities: The inn provides free WiFi, a sun terrace, and a lounge. Additional services include a minimarket, coffee shop, picnic area, and bicycle parking. Free on-site parking is available for guests.\n\nPrime Location: Located 6 km from Bukhara International Airport, the property is highly rated for its convenient location and excellent breakfast. Guests appreciate the central setting and easy access to local attractions.	39.77202800	64.42177300	Комфортное размещение: Бутик-отель Hotel Ansi Boutique W&S terrace в Бухаре предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть балкон или терраса, что обеспечивает приятное пребывание.\n\nГастрономический опыт: Гости могут насладиться блюдами европейской кухни в семейном ресторане, оформленном в традиционном и современном стиле. На завтрак предлагается шведский стол, меню а-ля карт и халяльные блюда, включая свежую выпечку, фрукты и горячие блюда.\n\nВозможности для отдыха: В гостинице есть солнечная терраса, гостиная и кафе. Дополнительные удобства включают минимаркет, зону для пикника и парковку для велосипедов. На всей территории доступен бесплатный Wi-Fi.\n\nУдобное расположение: Гостиница находится в 6 км от международного аэропорта Бухары и предлагает платный трансфер. Она расположена недалеко от таких достопримечательностей, как Арк и Ляби-Хауз.\n\n	t	\N
 184	Humson Buloq Sanatorium	1	1	info@humsonbuloq.uz	308028567	\N	Humson Buloq Sanatorium MCHJ	Tashkent region, Bostanlyk district, Khumsan settlement	\N	\N	\N	180	2025-09-22	\N	\N	Humson Buloq is a sanatorium and resort complex offering preventive and restorative treatment for cardiovascular, respiratory, and musculoskeletal conditions.\n\nThe complex is equipped with modern facilities for physiotherapy and hydrotherapy procedures.\n\nWe provide comfortable accommodation for up to 150 guests in accordance with international service standards, offering standard rooms, junior suites, suites, and family apartments.	\N	\N	«Humson Buloq» — это санаторно-курортный комплекс, предлагающий профилактическое и восстановительное лечение заболеваний сердечно-сосудистой системы, органов дыхания и опорно-двигательного аппарата.\n\nКомплекс оснащён современным оборудованием для проведения физиотерапевтических и гидротерапевтических процедур.\n\nМы предлагаем комфортное размещение и отдых для 150 гостей в соответствии с международными стандартами обслуживания — в стандартных номерах, номерах категории «полулюкс», «люкс», а также в семейных апартаментах.	f	\N
 163	Hotel Asson	1	11	assonhotel@gmail.com	201505582	45	"Asson-Termiz@ XK	27, At-Termezi str., Termiz Uzbekistan	2	\N	\N	174/2025	2025-08-20	\N	\N	Hotel “ASSON” is conveniently located in the city center, just 15 minutes from the international airport, 10 minutes from the bus station, and 5 minutes from the train station.\nAccommodation is offered in a four-story building with 83 rooms designed to host up to 130 guests. The room categories include 33 Single rooms, 45 Double rooms, 3 Semi-Lux rooms, 1 Deluxe room, and 1 Luxury suite.\nFor business travelers, the hotel provides international and long-distance telephone service, a business center, fax, and internet access.	\N	\N	Отель «ASSON» удобно расположен в самом центре города — всего в 15 минутах от международного аэропорта, в 10 минутах от автовокзала и в 5 минутах от железнодорожного вокзала.\nРазмещение предоставляется в четырёхэтажном здании, в котором расположено 83 номера, рассчитанных на 130 гостей. Категории номеров включают: 33 одноместных, 45 двухместных, 3 полулюкса, 1 номер категории «Делюкс» и 1 номер категории «Люкс».\nДля деловых путешественников в отеле предусмотрены международная и междугородняя телефонная связь, бизнес-центр, факс и доступ в интернет.	f	\N
 185	Tantana Hoteel	1	6	tantanahotel@gmail.com	305342909	\N	OOO "Tantana Hotel Fergana"	Al-Ferganiy street 122A, Fergana 150100 Uzbekistan	3	\N	\N	189	2025-01-07	\N	\N	TANTANA HOTEL invites you to experience true comfort, warmth, and traditional hospitality. Conveniently located in the scenic city of Fergana, just a few minutes’ drive from the airport, our hotel is an ideal choice for both business and leisure travelers.	\N	\N	TANTANA HOTEL приглашает вас окунуться в атмосферу комфорта, уюта и восточного гостеприимства. Наш отель расположен в живописной части города Фергана, всего в нескольких минутах езды от аэропорта, что делает его идеальным выбором как для деловых поездок, так и для отдыха.	f	\N
+25	Silk Road Kokand	1	14	info@silkroadkokand.com	305283769	45	Silk Road-Kokand MCHJ	Turkiston St., 57A, Kokand 150700 Uzbekistan	3	+998993633366	\N	069	2026-02-16	\N	\N	Comfortable Accommodations: Silk Road Kokand Hotel in Kokand offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a TV, soundproofing, and free WiFi.\n\nDining and Leisure: Guests can enjoy a restaurant serving American, Italian, Mediterranean, and local cuisines. The hotel features a bar, terrace, and garden, ideal for relaxation.\n\nConvenient Services: The hotel provides private check-in and check-out, a 24-hour front desk, concierge service, and free on-site parking. Additional services include room service, breakfast in the room, and a paid airport shuttle.\n\nPrime Location: Located 83 km from Fergana International Airport, the hotel is situated on a quiet street with garden and city views. Guests appreciate the friendly staff and comfortable rooms.	40.54965600	70.93729500	Комфортное размещение: Отель Silk Road Kokand Hotel в Коканде предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть телевизор, звукоизоляция и бесплатный Wi-Fi.\n\nПитание и отдых: Гости могут посетить ресторан, где подают блюда американской, итальянской, средиземноморской и местной кухни. В отеле есть бар, терраса и сад, идеально подходящие для отдыха.\n\nУдобные услуги: В отеле предусмотрены индивидуальная регистрация заезда и отъезда, круглосуточная стойка регистрации, услуги консьержа и бесплатная парковка на территории. Дополнительные услуги включают обслуживание номеров, завтрак в номере и платный трансфер из/в аэропорт.\n\nОтличное расположение: Отель расположен в 83 км от международного аэропорта Ферганы, на тихой улице с видом на сад и город. Гости высоко оценивают дружелюбный персонал и комфортабельные номера.\n\n	t	10
 187	Samarqand Darvoza Hotel	1	3	\N	\N	\N	Samarqand Darvoza Hotel	QCM9+6RX 8 uy, G'ijduvon Ko'chasi, 200100, Bukhara,	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 188	Emerald Hotel	1	3	emeraldhotel.uz@yandex.com	310799582	45	"DJURAYEVA MAVLYUDA" OK	Khudja Tabband 13, Bukhara 200100 Uzbekistan	3	\N	\N	36	2025-10-15	\N	\N	\N	\N	\N	\N	f	\N
 183	Damir Hotel Nukus	1	10	damirhotel@gmail.com	306667257	15	Dream Hotel Nukus OK	Рауаж 4, 230100 Nukus, Uzbekistan	3	\N	\N	96	2025-09-19	\N	\N	The center of Nukus is a place where the revived spirit of history harmoniously blends with the latest trends in hospitality.\nThe warm and welcoming atmosphere of Damir Hotel is enhanced by the comfort and thoughtful design of its rooms. The hotel offers five room categories to suit every taste — from the classic and elegant "Standard" to the spacious and luxurious "De Lux", as well as stylish designer options like "Lux" and "Lux Plus".\nEach room is equipped with:\n•\tComfortable beds with orthopedic mattresses, high-quality white linens, soft blankets, and pillows that create a cozy, home-like ambiance;\n•\tA modern LCD TV with a wide selection of channels and internet access;\n•\tA private bathroom with an illuminated mirror, hairdryer, bath amenities, and a bathrobe;\n•\tA climate control system (heating and air conditioning) for year-round comfort;\n•\tFree high-speed Wi-Fi available throughout the hotel.\nAll rooms feature brand-new furniture, and daily housekeeping ensures a clean and pleas	\N	\N	Центр Нукуса — это место, где возрождённый дух истории гармонично сочетается с современными тенденциями гостеприимства.\nГостеприимная, уютная атмосфера отеля "Damir Hotel" подчёркивается комфортом и продуманным оформлением номеров. Отель предлагает пять категорий номеров на любой вкус — от классических и элегантных "Standard", до просторных и роскошных "De Lux", а также стильных дизайнерских "Lux" и "Lux Plus".\nКаждый номер оборудован:\n•\tУдобными кроватями с ортопедическими матрасами, качественным белым постельным бельём, мягкими одеялами и подушками, создающими атмосферу уюта и домашнего тепла;\n•\tСовременным LCD-телевизором с множеством каналов и доступом в интернет;\n•\tПросторным санузлом с зеркалом с подсветкой, феном, банными принадлежностями и халатом;\n•\tСистемой кондиционирования и отопления, обеспечивающей комфорт в любое время года;\n•\tБесперебойным бесплатным Wi-Fi на всей территории отеля.\nВсе номера оснащены новой мебелью, а ежедневная уборка поддерживает чистоту и порядок.\nВ 	f	\N
@@ -6987,6 +7839,7 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 181	Art Hotel	1	39	artangren@gmail.com	309955861	\N	Art Hotel Angren	Chotkol MFY, Chirchiq street, 13	2	\N	\N	+998 95 515 80 70	2025-09-08	\N	\N	The largest hotel chain in Uzbekistan, Art Hotels Group, offers its hotels for guest accommodation.\nHotel provides a wide range of rooms of various classes and levels, equipped with everything necessary to ensure a comfortable and cozy stay for both international and local guests.\n\nHotel: Art Angren Hotel\nGuests can enjoy free breakfast and Wi-Fi.\nAll rooms are equipped with air conditioning, flat-screen TVs, and telephones.	\N	\N	Самая крупная сеть гостиниц в Узбекистане — Art Hotels Group — предлагает свои отели для размещения гостей.\nОтель предоставляют широкий выбор номеров различных классов и уровней, оснащённых всем необходимым для комфортного и уютного проживания как иностранных, так и местных гостей.\n\nОтель: Art Angren Hotel\nГости могут воспользоваться бесплатным завтраком и Wi-Fi.\nВсе номера оснащены кондиционерами, плоскими телевизорами и телефонами.	f	\N
 180	Hotel Citizen	1	10	citizenhotel6@gmail.com	307 548 482	30	OOO "AZIMUT HOTEL"	Ulitsa A. Dosnazarova, 171A, Nukus 230100 Uzbekistan	3	\N	\N	110	2025-09-03	\N	\N	Comfortable Accommodations: CITIZEN HOTEL in Nukus offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a work desk, TV, and free WiFi, ensuring a pleasant stay.\n\nExceptional Facilities: Guests enjoy free bicycles, a bar, and a free airport shuttle service. Additional services include a lounge, 24-hour front desk, concierge, and free on-site parking.\n\nDelicious Breakfast: A buffet breakfast is available with vegetarian, halal, and Asian options. Fresh pastries, pancakes, cheese, fruits, and juice are served daily.\n\nPrime Location: Located a few steps from Nukus Airport, the hotel is near an ice-skating rink. Cycling enthusiasts can explore the surrounding area with free bicycles.	\N	\N	CITIZEN HOTEL — это отель в городе Нукус. К услугам гостей бесплатные велосипеды, общий лаундж, бар и бесплатный Wi-Fi на всей территории. В распоряжении гостей — бесплатная частная парковка и бесплатный трансфер от/до аэропорта.\n\nВ CITIZEN HOTEL во всех номерах имеется письменный стол и телевизор с плоским экраном. В собственной ванной комнате есть биде, бесплатные туалетно-косметические принадлежности и фен. В CITIZEN HOTEL в каждом номере есть собственная ванная комната и установлен кондиционер.\n\nДля гостей сервируется завтрак «шведский стол», азиатский завтрак или вегетарианский завтрак.\n\nНа территории CITIZEN HOTEL можно поиграть в дартс, а в окрестностях популярно заниматься велосипедными прогулками.	f	\N
 179	Orbita Villa Boutique Bukhara	1	3	\N	\N	\N	\N	Bukhara Chorbakoli, 200100 Bukhara, Uzbekistan	6	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: Orbita Villa boutique in Bukhara offers family rooms with air-conditioning, private bathrooms, and inner courtyard views. Each room includes a work desk, TV, and soundproofing for a pleasant stay.\n\nEssential Facilities: Guests enjoy free WiFi, a free airport shuttle service, and a 24-hour front desk. Additional services include a minimarket, coffee shop, outdoor seating area, picnic area, and bicycle parking.\n\nDining Options: A variety of breakfast options are available, including continental, American, vegetarian, vegan, and halal. The on-site restaurant caters to diverse dietary needs.\n\nConvenient Location: Located 6 km from Bukhara International Airport, the hotel provides easy access to local attractions. Free on-site private parking is provided for guests' convenience.	\N	\N	Orbita Villa boutique — это отель, расположенный в городе Бухара. К услугам гостей отеля с 3 звездами — номера с кондиционером и собственной ванной комнатой. Гости могут обратиться к сотрудникам круглосуточной стойки регистрации, воспользоваться трансфером от/до аэропорта или доставкой еды и напитков, а также подключиться к бесплатному Wi-Fi на всей территории.\n\nВ Orbita Villa boutique в номерах имеется телевизор с плоским экраном, письменный стол и собственная ванная комната, а также предоставляются постельное белье и полотенца.\n\nДля гостей сервируется континентальный завтрак, американский завтрак или вегетарианский завтрак.\n\nМеждународный аэропорт Бухара находится в 6 км.	f	\N
+164	Khiva Silk Road	1	4	khivasilkroad@mail.ru	306397324	30	OOO "KhivaSilkRoad"	Gazchilar makhalla, Khiva 220900 Uzbekistan	3	\N	Rates with VAT & tourism tax included	10/26	2025-11-25	\N	\N	Comfortable Accommodations: Khiva Silk Road in Khiva offers family rooms with air-conditioning, private bathrooms, and city views. Each room includes a work desk, seating area, and free WiFi.\n\nDining and Leisure: Guests can enjoy a buffet breakfast, traditional and modern Turkish cuisine at the family-friendly restaurant, and a bar. The hotel features a seasonal outdoor swimming pool, garden, and outdoor fireplace.\n\nConvenient Services: The hotel provides private check-in and check-out, a 24-hour front desk, and free off-site parking. Additional amenities include a lounge, child-friendly buffet, and bicycle parking.\n\nLocation and Access: Urgench International Airport is 21 mi away. Free WiFi is available throughout the property.	41.37735200	60.37374900	Khiva Silk Road — это отель, расположенный в городе Хива. К услугам гостей сезонный открытый бассейн, сад, общий лаундж и ресторан. К услугам гостей как трансфер от/до аэропорта, так и пункт проката автомобилей.\n\nВо всех номерах имеется холодильник, микроволновая печь и чайник, а также душ и бесплатные туалетно-косметические принадлежности. Среди прочих удобств — кондиционер и письменный стол. В номерах Khiva Silk Road установлен бесплатный Wi-Fi, а также имеется собственная ванная комната с феном. Из окон некоторых номеров открывается вид на бассейн. В номерах в Khiva Silk Road имеется телевизор с плоским экраном и тапочки.\n\nГостям Khiva Silk Road предоставляется завтрак «шведский стол».\n	f	\N
 72	Hotel Continental Samarkand	1	2	info@continentalhotel.uz	302703887	40	\N	UNIVERSITY BOULEVARD 7, 140100 Samarkand, Uzbekistan	4	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: Continental Hotel Samarkand in Samarkand offers family rooms with private bathrooms, air-conditioning, and free WiFi. Each room includes a work desk, wardrobe, and city views.\n\nExceptional Facilities: Guests can enjoy spa facilities, a sauna, fitness centre, indoor swimming pool, and terrace. Additional amenities include a steam room, hammam, and free on-site private parking.\n\nDining Experience: The restaurant serves local cuisine with continental, buffet, vegetarian, and halal breakfast options. Breakfast includes local specialities, warm dishes, juice, cheese, and fruits.\n\nConvenient Location: Located 7 km from Samarkand International Airport, the hotel provides a 24-hour front desk, concierge service, and tour desk.	\N	\N	Continental Hotel Samarkand — это отель с 4 звездами, расположенный в городе Самарканд. К услугам гостей терраса. В числе прочих удобств — ресторан, доставка еды и напитков и круглосуточная стойка регистрации, а также бесплатный Wi-Fi. У гостей есть доступ к крытому бассейну, фитнес-центру, сауне и хаммаму.\n\nВ некоторых номерах в Continental Hotel Samarkand из окон открывается вид на город, при этом в номерах есть собственная ванная комната и письменный стол. В распоряжении всех гостей платяной шкаф и чайник.\n\nГостям подают завтрак «шведский стол», континентальный завтрак или вегетарианский завтрак.\n\nМеждународный аэропорт Самарканд находится в 7 км. Предоставляется платный трансфер от/до аэропорта.	f	\N
 178	Volidam Hotel Navoiy	1	8	\N	311561187	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: Volidam Hotel in Karmana offers family rooms with air-conditioning, city views, and modern amenities. Each room includes a dining table, walk-in shower, and free toiletries.\n\nDining Experience: The family-friendly restaurant serves Asian cuisine with halal options. Guests can enjoy a continental or buffet breakfast, complemented by free WiFi throughout the property.\n\nConvenient Facilities: The hotel features a garden, restaurant, and free on-site private parking. Additional services include a paid shuttle, 24-hour front desk, room service, and full-day security.\n\nPrime Location: Located 15 km from Navoi International Airport, the hotel is highly rated for its convenient location, attentive staff, and immaculate room cleanliness.	\N	\N	Volidam Hotel — это отель, расположенный в городе Karmana. К услугам гостей сад и ресторан. Гости могут обратиться к сотрудникам круглосуточной стойки регистрации, воспользоваться трансфером от/до аэропорта или доставкой еды и напитков, а также подключиться к бесплатному Wi-Fi на всей территории.\n\nВ номерах в Volidam Hotel есть чайник. В Volidam Hotel во всех номерах есть телевизор с плоским экраном, а также установлен кондиционер.\n\nГостям предлагается завтрак «шведский стол», континентальный завтрак или халяльный завтрак.\n\nМеждународный аэропорт Навои находится в 15 км.	f	\N
 177	Arhan Palace Premium	1	2	arhan.palace@bk.ru	305855009	30	Royal Hotel MCHJ	Mir Said Baraka Kuchasi Dom 81, Samarkand 700300 Uzbekistan	3	\N	\N	20/08	2025-08-20	\N	\N	Comfortable Accommodations: Hotel Arhan Palace in Samarqand offers air-conditioned rooms with private bathrooms, free WiFi, and modern amenities. Each room includes a work desk, minibar, and TV, ensuring a pleasant stay.\n\nExceptional Facilities: Guests can enjoy a bar, hot tub, and lounge. Additional services include a 24-hour front desk, concierge, and free on-site private parking. The hotel provides free WiFi throughout the property.\n\nDining Options: Breakfast options include continental, American, buffet, Ã la carte, Italian, full English/Irish, vegetarian, vegan, and halal. Local specialities, warm dishes, fresh pastries, and fruits are available.\n\nConvenient Location: Situated 8 km from Samarkand International Airport, the hotel offers private check-in and check-out, a paid shuttle service, and a coffee shop.	\N	\N	Hotel Arhan Palace — это отель баром в городе Самарканд. Гости могут обратиться к сотрудникам круглосуточной стойки регистрации, воспользоваться трансфером от/до аэропорта или общим лаунджем, а также подключиться к бесплатному Wi-Fi на всей территории.\n\nВо всех номерах имеется письменный стол, холодильник и чайник, а также биде и бесплатные туалетно-косметические принадлежности. Среди прочих удобств — кондиционер и телевизор с плоским экраном со спутниковыми каналами. В номерах имеется собственная ванная комната, душ и фен. В некоторых номерах в Hotel Arhan Palace в распоряжении гостей сейф. В номерах есть платяной шкаф.\n\nГостям предлагается завтрак «шведский стол», завтрак по меню или континентальный завтрак.\n\nГости Hotel Arhan Palace могут посетить гидромассажную ванну.\n\nМеждународный аэропорт Самарканд находится в 8 км.	f	\N
@@ -6999,11 +7852,11 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 77	Hotel Hilton Garden Inn Termez Ayritom 	1	11	reservation@hgi-termez.uz	311099654	5	One Team Hospitality MCHJ	Airitom Free Zone, 151600, Termez, Surkhandarya Airitom Free Zone, 151600, Termez, Uzbekistan	4	+998712052626	\N	HGI-095	2026-01-05	\N	\N	Comfortable Accommodations: Hilton Garden Inn Termez Airitom in Termiz offers rooms with air-conditioning, bathrobes, tea and coffee makers, hairdryers, refrigerators, free toiletries, slippers, and TVs. Balconies and interconnected rooms enhance the stay.\n\nDining and Leisure: The hotel features a fitness centre, garden, restaurant, and bar. A family-friendly restaurant serves steakhouse, Turkish, and local cuisines in a traditional ambience. A continental breakfast is available.\n\nConvenient Location: Situated 19 km from Termez Airport, the hotel offers a 24-hour front desk and parking. Guests appreciate the room cleanliness.	37.24587500	67.41972600	Комфортное размещение: Отель Hilton Garden Inn Termez Airitom в Термезе предлагает номера с кондиционером, халатами, принадлежностями для чая и кофе, феном, холодильником, бесплатными туалетно-косметическими принадлежностями, тапочками и телевизором. Балконы и смежные номера делают пребывание еще более комфортным.\n\nПитание и досуг: В отеле есть фитнес-центр, сад, ресторан и бар. Семейный ресторан с традиционной атмосферой предлагает блюда стейк-хауса, турецкой и местной кухни. Для гостей сервируется континентальный завтрак.\n\nУдобное расположение: Отель расположен в 19 км от аэропорта Термез и предлагает круглосуточную стойку регистрации и парковку. Гости высоко оценивают чистоту номеров.	f	15
 191	Hobiz Hotel	1	8	hobizuz@gmail.com	309078046	45	HOBIZ GROUP MCHJ	112, Mahmud Tarobiy street, 210100, Navioy	3	\N	\N	44	2026-01-07	\N	\N	Comfortable Accommodations: HOBIZ Hotel in Navoi offers family rooms with air-conditioning, balconies, and free WiFi. Each room includes a work desk, minibar, and private parking is available on-site.\n\nExceptional Facilities: Guests can enjoy spa facilities, a fitness centre, and a hammam. Additional amenities include a restaurant, massage services, and a 24-hour front desk.\n\nDining Experience: The modern restaurant serves Asian cuisine with halal options. Breakfast includes local specialities, warm dishes, fresh pastries, and a variety of beverages.\n\nConvenient Location: Located 19 km from Navoi International Airport, the hotel provides a free airport shuttle service. Nearby attractions include Navoi Museum and Navoi Park.\n\n	40.10940500	65.38574600	HOBIZ Hotel — это отель, расположенный в городе Навои. К услугам гостей фитнес-центр, общий лаундж, ресторан и бар. В распоряжении гостей общая кухня, бесплатный трансфер и камера хранения багажа.\n\nГостям подают завтрак «шведский стол», азиатский завтрак или халяльный завтрак.\n\nГости HOBIZ Hotel могут воспользоваться спа и велнес-услугами, в том числе хаммамом и массажными процедурами (по запросу).\n\nВ числе удобств — бесплатная частная парковка и бизнес-центр, а также круглосуточная стойка регистрации.\n\nМеждународный аэропорт Навои находится в 19 км.	f	\N
 145	Inspira S	1	1	reservation@inspira-s.com	306701396	45	ИП ООО "HHH Centralasia	6A Abdulla Qodiriy str.	4	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: Hotel Inspira-S Tashkent in Tashkent offers family rooms with air-conditioning, private bathrooms, and modern amenities. Guests enjoy garden or city views, ensuring a pleasant stay.\n\nExceptional Facilities: The hotel features spa facilities, a sauna, fitness center, indoor swimming pool, and free WiFi. Additional services include a 24-hour front desk, business area, and free on-site private parking.\n\nDining Experience: A modern, family-friendly restaurant serves international cuisine with halal, vegetarian, and gluten-free options. Breakfast includes local specialties, fresh pastries, and a variety of beverages.\n\nPrime Location: Located 5.6 mi from Islam Karimov Tashkent International Airport and near an ice-skating rink, the hotel provides easy access to local attractions.	41.32985600	69.24461200	Комфортное размещение: Отель Hotel Inspira-S Tashkent в Ташкенте предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. Гости могут наслаждаться видом на сад или город, проживать в звукоизолированных номерах и пользоваться бесплатным Wi-Fi на всей территории отеля.\n\nИсключительные удобства: В отеле есть спа-центр, сауна, фитнес-центр, крытый бассейн и джакузи. Дополнительные услуги включают круглосуточную стойку регистрации, бизнес-зону и бесплатную частную парковку на территории.\n\nГастрономический опыт: Современный семейный ресторан предлагает блюда международной кухни, включая халяльные, вегетарианские и безглютеновые варианты. На завтрак подают местные деликатесы, свежую выпечку и разнообразные напитки.\n\nОтличное расположение: Отель находится в 9 км от Международного аэропорта Ташкента имени Ислама Каримова и недалеко от катка, что обеспечивает удобный доступ к местным достопримечательностям.	f	15
+117	Club 777	1	6	club.hotel.777@mail.ru	\N	\N	\N	Farg'ona Kichik Xalqa Yo'li, 150115 Akaryk, Uzbekistan	3	\N	Rates incl VAT + Tourism tax	\N	\N	\N	\N	Comfortable Accommodations: ClubHotel 777 in Akaryk offers family rooms with garden views, air-conditioning, and private bathrooms. Each room includes a work desk, minibar, and free WiFi.\n\nWellness and Leisure: Guests can enjoy spa facilities, a fitness centre, sun terrace, and water sports. The hotel features an indoor and seasonal outdoor swimming pool, open-air bath, and hammam.\n\nDining Experience: The modern restaurant serves Russian and international cuisines with halal, vegetarian, and vegan options. Breakfast is available as a buffet, and lunch is served in a relaxed setting.\n\nConvenient Location: Located 4 km from Fergana International Airport, the hotel provides free on-site private parking and a paid shuttle service. Guests appreciate the attentive staff and excellent service.	40.36681500	71.78438200	ClubHotel 777 — это отель, расположенный в городе Akaryk. К услугам гостей сад, ресторан, бар и удобства для занятия водными видами спорта. В числе прочих удобств — доставка еды и напитков и круглосуточная стойка регистрации, а также бесплатный Wi-Fi на всей территории. У гостей есть доступ к оздоровительному и спа-центру с крытым бассейном, открытым бассейном и фитнес-центром. Также к услугам гостей терраса.\n\nВ номерах в ClubHotel 777 установлен кондиционер, телевизор с плоским экраном и сейф. Среди прочих удобств — письменный стол, чайник и мини-бар, а также собственная ванная комната с биде. В собственной ванной комнате есть душ, бесплатные туалетно-косметические принадлежности и фен. Гостям ClubHotel 777 предоставляются постельное белье и полотенца.\n\nГостям ClubHotel 777 предлагается завтрак «шведский стол».\n\nГости ClubHotel 777 могут посетить турецкую баню.	f	\N
 194	Mirluxe Plaza	1	1	info@mirluxeplaza.uz	\N	\N	\N	126, Avliyoota str., 100015 Tashkent, Uzbekistan	4	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: Mir Luxe Plaza in Tashkent offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a tea and coffee maker, refrigerator, and free toiletries.\n\nExceptional Facilities: Guests can enjoy a sauna, fitness center, indoor swimming pool, and free WiFi. Additional facilities include a steam room, hot tub, and fitness classes.\n\nDining Experience: The hotel features a family-friendly restaurant serving local, European, and barbecue grill cuisines. Breakfast includes local specialties, warm dishes, fresh pastries, and more.\n\nPrime Location: Located 1.9 mi from Islam Karimov Tashkent International Airport and near an ice-skating rink, the property provides easy access to local attractions.	\N	\N	Комфортное размещение: Отель Mir Luxe Plaza в Ташкенте предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть чайник и кофеварка, холодильник и бесплатные туалетно-косметические принадлежности.\n\nИсключительные удобства: Гости могут посетить сауну, фитнес-центр, крытый бассейн и воспользоваться бесплатным Wi-Fi. Среди дополнительных удобств — паровая баня, джакузи и фитнес-занятия.\n\nГастрономический опыт: В отеле работает семейный ресторан, где подают блюда местной, европейской и барбекю-кухни. На завтрак предлагаются местные деликатесы, горячие блюда, свежая выпечка и многое другое.\n\nОтличное расположение: Отель находится в 3 км от Международного аэропорта Ташкента имени Ислама Каримова и недалеко от катка, что обеспечивает удобный доступ к местным достопримечательностям.	t	15
 83	Hotel Malika Bukhara	1	3	malika-bukhara@mail.ru	205295265	45	Buxoro Malikasi MCHJ	Gavkushon Street 25, Bukhara 200118 Uzbekistan	3	+998652246256	\N	\N	\N	\N	\N	Centrally located just 50 m from Lyabi Havuz Complex, this hotel offers a spa centre and rich breakfast buffet with national and European dishes. \n\nWiFi is available throughout the property.\n\nElegant rooms with classic-style décor are offered at the Malika-Bukhara Hotel. Rooms feature a flat-screen TV, air conditioning and a minibar.\n\nNational and Western cuisine is served in the restaurant of the Malika-Bukhara Hotel. A wide variety of drinks is offered at the on-site bar.\n\nThe spa centre features Russian and Turkish sauna and guests can use fitness centre.\n	39.77253600	64.41718900	Этот отель, расположенный в центре города, всего в 50 метрах от комплекса «Ляби Хавуз», предлагает спа-центр и богатый завтрак «шведский стол» с блюдами национальной и европейской кухни.\n\nНа всей территории отеля доступен Wi-Fi.\n\nВ отеле «Малика-Бухара» предлагаются элегантные номера в классическом стиле. Номера оснащены телевизором с плоским экраном, кондиционером и мини-баром.\n\nВ ресторане отеля «Малика-Бухара» подают блюда национальной и западной кухни. В баре отеля предлагается широкий выбор напитков.\n\nВ спа-центре есть русская и турецкая сауны, а также фитнес-центр.	t	15
 16	Hotel Baden-Baden 	1	1	reservation@baden-baden.uz	303422611	45	Baden-Baden MCHJ	165, Temiryulchilar str., Tashkent, Uzbekistan 	3	+998901360647	\N	\N	\N	\N	\N	Comfortable Accommodations: Baden-Baden Hotel Tashkent in Tashkent offers family rooms with air-conditioning, private bathrooms, and city or inner courtyard views. Each room includes a work desk, mini-bar, and free WiFi.\n\nWellness and Leisure: Guests can enjoy a spa and wellness center, sauna, fitness center, indoor swimming pool, and sun terrace. Additional facilities include a steam room, hammam, and electric vehicle charging station.\n\nDining Experience: The modern restaurant serves European cuisine with halal options for lunch and dinner. Breakfast includes local specialties, warm dishes, fresh pastries, and a variety of beverages.\n\nConvenient Location: Located 1.9 mi from Islam Karimov Tashkent International Airport, the hotel is near an ice-skating rink. Free on-site private parking is available.\n\n	41.27752000	69.27451700	Комфортное размещение: Отель Baden-Baden Hotel Tashkent в Ташкенте предлагает комфортабельные номера с кондиционером, собственной ванной комнатой и видом на город или внутренний двор. В каждом номере есть рабочий стол, мини-бар и бесплатный Wi-Fi.\n\nИсключительные удобства: Гости могут воспользоваться спа-центром, сауной, фитнес-центром, крытым бассейном, солнечной террасой и садом. Дополнительные удобства включают парную, хаммам и зарядную станцию для электромобилей.\n\nГастрономический опыт: Современный ресторан предлагает блюда европейской кухни с халяльными опциями на обед и ужин. Завтрак включает местные специалитеты, горячие блюда, свежую выпечку и разнообразные напитки.\n\nУдобное расположение: Отель расположен в 3 км от Международного аэропорта Ташкента имени Ислама Каримова, недалеко от катка. На территории предоставляется бесплатная частная парковка.	f	15
 29	Hotel Asmald 	1	14	reservation@asmaldpalace.uz	305675059	45	Asmald Hotel MCHJ	150701, Fergana region, Kokand, Street Yangi Hayot, 62A	3	+998903662772	\N	\N	\N	\N	\N	Comfortable Accommodations: Asmald Palace Hotel in Kokand offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a work desk, dining area, and free WiFi, ensuring a pleasant stay.\n\nExceptional Facilities: Guests can enjoy a fitness center, sun terrace, and seasonal outdoor swimming pool. Additional facilities include a restaurant, bar, and garden, providing ample leisure options.\n\nDining Experience: The family-friendly restaurant serves Italian, Asian, and European cuisines, accommodating vegetarian and halal diets. Breakfast options include continental, American, and full English/Irish, with local specialties and fresh pastries.\n\nConvenient Location: Located 50 mi from Fergana International Airport, the hotel offers free on-site parking and a paid airport shuttle service. Nearby attractions include the Kokand Fortress and the Kokand Museum.\n\n	40.53928600	70.94595800	Комфортное размещение: Отель Asmald Palace Hotel в Коканде предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть рабочий стол, обеденная зона и бесплатный Wi-Fi, что обеспечивает приятное пребывание.\n\nИсключительные удобства: Гости могут пользоваться фитнес-центром, солнечной террасой и сезонным открытым бассейном. Дополнительные удобства включают ресторан, бар и сад, предоставляя множество вариантов для отдыха.\n\nКулинарный опыт: В семейном ресторане подают блюда итальянской, азиатской и европейской кухни, а также вегетарианские и халяльные блюда. На завтрак предлагается континентальное, американское и полное английское/ирландское меню, включая местные специалитеты и свежую выпечку.\n\nУдобное расположение: Отель находится в 81 км от международного аэропорта Ферганы и предлагает бесплатную парковку на территории, а также платный трансфер до аэропорта. Среди близлежащих достопримечательностей — крепость Коканд и музей Кокан	t	15
-164	Khiva Silk Road	1	4	khivasilkroad@mail.ru	306397324	30	OOO "KhivaSilkRoad"	Gazchilar makhalla, Khiva 220900 Uzbekistan	3	\N	\N	10/26	2025-11-25	\N	\N	Comfortable Accommodations: Khiva Silk Road in Khiva offers family rooms with air-conditioning, private bathrooms, and city views. Each room includes a work desk, seating area, and free WiFi.\n\nDining and Leisure: Guests can enjoy a buffet breakfast, traditional and modern Turkish cuisine at the family-friendly restaurant, and a bar. The hotel features a seasonal outdoor swimming pool, garden, and outdoor fireplace.\n\nConvenient Services: The hotel provides private check-in and check-out, a 24-hour front desk, and free off-site parking. Additional amenities include a lounge, child-friendly buffet, and bicycle parking.\n\nLocation and Access: Urgench International Airport is 21 mi away. Free WiFi is available throughout the property.	41.37735200	60.37374900	Khiva Silk Road — это отель, расположенный в городе Хива. К услугам гостей сезонный открытый бассейн, сад, общий лаундж и ресторан. К услугам гостей как трансфер от/до аэропорта, так и пункт проката автомобилей.\n\nВо всех номерах имеется холодильник, микроволновая печь и чайник, а также душ и бесплатные туалетно-косметические принадлежности. Среди прочих удобств — кондиционер и письменный стол. В номерах Khiva Silk Road установлен бесплатный Wi-Fi, а также имеется собственная ванная комната с феном. Из окон некоторых номеров открывается вид на бассейн. В номерах в Khiva Silk Road имеется телевизор с плоским экраном и тапочки.\n\nГостям Khiva Silk Road предоставляется завтрак «шведский стол».\n	f	\N
 3	Hotel Navruz 	1	1	reservation1@navruzhotel.uz	308065640	45	Navruz Hotels MCHJ	Uzbekistan, Tashkent, Yunusabad district, Shivli street, 6-8, 100084	3	+998900452521	\N	CNH44	2025-12-18	\N	\N	Comfortable Accommodations: Navruz Hotel Tashkent in Tashkent offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a work desk, TV, and free WiFi.\n\nExceptional Facilities: Guests can enjoy a fitness center, seasonal outdoor swimming pool, terrace, and garden. Additional facilities include free bicycles, a restaurant, bar, and outdoor seating area.\n\nDining Experience: The modern restaurant serves European cuisine with a buffet breakfast. The bar offers a relaxing atmosphere for evening drinks.\n\nConvenient Location: Located 5.6 mi from Islam Karimov Tashkent International Airport, the hotel provides free on-site parking and a paid shuttle service.	41.33493900	69.28607400	Комфортное размещение: Отель Navruz Hotel Tashkent в Ташкенте предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть рабочий стол, телевизор и бесплатный Wi-Fi.\n\nИсключительные удобства: Гости могут пользоваться фитнес-центром, сезонным открытым бассейном, террасой и садом. Среди дополнительных удобств — бесплатные велосипеды, ресторан, бар и зона отдыха на открытом воздухе.\n\nГастрономический опыт: В современном ресторане подают блюда европейской кухни, а также сервируют завтрак "шведский стол". В баре вы можете расслабиться за вечерним напитком.\n\nУдобное расположение: Отель находится в 9 км от международного аэропорта Ташкента имени Ислама Каримова. К услугам гостей бесплатная парковка на территории и платный трансфер.\n\n	f	15
 196	Frankfort Expo Hotel Tashkent	1	1	frankfortexpo@gmail.com	\N	\N	\N	27, Adham Rahmat str., Tashkent 100057	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	15
 197	Meridian Plaza by Reikartz Samarkand	1	2	uzsales@reikartz.com	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	15
@@ -7013,7 +7866,6 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 195	Mevlana Hotel	1	2	ikhtiyor@samarkand-renaissance.uz	301376385	35	"SAMARKAND RENAISSANCE" OOO 	Rahmatullaeva st. 41  140100, Samarkand	6	\N	\N	04	2026-01-01	\N	\N	Comfortable Accommodations: Mevlana Hotel in Samarkand offers family rooms with air-conditioning, private bathrooms, and garden views. Each room includes a work desk, TV, and free WiFi.\n\nDining and Leisure: Guests can enjoy a sun terrace, garden, restaurant, and bar. The family-friendly restaurant serves local and international cuisines, including halal, kosher, vegetarian, vegan, and gluten-free options. Additional amenities include a minimarket, outdoor seating, and a child-friendly buffet.\n\nConvenient Services: The hotel provides private check-in and check-out, a 24-hour front desk, concierge service, and free on-site parking. Additional services include a tour desk, luggage storage, and bicycle parking.\n\nLocation and Attractions: Located 3.1 mi from Samarkand International Airport, the hotel is near attractions such as Registan Square and Bibi Khanum Mosque. Guests can enjoy hiking and cycling in the surrounding area.	\N	\N	Mevlana Hotel — это отель, расположенный в городе Самарканд. К услугам гостей сад, терраса, ресторан и бар. Гости могут обратиться к сотрудникам круглосуточной стойки регистрации, воспользоваться трансфером от/до аэропорта или доставкой еды и напитков, а также подключиться к бесплатному Wi-Fi на всей территории.\n\nВ номерах есть письменный стол и чайник, а также душ и бесплатные туалетно-косметические принадлежности. Среди прочих удобств — кондиционер и телевизор с плоским экраном со спутниковыми каналами. В собственной ванной комнате есть тапочки. Во всех номерах есть собственная ванная комната и фен, а также предоставляется постельное белье.\n\nВ Mevlana Hotel предлагается завтрак «шведский стол» или завтрак по меню.\n\nВ окрестностях популярно заниматься пешими прогулками и велосипедными прогулками. Кроме того, к услугам гостей отеля прокат велосипедов и аренда автомобилей.\n\nМеждународный аэропорт Самарканд находится в 5 км.	t	5
 144	City Palace	1	1	reservations@citypalace.uz	302179574	45	City Palace MCHJ	Amir Temur Street 15, Tashkent, 100000, Uzbekistan	4	\N	\N	CPH-206	2026-01-01	\N	\N	City Palace Hotel Tashkent is 1640 feet from Emir Temur Square and Emir Timur Museum in the heart of Tashkent city center. Features include an outdoor pool, indoor pool, and free WiFi.\n\nA mini-bar, seating area, and refrigerator are provided in each room as well as a satellite TV. City Palace Hotel Tashkent extras include an electric kettle, towels, and linen.\n\nA restaurant is on site, and luggage storage is offered at reception for added convenience. Free parking is provided.\n\nAbdulla Kodiriy metro station is 1148 feet away. The hotel is also 2 mi from Pakhtakor Stadium, 6 minutes’ drive from Tashkent Botanical Garden, and 4.3 mi from Tashkent International Airport.\n\n	41.31619700	69.27977300	Отель City Palace Tashkent находится в самом центре Ташкента, в 500 метрах от площади и музея Амира Темура. К услугам гостей открытый и закрытый бассейны, а также бесплатный Wi-Fi.\n\nВ каждом из номеров отеля City Palace Tashkent в распоряжении гостей мини-бар, гостиный уголок, холодильник, спутниковое телевидение и электрический чайник. Предоставляются полотенца и постельное белье.\n\nНа территории отеля работает ресторан, а на стойке регистрации можно воспользоваться камерой хранения багажа. Для дополнительного удобства обустроена бесплатная парковка.\n\nВ 350 метрах от отеля расположена станция метро Abdulla Kodiriy. В 3,2 км отсюда находится стадион Пахтакор, в 6 минутах езды — Ботанический сад Ташкента, а в 7 км — международный аэропорт Ташкента.\n\n	f	15
 200	Uzbekistan Hotel	1	1	reservation@hoteluzbekistan.uz	200524845	5	"Otel O'zbekiston" MCHJ QK	45, Mahtumquli str., Tashkent 100047	3	\N	\N	0126/030-T	2025-12-19	\N	\N	Just 328 feet from Emir Temur Square, this hotel in the heart of Tashkent offers a gym, sauna, and air-conditioned rooms with flat-screen TVs. Guests enjoy free parking and great transport links.\n\nClassically furnished rooms and suites with mini-bars are offered at the Hotel Uzbekistan. Interiors feature dark wooden furniture and fine fabrics, and each bathroom has a hairdryer.\n\nEuropean cuisine and local specialties are served in the elegant restaurant with grand piano. The Vena café-bar offers a range of hot and cold drinks, and there is also a snack bar on site.\n\nRelaxing and medicinal massages are available at the Uzbekistan Hotel. Guests can also book hairdressing and beauty appointments in the salon.\n\nEmir Temur Metro Station is just 328 feet away, and is on 2 different metro lines. The 24-hour reception staff can organize a shuttle to Tashkent Airport, 6.2 mi away.	\N	\N	Этот отель расположен всего в 100 метрах от площади Амира Темура в центре Ташкента. К вашим услугам тренажерный зал, сауна, а также номера с кондиционером и телевизором с плоским экраном. Гости могут воспользоваться бесплатной парковкой, а поблизости налажено отличное транспортное сообщение.\n\nВ отеле "Узбекистан" можно остановиться в классически меблированных номерах и люксах с мини-баром. Интерьеры оформлены при помощи темной деревянной мебели и элегантных тканей. В каждой ванной комнате в вашем распоряжении фен.\n\nБлюда европейской кухни и местные кушанья подают в элегантном ресторане с роялем. В кафе-бар "Вена" представлен широкий выбор горячих и холодных напитков. Также на территории работает снэк-бар.\n\nВ гостинице "Узбекистан" можно будет посетить сеансы расслабляющего и медицинского массажа. Гости могут также могут записаться в парикмахерскую и косметический салон.\n\nСтанция метро "Амир Темур", соединяющая 2 линии метро, находится всего в 100 метрах. Сотрудники круглосуточной стойк	f	15
-78	Hotel Avenue Park	1	1	info@avenuepark.uz	206575564	3	Avesta Technology MCHJ	Yusufkhona Village, Bostanlyk District, Tashkent Region, Uzbekistan	3	+998909304032	\N	27	2026-01-21	\N	\N	Comfortable Accommodations: Avenue Park Hotel in Yusufkhona offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a balcony or terrace with mountain or river views, ensuring a pleasant stay.\n\nDining and Leisure: Guests can enjoy a seasonal outdoor swimming pool, a lush garden, and a terrace. The hotel features a family-friendly restaurant serving Russian, local, international, and European cuisines, alongside a bar. Additional facilities include a steam room, nightclub, and children's playground.\n\nConvenient Location: Located 93 km from Islam Karimov Tashkent International Airport, the hotel provides free WiFi, a 24-hour front desk, and free on-site private parking.	41.61897600	70.04021400	Комфортное размещение: Отель Avenue Park Hotel в Юсуфхоне предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть балкон или терраса с видом на горы или реку, что обеспечивает приятное пребывание.\n\nПитание и отдых: Гости могут насладиться сезонным открытым бассейном, пышным садом и террасой. В отеле есть семейный ресторан, где подают блюда русской, местной, международной и европейской кухни, а также бар. Среди дополнительных удобств — паровая баня, ночной клуб и детская игровая площадка.\n\nУдобное расположение: Отель находится в 93 км от Международного аэропорта Ташкента имени Ислама Каримова. К услугам гостей бесплатный Wi-Fi, круглосуточная стойка регистрации и бесплатная частная парковка на территории.	t	15
 20	Hotel Orient Star Varashsha 	1	3	orientstar.varaxsha@mail.ru	311311857	45	Orient Star Varashsha MCHJ	Navoi ave., 5, Bukhara 140120 Uzbekistan	3	+998997325046	\N	53	2025-12-20	\N	\N	Comfortable Accommodations: Orient Star Varahsha in Bukhara offers rooms with air-conditioning, balconies, private bathrooms, and city views. Each room includes a tea and coffee maker, refrigerator, work desk, and free toiletries.\n\nExceptional Facilities: Guests can enjoy a restaurant, bar, outdoor swimming pool, and free WiFi. Additional amenities include a lounge, coffee shop, and free on-site private parking.\n\nDining Options: A buffet breakfast is available, featuring halal and vegetarian options. The hotel also provides room service and a 24-hour front desk.\n\nConvenient Location: Located 7 km from Bukhara International Airport, the hotel is situated on a quiet street with easy access to local attractions.\n\n	\N	\N	Orient Star Varahsha — это отель, расположенный в городе Бухара. В числе прочих удобств — общий лаундж и доставка еды и напитков, а также бесплатный Wi-Fi на всей территории. К услугам гостей отеля — открытый бассейн, ресторан и бар. Из окон открывается вид на город.\n\nВо всех номерах имеется письменный стол, холодильник и чайник, а также ванна и бесплатные туалетно-косметические принадлежности. Среди прочих удобств — кондиционер и телевизор с плоским экраном со спутниковыми каналами. В номерах есть собственная ванная комната и фен, а также предоставляется постельное белье.\n\nГостям Orient Star Varahsha предоставляется завтрак «шведский стол».\n\nСотрудники стойки регистрации говорят на английском, на русском и на турецком и всегда готовы предоставить гостям полезную информацию.\n\nМеждународный аэропорт Бухара находится в 7 км.	f	15
 201	The Silk Road Terrace	1	3	silkroadterrace@gmail.com	312076469	10	The Silk Road Terrace MCHJ	54, Abu Ali Ibn Sino str., Bukhara	3	\N	\N	39	2026-01-23	\N	\N	Comfortable Accommodations: The Silk Road Terrace in Bukhara offers comfortable rooms with air-conditioning, balconies, and private bathrooms. Each room includes a work desk, TV, and free toiletries.\n\nDining Experience: Guests can enjoy Asian cuisine at the family-friendly restaurant, featuring a traditional ambience. The restaurant serves halal meals for lunch and dinner.\n\nAmenities and Services: The hotel provides free WiFi, a sun terrace, and a business area. Additional services include private check-in and check-out, a 24-hour front desk, and free parking.\n\nLocation and Accessibility: Located 6 km from Bukhara International Airport, the hotel offers city views and easy access to local attractions.	\N	\N	The Silk Road Terrace — это отель, расположенный в городе Бухара. В числе удобств — круглосуточная стойка регистрации и ресторан, а также терраса. Среди удобств есть бесплатный Wi-Fi и бизнес-центр.\n\nВ номерах в The Silk Road Terrace установлен кондиционер, сейф и телевизор с плоским экраном. Среди прочих удобств — письменный стол и чайник, а также собственная ванная комната с душем. В собственной ванной комнате есть бесплатные туалетно-косметические принадлежности. В номерах есть платяной шкаф.\n\nДля гостей сервируется завтрак «шведский стол», континентальный завтрак или халяльный завтрак.\n\nМеждународный аэропорт Бухара находится в 6 км.	f	\N
 202	Consti Hotel Tashkent	1	1	constihotel@gmail.com	311909664	30	"CONSTI HOTEL" OK	79, Konstitutsiya str., 100084 Tashkent, Uzbekistan	3	\N	\N	062	2025-12-08	\N	\N	Comfortable Accommodations: Consti Hotel Tashkent in Toshkent-Passajir Bekati offers air-conditioned rooms with private bathrooms, city views, and modern amenities. Each room includes a work desk, minibar, and free WiFi.\n\nDining Experience: Guests can enjoy a family-friendly restaurant serving international cuisine with halal options. The modern ambience offers a variety of meals for lunch and dinner. Breakfast includes continental and buffet options with juice, fresh pastries, cheese, and fruits.\n\nConvenient Facilities: The hotel provides free WiFi, a restaurant, and a 24-hour front desk. Additional services include private check-in and check-out, paid shuttle, lift, daily housekeeping, full-day security, and free on-site parking.\n\nPrime Location: Located 5 km from Islam Karimov Tashkent International Airport, the hotel is near an ice-skating rink.	\N	\N	Комфортное размещение: Отель Consti Hotel Tashkent в Ташкенте-Пассажирском предлагает номера с кондиционером, собственной ванной комнатой, видом на город и современными удобствами. В каждом номере есть рабочий стол, мини-бар и бесплатный Wi-Fi.\n\nРесторан: Гости могут посетить семейный ресторан, где подают блюда международной кухни, включая халяльные опции. В современной обстановке предлагается разнообразное меню на обед и ужин. На завтрак подают континентальные блюда и шведский стол с соками, свежей выпечкой, сыром и фруктами.\n\nУдобства: В отеле есть бесплатный Wi-Fi, ресторан и круглосуточная стойка регистрации. Дополнительные услуги включают индивидуальную регистрацию заезда и отъезда, платный трансфер, лифт, ежедневную уборку номеров, круглосуточную охрану и бесплатную парковку на территории.\n\nОтличное расположение: Отель находится в 5 км от международного аэропорта Ташкента имени Ислама Каримова, недалеко от катка. Персонал на стойке регистрации говорит на английском, русском и тур	f	\N
@@ -7032,6 +7884,22 @@ COPY public.hotels (id, name, country_id, city_id, email, inn, booking_cancellat
 204	Farohat Ona Hotel	1	4	hotelfarohatona@gmail.com	311826373	45	MAJIKA TOUR AGENCY MCHJ	103, P. Qoriy str., Khiva	3	\N	\N	90	2026-01-01	\N	\N	Comfortable Accommodations: Hotel FAROHAT ONA in Khiva offers air-conditioned rooms with private bathrooms, city views, and modern amenities. Each room includes a work desk, TV, and free toiletries.\n\nDining Experience: The family-friendly restaurant serves Asian cuisine in a traditional ambience. Guests can enjoy brunch, lunch, dinner, high tea, and cocktails, with options for vegetarian, vegan, and gluten-free diets.\n\nLeisure Facilities: The hotel features a terrace and free WiFi, providing relaxing spaces and connectivity. Additional facilities include a paid shuttle service, 24-hour front desk, and free on-site private parking.\n\nLocation and Access: Located 35 km from Urgench International Airport, the hotel is situated in Khiva, offering easy access to local attractions.	\N	\N	Hotel FAROHAT ONA — это отель, расположенный в городе Хива. Среди удобств отеля с 3 звездами — терраса, а также номера с кондиционером, бесплатным Wi-Fi и собственной ванной комнатой. В распоряжении гостей бесплатная частная парковка и платный трансфер от/до аэропорта.\n\nВ Hotel FAROHAT ONA во всех номерах имеется телевизор с плоским экраном, письменный стол и собственная ванная комната, а также предоставляются постельное белье и полотенца. В распоряжении всех гостей платяной шкаф и чайник.\n\nДля гостей сервируется завтрак «шведский стол», азиатский завтрак и вегетарианский завтрак. При Hotel FAROHAT ONA работает ресторан, где подают блюда азиатской кухни. Гости могут попросить приготовить вегетарианские, халяльные и веганские блюда.\n\nСотрудники круглосуточной стойки регистрации говорят на арабском, на английском, на русском и на турецком.\n\nМеждународный аэропорт Ургенч находится в 35 км.	t	10
 138	New Star  Khiva	1	4	hotelnewstarkhiva@gmail.com	204920438	45	Частное предприятие "New Millenium"	Anash Xalfa Street 23, Khiva 220900 Uzbekistan	6	\N	\N	86	2026-01-29	\N	\N	Comfortable Accommodations: New Star Boutique hotel in Hiva offers family rooms with air-conditioning, private bathrooms, and city views. Each room includes a tea and coffee maker, free toiletries, and a TV.\n\nDining Experience: Guests can enjoy a family-friendly restaurant serving local, Asian, and European cuisines. Breakfast options include continental, vegetarian, halal, gluten-free, and Asian. The restaurant offers brunch, lunch, dinner, and high tea in a traditional and romantic ambience.\n\nConvenient Services: The hotel provides free WiFi, a 24-hour front desk, concierge service, and a tour desk. Additional amenities include free private parking, bicycle parking, and a lounge.\n\nPrime Location: Located 36 km from Urgench International Airport, the hotel is near attractions such as Madrasah Muhammad Mahram 1903. Guests appreciate the hotel's history, culture, and attentive staff.	\N	\N	Комфортное размещение: Бутик-отель New Star Boutique hotel в Хиве предлагает семейные номера с кондиционером, собственной ванной комнатой и видом на город. В каждом номере есть чайник, бесплатные туалетно-косметические принадлежности и телевизор.\n\nКулинарные впечатления: Гости могут посетить семейный ресторан, где подают блюда местной, азиатской и европейской кухни. На завтрак предлагается континентальное, вегетарианское, халяльное, безглютеновое и азиатское меню. В ресторане можно заказать бранч, обед, ужин и послеобеденный чай в традиционной и романтической атмосфере.\n\nУдобные услуги: В отеле предоставляется бесплатный Wi-Fi, круглосуточная стойка регистрации, услуги консьержа и экскурсионное бюро. Дополнительные удобства включают бесплатную частную парковку, парковку для велосипедов и гостиную.\n\nОтличное расположение: Отель находится в 36 км от международного аэропорта Ургенч, недалеко от таких достопримечательностей, как медресе Мухаммад Махрам 1903 года. Гости высоко ценят историю	t	10
 205	Safir Hotel	1	6	safirhotel2024@gmail.com	309018870	45	GRAND STAR FAYZ SD MCHJ	30V/2, Motrudiy str.,	3	\N	\N	SAF51-2026	2026-01-16	\N	\N	Comfortable Accommodations: Safir Hotel in Fergana offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a work desk, TV, and free WiFi, ensuring a pleasant stay.\n\nDining Experience: The family-friendly restaurant serves halal meals with Russian and local cuisines in a modern ambience. Guests can enjoy lunch and dinner in a welcoming environment.\n\nConvenient Facilities: The hotel features a bar, restaurant, and free WiFi. Additional services include a paid airport shuttle, 24-hour front desk, electric vehicle charging station, and free on-site private parking.\n\nLocation and Accessibility: Safir Hotel is located 3 km from Fergana International Airport, providing easy access for travellers.	\N	\N	Safir Hotel, Fergana — это отель с 3 звездами, расположенный в городе Фергана. К услугам гостей ресторан и бар. Гости могут обратиться к сотрудникам круглосуточной стойки регистрации, воспользоваться трансфером от/до аэропорта или доставкой еды и напитков, а также подключиться к бесплатному Wi-Fi на всей территории.\n\nВ номерах в Safir Hotel, Fergana установлен кондиционер, телевизор с плоским экраном и сейф. Среди прочих удобств — письменный стол, чайник и холодильник, а также собственная ванная комната с биде. В собственной ванной комнате есть душ, бесплатные туалетно-косметические принадлежности и фен. Гостям Safir Hotel, Fergana предоставляются постельное белье и полотенца.\n\nГостям предлагается завтрак «шведский стол», вегетарианский завтрак или халяльный завтрак.\n\nМеждународный аэропорт Фергана находится в 3 км.	f	15
+87	Holiday INN Tashkent	1	1	reservation@hitc.uz	310912085	45	"HITC" MCHJ XK	100017, Tashkent Shayhantakhur  district, Ukchi street, 3. 	4	+998774010358	\N	F-76	2026-02-02	\N	\N	Comfortable Accommodations: Holiday Inn Tashkent City by IHG in Tashkent offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a work desk, TV, and soundproofing for a pleasant stay.\n\nExceptional Facilities: Guests can enjoy a sauna, fitness centre, indoor swimming pool, terrace, and free WiFi. Additional facilities include a restaurant, bar, and lounge, ensuring a relaxing and enjoyable experience.\n\nDining Options: The family-friendly restaurant serves local and European cuisines with halal and vegetarian options. Breakfast includes continental, buffet, and Asian selections, featuring fresh pastries, fruits, and local specialities.\n\nPrime Location: Located 8 km from Islam Karimov Tashkent International Airport, the hotel is near an ice-skating rink. Guests appreciate the convenient location, attentive staff, and delicious breakfast.	41.31452400	69.24460300	Комфортное размещение: Отель Holiday Inn Tashkent City by IHG в Ташкенте предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть рабочий стол, телевизор и звукоизоляция для комфортного проживания.\n\nИсключительные удобства: Гости могут воспользоваться сауной, фитнес-центром, крытым бассейном, террасой и бесплатным Wi-Fi. Дополнительные удобства включают ресторан, бар и лаундж, обеспечивая расслабляющий и приятный отдых.\n\nВарианты питания: В семейном ресторане подают блюда местной и европейской кухни, включая халяльные и вегетарианские опции. На завтрак предлагается континентальный, шведский стол и азиатские блюда, включая свежую выпечку, фрукты и местные деликатесы.\n\nОтличное расположение: Отель находится в 8 км от Международного аэропорта Ташкента имени Ислама Каримова, недалеко от катка. Гости высоко оценивают удобное расположение, внимательный персонал и вкусный завтрак.	f	15
+133	Prestige Terrace Hotel	1	3	bukharaprestige@mail.com	309408780	45	СП "Prestige Terrace Hotel"	Buxoro St 8, Bukhara 200111 Uzbekistan	6	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: Prestige Terrace Hotel in Bukhara offers family rooms with air-conditioning, private bathrooms, and balconies. Each room includes a dining area, work desk, and free WiFi.\n\nExceptional Facilities: Guests can relax on the terrace or enjoy free WiFi throughout the property. Additional amenities include a lounge, 24-hour front desk, concierge service, and a shared kitchen.\n\nDelicious Breakfast: A variety of breakfast options are available, including continental, Ã la carte, vegetarian, and halal. Breakfast includes warm dishes, fresh pastries, pancakes, cheese, fruits, and juice.\n\nConvenient Location: Located 5 km from Bukhara International Airport, the hotel provides free on-site private parking and a paid shuttle service. Nearby attractions include the Lyab-i Hauz and the Ark.	39.77651800	64.43323600	Prestige Terrace Hotel — это гостевой дом, расположенный в городе Бухара. К услугам гостей общий лаундж и терраса. Гости могут обратиться к сотрудникам круглосуточной стойки регистрации, воспользоваться трансфером от/до аэропорта или общей кухней, а также подключиться к бесплатному Wi-Fi на всей территории.\n\nВо всех номерах имеется письменный стол, холодильник и чайник, а также душ и бесплатные туалетно-косметические принадлежности. Среди прочих удобств — кондиционер и телевизор с плоским экраном со спутниковыми каналами. Во всех номерах имеется собственная ванная комната, ванна и фен. В некоторых единицах размещения в Prestige Terrace Hotel в распоряжении гостей сейф. В Prestige Terrace Hotel в номерах есть гостиная зона.\n\nДля гостей сервируется завтрак по меню, континентальный завтрак и вегетарианский завтрак.\n\nМеждународный аэропорт Бухара находится в 5 км.	f	\N
+107	Hotel Emir	1	3	mild@emirtravel.com	203305023	45	Emir Travel XK	Husaenov Street 17, Bukhara 200118 Uzbekistan	6	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: Emir in Bukhara offers family rooms with air-conditioning, private bathrooms, and parquet floors. Each room includes a refrigerator, TV, and free WiFi.\n\nDining Experience: Guests can enjoy a traditional restaurant serving local and European cuisines, including halal and vegetarian options. Breakfast is available as a continental buffet with warm dishes, fresh pastries, and fruits.\n\nAmenities and Services: The property features a sun terrace, shared kitchen, and private check-in and check-out services. Additional services include a 24-hour front desk, tour desk, and luggage storage.\n\nConvenient Location: Located 6 km from Bukhara International Airport, Emir is highly rated for its convenient location and excellent staff support.	39.77155000	64.42089300	Emir — это отель типа «постель и завтрак» в городе Бухара. Среди удобств есть терраса, общая кухня, доставка еды и напитков и бесплатный Wi-Fi. В этом отеле типа «постель и завтрак» также имеется ресторан.\n\nВ этом отеле типа «постель и завтрак» имеется телевизор с плоским экраном со спутниковыми каналами. Гостям этого отеля типа «постель и завтрак» предоставляются полотенца и постельное белье.\n\nГостям Emir предоставляется завтрак «шведский стол» или континентальный завтрак.\n\nСотрудники круглосуточной стойки регистрации говорят на английском и на русском и всегда готовы предоставить гостям полезную информацию.\n\nМеждународный аэропорт Бухара находится в 6 км. Предоставляется платный трансфер от/до аэропорта.	f	\N
+137	New Minor Hotel	1	4	khivaminor@bk.ru	310683206	45	New Minor Hotel MCHJ	Islam Khuja, 75, Khiva 220900 Uzbekistan	6	\N	\N	\N	\N	\N	\N	Comfortable Accommodations: New Minor Hotel in Khiva offers family rooms with air-conditioning, private bathrooms, and city views. Each room includes a balcony, hypoallergenic bedding, and modern amenities.\n\nDining and Leisure: Guests can enjoy a sun terrace, restaurant, bar, and free WiFi. The family-friendly restaurant serves Turkish and European cuisines with halal, vegetarian, and gluten-free options. Additional facilities include an outdoor fireplace, lounge, and coffee shop.\n\nConvenient Location: Located 35 km from Urgench International Airport, the hotel is praised for its convenient location and excellent service. Free on-site private parking and a tour desk enhance the stay.	41.37684500	60.36058000	Комфортное размещение: Отель New Minor Hotel в Хиве предлагает семейные номера с кондиционером, собственной ванной комнатой и видом на город. В каждом номере есть балкон, гипоаллергенное постельное белье и современные удобства.\n\nПитание и отдых: К услугам гостей солнечная терраса, ресторан, бар и бесплатный Wi-Fi. В семейном ресторане подают блюда турецкой и европейской кухни, включая халяльные, вегетарианские и безглютеновые варианты. Среди дополнительных удобств — уличный камин, гостиная и кафе.\n\nУдобные услуги: В отеле предусмотрены индивидуальная регистрация заезда и отъезда, круглосуточная стойка регистрации, услуги консьержа и бесплатная парковка на территории. Дополнительные услуги включают мини-маркет, салон красоты и зарядную станцию для электромобилей.\n\nМестные достопримечательности: Международный аэропорт Ургенч находится в 35 км от отеля. Среди близлежащих достопримечательностей — крепость Хива и мечеть Ислам Ходжа.	f	\N
+140	Intercontinental Tashkent	1	1	tasat.reservations@ihg.com	306 777 698	45	ИП ООО “UZTUR INVESTMENT AND DEVELOPMENT 	Shakhrisabz Street 2, Tashkent, Uzbekistan, 100000	5	\N	\N	\N	\N	\N	\N	Get the celebrity treatment with world-class service at InterContinental Tashkent by IHG\nElegant Accommodations: InterContinental Tashkent by IHG in Tashkent offers luxurious rooms with air-conditioning, private bathrooms, and city views. Each room includes a minibar, flat-screen TV, and free WiFi, ensuring a comfortable stay.\n\nExceptional Facilities: Guests can enjoy spa facilities, a swimming pool with a view, sauna, and fitness centre. Additional amenities include a terrace, hot tub, and yoga classes, catering to relaxation and wellness needs.\n\nDining Experience: The family-friendly restaurant serves Greek, Mediterranean, and international cuisines in a traditional and modern ambience. Breakfast options include continental, buffet, and à la carte, accommodating vegetarian, vegan, and special dietary requirements.\n\nPrime Location: Located 7 km from Islam Karimov Tashkent International Airport, the hotel is near attractions such as the Amir Timur Museum.	41.31515100	69.28255500	Почувствуйте себя знаменитостью благодаря великолепному сервису в InterContinental Tashkent by IHG\nЭлегантное размещение: Отель InterContinental Tashkent by IHG в Ташкенте предлагает 5-звездочный отдых с спа-услугами, спа-центром, бассейном с видом, сауной, фитнес-центром, террасой, рестораном, баром, крытым бассейном и бесплатным Wi-Fi.\n\nКомфортные удобства: Гости могут воспользоваться индивидуальной регистрацией заезда и отъезда, платным трансфером, услугами салона красоты, парной, оздоровительными программами, тренажерным залом, джакузи, круглосуточной стойкой регистрации, услугами консьержа, семейными номерами, круглосуточной охраной, парковкой для велосипедов, завтраком в номер, экспресс-регистрацией заезда и отъезда, обслуживанием номеров, хаммамом и камерой хранения багажа.\n\nВарианты питания: В семейном ресторане подают блюда греческой, средиземноморской, стейк-хаус, суши, турецкой, местной, интернациональной кухни, а также блюда на гриле.	f	\N
+122	T-City Presidental Hotel Tashkent	1	1	nfo@t-citypresidentialhotel.uz	308062154	60	Hotel MGMT MCHJ	Uzbekistan, Tashkent, Islam Karimov street, SQB Tower	5	\N	\N	\N	\N	\N	\N	The luxurious five-star hotel T-CITY PRESIDENTIAL is located in the heart of Tashkent, the capital of Uzbekistan. At a height higher than any building in the city, it offers its guests a unique opportunity to enjoy breathtaking panoramic views of the surrounding area. The T-CITY PRESIDENTIAL hotel is the ideal choice for those who desire comfort and luxury combined with a convenient location close to the city’s main attractions, allowing you to quickly and easily explore all the interesting places.\n\nGuests can enjoy a variety of services, from spa treatments and a fitness center to sightseeing tours of the area. In the evening, the hotel's restaurant serves delicious local and international cuisine prepared with fresh ingredients.\n\nFor business travelers, there are modern conference rooms equipped with everything necessary for successful events. Friendly staff is ready to satisfy any requests, making your holiday unforgettable.	41.31233400	69.24655500	Роскошный пятизвездочный отель T-CITY PRESIDENTIAL расположен в самом сердце Ташкента - столицы Узбекистана. На высоте, превосходящей все здания города, он предлагает своим гостям уникальную возможность наслаждаться захватывающими панорамными видами на окружающую местность. Отель T-CITY PRESIDENTIAL является идеальным выбором для тех, кто желает комфорта и роскоши в сочетании с удобным расположением вблизи главных достопримечательностей города, что позволяет легко и быстро осмотреть все интересные места.\n\nГости могут наслаждаться разнообразием услуг: от спа-процедур и фитнес-центра до экскурсионных туров по окрестностям. Вечером ресторан отеля предлагает изысканные блюда местной и международной кухни, приготовленные из свежих продуктов.\n\nДля деловых путешественников предусмотрены современные конференц-залы, оснащенные всем необходимым для проведения успешных мероприятий. Доброжелательный персонал готов удовлетворить любые запросы, делая ваш отдых незабываемым.	f	\N
+162	Lotte City Tashkent Palace 	1	1	lotte_tashkent@mail.ru	301424000	30	Tashkent Palace New MCHJ	Buyuk Turon Street 56, Tashkent 100029 Uzbekistan	4	\N	\N	\N	2025-04-08	\N	\N	Featuring an outdoor pool and a health club, this centrally located hotel is just 500 metres from Mustakillik Maydoni Metro Station. It offers air-conditioned rooms, and a roof top terrace.\n\nThe classic-style rooms at LOTTE City Hotels Tashkent Palace each feature satellite TV and a work desk. Toiletries and a hairdryer are provided in the en suite bathroom.\n\nThe hotel restaurants offer a choice of Eastern European, Asian, and international specialities. Guests can dine on the rooftop terrace or in the courtyard garden, and drinks are served in the piano bar.\n\nThe health club at LOTTE City Hotels Tashkent Palace  features a gym, sauna, and guests can book beauty treatments and massages. The Alisher Navoi Theatre and the Uzbekistan State Museum are within a 5-minute walk of the hotel.	\N	\N	Этот отель с открытым бассейном и оздоровительным клубом расположен в центре города, всего в 500 м от станции метро «Мустакиллик майдони». К услугам гостей номера с кондиционером и терраса на крыше.\nВсе номера отеля Lotte City Tashkent Palace оформлены в классическом стиле, в них установлен телевизор с каналами спутникового телевидения и рабочий стол. В ванной комнате в номере предоставляются туалетно-косметические принадлежности и фен.\nВ ресторанах отеля подают разнообразные блюда кухни Восточной Европы, Азии, а также международной кухни. Гости могут поужинать на террасе, расположенной на крыше, или в саду во внутреннем дворе. Напитки подаются в баре с живой фортепианной музыкой.\nВ оздоровительном клубе отеля Lotte City Tashkent Palace можно посетить тренажерный зал, сауну, а также заказать косметические процедуры и массаж. Театр имени Алишера Навои и Государственный музей Узбекистана находятся в 5 минутах ходьбы от отеля.	f	\N
+207	SUVON HOTEL	1	1	suvonhotel@gmail.com	\N	\N	\N	100022, Tashkent, Yakkasaroy district, Kichik Halqa Yo'li street, 14C	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	10
+208	Hotel Bankir Khiva	1	4	info@hotelbankirkhiva.uz	310365538	45	"Khiva Hotel Ibragimov Sardorbek" OK	Mehnat Guli 29, Kalta Minar District, Uzbekistan	3	\N	\N	123	2026-02-12	\N	\N	Discover the charm of Khiva in a whole new way by staying at one of the ancient city’s finest hotels.\nAt Hotel Bankir Khiva, you will enjoy a refined blend of classic Uzbek elegance and modern comforts, creating an atmosphere of true style and relaxation.\nAs you step inside, you’ll be welcomed beneath a turquoise dome — a symbol of unity under one sky and warm hospitality for travelers from around the world.\nLocated just a few steps from the UNESCO World Heritage Site Ichan-Kala, the hotel allows you to fully immerse yourself in Khiva’s rich history.\nWhat truly sets us apart is not only our exceptional location but also our attentive and friendly staff, always dedicated to making your stay comfortable and memorable.\nAt Hotel Bankir Khiva, we create experiences that stay with you long after your journey ends.\n	\N	\N	Откройте для себя очарование Хивы по-новому, остановившись в одном из лучших отелей древнего города.\nВ Hotel Bankir Khiva вас ждёт гармоничное сочетание изысканной узбекской классики и современных гостиничных удобств, создающее атмосферу уюта и стиля.\nПереступив порог, вы окажетесь под бирюзовым куполом — символом единства под одним небом и гостеприимства для путешественников со всего мира.\nОтель расположен всего в нескольких шагах от объекта Всемирного наследия ЮНЕСКО — Ичан-Кала, что позволяет полностью погрузиться в богатую историю Хивы.\nОднако нас отличает не только уникальное местоположение. Доброжелательный и внимательный персонал всегда готов сделать ваше пребывание по-настоящему комфортным и незабываемым.\nВ Hotel Bankir Khiva мы создаём впечатления, которые остаются в памяти надолго.	t	10
+91	Hotel City 	1	2	infocitysamarkand@gmail.com	306223889	35	ООО «Aurora City Plus»	University Boulevard Street 19 A, Samarkand 140129 Uzbekistan	3	+998979191731	\N	03	2026-01-09	\N	\N	Hotel City Samarkand is ideally located in the heart of Samarkand, on the historic University Boulevard. The hotel offers comfortable accommodations within walking distance of the city’s most iconic landmarks, including Registan and Gur-e-Amir Mausoleum. Its central location and welcoming atmosphere make it a perfect choice for travelers who wish to explore the rich history, culture, and architectural heritage of Samarkand	39.64302200	66.96016100	Hotel City Samarkand идеально расположен в самом центре Самарканд, на историческом Университетском бульваре. Отель предлагает комфортное размещение в пешей доступности от самых знаковых достопримечательностей города, включая Регистан и Мавзолей Гур-Эмир. Центральное расположение и гостеприимная атмосфера делают его отличным выбором для путешественников, желающих познакомиться с богатой историей, культурой и архитектурным наследием Самарканда.	t	\N
+44	Jipek Joli 	1	10	bookingjipekjloli@gmail.com	205788925	45	Ayim-Tur OK	Tatibaev Street 50, Nukus 230100 Uzbekistan	3	+998551070555	\N	123	2026-02-16	\N	\N	Comfortable Accommodations: Hotel Jipek Joli in Nukus offers air-conditioned rooms with private bathrooms, city or inner courtyard views, and modern amenities. Each room includes a work desk, dining table, and free WiFi.\n\nDining Experience: Guests can enjoy a family-friendly restaurant serving Italian, Korean, Russian, and local cuisines. The restaurant offers brunch, dinner, high tea, and cocktails in a traditional ambience. Breakfast includes local specialities, fresh pastries, and a variety of beverages.\n\nConvenient Facilities: The hotel provides a free airport shuttle, garden, and minimarket. Additional services include a 24-hour front desk, child-friendly buffet, coffee shop, and hairdresser. Free on-site private parking is available.\n\nLocal Attractions: Located 2 km from Nukus airport, the hotel is near an ice-skating rink and boating opportunities.	42.46590200	59.60988500	Комфортное размещение: Отель Hotel Jipek Joli в Нукусе предлагает кондиционированные номера с собственной ванной комнатой, видом на город или внутренний двор и современными удобствами. В каждом номере есть рабочий стол, обеденный стол и бесплатный Wi-Fi.\n\nРесторанное обслуживание: Гости могут посетить семейный ресторан, где подают блюда итальянской, корейской, русской и местной кухни, а также пиццу, стейки и суши. В ресторане с традиционной атмосферой предлагают бранч, ужин, послеобеденный чай и коктейли.\n\nВозможности для отдыха: В отеле есть сад, кафе и детский шведский стол. Дополнительные удобства включают минимаркет, парикмахерскую и бесплатную парковку на территории.\n\nУдобное расположение: Отель находится в 2 км от аэропорта Нукуса, недалеко от катка и мест для катания на лодках.	t	15
+214	Zilol Baxt	1	2	info@hotelzilolbaxt.uz	203874321	7	Zilol Baxt MCHJ	5, University Boulevard Street, 140100, Samarkand , Uzbekistan	4	\N	\N	82/26	2026-02-19	\N	\N	Welcome to **Zilol Baxt Hotel** — a 4-star hotel perfectly located in the heart of **Samarkand**. Whether you’re traveling for business or leisure, our hotel is the ideal destination where every guest can truly feel at home.\n\nWe take pride in delivering exceptional service and creating a warm, welcoming atmosphere that makes every stay truly memorable. **Zilol Baxt Hotel** offers a wide selection of rooms, each thoughtfully designed and equipped with modern amenities to satisfy even the most discerning travelers.\n\nNo matter the purpose of your visit — business meetings or a relaxing getaway — we ensure comfort, convenience, and genuine hospitality at every step of your stay.\n\nWe look forward to welcoming you and making your time in Samarkand unforgettable.	\N	\N	Добро пожаловать в **Zilol Baxt Hotel** — 4-звёздочный отель, идеально расположенный в самом сердце **Samarkand**. Путешествуете ли вы по делам или на отдых, наш отель — это идеальное место, где каждый гость может по-настоящему почувствовать себя как дома.\n\nМы гордимся высоким уровнем сервиса и создаём тёплую, гостеприимную атмосферу, которая сделает ваше пребывание по-настоящему незабываемым. Отель Zilol Baxt предлагает широкий выбор номеров, каждый из которых продуман до мелочей и оснащён современными удобствами, чтобы удовлетворить даже самых требовательных гостей.\n\nНезависимо от цели вашего визита — деловые встречи или спокойный отдых — мы обеспечим комфорт, удобство и искреннее гостеприимство на каждом этапе вашего пребывания.\n	t	15
+209	Jipek Joli Art	1	10	jipekjoli@gmail.com	205788925	45	Ayim-tur OK	47A/2, Jolmurza Aymurzaev str., 230103 Nukus	3	\N	\N	123	2026-02-16	\N	\N	Comfortable Accommodation: Jipek joli ART in Nukus offers comfortable rooms with air-conditioning, private bathrooms, and city views. Each room includes a work desk, free toiletries, and a TV.\n\nEssential Facilities: Guests enjoy free WiFi, a buffet breakfast with halal options, and a relaxing atmosphere. Additional amenities include bathrobes, bath, and slippers.\n\nConvenient Location: Located 2 km from Nukus Airport, the hotel is near an ice-skating rink and boating opportunities. Reception staff speak English and Russian.	42.46909400	59.61061200	Jipek joli ART — это отель, расположенный в городе Нукус. В числе удобств номеров с кондиционером — платяной шкаф и бесплатный Wi-Fi. Из окон открывается вид на город.\n\nВ Jipek joli ART в номерах имеется телевизор с плоским экраном, письменный стол и собственная ванная комната, а также предоставляются постельное белье и полотенца. В собственной ванной комнате есть душ, бесплатные туалетно-косметические принадлежности и фен.\n\nГостям Jipek joli ART предоставляется завтрак «шведский стол» или халяльный завтрак.\n\nАэропорт Нукус находится в 2 км.	t	15
+169	Hotel Pana	1	10	pana_hotel@mail.ru	303439344	45	OOO "GRAND CASTLE" 	 Miymandos №2, Nukus 230100 Uzbekistan	3	\N	Prices included VAT and tourism tax	71	2026-02-01	\N	\N	Comfortable Accommodation: PANA HOTEL in Nukus offers family rooms with air-conditioning, private bathrooms, and free WiFi. Each room includes a work desk, sofa bed, and TV, ensuring a pleasant stay.\n\nDining Experience: Guests can enjoy a variety of breakfast options, including continental, buffet, full English/Irish, vegetarian, halal, and Asian. The family-friendly restaurant serves brunch, lunch, dinner, high tea, and cocktails in a traditional, modern, or romantic ambience.\n\nConvenient Facilities: The hotel provides a free airport shuttle service, terrace, restaurant, and minimarket. Additional amenities include a coffee shop, outdoor seating area, hairdresser, and bicycle parking. Free on-site parking is available.\n\nLocal Attractions: Located a few steps from Nukus Airport, the hotel is near an ice-skating rink. Bike tours and cycling activities enhance the stay.	42.48097100	59.61468200	Комфортное размещение: Отель PANA HOTEL в Нукусе предлагает семейные номера с кондиционером, собственной ванной комнатой и бесплатным Wi-Fi. В каждом номере есть рабочий стол, диван-кровать и телевизор, что обеспечивает приятное пребывание.\n\nКулинарные впечатления: Гости могут насладиться разнообразными вариантами завтрака, включая континентальный, шведский стол, полный английский/ирландский, вегетарианский, халяльный и азиатский. В семейном ресторане подают бранч, обед, ужин, послеобеденный чай и коктейли в традиционной, современной или романтической атмосфере.\n\nУдобные услуги: Отель предоставляет бесплатный трансфер из/в аэропорт, террасу, ресторан и минимаркет. Дополнительные удобства включают кофейню, зону для отдыха на открытом воздухе, парикмахерскую и парковку для велосипедов. На территории доступна бесплатная парковка.\n\nМестные достопримечательности: Отель расположен в нескольких шагах от аэропорта Нукуса, недалеко от катка. Велосипедные туры и возможности для катания на велоси	f	\N
+78	Hotel Avenue Park	1	39	info@avenuepark.uz	206575564	3	Avesta Technology MCHJ	Yusufkhona Village, Bostanlyk District, Tashkent Region, Uzbekistan	3	+998909304032	\N	27	2026-01-21	\N	\N	Comfortable Accommodations: Avenue Park Hotel in Yusufkhona offers family rooms with air-conditioning, private bathrooms, and modern amenities. Each room includes a balcony or terrace with mountain or river views, ensuring a pleasant stay.\n\nDining and Leisure: Guests can enjoy a seasonal outdoor swimming pool, a lush garden, and a terrace. The hotel features a family-friendly restaurant serving Russian, local, international, and European cuisines, alongside a bar. Additional facilities include a steam room, nightclub, and children's playground.\n\nConvenient Location: Located 93 km from Islam Karimov Tashkent International Airport, the hotel provides free WiFi, a 24-hour front desk, and free on-site private parking.	41.61897600	70.04021400	Комфортное размещение: Отель Avenue Park Hotel в Юсуфхоне предлагает семейные номера с кондиционером, собственной ванной комнатой и современными удобствами. В каждом номере есть балкон или терраса с видом на горы или реку, что обеспечивает приятное пребывание.\n\nПитание и отдых: Гости могут насладиться сезонным открытым бассейном, пышным садом и террасой. В отеле есть семейный ресторан, где подают блюда русской, местной, международной и европейской кухни, а также бар. Среди дополнительных удобств — паровая баня, ночной клуб и детская игровая площадка.\n\nУдобное расположение: Отель находится в 93 км от Международного аэропорта Ташкента имени Ислама Каримова. К услугам гостей бесплатный Wi-Fi, круглосуточная стойка регистрации и бесплатная частная парковка на территории.	t	15
+85	Hotel Annex	1	4	annexhotel11@gmail.com	203625384	55	"MIrzo Boshi" OK	Zargarlar Street 121, Khiva 220900 Uzbekistan	6	+998953663000	\N	24	2026-02-17	\N	\N	Annex Hotel Khiva is located in the heart of Khiva, within walking distance of major attractions including Mohammed Rakhim Khan Medressa, Allakuli Khan Medressa, and Tosh-hovli Palace.\n\nThe hotel offers free Wi-Fi, concierge services, a restaurant, café, and bar/lounge. A complimentary buffet breakfast is served daily from 7:00 AM to 10:30 AM. Guests also benefit from a 24-hour front desk, laundry services, luggage storage, and free parking.\n\nAll 11 air-conditioned rooms feature fireplaces, heated floors, Smart TVs, minibars, free Wi-Fi, and daily housekeeping for a comfortable stay.\n	\N	\N	Annex Hotel Khiva расположен в самом сердце Хива, в пешей доступности от главных достопримечательностей, включая Mohammed Rakhim Khan Medressa, Медресе Алла-Кули-хана и Tosh-hovli Palace.\n\nОтель предлагает бесплатный Wi-Fi, услуги консьержа, ресторан, кафе и бар/лаунж. Ежедневно с 7:00 до 10:30 сервируется бесплатный завтрак «шведский стол». Также к услугам гостей круглосуточная стойка регистрации, прачечная, хранение багажа и бесплатная парковка.\n\nВсе 11 номеров оснащены кондиционером, каминами, подогреваемыми полами, телевизорами Smart TV, мини-барами и бесплатным Wi-Fi. Ежедневная уборка обеспечивает комфортное пребывание.\n	f	10
 \.
 
 
@@ -7238,6 +8106,21 @@ COPY public.manual_phones (id, phone_number, created_at, updated_at, manual_id, 
 207	+998623776860	2025-11-14 12:04:37	2026-01-28 11:16:57	190	App\\Models\\Hotel
 241	+998995004661	2026-01-28 11:50:51	2026-01-28 11:50:51	204	App\\Models\\Hotel
 243	+998936475577	2026-01-30 13:16:13	2026-01-30 13:16:13	205	App\\Models\\Hotel
+244	+998914145500	2026-02-02 10:28:21	2026-02-02 10:28:21	43	App\\Models\\Restaurant
+245	+998662398282	2026-02-04 11:46:27	2026-02-04 11:46:27	91	App\\Models\\Hotel
+246	+998951030005	2026-02-09 14:02:28	2026-02-09 14:02:28	99	App\\Models\\Hotel
+248	+998933943191	2026-02-10 13:37:32	2026-02-10 13:37:32	206	App\\Models\\Hotel
+250	+998507975799	2026-02-13 07:32:09	2026-02-13 07:32:09	207	App\\Models\\Hotel
+254	+998556013231	2026-02-16 07:44:21	2026-02-16 07:44:21	208	App\\Models\\Hotel
+255	+998910919045	2026-02-16 07:44:21	2026-02-16 07:44:21	208	App\\Models\\Hotel
+256	+998910949045	2026-02-16 07:44:21	2026-02-16 07:44:21	208	App\\Models\\Hotel
+259	+998712092233	2026-02-19 06:58:35	2026-02-19 06:58:35	210	App\\Models\\Hotel
+260	+998931082233	2026-02-19 06:58:35	2026-02-19 06:58:35	210	App\\Models\\Hotel
+262	+998977903332	2026-02-20 12:05:01	2026-02-20 12:05:01	211	App\\Models\\Hotel
+265	+998662398514	2026-02-23 06:15:01	2026-02-23 06:15:01	214	App\\Models\\Hotel
+266	+998662398830	2026-02-23 06:15:01	2026-02-23 06:15:01	214	App\\Models\\Hotel
+267	+998914270999	2026-03-01 08:40:29	2026-03-01 08:40:29	85	App\\Models\\Hotel
+269	+998939606508	2026-03-11 07:23:15	2026-03-11 07:23:15	216	App\\Models\\Hotel
 \.
 
 
@@ -7454,6 +8337,8 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 206	2025_12_24_041714_add_hotel_nds_fields	55
 207	2026_01_07_090905_add_city_id_web_tour_days	56
 208	2026_01_23_091315_add_period_id_hotel_room_types	57
+209	2026_02_27_064143_create_web_tour_free_prices	58
+210	2026_02_28_080157_create_web_tour_categories_table	59
 \.
 
 
@@ -7516,9 +8401,9 @@ COPY public.museums (id, name, inn, country_id, city_id, price_per_person, creat
 14	Pahlavon Makhmud 	207278291	1	4	50000.00	2025-03-03 07:30:30	2025-09-20 13:17:33	№75 от 03.01.2025	\N
 4	Бухарский Гос.музей заповедник	201511624	1	3	0.00	2025-01-09 13:58:00	2026-01-27 07:40:32	№4 от 06.01.2026	\N
 10	"O‘ZBEKISTON RESPUBLIKASI MADANIY MEROS AGENTLIGI O‘ZBEKISTON AMALIY SAN'AT VA HUNARMANDCHI" DM	201248340	1	1	40000.00	2025-02-13 06:49:53	2026-01-27 09:50:36	#87-26 24.12.25	\N
-11	"SAMARQAND DAVLAT MUZEY-QO`RIQXONASI" DM	201007767	1	2	355000.00	2025-02-20 12:02:02	2026-01-27 09:51:37	№422 от 24.12.2025	\N
 6	Ichan Qala	201126524	1	4	250000.00	2025-01-13 13:20:13	2026-01-28 12:23:27	#001-92 от 19.01.2026	"O`ZBEKISTON RESPUBLIKASI TURIZM VA SPORT VAZIRLIGI HUZURIDAGI MADANIY MEROS AGENTLIGI ICHAN-QAL`A D
-15	Registon Ansambl 	201008164	1	2	100000.00	2025-03-19 12:33:17	2026-01-28 12:24:24	#129 19.03.2025	\N
+15	Registon Ansambl 	201008164	1	2	65000.00	2025-03-19 12:33:17	2026-03-11 11:18:35	#129 19.03.2025	\N
+11	"SAMARQAND DAVLAT MUZEY-QO`RIQXONASI" DM	201007767	1	2	355000.00	2025-02-20 12:02:02	2026-03-11 11:21:47	№422 от 24.12.2025	\N
 \.
 
 
@@ -7546,6 +8431,7 @@ COPY public.packages (id, name_ru, name_en, created_at, updated_at) FROM stdin;
 19	Чаевые водителям и гидам	tips to drivers and guides	2025-10-08 12:19:54	2025-10-08 12:19:54
 20	Визовые сборы	visa fees	2025-10-08 12:20:21	2025-10-08 12:20:21
 21	Любые личные расходы и любые услуги, не включённые в вышеуказанную программу	Any personal expenses and any services not included in the above program	2025-10-08 12:21:33	2025-10-08 12:21:33
+22	Питание согласно программе	Meals as per program	2026-02-04 10:39:28	2026-02-04 10:39:28
 \.
 
 
@@ -7592,11 +8478,11 @@ COPY public.personal_access_tokens (id, tokenable_type, tokenable_id, name, toke
 13	App\\Models\\User	41	authToken	c00bb6e6742b94da87dbc088df7f9e33b7bb0b9f17666077abd285b5ea5ba148	["*"]	2025-10-07 09:08:55	\N	2025-10-07 08:44:06	2025-10-07 09:08:55
 26	App\\Models\\User	48	googleAuthToken	919d7b7ec44394c8ee1299b37fb20e384f1c4f42e3d5228c89bbe1bd9f776b57	["*"]	2025-11-26 03:54:37	\N	2025-11-26 03:54:37	2025-11-26 03:54:37
 10	App\\Models\\User	25	authToken	d4a7c9df80628975271c506714b7a91b6cb6f61e734e8206c2d5c8fb646eafed	["*"]	2025-09-23 09:28:52	\N	2025-09-23 07:19:47	2025-09-23 09:28:52
+32	App\\Models\\User	25	authToken	5ee4150e18e393bfe29de79060842dd4bcb2ed35e2b405bb1be615964bdf2a1a	["*"]	2026-03-10 05:30:19	\N	2025-12-19 11:04:46	2026-03-10 05:30:19
 16	App\\Models\\User	25	authToken	a3a5c89873c3b65c47f9f78be4eb99378664bf73b5db8ba88f4fe4d330b9e841	["*"]	2025-10-21 10:36:45	\N	2025-10-21 10:16:57	2025-10-21 10:36:45
 30	App\\Models\\User	6	googleAuthToken	6f3825c21a7d5f0f5951870205389092d6cd869c3ce8d3727695f93e9589665c	["*"]	2026-01-04 06:40:40	\N	2025-12-01 12:16:33	2026-01-04 06:40:40
 29	App\\Models\\User	44	authToken	c055dbebe53acd795329b6410b0154479490629b77d5173ca4ab260d98d98278	["*"]	2026-01-04 23:10:26	\N	2025-12-01 12:14:38	2026-01-04 23:10:26
 24	App\\Models\\User	41	googleAuthToken	cc0de385260bda8c9a4e81d8e767706e8ed9b21ab3d6d4243b4605f3bd9a93fa	["*"]	2026-01-07 01:21:54	\N	2025-11-14 14:23:24	2026-01-07 01:21:54
-32	App\\Models\\User	25	authToken	5ee4150e18e393bfe29de79060842dd4bcb2ed35e2b405bb1be615964bdf2a1a	["*"]	2026-02-02 05:39:30	\N	2025-12-19 11:04:46	2026-02-02 05:39:30
 28	App\\Models\\User	49	googleAuthToken	0eed5bc2ae03df60bdb4943b05d98a8fc4d369005b96adc64654f439d7cddae2	["*"]	2025-12-24 09:07:42	\N	2025-11-30 16:59:17	2025-12-24 09:07:42
 \.
 
@@ -7656,6 +8542,7 @@ COPY public.restaurants (id, name, country_id, city_id, created_at, updated_at, 
 40	Zarafshan Tashkent	1	1	2025-09-02 06:24:32	2025-09-02 06:24:32	146000	\N	ООО «ZARAFSHON KHIVA RESTAURANT»	311924434	\N	\N
 41	ZARAFSHON	1	1	2025-09-19 06:48:35	2025-09-19 06:48:35	145600	\N	"ZARAFSHON KHIVA RESTAURANT" MCHJ	311924434	\N	\N
 42	"GOLDEN MINARET" OK	1	3	2025-10-02 06:42:23	2025-10-02 06:42:23	130000	\N	"GOLDEN MINARET" OK	305399021	\N	\N
+43	NDB	1	3	2026-02-02 10:28:21	2026-02-02 10:28:21	180000	\N	"MOHICHEHRI-ZAMON" MCHJ	303906166	\N	\N
 \.
 
 
@@ -7768,8 +8655,11 @@ COPY public.room_types (id, name, picture, description) FROM stdin;
 78	Premier Suire Double Use	\N	\N
 79	Residence Suite With Terrace Single Use	\N	\N
 80	Residence Suite With Terrace Double Use	\N	\N
-2	Double/Twin	room-types/01KDDAJTARFDGS9H5FTV1Q9HWB.jpg	Please refer the hotel pics above
-1	Single	room-types/01KDDAHXSPE6GB9J8DK3KCQBS2.jpg	Please refer the hotel pics above
+81	Premium Deluxe Single Use  	\N	\N
+82	Premium Deluxe Double Use	\N	\N
+83	Small Single Room 	\N	\N
+1	Standard Single Room	\N	Please refer the hotel pics above
+2	Standard Double/Twin Room	\N	Please refer the hotel pics above
 \.
 
 
@@ -7778,8 +8668,8 @@ COPY public.room_types (id, name, picture, description) FROM stdin;
 --
 
 COPY public.services (id, name_ru, name_en, description_ru, description_en, photo, created_at, updated_at) FROM stdin;
-1	Туры и экскурсии	Tours & Excursion	Мы гарантируем конкурентоспособные цены на все направления и туры.	We guarantee competitive prices for all destinations and tours.	\N	2025-08-05 13:04:15	2026-01-28 07:06:38
-3	Гарантированные туры	Guaranreed Tours	\N	\N	\N	2025-09-27 09:53:44	2026-01-28 07:06:45
+1	Туры и экскурсии	Tours & Excursion	Мы гарантируем конкурентоспособные цены на все направления и туры.	We guarantee competitive prices for all destinations and tours.	\N	2025-08-05 13:04:15	2026-02-21 07:20:04
+3	Гарантированные туры	Guaranreed Tours	\N	\N	\N	2025-09-27 09:53:44	2026-02-21 07:31:26
 4	Трансферы	Transfers	Забронируйте поездку, отслеживайте её, изменяйте дату и время или отменяйте бронирование.	Book, track, change date and time, or cancel rides\n	\N	2025-11-10 13:54:17	2026-01-28 07:06:53
 5	Авиабилеты	Flight Tickets	Забронируйте поездку, отслеживайте её, изменяйте дату и время или отменяйте бронирование.\n	Book, track, change date and time, or cancel rides	\N	2026-01-21 10:12:34	2026-01-28 07:46:54
 \.
@@ -7800,6 +8690,7 @@ COPY public.settings (id, key, value, created_at, updated_at) FROM stdin;
 
 COPY public.shows (id, name, country_id, city_id, price_per_person, created_at, updated_at) FROM stdin;
 1	NDB (BUXORO SHARQ YOG'DUSI" MCHJ) (INN 306636628)	1	3	100000	2025-01-07 14:49:09	2025-03-23 18:12:42
+3	"THOUSAND AND ONE NIGHTS" MCHJ	1	2	120000	2026-02-02 10:04:44	2026-02-02 10:04:44
 \.
 
 
@@ -7809,6 +8700,10 @@ COPY public.shows (id, name, country_id, city_id, price_per_person, created_at, 
 
 COPY public.similar_tours (id, web_tour_id, similar_web_tour_id, created_at, updated_at) FROM stdin;
 2	2	4	\N	\N
+3	14	2	\N	\N
+4	14	4	\N	\N
+5	16	13	\N	\N
+6	16	12	\N	\N
 \.
 
 
@@ -7901,6 +8796,7 @@ COPY public.tour_day_expense_room_types (id, tour_day_expense_id, room_type_id, 
 94	1974	1	1	2025-11-19 11:34:23	2025-11-19 11:34:23
 95	1975	1	6	2025-11-19 11:34:23	2025-11-19 11:34:23
 96	1976	1	2	2025-11-24 12:36:31	2025-11-24 12:36:31
+97	2131	1	2	2026-02-02 09:30:10	2026-02-02 09:30:10
 \.
 
 
@@ -7970,6 +8866,8 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 180	71	7	5520000.00	\N	\N	\N	\N	\N	\N	\N	MANSUR	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	\N	5520000	\N	2	\N	\N	\N	\N	\N	\N
 556	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	45	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-05-07	1	\N	\N	\N	\N	2025-05-08 12:00:00	700000	\N	\N	\N	11	\N	\N	2	\N	\N	\N	\N	\N	\N
 792	\N	3	\N	\N	2	tashkent International Hotel-Bek Hotel	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	16:40	Tashkent International Aiport	\N	\N	\N	2025-06-11	1	\N	\N	\N	\N	\N	\N	\N	Bekabod	\N	51	\N	\N	2	\N	\N	\N	\N	\N	\N
+1908	571	1	22236000.00	\N	2	for the night of 06.05.26	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	22236000	\N	2	\N	\N	\N	\N	\N	\N
+2059	618	4	2875000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["16","2","10"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2875000	\N	2	\N	\N	\N	\N	\N	\N
 215	82	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Inspira	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	\N	Tashkent City Tour	UZS	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1248	377	1	13291500.00	\N	5	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	13291500	\N	2	\N	\N	\N	\N	\N	\N
 213	81	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17:30	Tashkent Airport	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	\N	Tashkent airport - Hotel - Dinner - Hotel	UZS	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8095,6 +8993,8 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 667	222	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Movenpick	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	экскурсия по г. Самарканду	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 659	220	1	14481250.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14481250	\N	2	\N	\N	\N	\N	\N	\N
 643	216	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Hotel Crowne Plaza	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Hotel Crowne Plaza - airport T3	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2172	646	1	0.00	\N	2	for the night of 10.05.26	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1840	551	1	19612400.00	\N	2	for the night of 23.04.2026	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19612400	\N	2	\N	\N	\N	\N	\N	\N
 644	216	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:20	Airport Urgench	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Urgench - Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 665	221	6	1950000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1950000	\N	2	\N	\N	\N	\N	\N	\N
 367	127	3	\N	\N	5	Tozaboy	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Jiopek Joli	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	\N	Nukus-Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8148,7 +9048,9 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 690	225	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	44	\N	\N	\N	\N	\N	\N	10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 405	76	10	1600000.00	\N	5	show only	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1600000	\N	2	\N	\N	\N	\N	\N	\N
 560	\N	9	15564048.00	\N	2	arrival on 11.05.25\nTK8575 19:00 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19:00	16:35	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-05-10	\N	\N	\N	\N	CPT-TAS	\N	\N	\N	\N	\N	14	\N	\N	2	\N	\N	\N	\N	\N	\N
+2173	647	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 561	\N	9	876668.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12:15	10:50	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-05-12	\N	\N	\N	\N	TAS-NVI	\N	\N	\N	\N	\N	14	\N	\N	2	\N	\N	\N	\N	\N	\N
+2208	656	1	800000.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	800000	\N	2	\N	\N	\N	\N	\N	\N
 1151	\N	9	1100370.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-04	\N	\N	\N	\N	TAS-BHK	\N	\N	\N	\N	\N	102	1100370	\N	2	\N	US801	\N	\N	2	\N
 388	137	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 296	106	3	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:22	вокзал г. Самарканд	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	\N	вокзал г. Самарканд - отель Ал Мадина, экскурсия 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8221,8 +9123,11 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 583	\N	1	\N	\N	1	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-06-15	1	\N	\N	\N	\N	2025-06-16 12:00:00	1	\N	\N	\N	24	\N	\N	2	\N	\N	\N	\N	\N	\N
 584	\N	9	3606165.00	\N	1	Сложный Маршрут Ташкент Нукус 31 мая, Ташкент Бишкек 1 июня, Фергана Ташкент 15 июня,  Ташкент Ургенч 16 июня 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	18:15	16:55	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-05-31	\N	\N	\N	\N	NCU-TAS TAS-MAN FEG-TAS TAS-UGN	\N	\N	\N	\N	\N	24	\N	\N	2	\N	\N	\N	\N	\N	\N
 459	167	2	50.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	642500	\N	2	\N	\N	\N	\N	\N	\N
+2175	647	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Inspira S 	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 571	199	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	отель Инспира С	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Ташкент- КПП Ойбек 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2177	647	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 376	131	3	\N	\N	2	Bedu Expeditionen\n\nflight QR 377Q @01:20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:20	Tashkent airport	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	\N	Tashkent airport - Mirzo hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2176	647	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
 455	166	1	1400500.00	\N	2	\N	\N	\N	\N	\N	\N	65	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	1400500	\N	2	\N	\N	\N	\N	\N	\N
 457	167	1	1400500.00	\N	2	\N	\N	\N	\N	\N	\N	65	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	1400500	\N	2	\N	\N	\N	\N	\N	\N
 460	168	1	1400500.00	\N	2	\N	\N	\N	\N	\N	\N	65	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	1400500	\N	2	\N	\N	\N	\N	\N	\N
@@ -8271,6 +9176,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 563	\N	8	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	10:22	07:52	\N	\N	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	\N	2025-06-17	1	1	\N	\N	\N	\N	\N	\N	\N	\N	15	\N	\N	2	\N	\N	\N	\N	\N	\N
 523	189	8	0.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	10:53	08:29	\N	\N	\N	\N	\N	\N	32	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 518	189	1	17495000.00	\N	5	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17495000	\N	2	\N	\N	\N	\N	\N	\N
+2174	647	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:00	TAS Airport	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	TAS Airport - Inspira S Hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 520	189	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:53	вокзал Самарканд	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	экскурсия по Самарканду	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 564	\N	8	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	20:30	18:10	\N	\N	\N	\N	\N	\N	1	\N	0	\N	\N	\N	\N	\N	\N	\N	2025-06-17	2	1	\N	\N	\N	\N	\N	\N	\N	\N	16	\N	\N	2	\N	\N	\N	\N	\N	\N
 515	188	3	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	отель Inspira S	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	экскурсия по Ташкенту	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8352,6 +9258,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 806	\N	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17:00	Reverside (Yangi Uzbekistan)	\N	\N	\N	2025-06-16	1	\N	\N	\N	\N	\N	\N	\N	Reverside (Yangi Uzbekistan)-Chirchik Hotel	\N	58	\N	\N	2	\N	\N	\N	\N	\N	\N
 841	270	1	1400500.00	\N	2	\N	\N	\N	\N	\N	\N	65	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1400500	\N	2	\N	\N	\N	\N	\N	\N
 864	274	1	3600000.00	\N	5	\N	\N	\N	\N	\N	\N	5	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	2	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	3600000	\N	2	\N	\N	\N	\N	\N	\N
+2180	648	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	SKD train station 	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	SKD train station - City Tour 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 866	274	8	1620000.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	10:50	08:29	\N	\N	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1620000	\N	2	\N	\N	\N	\N	\N	\N
 855	\N	3	\N	\N	2	Transfer Sirdarya - Tashkent \nMr. Reda Mansour	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	Sirdarya site	\N	\N	\N	2025-06-25	33	\N	\N	\N	\N	\N	\N	\N	Sirdarya site - International hotel Tashkent	\N	63	0	\N	2	\N	\N	\N	\N	\N	\N
 859	\N	3	\N	\N	5	Kazakstan residence-Sirdarya Mr. Bram	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	33	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Kazakstan Recidence	\N	\N	\N	2025-06-27	1	\N	\N	\N	\N	\N	\N	\N	Sirdarya	\N	66	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8368,6 +9275,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1230	\N	9	6539746.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-09	\N	\N	\N	\N	TAS-ESB-TAS	\N	\N	\N	\N	\N	108	\N	\N	2	\N	\N	\N	\N	1	200000
 709	233	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Mercury	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	экскурсия по Бухаре	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1077	332	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Train Station Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Train Station - Hotel City, full day in Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2182	648	4	14105000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["3","11","15"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14105000	\N	2	\N	\N	\N	\N	\N	\N
 1087	335	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Shirin Village	\N	\N	\N	\N	30	\N	\N	["7"]	\N	\N	\N	\N	Vobkent-Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1076	332	1	17985000.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	2	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	17985000	\N	2	\N	\N	\N	\N	\N	\N
 1079	332	6	5100000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5100000	\N	2	\N	\N	\N	\N	\N	\N
@@ -8460,11 +9368,14 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 190	74	8	4590000.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	09:51	07:21	\N	\N	\N	\N	\N	\N	17	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	UZS	\N	4590000	\N	2	\N	\N	\N	\N	\N	\N
 192	75	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	33	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	UZS	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 228	87	3	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:05	межд.аэропорт г. Ташкент	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	\N	межд.аэропорт г. Ташкент - отел  Инспира С	USD	\N	899500	\N	2	\N	\N	\N	\N	\N	\N
+2181	648	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2178	648	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 842	271	1	1400500.00	\N	2	\N	\N	\N	\N	\N	\N	65	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1400500	\N	2	\N	\N	\N	\N	\N	\N
 835	265	1	1225000.00	\N	2	\N	\N	\N	\N	\N	\N	26	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1225000	\N	2	\N	\N	\N	\N	\N	\N
 829	262	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	67	\N	\N	\N	\N	\N	\N	28	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	28	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1231	\N	9	1382700.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-06 10:10:00	07:45	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-06	\N	\N	\N	\N	BBI-DEL	\N	\N	\N	\N	\N	109	\N	\N	2	6E6074	6E6074	\N	\N	1	200000
 861	273	2	70.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	864500	\N	2	\N	\N	\N	\N	\N	\N
+2219	659	2	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 850	\N	3	\N	\N	2	Tashkent International Hotel-Bakabod Mettalurg Hotel Mr. Shafiq	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	15:20	Tashkent International Aiport	\N	\N	\N	2025-06-19	1	\N	\N	\N	\N	\N	\N	\N	Sirdarya Mettalurg Hotel	\N	61	\N	\N	2	\N	\N	\N	\N	\N	\N
 851	\N	3	\N	\N	2	Beksbod Metallurg Hotel- Tashkent	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	22:00	Mettallurg Hotel	\N	\N	\N	2025-06-20	12	\N	\N	\N	\N	\N	\N	\N	Tashkent	\N	61	\N	\N	2	\N	\N	\N	\N	\N	\N
 846	\N	1	0.00	\N	2	Mr. Ashrad	\N	\N	\N	\N	\N	147	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	15:00	\N	2025-06-17	1	\N	\N	\N	\N	2025-06-18 12:00:00	1	\N	\N	\N	60	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8477,6 +9388,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 820	257	1	971000.00	\N	2	\N	\N	\N	\N	\N	\N	41	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	971000	\N	2	\N	\N	\N	\N	\N	\N
 815	254	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	44	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	10	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 814	254	3	\N	\N	2	Airport transfer flight to Nukus	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:45	Mirzo hotel	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	Mirzo hotel-Tashkent airport T3	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2179	648	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S hotel 	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Inspira S hotel  - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 831	263	1	1225000.00	\N	2	\N	\N	\N	\N	\N	\N	26	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1225000	\N	2	\N	\N	\N	\N	\N	\N
 803	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19:17	Tashkent train station (severniy)	\N	\N	\N	2025-07-03	1	\N	\N	\N	\N	\N	\N	\N	Tashkent train station - ACWA Power Office	\N	57	0	\N	2	\N	\N	\N	\N	\N	\N
 848	\N	8	0.00	\N	2	TAS-NVI train ticket	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	8	23:19	19:41	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-23	1	1	\N	\N	\N	\N	\N	\N	\N	\N	57	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8530,13 +9442,13 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 894	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Shirin	\N	\N	\N	2025-07-01	7	\N	\N	\N	\N	\N	\N	\N	Shirin-Tashkent	\N	69	0	\N	2	\N	\N	\N	Muhammad Waqar	\N	\N
 895	\N	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	159	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-07-01	1	\N	\N	\N	\N	2025-06-11 20:00:00	11	\N	\N	\N	69	0	\N	2	\N	\N	\N	\N	\N	\N
 928	\N	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:50	межд.аэропорт 	\N	\N	\N	2025-07-22	1	\N	\N	["2"]	\N	\N	\N	\N	межд.аэропорт - Hotel Wyndham Tashkent	\N	83	0	\N	2	\N	\N	\N	Berlin Economics GmbH	\N	\N
-897	252	1	0.00	\N	2	231231	\N	\N	\N	\N	\N	160	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12:31	\N	\N	1	\N	\N	\N	\N	\N	\N	12:31	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N
 896	\N	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	20:00	Hotel Gloria	\N	\N	\N	2025-07-11	1	\N	\N	["21"]	\N	\N	\N	\N	Tashkent-Shirin	\N	69	0	\N	2	\N	\N	\N	Muhammad Waqar	\N	\N
 898	\N	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	18	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	23:00	\N	2025-07-01	1	\N	\N	\N	\N	2025-07-02 12:00:00	1	\N	\N	\N	70	0	\N	2	\N	\N	\N	\N	\N	\N
 899	\N	9	994012.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-03 09:55	08:30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-04	\N	\N	\N	\N	Termez-Tashkent	\N	\N	\N	\N	\N	71	994012	\N	2	US-752	\N	\N	\N	\N	\N
 900	\N	9	994012.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-03 09:55	08:30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-03	\N	\N	\N	\N	Termez-Tashkent	\N	\N	\N	\N	\N	72	994012	\N	2	US-752	\N	\N	\N	\N	\N
 903	\N	9	1912043.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-03 21:40	20:00	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-03	\N	\N	\N	\N	Tashkent-Nukus	\N	\N	\N	\N	\N	75	\N	\N	2	HY17	\N	\N	\N	\N	\N
 904	\N	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	15:00	Shirin	\N	\N	\N	2025-07-03	7	\N	\N	\N	\N	\N	\N	\N	Shirin-Tashkent airport	\N	75	\N	\N	2	\N	\N	\N	Puthan Purayil Gijesh Balakrishnan	\N	\N
+2183	648	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	08:00	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 901	\N	9	994012.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-22 09:55	08:30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-04	\N	\N	\N	\N	Termez-Tashkent	\N	\N	\N	\N	\N	73	994012	\N	2	US-752	\N	\N	\N	2	0
 902	\N	9	994012.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-22 09:55	08:30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-03	\N	\N	\N	\N	Termez-Tashkent	\N	\N	\N	\N	\N	74	994012	\N	2	US-752	\N	\N	\N	2	0
 919	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	15:00	Sirdarya	\N	\N	\N	2025-07-07	33	\N	\N	\N	\N	\N	\N	\N	Sirdarya-Tashkent	\N	78	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8565,6 +9477,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 918	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-07-07	12	\N	\N	\N	\N	2025-07-11 12:00:00	4	\N	\N	\N	77	\N	\N	2	\N	\N	\N	\N	\N	\N
 934	118	2	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	864500	\N	2	\N	\N	\N	\N	\N	\N
 915	284	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2210	657	2	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 923	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:00	TBD	\N	\N	\N	2025-07-08	1	\N	\N	\N	\N	\N	\N	\N	Tashkent-Shrin	\N	81	0	\N	2	\N	\N	\N	Mr. Giyos	\N	\N
 942	287	3	\N	\N	5	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	14	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:15	hotel Lotte City Palace 	\N	\N	\N	\N	1	\N	\N	["6"]	\N	\N	\N	\N	hotel Lotte City Palace - North Train Station	\N	\N	0	\N	2	\N	\N	\N	Mr.Fischer+3	\N	\N
 938	286	2	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	864500	\N	2	\N	\N	\N	\N	\N	\N
@@ -8578,6 +9491,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 962	294	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	40	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	3	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 994	303	1	13524500.00	\N	5	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	3	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	13524500	\N	2	\N	\N	\N	\N	\N	\N
 950	289	3	\N	\N	5	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:22	Train Station Samarkand	\N	\N	\N	\N	2	\N	\N	["7"]	\N	\N	\N	\N	full day in Samarkand 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2185	649	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City Tour Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 958	292	3	\N	\N	5	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	26	26	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Raxmatulla GH	\N	\N	\N	\N	28	\N	\N	["7"]	\N	\N	\N	\N	Asraf-Yurt Camp Aydarkul	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 963	294	2	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	864500	\N	2	\N	\N	\N	\N	\N	\N
 964	294	3	\N	\N	5	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Anor	\N	\N	\N	\N	3	\N	\N	["7"]	\N	\N	\N	\N	full day in Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8629,6 +9543,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 973	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	40	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	18:00	Zavod	\N	\N	\N	2025-07-10	7	\N	\N	\N	\N	\N	\N	\N	Shirin-Guliston	\N	84	0	\N	2	\N	\N	\N	Bram Filiep	\N	\N
 1055	323	3	\N	\N	5	\N	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	HOtel Ansi	\N	\N	\N	\N	3	\N	\N	["7"]	\N	\N	\N	\N	full day in Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1036	314	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	12	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2187	649	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1001	305	1	13524500.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	4	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	13524500	\N	2	\N	\N	\N	\N	\N	\N
 1037	314	3	\N	\N	5	\N	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:00	Hotel Human	\N	\N	\N	\N	2	\N	\N	["6"]	\N	\N	\N	\N	Hotel Human-Train Station	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1006	306	6	4030000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	31	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4030000	\N	2	\N	\N	\N	\N	\N	\N
@@ -8667,6 +9582,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1024	310	6	1560000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	33	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1560000	\N	2	\N	\N	\N	\N	\N	\N
 1042	315	3	\N	\N	5	\N	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel De Villa	\N	\N	\N	\N	2	\N	\N	["7"]	\N	\N	\N	\N	full day in Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1022	310	1	6900000.00	\N	2	\N	\N	\N	\N	\N	\N	74	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	6	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	6900000	\N	2	\N	\N	\N	\N	\N	\N
+2292	679	2	65.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	793000	\N	2	\N	\N	\N	\N	\N	\N
 1003	305	7	120000.00	\N	1	\N	\N	\N	\N	\N	Pick Nick	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	120000	\N	2	\N	\N	\N	\N	\N	\N
 1048	318	3	\N	\N	5	\N	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	11	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Sariyosia	\N	\N	\N	\N	11	\N	\N	["7"]	\N	\N	\N	\N	full day in Termez	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1002	305	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Anor	\N	\N	\N	\N	\N	\N	\N	["7"]	\N	\N	\N	\N	Bukhara-Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8711,6 +9627,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1099	339	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:00	Hotel New Minor	\N	\N	\N	\N	4	\N	\N	["7"]	\N	\N	\N	\N	Khiva-Urgench	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1073	331	6	5100000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5100000	\N	2	\N	\N	\N	\N	\N	\N
 1082	333	6	5100000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	20	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5100000	\N	2	\N	\N	\N	\N	\N	\N
+2186	649	4	775000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["13"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	775000	\N	2	\N	\N	\N	\N	\N	\N
 1111	341	1	3631250.00	\N	5	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	3631250	\N	2	\N	\N	\N	\N	\N	\N
 1103	\N	9	19550000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-28 00:50	11:50	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-07-27	\N	\N	\N	\N	Tuluza-TAS-Tuluza	\N	\N	\N	\N	\N	95	\N	\N	2	\N	\N	\N	\N	1	200000
 1124	345	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12:18	Train Station Tashkent	\N	\N	\N	\N	1	\N	\N	["33","6"]	\N	\N	\N	\N	Train Station, full day in Tashkent	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8753,6 +9670,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1142	\N	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	40	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	18:00	Shirin	\N	\N	\N	2025-07-23	7	\N	\N	\N	\N	\N	\N	\N	Shirin-Guliston	\N	100	\N	\N	2	\N	\N	\N	Mr. Bram Filiep	\N	\N
 1143	\N	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Guliston	\N	\N	\N	2025-07-24	40	\N	\N	\N	\N	\N	\N	\N	Guliston-Shirin	\N	100	\N	\N	2	\N	\N	\N	Mr. Bram Filiep	\N	\N
 1293	390	4	40000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["9"]	\N	\N	\N	["4"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	40000	\N	2	\N	\N	\N	\N	\N	\N
+2190	650	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1303	394	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Raxmatulla House	\N	\N	\N	\N	28	\N	\N	\N	\N	\N	\N	\N	Asraf-Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1109	340	1	4200000.00	\N	5	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	\N	\N	\N	34	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	34	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	4200000	\N	2	\N	\N	\N	\N	\N	\N
 1232	373	1	21056250.00	\N	5	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	00:50	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21056250	\N	2	\N	\N	\N	\N	\N	\N
@@ -8792,6 +9710,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1276	384	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	10	10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:55	Domestic Airport 	\N	\N	\N	\N	10	\N	\N	["29","6"]	\N	\N	\N	\N	full day Nukus	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1160	351	2	100.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	1260000	\N	2	\N	\N	\N	\N	\N	\N
 1168	355	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel New Minor	\N	\N	\N	\N	3	\N	\N	["7"]	\N	\N	\N	\N	Khiva-Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2188	650	1	\N	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1165	353	2	70.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	882000	\N	2	\N	\N	\N	\N	\N	\N
 1264	374	7	21.00	\N	\N	\N	\N	\N	\N	\N	Train Ticket Guide 	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	264600	\N	2	\N	\N	\N	\N	\N	\N
 1295	391	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	66	\N	\N	\N	\N	\N	\N	26	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	26	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8850,6 +9769,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1182	360	1	5200000.00	\N	5	\N	\N	\N	\N	\N	\N	26	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	2	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	5200000	\N	2	\N	\N	\N	\N	\N	\N
 1186	361	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	2	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1185	361	3	\N	\N	5	4 cars thourgh mountain pass	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Reikartz Amar	\N	\N	\N	\N	2	\N	\N	["7"]	\N	\N	\N	\N	Samarkand-Shakhrisabz-Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2189	650	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City Hotel - Shirin village	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1183	360	2	70.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	882000	\N	2	\N	\N	\N	\N	\N	\N
 1191	363	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	18:00	Hotel Reikartz Amar	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Amar hotel - train station	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1209	368	8	0.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	2025-08-01 12:46:00	11:03	\N	\N	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8945,6 +9865,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1268	383	2	50.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	617500	\N	2	\N	\N	\N	\N	\N	\N
 1271	383	7	1.00	\N	1	\N	\N	\N	\N	\N	Metro ride	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	12350	\N	2	\N	\N	\N	\N	\N	\N
 1299	393	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	67	\N	\N	\N	\N	\N	\N	28	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	28	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2192	651	1	\N	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1367	416	4	560000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	560000	\N	2	\N	\N	\N	\N	\N	\N
 1370	418	7	10.00	\N	1	\N	\N	\N	\N	\N	water 	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	123500	\N	2	\N	\N	\N	\N	\N	\N
 1327	402	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Huvaydo	\N	\N	\N	\N	1	\N	\N	["6"]	\N	\N	\N	\N	Tasheknt-Chimgan	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -8975,6 +9896,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1414	430	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:30	Hotel Huvaydo	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	Hotel Huvaydo-Train Station Tashkent	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1202	368	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	171	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	3	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1402	371	2	60.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	756000	\N	2	\N	\N	\N	\N	\N	\N
+2195	651	4	2480000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["18","4"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2480000	\N	2	\N	\N	\N	\N	\N	\N
 1423	432	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	28	28	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel De Villa 	\N	\N	\N	\N	2	\N	\N	["7"]	\N	\N	\N	\N	Samarkand- Asraf Village	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1416	430	4	500000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["20","21","22","23","2"]	\N	\N	\N	["11","13","15","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	500000	\N	2	\N	\N	\N	\N	\N	\N
 1415	430	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:49	Train Station Samarkand	\N	\N	\N	\N	2	\N	\N	["7"]	\N	\N	\N	\N	full day Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -9017,7 +9939,6 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1418	430	8	0.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2025-09-26 10:49:00	08:30	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1439	438	1	806250.00	\N	5	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	806250	\N	2	\N	\N	\N	\N	\N	\N
 1453	266	2	50.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	590000	\N	2	\N	\N	\N	\N	\N	\N
-1908	571	1	0.00	\N	2	for the night of 06.05.26	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1475	\N	8	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2025-08-28 12:05:00	08:40	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-28	1	8	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	2	\N	\N	\N	\N	\N	\N
 1472	449	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:00	Hotel Orient Star (Madrassa)	\N	\N	\N	\N	4	\N	\N	["7"]	\N	\N	\N	\N	Khiva-Urgench Airport 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1456	\N	3	\N	\N	4	12:15 Подача в NAVRUZ. Трансфер в межд. а/п на рейс TK367 @15:15	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12:15	отель Навруз	\N	\N	\N	2025-09-12	1	\N	\N	[]	\N	\N	\N	\N	отель Навруз-межд.аэропорт 	\N	118	0	\N	2	\N	\N	\N	HSIEN-YU TSAI + CHI-YEN LIN + KUO-CHAO CHAO	\N	\N
@@ -9029,10 +9950,12 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 821	258	3	\N	\N	5	Khiva - Bukhara transfer	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Grand Vizir hotel	\N	\N	\N	\N	4	\N	\N	["7"]	\N	\N	\N	\N	Khiva - Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 862	273	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	00:40	Internatioanl Airport Tashkent	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	Airport - Hotel Sapiens	\N	\N	0	\N	2	\N	\N	\N	Bedu Expeditionen 	\N	\N
 1466	446	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	отель Меридан Plaza	\N	\N	\N	\N	3	\N	\N	["9"]	\N	\N	\N	\N	Samarkand-Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2191	651	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	Shirin Ethno house	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	Shirin Ethno house - Bukhara 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1478	\N	9	729891.00	\N	2	Мы были вынуждены продать этот билет с убытком. Агент, который оформлял билет, ошибочно взял тариф 948858 UZS.	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-26 08:00:00	06:30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-26	\N	\N	\N	\N	Tashkent-Termez	\N	\N	\N	\N	\N	122	\N	\N	2	\N	751	\N	\N	2	100000
 1479	\N	9	848561.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-27 21:05:00	19:55	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-27	\N	\N	\N	\N	Termez-Tashkent	\N	\N	\N	\N	\N	122	\N	\N	2	\N	HY70	\N	\N	2	10000
 1480	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	163	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-08-26	11	\N	\N	\N	\N	2025-08-27 12:00:00	1	\N	\N	\N	123	\N	\N	2	\N	\N	\N	\N	\N	\N
 1469	447	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Bahor 	\N	\N	\N	\N	3	\N	\N	[]	\N	\N	\N	\N	Bukhara-Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2193	651	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1461	444	6	1650000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1650000	\N	2	\N	\N	\N	\N	\N	\N
 1462	444	4	440000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["10"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	440000	\N	2	\N	\N	\N	\N	\N	\N
 1464	445	6	1320000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1320000	\N	2	\N	\N	\N	\N	\N	\N
@@ -9068,14 +9991,17 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1491	\N	9	778951.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-09-07 21:30:00	20:00	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-09-07	\N	\N	\N	\N	TAS-NCU	\N	\N	\N	\N	\N	128	778951	\N	2	\N	\N	\N	\N	2	100000
 1067	327	3	\N	\N	5	\N	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Silk Road Khiva	\N	\N	\N	\N	\N	\N	\N	["7"]	\N	\N	\N	\N	Khiva-Dashgouz	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1511	454	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11:00	Dom.Airport Samarkand 	\N	\N	\N	\N	2	\N	\N	["2"]	\N	\N	\N	\N	full day Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2137	636	1	0.00	\N	2	for the night of 26.04 	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1266	382	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	00:50	Airport Tashkent	\N	\N	\N	\N	1	\N	\N	["6","2"]	\N	\N	\N	\N	Airport- Hotel Huvaydo	\N	\N	0	\N	2	\N	\N	\N	Jan van den Brand +1	\N	\N
 1249	377	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Shirin Village	\N	\N	\N	\N	3	\N	\N	["7"]	\N	\N	\N	\N	Vobkent-Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1524	460	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	отель BAHOR BUKHARA	\N	\N	\N	\N	4	\N	\N	["7"]	\N	\N	\N	\N	Бухара-Хива	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2194	651	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1129	346	3	\N	\N	5	Taschkent (TAS) – MUC, 05.25 – 09.20\nMrs Körger, Hannelore & Mr Körger, Friedrich Karl\nMrs Kistler, Ursula & Mr Kistler, Martin	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	02:30	Hotel Huvaydo	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	Hotel Huvaydo-Inter.Airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1130	346	3	\N	\N	5	Taschkent (TAS) – IST, 06.20 – 09.35\nMrs Schmidt, Kerstin & Mr Schmidt, Frank	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	03:30	Hotel Huvaydo	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	Hotel Huvaydo-Inter.Airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1495	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	181	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-09-09	39	\N	\N	\N	\N	2025-09-10 12:00:00	1	\N	\N	\N	130	\N	\N	2	\N	\N	\N	\N	\N	\N
 1455	\N	3	\N	\N	4	межд.а/п рейс TK364. Трансфер в отель NAVRUZ	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	04:50	межд.аэропорт	\N	\N	\N	2025-09-09	1	\N	\N	["2"]	\N	\N	\N	\N	межд.а/п рейс TK364 - отель NAVRUZ	\N	117	0	\N	2	\N	\N	\N	HSIEN-YU TSAI + CHI-YEN LIN + KUO-CHAO CHAO	\N	\N
 1506	450	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11:50	межд.аэропорт Ташкент	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	аэропорт -  отель Ramada by Wyndham  Tashkent	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2295	681	1	1049200.00	\N	2	\N	\N	\N	\N	\N	\N	40	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1049200	\N	2	\N	\N	\N	\N	\N	\N
 1496	\N	8	659130.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	8	2025-09-11 01:31:00	20:20	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-09-10	1	8	\N	\N	\N	\N	\N	\N	\N	\N	131	659130	\N	2	\N	\N	\N	\N	\N	\N
 1497	\N	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	178	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:31	\N	2025-09-11	8	\N	\N	\N	\N	2025-09-11 12:00:00	0.5	\N	\N	\N	131	0	\N	2	\N	\N	\N	\N	\N	\N
 1498	\N	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	2025-09-12 06:51:00	00:21	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-09-12	8	7	\N	\N	\N	\N	\N	\N	\N	\N	131	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -9114,7 +10040,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1538	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	58	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-09-26	3	\N	\N	\N	\N	2025-09-27 12:00:00	1	\N	\N	\N	137	\N	\N	2	\N	\N	\N	\N	\N	\N
 1539	\N	9	804670.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-09-23 15:40:00	14:10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-09-23	\N	\N	\N	\N	TAS-BHK	\N	\N	\N	\N	\N	138	\N	\N	2	US803	US803	\N	\N	2	100000
 1540	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-09-23	3	\N	\N	\N	\N	2025-09-26 12:00:00	3	\N	\N	\N	138	\N	\N	2	\N	\N	\N	\N	\N	\N
-2059	618	4	2875000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["16","2","10"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2875000	\N	2	\N	\N	\N	\N	\N	\N
+2154	640	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1405	428	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Tashkent Airport	\N	\N	\N	\N	1	\N	\N	["2","34"]	\N	\N	\N	\N	Airport - Hotel Huvaydo, full day Tashkent	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1531	461	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	отель Khiva Residence	\N	\N	\N	\N	4	\N	\N	["2"]	\N	\N	\N	\N	full time Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1542	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	22:00	\N	2025-09-27	3	\N	\N	\N	\N	2025-09-28 12:00:00	1	\N	\N	\N	139	\N	\N	2	\N	\N	\N	\N	\N	\N
@@ -9176,6 +10102,7 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1600	482	2	200.00	\N	2	200 $ for 2 pax for a day trip in Chimgan including transport + guide	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	2400000	\N	2	\N	\N	\N	\N	\N	\N
 1647	\N	9	1755644.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-10-07 20:35:00	19:05	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-10-07	\N	\N	\N	\N	TAS-TMJ-TAS	\N	\N	\N	\N	\N	142	1755644	\N	2	\N	US755	\N	\N	\N	100000
 1649	\N	9	4603794.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	20:40	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-10-20	\N	\N	\N	\N	ESB-IST-TAS	\N	\N	\N	\N	\N	143	\N	\N	2	\N	\N	\N	\N	1	200000
+2301	682	2	60.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	732000	\N	2	\N	\N	\N	\N	\N	\N
 1641	499	3	\N	\N	5	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:50	Amar hotel	\N	\N	\N	\N	2	\N	\N	["7"]	\N	\N	\N	\N	Amar hotel - train station	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1622	493	2	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	861000	\N	2	\N	\N	\N	\N	\N	\N
 1612	487	3	\N	\N	5	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	10	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:45	The Heritage hotel	\N	\N	\N	\N	10	\N	\N	["2"]	\N	\N	\N	\N	The Heritage hotel - Domestic airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -9232,6 +10159,8 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1677	506	6	2100000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	36	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2100000	\N	2	\N	\N	\N	\N	\N	\N
 1675	506	4	3500000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3500000	\N	2	\N	\N	\N	\N	\N	\N
 1668	503	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel	\N	\N	\N	\N	1	\N	\N	["7"]	\N	\N	\N	\N	Tashkent-Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2196	652	1	\N	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2197	652	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	City tour Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1395	425	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Imperial Palace	\N	\N	\N	\N	3	\N	\N	["7"]	\N	\N	\N	\N	Bukhara-Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1671	504	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel 	\N	\N	\N	\N	2	\N	\N	["6"]	\N	\N	\N	\N	Samarkand-Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1660	\N	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	00:30	Hotel Ramada Encore	\N	\N	\N	2025-11-01	1	\N	\N	\N	\N	\N	\N	\N	Hotel Ramada Encore- Int. Airport	\N	147	0	\N	2	\N	\N	1	\N	\N	\N
@@ -9241,15 +10170,19 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1676	506	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel	\N	\N	\N	\N	4	\N	\N	["2"]	\N	\N	\N	\N	Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1678	507	3	\N	\N	5	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:00	Hotel	\N	\N	\N	\N	4	\N	\N	["6"]	\N	\N	\N	\N	Khiva - Urgench	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1681	\N	9	703077.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-10-28 16:10:00	15:10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-10-28	\N	\N	\N	\N	Bukhara-Tashkent	\N	\N	\N	\N	\N	151	\N	\N	2	HY22	HY22	\N	\N	2	100000
+2198	652	6	3100000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3100000	\N	2	\N	\N	\N	\N	\N	\N
 1656	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	00:50	Int.Airport Tashkent	\N	\N	\N	2025-10-29	1	\N	\N	["2"]	\N	\N	\N	\N	INt.Airport - Hotel Ramada Encore 	\N	147	0	\N	2	\N	\N	\N	Berlin Economics GmbH	\N	\N
 1657	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Ramada Encore	\N	\N	\N	2025-10-29	1	\N	\N	[]	\N	\N	\N	\N	full day Tashkent	\N	147	0	\N	2	\N	\N	\N	\N	\N	\N
 1658	\N	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Ramada Encore	\N	\N	\N	2025-10-30	1	\N	\N	["2"]	\N	\N	\N	\N	full day Tashkent	\N	147	0	\N	2	\N	\N	\N	Berlin Economics GmbH	\N	\N
+1709	514	4	1000000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["19"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1000000	\N	2	\N	\N	\N	\N	\N	\N
+2184	649	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1683	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-10-31	3	\N	\N	\N	\N	2025-11-01 12:00:00	1	\N	\N	\N	153	\N	\N	2	\N	\N	\N	\N	\N	\N
 1659	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Ramada Encore	\N	\N	\N	2025-10-31	1	\N	\N	["2"]	\N	\N	\N	\N	full day Tashkent	\N	147	0	\N	2	\N	\N	1	\N	\N	\N
 1690	509	2	120.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	1440000	\N	2	\N	\N	\N	\N	\N	\N
 1682	\N	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-10-31	3	\N	\N	\N	\N	2025-11-01 12:00:00	1	\N	\N	\N	152	0	\N	2	\N	\N	\N	\N	\N	\N
 1701	512	3	\N	\N	2	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	16:30	TAS Apt	\N	\N	\N	\N	1	\N	\N	[]	\N	\N	\N	\N	TAS APT - Hyatt Regency	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1684	\N	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	35	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-11-07	3	\N	\N	\N	\N	2025-11-08 12:00:00	1	\N	\N	\N	154	0	\N	2	\N	\N	\N	\N	\N	\N
+1707	514	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1686	508	4	50000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["20"]	\N	\N	\N	["15","11"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	50000	\N	2	\N	\N	\N	\N	\N	\N
 1662	501	3	\N	\N	2	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12:30	Int.Airport	\N	\N	\N	\N	1	\N	\N	[]	\N	\N	\N	\N	full day Tashkent	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1689	509	4	160000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["5","6","26"]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	160000	\N	2	\N	\N	\N	\N	\N	\N
@@ -9265,152 +10198,197 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1708	514	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hyatt Regency	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent city tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1687	508	2	100.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	1200000	\N	2	\N	\N	\N	\N	\N	\N
 1685	508	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Krokus Plaza	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	TAS-SKD	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2212	657	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Huvaydo hotel 	\N	\N	\N	\N	1	\N	\N	["6"]	\N	\N	\N	\N	Tashkent city tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1696	\N	9	2845000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-12-15 02:35:00	19:00	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-12-15	\N	\N	\N	\N	BBI-DEL-TAS	\N	\N	\N	\N	\N	155	2845000	\N	2	HY426	HY5SPA	2	\N	1	200000
 1699	511	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	23:50	Int.Airport Tashkent	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	Airport - Hotel Krokus Plaza	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1707	514	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2223	660	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2026-03-16 10:25:00	08:00	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2222	660	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S 	\N	\N	\N	\N	1	\N	\N	["6"]	\N	\N	\N	\N	Inspira S - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	Gantner Johannes	\N	\N
+1711	514	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1695	\N	9	4106000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-22 18:30:00	08:10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-22	\N	\N	\N	\N	TAS-DEL-BBI	\N	\N	\N	\N	\N	155	4106000	\N	2	6E6688	HY423	2	\N	1	200000
-1710	514	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1711	514	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1709	514	4	1000000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["19"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1000000	\N	2	\N	\N	\N	\N	\N	\N
+1710	514	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2199	653	1	\N	\N	2	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2200	653	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Imperial Palace - Khiva Said Islom Khodja hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2201	653	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2202	653	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2236	664	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21:30	New Minor hotel	\N	\N	\N	\N	4	\N	\N	["2"]	\N	\N	\N	\N	Urgench airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1700	512	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1780	532	4	1800000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1800000	\N	2	\N	\N	\N	\N	\N	\N
+1776	532	1	19800600.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19800600	\N	2	\N	\N	\N	\N	\N	\N
+1781	533	1	17656800.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17656800	\N	2	\N	\N	\N	\N	\N	\N
+1785	533	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2026-04-11 10:25:00	08:00	\N	\N	\N	\N	\N	\N	33	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2209	656	3	\N	\N	1	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	23:00	Tashkent airport 	\N	\N	\N	\N	1	\N	\N	["6"]	\N	\N	\N	\N	Tashkent airport  - Huvaydo hotel 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2225	660	2	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2240	666	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	16:05	Tashkent International Airport	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Hyatt Regency 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2237	664	2	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2231	662	2	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2282	675	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2280	675	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	22:00	Tashkent Domestic Airport	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Hyatt Regency	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2246	668	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:50	Hyatt Regency	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Severniy Vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2248	668	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:30	Samarkand Train station	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2217	659	1	961800.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	961800	\N	2	\N	\N	\N	\N	\N	\N
+2224	660	4	455000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["3","11","15"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	455000	\N	2	\N	\N	\N	\N	\N	\N
+2220	660	1	828800.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	828800	\N	2	\N	\N	\N	\N	\N	\N
+2229	662	1	713200.00	\N	2	\N	\N	\N	\N	\N	\N	40	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	713200	\N	2	\N	\N	\N	\N	\N	\N
+2232	662	4	80000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["18","4"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	80000	\N	2	\N	\N	\N	\N	\N	\N
+2235	664	1	1011800.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1011800	\N	2	\N	\N	\N	\N	\N	\N
+2218	659	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:35	Tashkent airport 	\N	\N	\N	\N	1	\N	\N	["2"]	\N	\N	\N	\N	Tashkent airport - Inspira S hotel - City tour Tashkent	\N	\N	0	\N	2	\N	\N	\N	Gantner Johannes	\N	\N
+2221	660	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:25	Samarkand train station	\N	\N	\N	\N	2	\N	\N	["2"]	\N	\N	\N	\N	Samarkand train station - City Samarkand hotel - City tour Samarkand	\N	\N	0	\N	2	\N	\N	\N	Gantner Johannes	\N	\N
+2230	662	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Samarkand hotel	\N	\N	\N	\N	2	\N	\N	["2"]	\N	\N	\N	\N	City Samarkand hotel - Bukhara, Anor Butik hotel	\N	\N	0	\N	2	\N	\N	\N	Gantner Johannes	\N	\N
+2249	668	2	65.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	793000	\N	2	\N	\N	\N	\N	\N	\N
 1688	509	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Marokand Spa Hotel	\N	\N	\N	\N	3	\N	\N	["2"]	\N	\N	\N	\N	half day city tour, SKD-BHK	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2281	675	9	336.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	2026-05-01 21:35:00	20:15	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	Urgench-Tashkent	\N	\N	\N	\N	USD	\N	4099200	\N	2	HY 054	HY 054	\N	\N	2	\N
+2284	677	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	04:40	International Airport SKD 	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Airport-Hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2265	672	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Badyan Hotel Boutique	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2266	672	2	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	854000	\N	2	\N	\N	\N	\N	\N	\N
+2256	670	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Hilton Garden Inn	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1783	533	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	SKD vokzal	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	SKD vokzal - City tour - Hotel City Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1784	533	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2257	670	2	65.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	793000	\N	2	\N	\N	\N	\N	\N	\N
+2258	670	1	2506800.00	\N	2	\N	\N	\N	\N	\N	\N	90	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	2	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	2506800	\N	2	\N	\N	\N	\N	\N	\N
+2278	675	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Farovon Hotel	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	City Tour Ichan Kala	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2263	671	1	940000.00	\N	2	\N	\N	\N	\N	\N	\N	216	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	3	\N	\N	\N	\N	\N	\N	00:00	\N	\N	\N	940000	\N	2	\N	\N	\N	\N	\N	\N
+2267	672	1	940000.00	\N	2	\N	\N	\N	\N	\N	\N	216	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	3	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	940000	\N	2	\N	\N	\N	\N	\N	\N
+2271	673	10	200000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	200000	\N	2	\N	\N	\N	\N	\N	\N
+2279	675	2	60.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	732000	\N	2	\N	\N	\N	\N	\N	\N
+2241	666	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2247	668	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2026-04-24 09:30:00	07:30	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2251	668	1	2506800.00	\N	2	\N	\N	\N	\N	\N	\N	90	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	2	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	2506800	\N	2	\N	\N	\N	\N	\N	\N
+2250	668	4	200000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["3","15"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	200000	\N	2	\N	\N	\N	\N	\N	\N
+2285	677	6	1920000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1920000	\N	2	\N	\N	\N	\N	\N	\N
+2286	677	4	5680000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["2","22","20","21","23"]	\N	\N	\N	["3","15","11"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5680000	\N	2	\N	\N	\N	\N	\N	\N
+2291	679	1	\N	\N	2	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2293	679	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Amar Boutique	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	SKD City tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2297	681	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Amar Boutique hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Amar Boutique hotel - SKD train station 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1777	532	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:30	Tashkent airport	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent Apt - Inspira S	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1780	532	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
 1779	532	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1778	532	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Inspira S	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent city tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1776	532	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1783	533	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	SKD vokzal	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	SKD vokzal - City tour - Hotel City Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1784	533	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1781	533	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1785	533	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1782	533	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Inspira S - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1831	547	6	4650000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	38	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4650000	\N	2	\N	\N	\N	\N	\N	\N
-1801	538	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1802	538	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1802	538	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1803	538	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	Bukhara - Khiva 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1788	534	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Samarkand hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	CIty tour Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1789	534	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1803	538	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Bukhara - Khiva 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1790	535	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City hotel Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand - Shirin village (Bukhara)	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1792	535	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1792	535	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1797	536	4	2400000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2400000	\N	2	\N	\N	\N	\N	\N	\N
+1799	537	6	3000000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3000000	\N	2	\N	\N	\N	\N	\N	\N
 1810	542	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:30	TAS APT	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	TAS APT - Inspira S	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1796	536	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1800	538	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1794	536	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	13:00	Shirin ethno house	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Shirin village - Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1795	536	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1832	548	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1805	539	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1804	539	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1814	543	1	16284800.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	16284800	\N	2	\N	\N	\N	\N	\N	\N
+1806	539	4	9000000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	9000000	\N	2	\N	\N	\N	\N	\N	\N
 1826	546	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	13:00	Shirin Ehtno house	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Shirin Ehtno house - Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1811	542	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Inspira S	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent city tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1812	542	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1827	546	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1775	531	1	19800600.00	\N	2	for the night of 09.04.2026	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19800600	\N	2	\N	\N	\N	\N	\N	\N
 1828	546	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1837	549	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1836	549	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1815	543	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	SKD train station 	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	SKD train station  - City tour SKD - City hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1813	542	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
-1817	543	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1807	540	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:30	New Minor hotel 	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	New Minor hotel - Urgench airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1775	531	1	0.00	\N	2	for the night of 09.04.2026	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1786	533	4	2790000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","15","3","13"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2790000	\N	2	\N	\N	\N	\N	\N	\N
-1787	534	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1791	535	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1786	533	4	14400000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","15","3","13"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14400000	\N	2	\N	\N	\N	\N	\N	\N
+1816	543	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Inspira S hotel - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1787	534	1	17656800.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17656800	\N	2	\N	\N	\N	\N	\N	\N
+1791	535	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1793	536	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1797	536	4	2480000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2480000	\N	2	\N	\N	\N	\N	\N	\N
+1807	540	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:30	New Minor hotel 	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	New Minor hotel - Urgench airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1798	537	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1799	537	6	3100000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3100000	\N	2	\N	\N	\N	\N	\N	\N
-1800	538	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1804	539	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	138	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1806	539	4	7750000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7750000	\N	2	\N	\N	\N	\N	\N	\N
-1818	544	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1816	543	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Inspira S hotel - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1825	546	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1808	541	1	18800600.00	\N	2	for the night of 16.04.26	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	18800600	\N	2	\N	\N	\N	\N	\N	\N
+1809	542	1	18800600.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	18800600	\N	2	\N	\N	\N	\N	\N	\N
+1813	542	4	1500000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1500000	\N	2	\N	\N	\N	\N	\N	\N
+1796	536	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1790	535	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City hotel Samarkand	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Samarkand - Shirin village (Bukhara)	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1789	534	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1805	539	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1846	543	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2026-04-18 10:25:00	08:00	\N	\N	\N	\N	\N	\N	26	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1817	543	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1838	549	4	7500000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7500000	\N	2	\N	\N	\N	\N	\N	\N
 1819	544	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1820	544	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1823	545	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City Samarkand - Shirin village	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1824	545	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1821	544	4	12000000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","13","3","15"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12000000	\N	2	\N	\N	\N	\N	\N	\N
 1847	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	191	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-11-19	8	\N	\N	\N	\N	2025-11-21 12:00:00	2	\N	\N	\N	158	\N	\N	2	\N	\N	\N	\N	\N	\N
-1809	542	1	21687500.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21687500	\N	2	\N	\N	\N	\N	\N	\N
+1818	544	1	16284800.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	16284800	\N	2	\N	\N	\N	\N	\N	\N
 1833	548	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Imperial Palace - Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1834	548	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1835	548	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1822	545	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1843	552	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Inspira S hotel 	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent city tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1839	550	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:30	New Minor hotel	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	New Minor hotel - Urgench airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1814	543	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1846	543	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1838	549	4	7750000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7750000	\N	2	\N	\N	\N	\N	\N	\N
-1829	546	4	2480000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2480000	\N	2	\N	\N	\N	\N	\N	\N
+1815	543	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	SKD train station 	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	SKD train station  - City tour SKD - City hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1829	546	4	2000000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2000000	\N	2	\N	\N	\N	\N	\N	\N
+1825	546	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1830	547	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1782	533	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Inspira S - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1831	547	6	3750000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	38	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3750000	\N	2	\N	\N	\N	\N	\N	\N
+1832	548	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1842	552	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:30	Tashkent airport 	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent airport - Inspira S hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1845	552	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
+1836	549	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1844	552	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1848	553	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1841	552	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1821	544	4	2790000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","13","3","15"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2790000	\N	2	\N	\N	\N	\N	\N	\N
-1822	545	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1808	541	1	21687500.00	\N	2	for the night of 16.04.26	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21687500	\N	2	\N	\N	\N	\N	\N	\N
+1845	552	4	1440000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1440000	\N	2	\N	\N	\N	\N	\N	\N
+1841	552	1	19612400.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19612400	\N	2	\N	\N	\N	\N	\N	\N
+1801	538	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1848	553	1	16839200.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	16839200	\N	2	\N	\N	\N	\N	\N	\N
+1875	561	1	22236000.00	\N	2	for the night of 30.04.2026	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	22236000	\N	2	\N	\N	\N	\N	\N	\N
 1850	553	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Samarkand vokzal	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand vokzal - Samarkand city tour - City hotel Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1851	553	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1849	553	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S hotel 	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Inspira S hotel  - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1879	562	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
 1874	560	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:30	New Minor hotel	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	New Minor hotel - UGC Airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1857	555	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1860	556	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1864	556	4	2480000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2480000	\N	2	\N	\N	\N	\N	\N	\N
-1865	557	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1866	557	6	4650000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	38	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4650000	\N	2	\N	\N	\N	\N	\N	\N
-1867	558	1	0.00	\N	1	WL	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1876	562	1	22236000.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	22236000	\N	2	\N	\N	\N	\N	\N	\N
+1853	553	4	11520000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","13","15","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11520000	\N	2	\N	\N	\N	\N	\N	\N
+1881	563	1	19320000.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19320000	\N	2	\N	\N	\N	\N	\N	\N
 1855	554	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel City Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City Tour Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1856	554	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1871	559	1	0.00	\N	1	WL	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1854	554	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1882	563	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1869	558	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1870	558	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1858	555	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Samarkand hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City Samarkand hotel - Shirin village (Bukhara)	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1859	555	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1852	553	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1886	564	1	19320000.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19320000	\N	2	\N	\N	\N	\N	\N	\N
+1888	564	4	14880000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["13","11","15","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14880000	\N	2	\N	\N	\N	\N	\N	\N
+1890	565	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1893	566	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1868	558	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	Imperial Palace - Khiva (New Minor hotel)	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1853	553	4	2790000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","13","15","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2790000	\N	2	\N	\N	\N	\N	\N	\N
 1861	556	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	13:00	Shirin ethno house	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Shirin ethno house - Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1862	556	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1863	556	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1840	551	1	0.00	\N	2	for the night of 23.04.2026	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1882	563	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1895	566	4	2480000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2480000	\N	2	\N	\N	\N	\N	\N	\N
+1898	567	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1899	567	6	4650000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	38	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4650000	\N	2	\N	\N	\N	\N	\N	\N
+1900	568	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1896	566	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1885	563	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Samarkand vokzal	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand vokzal - City tour - City hotel Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1897	566	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1877	562	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:30	Tashkent airport	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent airport - Inspira S Hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1878	562	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Inspira S Hotel 	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent city tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1893	566	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1904	569	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1883	563	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1873	559	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1884	563	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S Hotel 	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Inspira S Hotel - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1900	568	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1904	569	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1905	569	4	7750000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7750000	\N	2	\N	\N	\N	\N	\N	\N
+1905	569	4	9300000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	9300000	\N	2	\N	\N	\N	\N	\N	\N
+1914	573	1	19320000.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19320000	\N	2	\N	\N	\N	\N	\N	\N
 1901	568	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1895	566	4	2480000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2480000	\N	2	\N	\N	\N	\N	\N	\N
+1912	572	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
 1880	562	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1886	564	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1887	564	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City hotel Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City tour Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1888	564	4	2790000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["13","11","15","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2790000	\N	2	\N	\N	\N	\N	\N	\N
+2204	654	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1889	564	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1892	565	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1898	567	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1891	565	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel City Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Hotel City Samarkand - Shirin village (Bukhara)	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1890	565	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1899	567	6	4650000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	38	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4650000	\N	2	\N	\N	\N	\N	\N	\N
+1857	555	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1894	566	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	13:00	Shirin village	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Shirin village - Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1902	568	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1903	568	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Imperial Palace - Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1881	563	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1864	556	4	1920000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1920000	\N	2	\N	\N	\N	\N	\N	\N
 1907	570	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:30	New Minor hotel 	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	New Minor hotel - Urgench airport 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1906	569	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1879	562	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
-1876	562	1	21687500.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21687500	\N	2	\N	\N	\N	\N	\N	\N
-1872	559	4	7750000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7750000	\N	2	\N	\N	\N	\N	\N	\N
-1912	572	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
+1866	557	6	3600000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	38	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3600000	\N	2	\N	\N	\N	\N	\N	\N
+1872	559	4	7200000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7200000	\N	2	\N	\N	\N	\N	\N	\N
+1852	553	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2026-04-25 10:25:00	08:00	\N	\N	\N	\N	\N	\N	26	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1911	572	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:30	Inspira S hotel 	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent city tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1914	573	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1875	561	1	21687500.00	\N	2	for the night of 30.04.2026	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21687500	\N	2	\N	\N	\N	\N	\N	\N
-1915	573	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Inspira S - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1860	556	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1854	554	1	16839200.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	16839200	\N	2	\N	\N	\N	\N	\N	\N
+1865	557	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1867	558	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1871	559	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1916	573	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Samarkand vokzal	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand vokzal - City tour - City Samarkand hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1917	573	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1955	584	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -9422,21 +10400,20 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1936	578	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1924	575	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Hotel Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand - Shirin village (Vobkent Bukhara)	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1925	575	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1909	572	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1918	573	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1919	573	4	14880000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","15","3","13"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14880000	\N	2	\N	\N	\N	\N	\N	\N
 1927	576	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	13:00	Shirin ethno house	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Vobkent - Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1919	573	4	2790000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","15","3","13"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2790000	\N	2	\N	\N	\N	\N	\N	\N
+1915	573	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Inspira S	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Inspira S - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1929	576	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1930	576	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1920	574	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1923	575	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1926	576	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1928	576	4	2480000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2480000	\N	2	\N	\N	\N	\N	\N	\N
 1931	577	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1932	577	6	4650000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	38	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4650000	\N	2	\N	\N	\N	\N	\N	\N
 1933	578	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1937	579	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-1938	579	4	7750000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7750000	\N	2	\N	\N	\N	\N	\N	\N
+1938	579	4	9300000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	9300000	\N	2	\N	\N	\N	\N	\N	\N
+1909	572	1	22236000.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	22236000	\N	2	\N	\N	\N	\N	\N	\N
+1920	574	1	19320000.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	19320000	\N	2	\N	\N	\N	\N	\N	\N
 1960	586	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1939	579	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1961	586	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -9471,9 +10448,12 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 1945	582	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
 1942	582	1	21687500.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21687500	\N	2	\N	\N	\N	\N	\N	\N
 1975	\N	1	\N	\N	2	\N	\N	\N	\N	\N	\N	35	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-11-23	3	\N	\N	\N	\N	2025-11-24 01:00:00	1	\N	\N	\N	160	\N	\N	2	\N	\N	\N	\N	\N	\N
+1918	573	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+1923	575	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1976	\N	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	2025-11-26	6	\N	\N	\N	\N	2025-11-27 12:00:00	1	\N	\N	\N	161	0	\N	2	\N	\N	\N	\N	\N	\N
 1979	\N	7	1493000.00	\N	1	\N	\N	\N	\N	\N	Dop bagaj 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-30	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	162	1493000	\N	2	\N	\N	\N	\N	\N	\N
 1978	\N	9	6770000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-30	\N	\N	\N	\N	Tashkent - Sarajevo	\N	\N	\N	\N	\N	162	6770000	\N	2	\N	\N	\N	\N	1	200000
+2203	654	1	\N	\N	2	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 1977	\N	8	0.00	\N	2	219710 + 60000 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	18:25	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-28	16	4	\N	\N	\N	\N	\N	\N	\N	\N	162	0	\N	2	\N	\N	\N	\N	\N	\N
 1980	591	3	\N	\N	1	pick up time TBC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12:00	Tashkent airport	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent airport - Huvaydo hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2000	597	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	6	14	\N	\N	\N	\N	\N	\N	\N	\N	15	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	6	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
@@ -9515,102 +10495,217 @@ COPY public.tour_day_expenses (id, tour_day_id, type, price, pax, status, commen
 2015	602	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	167	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2017	603	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	167	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2024	605	3	\N	\N	1	drop off TBC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	00:30	Huvaydo hotel	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Huvaydo hotel - Tashkent airport 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2034	608	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2035	608	4	720000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	720000	\N	2	\N	\N	\N	\N	\N	\N
 2026	606	3	\N	\N	1	pick up time TBC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	6	34	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12:00	Dostlik border	\N	\N	\N	\N	34	\N	\N	\N	\N	\N	\N	\N	Dostlik border - Andijan - Fergana	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2018	603	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Asia Samarkand hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City tour Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2019	603	4	1440000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["13","11","15","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1440000	\N	2	\N	\N	\N	\N	\N	\N
+2027	607	1	3850000.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3850000	\N	2	\N	\N	\N	\N	\N	\N
 2003	599	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	176	\N	\N	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2005	600	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2007	600	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	15	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2031	608	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2034	608	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2032	608	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11:50	Bukhara train station	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Bukhara train station - Imperial palace	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2028	607	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Club 777 hotel	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	Fergana - Margilan - Rishtan - Kokand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2030	607	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21:20	Severniy vokzal	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Severniy vokzal - Huvaydo hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2033	608	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:45	Huvaydo hotel	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Huvaydo hotel - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2035	608	4	720000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	720000	\N	2	\N	\N	\N	\N	\N	\N
-2027	607	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2038	610	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	167	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2031	608	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2040	610	4	4095000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","15","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4095000	\N	2	\N	\N	\N	\N	\N	\N
 153	61	3	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	отель Arhan Palace	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	\N	экскурсия по г. Самарканд	UZS	\N	0	\N	2	\N	\N	2	\N	\N	\N
 1941	581	1	21687500.00	\N	2	for the night of 14.05.26	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21687500	\N	2	\N	\N	\N	\N	\N	\N
 2037	609	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Imperial Palace - Mohi Hosa - Samarkand 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2040	610	4	585000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","15","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	585000	\N	2	\N	\N	\N	\N	\N	\N
-2041	611	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2206	654	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2041	611	1	3850000.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3850000	\N	2	\N	\N	\N	\N	\N	\N
 2044	611	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2045	611	4	675000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2","16"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	675000	\N	2	\N	\N	\N	\N	\N	\N
 2039	610	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Asia Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand city tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2048	614	3	\N	\N	1	extra transfer for Mr. & Mrs. Geilhufe (sedan) - drop off time TBC	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Asia Samarkand	\N	\N	\N	\N	2	\N	\N	[]	\N	\N	\N	\N	Asia Samarkand - Samarkand vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2049	614	3	\N	\N	1	extra transfer for Mr. & Mrs. Geilhufe (sedan) - pick up time TBC	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	13:00	Severniy vokzal	\N	\N	\N	\N	1	\N	\N	[]	\N	\N	\N	\N	Severniy vokzal - Huvaydo	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2045	611	4	675000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2","16"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	675000	\N	2	\N	\N	\N	\N	\N	\N
 2046	612	3	\N	\N	1	drop off time TBC for 6 pax\nTK369	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	00:10	Huvaydo hotel	\N	\N	\N	\N	1	\N	\N	[]	\N	\N	\N	\N	Huvaydo hotel - Airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2050	\N	7	2640000.00	\N	1	220*12000=26400000	\N	\N	\N	\N	Визовая поддержка в Саудовскую Аравию  	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-12-08	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	163	2640000	\N	2	\N	\N	\N	\N	\N	\N
 2042	611	3	\N	\N	1	pick up time TBC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	12:00	Severniy vokzal	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Severniy vokzal - Huvaydo hotel - City tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2056	512	6	\N	\N	2	Sandwiche & Soft Drink	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2065	619	4	8875000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["20","21","22","23","2"]	\N	\N	\N	["15","11","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	8875000	\N	2	\N	\N	\N	\N	\N	\N
 2051	\N	3	\N	\N	5	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:50	межд.аэропорт Ташкент	\N	\N	\N	2025-12-05	1	\N	\N	["12"]	\N	\N	\N	\N	Hotel; Hyatt Regency	\N	164	\N	\N	2	\N	\N	\N	Muharrem REÇBER	\N	\N
 2052	\N	9	1945000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-12-14	\N	\N	\N	\N	BBI-DEL	\N	\N	\N	\N	\N	165	\N	\N	2	\N	\N	\N	\N	1	200000
+2068	619	1	34912400.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	34912400	\N	2	\N	\N	\N	\N	\N	\N
+2069	620	1	34912400.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	34912400	\N	2	\N	\N	\N	\N	\N	\N
 2043	611	3	\N	\N	1	drop off time TBC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Asia Samarkand hotel	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Asia Samarkand - Samarkand vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2057	618	1	\N	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2058	618	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	hotel Hyatt Regency	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	full day Tashent	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2069	620	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2060	618	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2061	618	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2047	613	7	\N	\N	1	Extra night for Mr. & Mrs. Geilhufe in Asia Samarkand	\N	\N	\N	\N	Extra hotel night Asia Samarkand	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2064	619	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:22	Train Station Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	full day Samaarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2066	619	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2067	619	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2062	619	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:00	Hotel Hyattt Regncy	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Hotel Hyatt Regency-Train Station	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2095	626	1	11300000.00	\N	2	\N	\N	\N	\N	\N	\N	201	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11300000	\N	2	\N	\N	\N	\N	\N	\N
+2073	621	1	34912400.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	34912400	\N	2	\N	\N	\N	\N	\N	\N
+2080	622	1	34912400.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	34912400	\N	2	\N	\N	\N	\N	\N	\N
+2084	623	4	8250000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["5","6","7","8","11","12","14","28","26"]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	8250000	\N	2	\N	\N	\N	\N	\N	\N
+2025	606	1	5250000.00	\N	2	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5250000	\N	2	\N	\N	\N	\N	\N	\N
 2082	623	1	11300000.00	\N	2	\N	\N	\N	\N	\N	\N	201	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11300000	\N	2	\N	\N	\N	\N	\N	\N
-2084	623	4	7250000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["5","6","7","8","11","12","14","28","26"]	\N	\N	\N	["4","18"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7250000	\N	2	\N	\N	\N	\N	\N	\N
-2025	606	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2088	624	1	11300000.00	\N	2	\N	\N	\N	\N	\N	\N	201	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11300000	\N	2	\N	\N	\N	\N	\N	\N
+2064	619	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:22	Train Station Samarkand	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	full day Samaarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2091	625	1	11300000.00	\N	2	\N	\N	\N	\N	\N	\N	201	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11300000	\N	2	\N	\N	\N	\N	\N	\N
+2066	619	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2095	626	1	11300000.00	\N	2	\N	\N	\N	\N	\N	\N	201	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11300000	\N	2	\N	\N	\N	\N	\N	\N
+2067	619	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2057	618	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2047	613	7	\N	\N	2	Extra night for Mr. & Mrs. Geilhufe in Asia Samarkand	\N	\N	\N	\N	Extra hotel night Asia Samarkand	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2029	607	8	0.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2036	609	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	167	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2038	610	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	167	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2074	621	3	\N	\N	2	через перевал, нужно заказать 9 легковых машин (Музаффар)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Movenpick	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand-Shakhrisabz-Samarkand 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2088	624	1	11300000.00	\N	2	\N	\N	\N	\N	\N	\N	201	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11300000	\N	2	\N	\N	\N	\N	\N	\N
 2079	622	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Movenpickk	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	full day Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2070	620	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel  Mövenpick	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	full day Samarkand	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2071	620	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2072	620	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2075	621	7	10.00	\N	1	\N	\N	\N	\N	\N	Entrance fees	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	120000	\N	2	\N	\N	\N	\N	\N	\N
 2076	621	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2077	621	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2083	623	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Movenpick Samarkand	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Samarkand-Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2081	622	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2078	619	7	20.00	\N	1	\N	\N	\N	\N	\N	train ticket for Guide	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	240000	\N	2	\N	\N	\N	\N	\N	\N
-2091	625	1	11300000.00	\N	2	\N	\N	\N	\N	\N	\N	201	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11300000	\N	2	\N	\N	\N	\N	\N	\N
-2073	621	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2075	621	7	10.00	\N	1	\N	\N	\N	\N	\N	Entrance fees	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	122000	\N	2	\N	\N	\N	\N	\N	\N
 2087	624	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Silk Road Terrase	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	full day Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2085	623	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2086	623	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2068	619	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2078	619	7	20.00	\N	1	\N	\N	\N	\N	\N	train ticket for Guide	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	244000	\N	2	\N	\N	\N	\N	\N	\N
 2089	624	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2090	624	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2092	625	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Silk Road Terrase	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Bukhhara-Shirin Vil-Bukara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2093	625	5	\N	\N	2	Shirin Village 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2065	619	4	6250000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["20","21","22","23","2"]	\N	\N	\N	["15","11","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	6250000	\N	2	\N	\N	\N	\N	\N	\N
-2080	622	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2096	626	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Silk Road Terrase	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	full day Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2097	626	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2138	637	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2142	637	4	1860000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1860000	\N	2	\N	\N	\N	\N	\N	\N
 2098	627	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Silk Road Terrase	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Bukhara-Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2099	627	1	\N	\N	2	\N	\N	\N	\N	\N	\N	190	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2100	627	7	10.00	\N	1	\N	\N	\N	\N	\N	Pick Nick	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	120000	\N	2	\N	\N	\N	\N	\N	\N
-2101	628	1	\N	\N	2	\N	\N	\N	\N	\N	\N	190	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2113	630	9	1006986.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	2026-04-15 17:35:00	16:15	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	UGC-TAS	\N	\N	\N	\N	\N	\N	1006986	\N	2	\N	HY051	\N	\N	2	\N
+2110	630	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2145	638	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	215	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2147	638	4	11005000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["11","3"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11005000	\N	2	\N	\N	\N	\N	\N	\N
+2114	631	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2103	628	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2104	628	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2105	629	1	\N	\N	2	\N	\N	\N	\N	\N	\N	190	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2149	639	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	215	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2130	635	7	1300000.00	\N	5	\N	\N	\N	\N	\N	Skiing activity including coach	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1300000	\N	2	\N	\N	\N	\N	\N	\N
 2106	629	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Orient star 	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	Khiva-Ayazkala-Toprak Kala-Khiva	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2107	629	4	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2108	629	5	\N	\N	2	Yurta	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2109	629	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2110	630	1	\N	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2114	631	1	\N	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2150	639	4	775000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["13"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	775000	\N	2	\N	\N	\N	\N	\N	\N
+2136	\N	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:30	Hotel Wyndham Tashkent	\N	\N	\N	2026-02-20	1	\N	\N	["2"]	\N	\N	\N	\N	Hotel Wyndham - Inter. Airport	\N	167	\N	\N	2	\N	\N	\N	Berlin Economics 	\N	\N
+2063	619	8	0.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2026-04-04 10:22:00	08:00	\N	\N	\N	\N	\N	\N	25	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2131	\N	1	\N	\N	5	\N	\N	\N	\N	\N	\N	60	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:50	\N	2026-02-16	1	\N	\N	\N	\N	2026-02-20 07:00:00	4	\N	\N	\N	167	\N	\N	2	\N	\N	\N	\N	\N	\N
+2099	627	1	17482400.00	\N	2	\N	\N	\N	\N	\N	\N	190	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17482400	\N	2	\N	\N	\N	\N	\N	\N
+2205	654	4	9300000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["14","6"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	9300000	\N	2	\N	\N	\N	\N	\N	\N
 2115	631	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	08:00	Hotel Hyatt Regency	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent-Chimgan-Tashkent	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2116	631	7	20.00	\N	1	\N	\N	\N	\N	\N	chairlift Amirsoy	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	240000	\N	2	\N	\N	\N	\N	\N	\N
+2139	637	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2117	632	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	15:00	Hotel HYatt Regency	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Hotel - Airport 	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 2111	630	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	13:30	Hotel Orinet Star 	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Khiva-Urgench	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2119	633	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	78	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	39	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2121	633	7	220000.00	\N	5	\N	\N	\N	\N	\N	Cable Car	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	220000	\N	2	\N	\N	\N	\N	\N	\N
 2112	630	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17:35	Airport Dom.Tashkent	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Airport-Dinner-Hotel Hyatt Regency	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2063	619	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2026-04-04 10:22:00	08:00	\N	\N	\N	\N	\N	\N	25	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
-2102	628	4	6250000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	6250000	\N	2	\N	\N	\N	\N	\N	\N
-2113	630	9	1006986.00	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	2026-04-15 17:35:00	16:15	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	UGC-TAS	\N	\N	\N	\N	\N	\N	1006986	\N	2	\N	HY051	\N	\N	2	\N
+2129	635	3	\N	\N	5	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Avenue Park Hotel	\N	\N	\N	\N	39	\N	\N	["2"]	\N	\N	\N	\N	Avenue park -Amirsoy (до 2ой парковки)-Tashkent	\N	\N	0	\N	2	\N	\N	\N	Better Cotton	\N	\N
+2120	633	3	\N	\N	2	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	DMaar Business Center	\N	\N	\N	\N	39	\N	\N	["2"]	\N	\N	\N	\N	Tashkennt - Amirsay-Avenue park	\N	\N	0	\N	2	\N	\N	\N	Better Cotton	\N	\N
+2122	633	6	900000.00	\N	5	Restaraunt Avenue Park	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	35	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	900000	\N	2	\N	\N	\N	\N	\N	\N
 2118	\N	8	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	2026-01-31 12:00:00	08:00	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-01-31	1	1	\N	\N	\N	\N	\N	\N	\N	\N	166	\N	\N	2	\N	\N	\N	\N	\N	\N
+2123	634	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	78	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2133	\N	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Hotel Wyndham Tashkent	\N	\N	\N	2026-02-17	1	\N	\N	["2"]	\N	\N	\N	\N	full day Tashkent	\N	167	\N	\N	2	\N	\N	\N	Berlin Economics 	\N	\N
+2132	\N	3	\N	\N	5	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:50	International Airpopprt	\N	\N	\N	2026-02-17	1	\N	\N	["2"]	\N	\N	\N	\N	Airport-Hotel Wyndham Tashkent	\N	167	\N	\N	2	\N	\N	\N	Berlin Economics 	\N	\N
+2124	634	5	900000.00	\N	5	Lunch in Avenue Park's restaraunt	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	35	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	900000	\N	2	\N	\N	\N	\N	\N	\N
+2100	627	7	10.00	\N	1	\N	\N	\N	\N	\N	Pick Nick	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	122000	\N	2	\N	\N	\N	\N	\N	\N
+2125	634	6	900000.00	\N	5	Dinner in Avenue Park's restaraunt	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	35	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	900000	\N	2	\N	\N	\N	\N	\N	\N
+2134	\N	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Hotel Wyndham Tashkent	\N	\N	\N	2026-02-18	1	\N	\N	["2"]	\N	\N	\N	\N	full day Tashkent	\N	167	\N	\N	2	\N	\N	\N	Berlin Economics 	\N	\N
+2135	\N	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Hotel Wyndham Tashkent	\N	\N	\N	2026-02-19	1	\N	\N	["2"]	\N	\N	\N	\N	full day Tashkent	\N	167	\N	\N	2	\N	\N	\N	Berlin Economics 	\N	\N
+2126	634	7	100000.00	\N	5	\N	\N	\N	\N	\N	Coffee break	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100000	\N	2	\N	\N	\N	\N	\N	\N
+2116	631	7	20.00	\N	1	\N	\N	\N	\N	\N	chairlift Amirsoy	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	244000	\N	2	\N	\N	\N	\N	\N	\N
+2062	619	3	\N	\N	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	06:00	Hotel Hyattt Regncy	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Hotel Hyatt Regency-Train Station	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2102	628	4	7500000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["6","14"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	7500000	\N	2	\N	\N	\N	\N	\N	\N
+2101	628	1	17482400.00	\N	2	\N	\N	\N	\N	\N	\N	190	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17482400	\N	2	\N	\N	\N	\N	\N	\N
+2127	634	7	100000.00	\N	5	\N	\N	\N	\N	\N	coffee break	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100000	\N	2	\N	\N	\N	\N	\N	\N
+2128	635	1	0.00	\N	5	\N	\N	\N	\N	\N	\N	78	\N	\N	\N	\N	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	39	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2105	629	1	17482400.00	\N	2	\N	\N	\N	\N	\N	\N	190	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17482400	\N	2	\N	\N	\N	\N	\N	\N
+2140	637	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	01:30	Tashkent Airport	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent Airport - Inspira S Hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2141	637	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Inspira S Hotel 	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent City tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2144	638	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	SKD Train station	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Train station - Reikartz Hanzade Hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2146	638	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2143	638	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2148	639	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hanzade hotel 	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand City tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2153	640	1	\N	\N	2	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2151	639	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2152	640	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hanzade hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Samarkand - Shirin village	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2155	641	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	Shirin Ethno House	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	Shirin Ethno House - Bukhara	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2156	641	1	\N	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2157	641	4	2480000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["18","4"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2480000	\N	2	\N	\N	\N	\N	\N	\N
+2158	641	5	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2159	641	6	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2162	642	6	3100000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	17	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3100000	\N	2	\N	\N	\N	\N	\N	\N
+2160	642	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2161	642	1	\N	\N	2	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2170	644	4	9300000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["14","6"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	9300000	\N	2	\N	\N	\N	\N	\N	\N
+2207	655	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:00	Said Islom Khodja 	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	Said Islom Khodja - UGC Airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2163	643	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Imperial Palace	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Imperial Palace - Khiva New Minor hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2164	643	1	\N	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2165	643	5	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2166	643	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2213	658	1	\N	\N	2	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2167	644	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2168	644	1	\N	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2169	644	6	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2214	658	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11:30	SKD train station	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	SKD train station - City tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2216	658	2	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2171	645	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:00	New Minor Hotel	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	New Minor Hotel - UGC airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2261	671	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11:47	Train Station	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2228	661	2	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2262	671	2	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	854000	\N	2	\N	\N	\N	\N	\N	\N
+2259	671	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hilton Garden Inn	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Train Station	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2233	663	1	\N	\N	2	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2268	673	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Badyan Hotel	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2252	669	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Hilton Garden Inn	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2253	669	2	65.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	793000	\N	2	\N	\N	\N	\N	\N	\N
+2269	673	2	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	854000	\N	2	\N	\N	\N	\N	\N	\N
+2226	661	1	828800.00	\N	2	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	828800	\N	2	\N	\N	\N	\N	\N	\N
+2227	661	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	City Samarkand hotel	\N	\N	\N	\N	2	\N	\N	["2"]	\N	\N	\N	\N	City tour	\N	\N	0	\N	2	\N	\N	\N	Gantner Johannes	\N	\N
+2234	663	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Anor Butik hotel	\N	\N	\N	\N	3	\N	\N	["2"]	\N	\N	\N	\N	Anor Butik hotel - Khiva, New Minor hotel	\N	\N	0	\N	2	\N	\N	\N	Gantner Johannes	\N	\N
+2238	665	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	00:30	Tashkent airport Terminal 3	\N	\N	\N	\N	1	\N	\N	["6"]	\N	\N	\N	\N	Tashkent airport Terminal 3 - Inspira S hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2239	665	3	\N	\N	2	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:30	Inspira S hotel	\N	\N	\N	\N	1	\N	\N	["6"]	\N	\N	\N	\N	Inspira S hotel - Tashkent airport T2	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2242	667	2	70.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	854000	\N	2	\N	\N	\N	\N	\N	\N
+2243	667	3	\N	\N	2	City Tour	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	Hyatt Regency	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2244	667	4	120000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["2"]	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	120000	\N	2	\N	\N	\N	\N	\N	\N
+2245	667	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	50	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	1	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2272	674	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	05:00	Badyan Hotel	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	Train Station	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2254	669	4	760000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["13","11"]	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	760000	\N	2	\N	\N	\N	\N	\N	\N
+2274	674	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	11:37	Train Station Khiva	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	City Tour	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2275	674	2	60.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	732000	\N	2	\N	\N	\N	\N	\N	\N
+2276	674	4	600000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["14","6"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	600000	\N	2	\N	\N	\N	\N	\N	\N
+2283	676	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:30	Hyatt Regency	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Tashkent International Airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2277	674	1	\N	\N	2	\N	\N	\N	\N	\N	\N	23	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	4	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2294	680	1	\N	\N	2	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2255	669	1	2506800.00	\N	2	\N	\N	\N	\N	\N	\N	90	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	2	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	2506800	\N	2	\N	\N	\N	\N	\N	\N
+2264	671	4	160000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["18","4"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	160000	\N	2	\N	\N	\N	\N	\N	\N
+2260	671	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	2026-04-27 11:47:00	09:43	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	3	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2270	673	1	940000.00	\N	2	\N	\N	\N	\N	\N	\N	216	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	14:00	\N	\N	3	\N	\N	\N	\N	\N	\N	12:00	\N	\N	\N	940000	\N	2	\N	\N	\N	\N	\N	\N
+2273	674	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	05:42	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	7	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2215	658	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:15	Huvaydo hotel	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	Huvaydo hotel - Severniy vokzal	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2296	681	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:00	BHK Train station	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	BHK Train station - Anor Boutique hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2290	658	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	2	2026-03-25 11:46:00	08:37	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2299	681	2	60.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	732000	\N	2	\N	\N	\N	\N	\N	\N
+2211	657	1	800000.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	800000	\N	2	\N	\N	\N	\N	\N	\N
+2300	682	1	1049200.00	\N	2	\N	\N	\N	\N	\N	\N	40	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1049200	\N	2	\N	\N	\N	\N	\N	\N
+2298	681	8	0.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	2026-03-28 10:16:00	08:33	\N	\N	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2302	682	3	\N	\N	1	stary gorod + za gorod city tour	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Anor boutique	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	City tour BHK	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2304	684	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Anor Boutique	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	Anor Boutique - Khiva (Twins Hotel)	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2317	690	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Sahid Zarafshan	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	BHK-KHIVA	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2307	685	2	60.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	USD	\N	732000	\N	2	\N	\N	\N	\N	\N	\N
+2309	686	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	10:40	TAS APT Terminal 3	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	TAS APT Terminal 3 - Huvaydo hotel	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2310	686	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:15	Twins hotel	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	Twins hotel - Urgench airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2315	689	4	5280000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	["27","26","6","5","7","8","11","12","14"]	\N	\N	\N	["18","4"]	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5280000	\N	2	\N	\N	\N	\N	\N	\N
+2316	689	6	2080000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	5	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2080000	\N	2	\N	\N	\N	\N	\N	\N
+2318	690	6	2080000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	31	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2080000	\N	2	\N	\N	\N	\N	\N	\N
+2319	691	4	4800000.00	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	[]	\N	\N	\N	["14","6"]	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4800000	\N	2	\N	\N	\N	\N	\N	\N
+2320	691	6	2320000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	15	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2320000	\N	2	\N	\N	\N	\N	\N	\N
+2321	691	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	21:00	Orient Star khiva	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	Khiva-Urgench Airport	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2313	688	3	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	07:00	Huvaydo hotel	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	Huvaydo hotel - TAS APT terminal 2	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2303	683	1	1049200.00	\N	2	\N	\N	\N	\N	\N	\N	40	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1049200	\N	2	\N	\N	\N	\N	\N	\N
+2305	684	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	217	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2306	685	1	0.00	\N	2	\N	\N	\N	\N	\N	\N	217	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
+2308	686	1	800000.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	800000	\N	2	\N	\N	\N	\N	\N	\N
+2311	686	9	894000.00	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	2026-04-02 10:40:00	09:20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	UGC-TAS	\N	\N	\N	\N	\N	\N	894000	\N	2	HY52	HY52	\N	\N	2	\N
+2312	687	1	800000.00	\N	2	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	800000	\N	2	\N	\N	\N	\N	\N	\N
+2314	689	3	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	09:00	Hotel Reikartz Hanzade 	\N	\N	\N	\N	2	\N	\N	\N	\N	\N	\N	\N	SKD-BHK	\N	\N	0	\N	2	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -10130,6 +11225,64 @@ COPY public.tour_days (id, date, city_id, tour_id, status) FROM stdin;
 630	2026-04-15	1	257	\N
 631	2026-04-16	1	257	\N
 632	2026-04-17	1	257	\N
+633	2026-02-04	39	283	\N
+634	2026-02-05	39	283	\N
+635	2026-02-06	39	283	\N
+636	2026-04-27	1	286	\N
+637	2026-04-27	1	286	\N
+638	2026-04-28	2	286	\N
+639	2026-04-29	2	286	\N
+640	2026-04-30	3	286	\N
+641	2026-05-01	3	286	\N
+642	2026-05-02	3	286	\N
+643	2026-05-03	4	286	\N
+644	2026-05-04	4	286	\N
+645	2026-05-05	4	286	\N
+646	2026-05-11	1	287	\N
+647	2026-05-11	1	287	\N
+648	2026-05-12	2	287	\N
+649	2026-05-13	2	287	\N
+650	2026-05-14	30	287	\N
+651	2026-05-15	3	287	\N
+652	2026-05-16	3	287	\N
+653	2026-05-17	4	287	\N
+654	2026-05-18	4	287	\N
+655	2026-05-19	4	287	\N
+656	2026-03-23	1	289	\N
+657	2026-03-24	1	289	\N
+658	2026-03-25	2	289	\N
+659	2026-03-15	1	290	\N
+660	2026-03-16	2	290	\N
+661	2026-03-17	2	290	\N
+662	2026-03-18	3	290	\N
+663	2026-03-19	4	290	\N
+664	2026-03-20	1	290	\N
+665	2026-03-21	1	290	\N
+666	2026-04-22	1	291	\N
+667	2026-04-23	1	291	\N
+669	2026-04-25	2	291	\N
+668	2026-04-24	2	291	\N
+670	2026-04-26	2	291	\N
+671	2026-04-27	3	291	\N
+672	2026-04-28	3	291	\N
+673	2026-04-29	3	291	\N
+674	2026-04-30	4	291	\N
+675	2026-05-01	4	291	\N
+676	2026-05-02	1	291	\N
+677	2026-03-16	2	292	\N
+679	2026-03-26	2	289	\N
+680	2026-03-27	2	289	\N
+681	2026-03-28	3	289	\N
+682	2026-03-29	3	289	\N
+683	2026-03-30	3	289	\N
+684	2026-03-31	4	289	\N
+685	2026-04-01	4	289	\N
+686	2026-04-02	1	289	\N
+687	2026-04-03	1	289	\N
+688	2026-04-04	1	289	\N
+689	2026-03-17	3	292	\N
+690	2026-03-18	4	292	\N
+691	2026-03-19	4	292	\N
 \.
 
 
@@ -10282,6 +11435,7 @@ COPY public.tour_groups (id, "order", name, type, tour_id, created_at, updated_a
 164	\N	\N	\N	276	2025-12-04 16:27:56	2025-12-04 16:27:56
 165	\N	\N	\N	277	2025-12-10 06:41:56	2025-12-10 06:41:56
 166	\N	\N	\N	282	2026-01-28 17:21:37	2026-01-28 17:21:37
+167	\N	\N	\N	284	2026-02-02 09:30:10	2026-02-02 09:30:10
 \.
 
 
@@ -10482,6 +11636,8 @@ COPY public.tour_passengers (id, tour_id, name, tour_group_id) FROM stdin;
 264	\N	Sahoo Malaya Kumar	165
 265	\N	RBB	166
 266	\N	RSB	166
+267	\N	Mr. Walter 	167
+268	\N	Mr. Lücke	167
 \.
 
 
@@ -10542,12 +11698,6 @@ COPY public.tour_room_types (id, tour_id, amount, created_at, updated_at, room_t
 89	204	1	2025-08-11 05:49:36	2025-08-11 05:49:36	2	\N	\N
 92	237	1	2025-10-02 05:58:07	2025-10-02 05:58:07	2	\N	\N
 93	238	2	2025-10-02 08:01:53	2025-10-02 08:01:53	2	\N	\N
-94	259	10	2025-11-17 11:20:04	2025-11-17 11:20:04	1	\N	\N
-95	259	10	2025-11-17 11:20:04	2025-11-17 11:20:04	2	\N	\N
-96	260	10	2025-11-18 10:21:46	2025-11-18 10:21:46	1	\N	\N
-97	260	10	2025-11-18 10:21:46	2025-11-18 10:21:46	2	\N	\N
-98	261	10	2025-11-18 10:52:30	2025-11-18 10:52:30	1	\N	\N
-99	261	10	2025-11-18 10:52:30	2025-11-18 10:52:30	2	\N	\N
 100	263	10	2025-11-18 11:57:43	2025-11-18 11:57:43	1	\N	\N
 101	263	10	2025-11-18 11:57:43	2025-11-18 11:57:43	2	\N	\N
 102	264	10	2025-11-19 05:38:38	2025-11-19 05:38:38	1	\N	\N
@@ -10560,10 +11710,19 @@ COPY public.tour_room_types (id, tour_id, amount, created_at, updated_at, room_t
 113	273	6	2025-12-01 06:47:36	2025-12-01 06:47:36	2	\N	\N
 114	274	1	2025-12-01 13:55:42	2025-12-01 13:55:42	1	\N	\N
 115	274	4	2025-12-01 13:55:42	2025-12-01 13:55:42	2	\N	\N
-117	257	7	2026-01-26 06:28:41	2026-01-26 06:28:41	8	\N	\N
-118	257	11	2026-01-26 06:28:41	2026-01-26 06:28:41	9	\N	\N
 119	257	7	2026-01-26 06:48:42	2026-01-26 06:48:42	2	\N	\N
 120	257	11	2026-01-26 06:48:42	2026-01-26 06:48:42	1	\N	\N
+121	283	6	2026-02-02 07:56:50	2026-02-02 07:56:50	1	\N	\N
+128	288	1	2026-03-02 05:44:02	2026-03-02 05:44:02	2	\N	\N
+94	259	4	2025-11-17 11:20:04	2026-03-05 07:06:57	1	\N	\N
+95	259	13	2025-11-17 11:20:04	2026-03-05 07:06:57	2	\N	\N
+96	260	9	2025-11-18 10:21:46	2026-03-05 07:09:21	1	\N	\N
+97	260	8	2025-11-18 10:21:46	2026-03-05 07:09:21	2	\N	\N
+98	261	11	2025-11-18 10:52:30	2026-03-05 07:10:21	1	\N	\N
+99	261	7	2025-11-18 10:52:30	2026-03-05 07:10:21	2	\N	\N
+129	289	1	2026-03-06 10:18:18	2026-03-06 10:18:18	2	\N	\N
+130	290	1	2026-03-10 06:07:44	2026-03-10 06:07:44	1	\N	\N
+131	291	1	2026-03-11 06:51:41	2026-03-11 06:51:41	10	\N	\N
 \.
 
 
@@ -10653,6 +11812,7 @@ COPY public.tours (id, group_number, company_id, start_date, end_date, pax, coun
 150	A250-25C	1	\N	\N	\N	\N	\N	1	2	\N	\N	\N	2	2025-07-03 05:40:40	2025-11-21 15:17:42	0.00	1912043	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sanjar	\N	\N	0	\N
 153	A253-25C	1	\N	\N	\N	\N	\N	33	1	\N	\N	\N	2	2025-07-07 09:28:37	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sanjar	\N	\N	0	\N
 155	A255-25C	1	\N	\N	\N	\N	\N	33	1	\N	\N	\N	2	2025-07-07 09:41:49	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sanjar	\N	\N	0	\N
+288	M114-26T	16	2026-05-08 19:00:00	2026-05-25 16:50:00	2	18	\N	30	2	\N	\N	\N	1	2026-03-02 05:44:02	2026-03-02 05:44:02	\N	0	0	\N	\N	1	\N	\N	\N	\N	1	\N	\N	Uzbekistan Vacation 18 days	USD	\N	\N	2	2	\N	0	0	0	\N	HY280	HY273	0	\N
 159	A259-25C	13	\N	\N	\N	\N	\N	1	2	\N	\N	\N	2	2025-07-09 08:25:21	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Abduvakhid	\N	\N	0	\N
 157	A257-25C	1	\N	\N	\N	\N	\N	1	1	\N	\N	\N	2	2025-07-08 07:13:14	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sevara Usmonova	\N	\N	0	\N
 242	B342-25C	38	\N	\N	\N	\N	\N	20	1	\N	\N	\N	2	2025-10-11 08:25:19	2025-11-21 15:17:42	0.00	717000	0	\N	 -\n15.12.1973 - Male - C4J6***T4 (DEU)\n77455384186894\n179 250 сум\n -\n26.10.1988 - Male - C4J6***X5 (DEU)	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Djo Raisa	\N	\N	0	\N
@@ -10660,6 +11820,7 @@ COPY public.tours (id, group_number, company_id, start_date, end_date, pax, coun
 161	A261-25C	1	\N	\N	\N	\N	\N	1	1	\N	\N	\N	2	2025-07-10 15:29:00	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sanjar	\N	\N	0	\N
 160	A260-25C	1	\N	\N	\N	\N	\N	1	1	\N	\N	\N	2	2025-07-10 15:02:12	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sanjar	\N	\N	0	\N
 163	M263-25C	1	\N	\N	\N	\N	\N	2	1	\N	\N	\N	2	2025-07-12 06:59:45	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sevara Usmonova	\N	\N	0	\N
+291	A117-26T	71	2026-04-22 16:05:00	2026-05-02 17:25:00	2	3	\N	33	2	\N	\N	\N	1	2026-03-11 06:51:41	2026-03-11 08:46:38	2400.00	23738600	34821400	\N	\N	1	\N	\N	\N	\N	1	\N	\N	Silk Road Tour 11 days 10 nights	USD	\N	20	2	2	USD	29280000	0	244000	\N	FZ 1941	EK 2475	58560000	\N
 247	A347-25C	30	\N	\N	\N	\N	\N	33	1	\N	\N	\N	2	2025-10-22 11:01:31	2025-11-21 15:17:42	0.00	877822	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Mirjahon	\N	\N	0	\N
 177	A277-25C	1	\N	\N	\N	\N	\N	1	1	\N	\N	\N	2	2025-07-18 11:30:21	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sanjarbek Nurboyev	\N	\N	0	\N
 166	A266-25C	1	\N	\N	\N	\N	\N	1	2	\N	\N	\N	2	2025-07-14 12:23:51	2025-11-21 15:17:42	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sanjar	\N	\N	0	\N
@@ -10730,17 +11891,28 @@ COPY public.tours (id, group_number, company_id, start_date, end_date, pax, coun
 236	B336-25C	30	\N	\N	\N	\N	\N	20	1	\N	\N	\N	2	2025-09-26 11:48:49	2025-11-21 15:17:42	0.00	804670	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Mirjahon Yusupov	\N	\N	0	\N
 237	M337-25T	16	2025-10-05 04:04:00	2025-10-23 06:10:00	2	18	\N	30	2	\N	\N	\N	1	2025-10-02 05:41:54	2025-11-21 15:17:42	4324.00	22625548	83744852	\N	BP Antoine Artz + 1	1	\N	\N	\N	\N	1	\N	\N	Uzbekistan Grand Tour 19 days	USD	\N	1260	2	1	USD	53185200	0	15498000	\N	TK364	TK365	106370400	\N
 270	M370-25C	29	\N	\N	\N	\N	\N	30	2	\N	\N	\N	2	2025-11-26 10:08:13	2025-11-27 05:56:54	0.00	8263000	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sarvinoz	\N	\N	0	\N
-273	M373-26T	54	2026-08-31 12:00:00	2026-09-06 12:00:00	15	4	\N	30	2	\N	\N	\N	1	2025-12-01 06:47:36	2025-12-01 07:19:06	674.00	4216000	123035200	1	\N	2	Ravshan	+998934701514	120.00	\N	5	\N	115	Discover Uzbekistan 7 days	USD	USD	\N	2	1	\N	7953200	1416000	0	\N	\N	\N	127251200	\N
+273	M108-26T	54	2026-08-31 12:00:00	2026-09-06 12:00:00	15	4	\N	30	2	\N	\N	\N	1	2025-12-01 06:47:36	2025-12-01 07:19:06	674.00	4216000	123035200	1	\N	2	Ravshan	+998934701514	120.00	\N	5	\N	115	Discover Uzbekistan 7 days	USD	USD	\N	2	1	\N	7953200	1416000	0	\N	\N	\N	127251200	\N
+289	M115-26T	16	2026-03-23 23:00:00	2026-04-04 10:00:00	2	18	\N	30	2	\N	\N	\N	1	2026-03-06 10:18:18	2026-03-13 12:04:42	1561.00	10230600	27857800	\N	\N	1	\N	\N	\N	\N	1	\N	\N	Uzbekistan tour 13 days	USD	\N	\N	2	2	\N	19044200	0	0	\N	HY212	\N	38088400	Mrs. Inge Van Dijk + 1
+292	B118-26T	56	2026-03-16 04:40:00	2026-03-21 09:55:00	16	16	17	20	2	\N	\N	\N	1	2026-03-12 08:07:11	2026-03-15 05:48:40	410.00	24160000	55872000	0	\N	2	Golib	+998914434434	\N	\N	5	\N	0	SKD-BHK-KHIVA-TAS 	USD	USD	1000	1	2	USD	5002000	0	12200000	\N	TK372	TK369	80032000	\N
+290	M116-26T	70	2026-03-15 08:03:00	2026-03-21 09:55:00	1	4	\N	30	2	\N	\N	\N	1	2026-03-10 06:07:44	2026-03-10 06:28:05	\N	4879400	-4879400	\N	FAM trip Uzbekistan for 1 pax from Prima Reisen	1	\N	\N	\N	\N	1	\N	\N	FAM trip Uzbekistan 	\N	\N	\N	2	2	\N	0	0	0	\N	TK368	TK369	0	Mr. GANTNER JOHANNES 
 134	M234-25T	16	2025-08-18 00:45:00	2025-09-05 09:35:00	2	18	\N	30	2	\N	\N	\N	1	2025-06-16 07:50:26	2025-12-22 06:54:12	4528.00	32394729	81710871	0	Mrs. Sarah Wouters+1	1	\N	\N	\N	\N	1	\N	\N	Grand Tour Uzbekistan 19 days	USD	\N	300	2	1	USD	57052800	0	3780000	\N	TK370	TK369	114105600	\N
+274	M109-26T	54	2026-09-07 12:00:00	2026-09-13 12:00:00	8	4	\N	30	2	\N	\N	\N	1	2025-12-01 13:55:42	2026-03-10 09:11:52	855.00	19880000	72460000	1	\N	2	Ravshan	+998934701514	120.00	\N	5	\N	115	Discover Uzbekistan 7 days	USD	USD	\N	2	2	\N	10260000	1440000	0	\N	\N	\N	92340000	\N
 246	B346-25T	56	2025-10-19 12:30:00	2025-10-24 09:30:00	14	16	17	20	2	\N	\N	\N	1	2025-10-17 12:11:09	2025-11-21 15:17:42	365.00	25908400	35411600	\N	\N	2	INOBAT	+998974601551	700.00	\N	6	\N	\N	\N	USD	USD	2000	\N	\N	\N	4380000	8400000	2000	\N	HY282	HY 281	61320000	\N
-274	M374-26T	54	2026-09-07 12:00:00	2026-09-13 12:00:00	8	4	\N	30	2	\N	\N	\N	1	2025-12-01 13:55:42	2026-01-24 09:38:53	855.00	3420000	88920000	1	\N	2	Ravshan	+998934701514	120.00	\N	5	\N	115	Discover Uzbekistan 7 days	USD	USD	\N	2	2	\N	10260000	1440000	0	\N	\N	\N	92340000	\N
 282	B110-26C	3	\N	\N	\N	\N	\N	20	1	\N	\N	\N	2	2026-01-28 17:21:37	2026-01-28 17:22:51	0.00	1018000	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	vjcjhv	\N	\N	0	\N
-272	M372-26T	54	2026-05-30 12:00:00	2026-06-06 12:00:00	15	4	\N	30	2	\N	\N	\N	1	2025-11-29 13:13:26	2025-12-01 06:35:49	796.00	5416000	144868800	1	\N	2	Ravshan	+998934701514	120.00	\N	5	\N	131	Discover Uzbekistan 	USD	USD	\N	2	2	\N	9392800	1416000	0	\N	\N	\N	150284800	\N
+283	A110-26T	62	2026-02-04 12:00:00	2026-02-06 12:00:00	6	1	1	33	2	\N	\N	\N	1	2026-02-02 07:56:50	2026-02-02 09:14:34	5500000.00	4420000	28580000	\N	\N	1	\N	\N	\N	\N	4	\N	\N	Corporate BCI team meeting	\N	\N	3600000	2	2	\N	5500000	0	3600000	\N	\N	\N	33000000	\N
+286	M112-26T	36	2026-04-27 01:03:00	2026-05-05 08:30:00	30	19	\N	30	2	\N	\N	\N	1	2026-02-26 05:50:47	2026-02-26 07:34:04	978.00	29740000	340139600	1	\N	2	Ruslan Xolmirzayev	+998993114904	100.00	\N	6	\N	220	Uzbekistan 9D/9N by TK flights	USD	USD	\N	2	2	\N	11931600	1220000	0	\N	TK370	TK262	369879600	\N
+285	B111-26T	69	2026-05-29 12:00:00	2026-06-13 09:15:00	17	9	57	20	2	\N	\N	\N	1	2026-02-11 11:46:26	2026-02-16 13:45:00	\N	17446000	-17446000	1	\N	2	Mihil Ekaterina	+998903282552	1430.00	\N	6	\N	\N	 5stan Tour	USD	USD	3000	1	2	\N	0	17446000	3000	\N	border Shavat	TK 357	0	\N
+259	M101-26T	36	2026-04-10 01:05:00	2026-04-18 08:30:00	29	19	\N	30	2	\N	\N	\N	1	2025-11-17 11:20:04	2026-03-05 07:06:57	978.00	106734800	251213200	1	\N	2	Ruslan Xolmirzayev	+998993114904	100.00	\N	6	\N	220	Uzbekistan 9D/9N by TK flights	USD	USD	\N	2	2	\N	11931600	1220000	0	\N	TK370	TK263	357948000	\N
+260	M102-26T	36	2026-04-17 01:05:00	2026-04-25 08:30:00	24	19	\N	30	2	\N	\N	\N	1	2025-11-18 10:21:46	2026-03-05 07:09:21	978.00	98872800	199417200	1	\N	2	Aziz aka	+998909803480	160.00	\N	6	\N	220	Uzbekistan 9d/9n by TK flights	USD	USD	\N	2	2	\N	11931600	1952000	0	\N	TK370	HY263	298290000	\N
+261	M103-26T	36	2026-04-24 01:30:00	2026-05-02 05:30:00	23	19	\N	30	2	\N	\N	\N	1	2025-11-18 10:52:30	2026-03-09 10:20:00	978.00	99803200	186555200	1	\N	2	Shuxrat Aliyev	+998974083560	100.00	\N	6	\N	220	Uzbekistan 9n/9d by tk flights	USD	USD	\N	2	2	\N	11931600	1220000	0	\N	TK370	tk263	286358400	\N
 275	B375-25C	1	\N	\N	\N	\N	\N	20	2	\N	\N	\N	2	2025-12-02 08:50:28	2025-12-02 09:01:05	0.00	2640000	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Elnora Odilova	\N	\N	0	\N
-263	M363-26T	36	2026-05-01 01:30:00	2026-05-09 05:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-18 11:57:43	2025-12-23 11:58:30	978.00	62905000	294847400	1	\N	2	Shomansur 	+998333920001	\N	\N	6	\N	220	Uzbekistan 9n/9d by TK flights	USD	USD	\N	2	2	\N	11540400	0	0	\N	TK370	TK263	357752400	\N
-265	M365-26T	36	2026-05-15 01:30:00	2026-05-23 05:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-19 06:31:07	2025-12-23 11:59:06	978.00	62905000	294847400	1	\N	2	Shomansur	+998333920001	\N	\N	6	\N	220	Uzbekistan 9n/9d by TK flights	USD	\N	\N	2	2	\N	11540400	0	0	\N	TK370	TK263	357752400	\N
-260	M360-26T	36	2026-04-17 01:05:00	2026-04-25 08:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-18 10:21:46	2025-12-23 12:01:06	978.00	62905000	294847400	1	\N	2	Aziz aka	+998909803480	\N	\N	6	\N	220	Uzbekistan 9d/9n by TK flights	USD	\N	\N	2	2	\N	11540400	0	0	\N	TK370	HY263	357752400	\N
-257	M357-26T	6	2026-04-01 16:03:00	2026-04-17 17:50:00	24	14	\N	30	2	\N	\N	\N	1	2025-11-14 10:04:56	2026-01-27 07:10:58	2772.00	70551986	761048014	1	\N	2	Baxrom Tuychiyev 	90 911 99 6	\N	\N	6	\N	995	Discover Uzbekistan 17 days tour	USD	\N	\N	2	2	\N	33264000	0	0	\N	flydubai @16:05	flydubai @17:25	831600000	\N
+265	M106-26T	36	2026-05-15 01:30:00	2026-05-23 05:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-19 06:31:07	2025-12-23 11:59:06	978.00	62905000	294847400	1	\N	2	Shomansur	+998333920001	\N	\N	6	\N	220	Uzbekistan 9n/9d by TK flights	USD	\N	\N	2	2	\N	11540400	0	0	\N	TK370	TK263	357752400	\N
+272	M107-26T	54	2026-05-30 12:00:00	2026-06-06 12:00:00	15	4	\N	30	2	\N	\N	\N	1	2025-11-29 13:13:26	2025-12-01 06:35:49	796.00	5416000	144868800	1	\N	2	Ravshan	+998934701514	120.00	\N	5	\N	131	Discover Uzbekistan 	USD	USD	\N	2	2	\N	9392800	1416000	0	\N	\N	\N	150284800	\N
+284	B111-26C	13	\N	\N	\N	\N	\N	20	1	\N	\N	\N	2	2026-02-02 09:30:10	2026-02-03 11:57:47	0.00	0	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Abduvokhid Suleymanov	\N	\N	0	\N
+263	M104-26T	36	2026-05-01 01:30:00	2026-05-09 05:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-18 11:57:43	2026-02-26 07:36:45	978.00	116282000	253597600	1	\N	2	Shomansur 	+998333920001	\N	\N	6	\N	220	Uzbekistan 9n/9d by TK flights	USD	USD	\N	2	2	\N	11931600	0	0	\N	TK370	TK263	369879600	\N
+264	M105-26T	36	2026-05-07 01:30:00	2026-05-15 05:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-19 05:38:38	2026-02-26 07:38:29	978.00	117502000	252377600	1	\N	2	Ruslan Xolmirzayev	+998993114904	100.00	\N	6	\N	220	Uzbekistan 9n/9d by TK flights	USD	USD	\N	2	2	USD	11931600	1220000	0	\N	TK370	TK263	369879600	\N
+287	M113-26T	36	2026-05-11 01:00:00	2026-05-19 08:30:00	30	19	\N	30	2	\N	\N	\N	1	2026-02-26 07:48:55	2026-02-26 08:37:41	978.00	32840000	337039600	1	\N	2	Eldor Raxmonov	+998979188038	100.00	\N	6	\N	220	Uzbekistan 9D/9N by TK flights	USD	USD	\N	2	2	\N	11931600	1220000	0	\N	TK370	TK262	369879600	\N
+257	M100-26T	6	2026-04-01 16:03:00	2026-04-17 17:50:00	24	14	\N	30	2	\N	\N	\N	1	2025-11-14 10:04:56	2026-02-28 08:44:43	2772.00	283395786	562064214	1	\N	2	Baxrom Tuychiyev 	90 911 99 6	1300.00	\N	6	\N	995	Discover Uzbekistan 17 days tour	USD	USD	\N	2	1	\N	33818400	15860000	0	\N	flydubai @16:05	flydubai @17:25	845460000	\N
 111	M211-25C	1	\N	\N	\N	\N	\N	2	1	\N	\N	\N	2	2025-06-02 11:01:23	2025-11-21 15:17:42	0.00	0	0	\N	Transfer for Mr. Tuychi Ostonov	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sanjar	\N	\N	0	\N
 113	M213-25C	42	\N	\N	\N	\N	\N	2	1	\N	\N	\N	2	2025-06-03 07:26:41	2025-11-21 15:17:42	0.00	1926696	0	\N	Flight tickets for Mr. Makhmudov Sardorbek 	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Baxrom aka ACWA Power	\N	\N	0	\N
 77	A177-25T	36	2025-05-13 01:00:00	2025-05-21 08:00:00	34	19	\N	1	2	\N	\N	\N	1	2025-04-29 14:19:34	2025-11-21 15:17:42	849.00	113944060	-113914345	1	\N	2	Aziz	+998909803480	1490.00	\N	6	\N	202	Uzbekistan 9D/9N	\N	USD	2016	2	2	USD	849	1490	2016	\N	\N	\N	29715	\N
@@ -10760,10 +11932,7 @@ COPY public.tours (id, group_number, company_id, start_date, end_date, pax, coun
 256	A356-25C	29	\N	\N	\N	\N	\N	33	1	\N	\N	\N	2	2025-11-12 07:48:27	2025-11-21 15:17:42	0.00	11990752	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sabina	\N	\N	0	\N
 253	D353-25T	66	2025-11-14 23:51:00	2025-11-18 01:35:00	1	8	\N	42	2	\N	\N	\N	1	2025-11-10 11:54:23	2025-11-21 15:17:42	877.00	3100000	7424000	\N	only transport , local guide , entrance fee\n\npayment was done by WeChat to Ruslan Turkmenistan	1	\N	\N	\N	\N	1	\N	\N	TTAS-SKD-BHK	USD	\N	400	1	1	USD	10524000	0	4800000	\N	CZ6029 from Urumchi	CZ6030	10524000	\N
 266	A366-25C	3	\N	\N	\N	\N	\N	11	2	\N	\N	\N	2	2025-11-19 11:34:23	2025-11-21 15:17:42	0.00	15664500	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Кериме Эннанова 	\N	\N	0	\N
-259	M359-26T	36	2026-04-10 01:05:00	2026-04-18 08:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-17 11:20:04	2025-11-21 15:17:42	978.00	17980000	345836000	1	\N	2	\N	\N	\N	\N	6	\N	220	Uzbekistan 9D/9N by TK flights	USD	\N	\N	2	2	\N	11736000	0	0	\N	TK370	TK263	363816000	\N
 262	A362-25C	29	\N	\N	\N	\N	\N	33	1	\N	\N	\N	2	2025-11-18 11:24:45	2025-11-21 15:17:42	0.00	1800000	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	UZS	UZS	\N	2	2	UZS	\N	\N	\N	Sabina	\N	\N	0	\N
-261	M361-26T	36	2026-04-24 01:30:00	2026-05-02 05:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-18 10:52:30	2025-11-21 15:17:42	978.00	19530000	344286000	1	\N	2	\N	\N	\N	\N	6	\N	220	Uzbekistan 9n/9d by tk flights	USD	\N	\N	2	2	\N	11736000	0	0	\N	TK370	tk263	363816000	\N
-264	M364-26T	36	2026-05-07 01:30:00	2026-05-15 05:30:00	30	19	\N	30	2	\N	\N	\N	1	2025-11-19 05:38:38	2025-11-21 15:17:42	978.00	19530000	344286000	1	\N	2	\N	\N	\N	\N	6	\N	220	Uzbekistan 9n/9d by TK flights	USD	\N	\N	2	2	USD	11736000	0	0	\N	TK370	TK263	363816000	\N
 \.
 
 
@@ -10772,7 +11941,6 @@ COPY public.tours (id, group_number, company_id, start_date, end_date, pax, coun
 --
 
 COPY public.train_tariffs (id, train_id, from_city_id, to_city_id, class_second, class_business, class_vip, created_at, updated_at) FROM stdin;
-5	1	2	3	196000	289000	\N	2025-02-18 12:43:58	2025-02-18 12:44:12
 7	1	2	16	141000	204000	\N	2025-02-18 12:46:31	2025-02-18 12:46:31
 10	4	1	2	179250	266700	498030	2025-02-18 12:57:43	2025-02-18 12:57:43
 11	4	2	16	133780	\N	\N	2025-02-18 13:00:17	2025-02-18 13:00:17
@@ -10799,6 +11967,7 @@ COPY public.train_tariffs (id, train_id, from_city_id, to_city_id, class_second,
 19	1	2	1	311000	455000	709000	2025-05-26 15:43:43	2026-01-26 13:08:12
 31	1	16	1	429000	642000	976000	2026-01-26 13:09:02	2026-01-26 13:09:02
 20	1	3	1	509000	760000	1138000	2025-08-03 12:01:02	2026-01-26 13:10:05
+5	1	2	3	225000	332000	\N	2025-02-18 12:43:58	2026-02-18 10:29:18
 \.
 
 
@@ -10832,6 +12001,7 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 27	1	1	25	12	5	1	17:05 межд.аэропорт (рейс НУ604) - отель Holiday INN 	2025-02-04 08:42:41	2025-07-11 06:39:52	1	\N	\N	\N	\N	межд.аэропорт	\N	2025-02-04 17:05:00	\N	\N	\N	\N	25	\N	\N	\N	\N	{"id":27,"transport_type":1,"transport_comfort_level":1,"price":"25","company_id":12,"status":5,"pax":1,"comment":"17:05 \\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 (\\u0440\\u0435\\u0439\\u0441 \\u041d\\u0423604) - \\u043e\\u0442\\u0435\\u043b\\u044c Holiday INN ","created_at":"2025-02-04T08:42:41.000000Z","updated_at":"2025-02-05T08:59:23.000000Z","from_city_id":1,"to_city_id":null,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","time":null,"date_time":"2025-02-04T17:05:00.000000Z","send_username":null,"driver_ids":null,"route":null,"passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":null,"mark":null,"notified_times":0,"number":null,"requested_by":null}	0	1027	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1309	1	\N	\N	48	1	1	PAVLENKO ANASTASIYA MRS	2025-12-05 07:33:39	2025-12-05 07:33:39	\N	1	\N	\N	\N	Hotel swissotel	\N	2025-01-18 18:00:00	\N	[]	Airport	\N	25	\N	PAVLENKO ANASTASIYA MRS	20	\N	\N	0	2309	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1339	6	\N	\N	6	2	26	\N	2026-01-26 07:59:43	2026-01-26 07:59:43	2	2	\N	M357-26T	2079	Hotel Movenpickk	\N	2026-04-07 09:00:00	\N	\N	full day Samarkand	\N	\N	\N	\N	20	\N	\N	0	2339	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1389	6	\N	\N	36	1	31	\N	2026-02-26 07:27:01	2026-02-26 07:27:01	3	3	\N	M112-26T	2160	\N	\N	2026-05-02 09:00:00	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	0	2389	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 89	1	\N	\N	1	2	1	20.02.2025 \n08:00 Regal Hotel-Bash \nФИО пассажира: Mr. Carlton\nвстречалка: Nomac	2025-02-19 11:01:17	2025-02-19 11:17:37	\N	8	\N	\N	\N	Regal Hotel	\N	2025-02-20 08:00:00	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 56	3	1	35	12	2	4	15 февраля 2025 \n00:30 Harris → Международный аэропорт Ташкента имени Ислама Каримова\n Полещук Мария Игоревна+3, +79777871090	2025-02-07 10:47:23	2025-07-11 06:39:52	1	\N	\N	\N	\N	отель Harris	\N	2025-02-15 00:30:00	\N	\N	\N	\N	35	\N	\N	\N	\N	{"id":56,"transport_type":3,"transport_comfort_level":1,"price":"35","company_id":12,"status":2,"pax":4,"comment":"15 \\u0444\\u0435\\u0432\\u0440\\u0430\\u043b\\u044f 2025 \\n00:30 Harris \\u2192 \\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442\\u0430 \\u0438\\u043c\\u0435\\u043d\\u0438 \\u0418\\u0441\\u043b\\u0430\\u043c\\u0430 \\u041a\\u0430\\u0440\\u0438\\u043c\\u043e\\u0432\\u0430\\n \\u041f\\u043e\\u043b\\u0435\\u0449\\u0443\\u043a \\u041c\\u0430\\u0440\\u0438\\u044f \\u0418\\u0433\\u043e\\u0440\\u0435\\u0432\\u043d\\u0430+3, +79777871090","created_at":"2025-02-07T10:47:23.000000Z","updated_at":"2025-02-07T10:47:23.000000Z","from_city_id":1,"to_city_id":null,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c Harris","time":null,"date_time":"2025-02-15T00:30:00.000000Z","send_username":null,"driver_ids":null,"route":null,"passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":null,"mark":null,"notified_times":0,"number":null,"requested_by":null}	0	1056	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 30	3	2	120	11	5	4	08.02.25 - 09:00 -17:30 работа по Ташкенту	2025-02-04 10:59:35	2025-07-11 06:39:52	1	\N	\N	\N	\N	отель Hilton	\N	2025-02-08 09:00:00	\N	\N	\N	\N	120	\N	\N	\N	\N	{"id":30,"transport_type":3,"transport_comfort_level":2,"price":"120","company_id":11,"status":5,"pax":4,"comment":"08.02.25 - 09:00 -17:30 \\u0440\\u0430\\u0431\\u043e\\u0442\\u0430 \\u043f\\u043e \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442\\u0443","created_at":"2025-02-04T10:59:35.000000Z","updated_at":"2025-02-08T12:49:09.000000Z","from_city_id":1,"to_city_id":null,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c Hilton","time":null,"date_time":"2025-02-08T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":null,"passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":null,"mark":null,"notified_times":0,"number":null,"requested_by":null}	0	1030	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -10844,12 +12014,14 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 260	1	\N	\N	8	5	1	\N	2025-04-04 12:30:42	2025-04-09 05:36:48	\N	1	\N	\N	\N	межд.аэрпорт г. Ташкент	\N	2025-04-07 00:50:00	\N	["2","6"]	межд.аэрпорт г. Ташкент-Radisson Blu Hotel	\N	\N	\N	ACWA POWER	1	Malibu	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 87	1	\N	\N	1	2	2	19.02.2025 \n12:02 ЖД. Вокзал г.Навои-Зафаробод \nФИО Пассажира: Mr. Saqib Bilal+1	2025-02-19 06:25:43	2025-02-19 06:30:45	\N	8	\N	\N	\N	ЖД. Вокзал г.Навои	\N	2025-02-19 12:02:00	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1340	6	\N	\N	6	2	26	\N	2026-01-26 08:07:10	2026-01-26 08:07:10	3	3	\N	M357-26T	2083	Hotel Movenpick Samarkand	\N	2026-04-08 09:00:00	\N	\N	Samarkand-Bukhara	\N	\N	\N	\N	20	\N	\N	0	2340	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1390	6	\N	\N	36	1	31	\N	2026-02-26 07:28:26	2026-02-26 07:28:26	4	4	\N	M112-26T	2163	Imperial Palace	\N	2026-05-03 09:00:00	\N	\N	Imperial Palace - Khiva New Minor hotel	\N	\N	\N	\N	30	\N	\N	0	2390	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 88	1	\N	\N	1	2	1	19.02.2025 \n23:19 Navoiy Vokzal -Regal Hotel. \nФИО Пассажира: Mr. Carlton\nтабличка: Nomac	2025-02-19 10:58:13	2025-02-19 11:17:07	\N	8	\N	\N	\N	Navoi Vokzal	\N	2025-02-19 23:19:00	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 90	1	\N	\N	1	2	2	20.02.25\n09:00 ул.М. Гафурова д.169- Ширин-Ташкент\nФИО пассажира: Алла Ахмедова\nТел: +998933830508	2025-02-19 12:05:31	2025-02-20 01:01:25	\N	1	\N	\N	\N	Ул. М. Гафурова 169 	\N	2025-02-20 08:30:00	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 98	3	\N	\N	11	5	9	23.02.25 09:00 Samarkand city Tour	2025-02-21 10:07:38	2025-03-03 05:39:08	\N	2	\N	\N	\N	De villa Hotel	\N	2025-02-23 09:00:00	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 111	1	\N	\N	25	5	2	28.02.25\nвремя: 09:30\nмаршрут: экскурсия по Ташкекнту (8-9 ч)\nФИО пассажира: нет\nтабличка: нет 	2025-02-26 06:02:33	2025-03-03 05:42:04	\N	1	\N	\N	\N	отель Hyatt Regency	\N	2025-02-28 09:30:00	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1246	5	\N	\N	54	2	16	\N	2025-11-29 14:27:37	2025-11-29 14:27:37	1	1	\N	M372-26T	1983	Huvaydo hotel	\N	2026-05-31 09:00:00	\N	\N	Tashkent city tour	\N	\N	\N	\N	30	\N	\N	0	2246	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1282	5	\N	\N	54	1	9	pick up time TBC	2025-12-01 13:58:03	2025-12-01 13:58:03	6	34	\N	M374-26T	2026	Dostlik border	\N	2026-09-07 12:00:00	\N	\N	Dostlik border - Andijan - Fergana	\N	\N	\N	\N	30	\N	\N	0	2282	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1419	1	\N	\N	12	1	1	Агафонов Андрей Алексеевич +79169935593	2026-03-11 05:15:24	2026-03-11 05:15:24	\N	1	\N	\N	\N	Международный аэропорт Ташкента	\N	2026-03-24 14:10:00	\N	[]	Аэрпоорт-отель Хилтон Ташкент	\N	25	\N	Агафонов Андрей Алексеевич	20	\N	\N	0	2419	\N	305000	0	USD	\N	\N	\N	\N	\N	\N
 112	1	\N	\N	25	5	1	01.03.2025\nвремя: 07:00\nмаршрут: отель Hyatt Regency - межд.аэропорт (TK369 в 09ч55)\nФИО пассажиров: нет \nтабличка: нет 	2025-02-26 06:05:42	2025-03-03 05:42:16	\N	1	\N	\N	\N	отель Hyatt Regency	\N	2025-03-01 07:00:00	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 661	1	\N	\N	1	5	1	Mr. Mujeeb	2025-06-25 06:50:09	2025-06-25 06:50:09	\N	33	\N	\N	\N	Gulistan 	\N	2025-06-25 07:30:00	\N	["21"]	Gulistan - Shirin	\N	\N	\N	\N	2	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 71	3	1	30	14	2	4	16.02.25\n00:20 местный аэропорт-межд.аэропорт 	2025-02-12 05:22:42	2025-07-11 06:39:52	1	\N	\N	\N	\N	местный аэропорт	\N	2025-02-16 00:20:00	\N	\N	\N	\N	30	\N	\N	\N	\N	{"id":71,"transport_type":3,"transport_comfort_level":1,"price":"30","company_id":14,"status":2,"pax":4,"comment":"16.02.25\\n00:20 \\u043c\\u0435\\u0441\\u0442\\u043d\\u044b\\u0439 \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 ","created_at":"2025-02-12T05:22:42.000000Z","updated_at":"2025-02-12T05:22:42.000000Z","from_city_id":1,"to_city_id":null,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0441\\u0442\\u043d\\u044b\\u0439 \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","time":null,"date_time":"2025-02-16T00:20:00.000000Z","send_username":null,"driver_ids":null,"route":null,"passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":null,"mark":null,"notified_times":0,"number":null,"requested_by":null}	0	1071	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -10876,6 +12048,7 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 657	1	\N	\N	1	5	1	transfer for Mr. Farzan Khan\nLocation in TG	2025-06-23 13:23:07	2025-07-11 06:39:52	\N	1	\N	\N	\N	Tashkent 	\N	2025-06-24 05:00:00	\N	["21"]	Tashkent - Sirdarya	\N	\N	\N	Mr. Farzan Khan	2	Cobalt	{"id":657,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":1,"status":5,"pax":1,"comment":"transfer for Mr. Farzan Khan\\nLocation in TG","created_at":"2025-06-23T13:23:07.000000Z","updated_at":"2025-06-24T07:30:38.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Tashkent ","time":null,"date_time":"2025-06-24T05:00:00.000000Z","send_username":null,"driver_ids":["21"],"route":"Tashkent - Sirdarya","passenger":null,"sell_price":"1000000","buy_price":null,"nameplate":"Mr. Farzan Khan","created_by":2,"mark":"Cobalt","notified_times":2,"number":null,"requested_by":null}	2	1657	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 699	1	\N	\N	14	2	1	1. Солнцева Ольга +79857767653\n2. Тарасов Павел ()	2025-07-07 13:39:23	2025-07-11 09:59:02	\N	1	\N	\N	\N	5-й проезд Ниёзбек Йули, 1 (Ташкент, Узбекистан)	\N	2025-07-11 15:30:00	\N	["2"]	5-й проезд Ниёзбек Йули 1 - аэропорт	\N	\N	\N	Солнцева Ольга 	1	Малибу	{"id":699,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":"1. \\u0421\\u043e\\u043b\\u043d\\u0446\\u0435\\u0432\\u0430 \\u041e\\u043b\\u044c\\u0433\\u0430 +79857767653\\n2. \\u0422\\u0430\\u0440\\u0430\\u0441\\u043e\\u0432 \\u041f\\u0430\\u0432\\u0435\\u043b ()","created_at":"2025-07-07T13:39:23.000000Z","updated_at":"2025-07-11T09:30:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"5-\\u0439 \\u043f\\u0440\\u043e\\u0435\\u0437\\u0434 \\u041d\\u0438\\u0451\\u0437\\u0431\\u0435\\u043a \\u0419\\u0443\\u043b\\u0438, 1 (\\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)","time":null,"date_time":"2025-07-11T15:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"5-\\u0439 \\u043f\\u0440\\u043e\\u0435\\u0437\\u0434 \\u041d\\u0438\\u0451\\u0437\\u0431\\u0435\\u043a \\u0419\\u0443\\u043b\\u0438 1 - \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"\\u0421\\u043e\\u043b\\u043d\\u0446\\u0435\\u0432\\u0430 \\u041e\\u043b\\u044c\\u0433\\u0430 ","created_by":1,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443","notified_times":1,"number":"1699","requested_by":null}	2	1699	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 144	4	\N	\N	10	5	9	\N	2025-03-14 05:27:47	2025-03-22 09:57:47	\N	1	\N	\N	\N	бизнес центр Альфа (Лабзак)	\N	2025-03-18 09:00:00	\N	["12"]	работа по г. Ташкент	\N	\N	70	AFD	1	Кинг Лонг 	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1391	6	\N	\N	36	1	31	\N	2026-02-26 07:29:34	2026-02-26 07:29:34	4	4	\N	M112-26T	2167	\N	\N	2026-05-04 09:00:00	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	0	2391	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 168	6	\N	\N	17	5	16	\N	2025-03-18 10:29:20	2025-03-29 07:22:26	2	1	\N	A14125T	187	отель Gabrielle International	\N	2025-03-29 06:00:00	\N	[]	отель Gabrielle International - Северный вокзал г.Ташкент	\N	\N	\N	\N	1	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 153	1	\N	\N	16	5	2	\N	2025-03-17 18:48:00	2025-03-29 07:27:00	3	3	\N	A13925T	142	отель Anor Bukhara	\N	2025-03-29 09:00:00	\N	[]	экскурсия по г. Бухара	\N	\N	\N	\N	1	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 169	6	\N	\N	17	5	16	\N	2025-03-18 10:29:20	2025-03-30 13:11:18	2	2	\N	A14125T	188	вокзал г. Самарканд	\N	2025-03-29 09:51:00	\N	[]	вокзал г. Самарканд, экскурсия по г. Самарканд	\N	\N	\N	\N	1	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -10970,12 +12143,15 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 592	1	\N	\N	1	5	1	\N	2025-06-05 11:09:39	2025-06-05 14:08:16	\N	33	\N	\N	\N	Sirdarya	\N	2025-06-05 17:00:00	\N	[]	Sirdarya - Tashkent	\N	\N	\N	\N	2	\N	{"id":592,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":1,"status":2,"pax":1,"comment":"guest name TBC\\nawaiting email","created_at":"2025-06-05T11:09:39.000000Z","updated_at":"2025-06-05T11:09:39.000000Z","from_city_id":null,"to_city_id":33,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Sirdarya","time":null,"date_time":"2025-06-06T05:00:00.000000Z","send_username":null,"driver_ids":[],"route":"Sirdarya - Tashkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":2,"mark":null,"notified_times":0}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 364	1	\N	\N	16	5	2	\N	2025-04-23 06:04:24	2025-05-08 06:13:52	2	5	\N	A16925T	480	Al Madina hotel	\N	2025-05-08 09:00:00	\N	[]	Al Madina - Shakhrisabz city tour - Samarkand	\N	\N	\N	\N	1	\N	{"id":364,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":null,"created_at":"2025-04-23T06:04:24.000000Z","updated_at":"2025-05-08T03:40:01.000000Z","from_city_id":2,"to_city_id":5,"total_price":null,"group_number":"A16925T","tour_day_expense_id":480,"place_of_submission":"Al Madina hotel","time":null,"date_time":"2025-05-08T09:00:00.000000Z","send_username":null,"driver_ids":[],"route":"Al Madina - Shakhrisabz city tour - Samarkand","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_at":"2025-05-08T03:40:01.000000Z"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1286	5	\N	\N	54	1	9	\N	2025-12-02 06:07:03	2025-12-02 06:07:03	3	1	\N	M374-26T	2033	Huvaydo hotel	\N	2026-09-09 06:45:00	\N	\N	Huvaydo hotel - Severniy vokzal	\N	\N	\N	\N	30	\N	\N	0	2286	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1392	6	\N	\N	36	1	31	\N	2026-02-26 07:30:10	2026-02-26 07:30:10	4	9	\N	M112-26T	2171	New Minor Hotel	\N	2026-05-05 05:00:00	\N	\N	New Minor Hotel - UGC airport	\N	\N	\N	\N	30	\N	\N	0	2392	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1420	\N	\N	\N	12	2	1	Рейс: SU 1873\n1. Агафонов Андрей Алексеевич +79169935593	2026-03-11 05:18:21	2026-03-11 05:18:21	\N	1	\N	\N	\N	Hilton Tashkent City (ул. Укчи, 1, Ташкент, Узбекистан)	\N	2026-03-27 12:15:00	\N	[]	Hilton Tashkent City - Аэропорт	\N	25	\N	\N	20	\N	\N	0	2420	\N	305000	0	USD	\N	\N	\N	\N	\N	\N
 242	3	\N	\N	7	5	3	\N	2025-03-31 15:06:57	2025-04-18 05:52:54	4	3	\N	A14725T	308	hotel mercure	\N	2025-04-18 08:00:00	\N	[]	Бухара-Хива	\N	\N	\N	\N	1	\N	{"id":242,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":7,"status":1,"pax":3,"comment":null,"created_at":"2025-03-31T15:06:57.000000Z","updated_at":"2025-03-31T15:06:57.000000Z","from_city_id":4,"to_city_id":3,"total_price":null,"group_number":"A14725T","tour_day_expense_id":308,"place_of_submission":"hotel mercure","time":null,"date_time":"2025-04-18T08:00:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u0411\\u0443\\u0445\\u0430\\u0440\\u0430-\\u0425\\u0438\\u0432\\u0430","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 304	1	\N	\N	16	5	2	Группа №128-25 \nGuide Naim 90 958 95 55	2025-04-18 07:33:14	2025-04-21 11:24:17	\N	1	\N	\N	\N	Mirzo Hotel	\N	2025-04-20 10:00:00	\N	["2","6"]	Mirzo hotel - City tour - Mirzo hotel 	\N	\N	\N	Mrs. Else Loes Pasma + 1	1	\N	{"id":304,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":"\\u0413\\u0440\\u0443\\u043f\\u043f\\u0430 \\u2116128-25 \\nGuide Naim 90 958 95 55","created_at":"2025-04-18T07:33:14.000000Z","updated_at":"2025-04-19T08:45:15.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Mirzo Hotel","time":null,"date_time":"2025-04-20T10:00:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"Mirzo hotel - City tour - Mirzo hotel ","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Mrs. Else Loes Pasma + 1","created_by":1,"mark":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 161	1	\N	\N	16	5	2	\N	2025-03-17 20:14:29	2025-04-22 04:30:10	1	1	\N	A13925T	169	отель Green Canyon	\N	2025-04-08 08:00:00	\N	[]	отель Green Canyon, экскурсия, трансфер в Ташкент	\N	\N	\N	\N	1	\N	{"id":161,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":5,"pax":2,"comment":null,"created_at":"2025-03-17T20:14:29.000000Z","updated_at":"2025-04-08T05:40:39.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A13925T","tour_day_expense_id":169,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c Green Canyon","time":null,"date_time":"2025-04-08T08:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c Green Canyon, \\u044d\\u043a\\u0441\\u043a\\u0443\\u0440\\u0441\\u0438\\u044f, \\u0442\\u0440\\u0430\\u043d\\u0441\\u0444\\u0435\\u0440 \\u0432 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1343	6	\N	\N	6	2	26	\N	2026-01-26 08:14:07	2026-01-26 08:14:07	3	3	\N	M357-26T	2096	Hotel Silk Road Terrase	\N	2026-04-11 09:00:00	\N	\N	full day Bukhara	\N	\N	\N	\N	20	\N	\N	0	2343	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 694	1	\N	\N	8	5	1	\N	2025-07-07 09:30:35	2025-07-30 07:58:43	33	1	\N	S25325C	919	Sirdarya	\N	2025-07-07 15:00:00	\N	\N	Sirdarya-Tashkent	\N	\N	450000	\N	29	Cobalt	{"id":694,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":8,"status":5,"pax":1,"comment":null,"created_at":"2025-07-07T09:30:35.000000Z","updated_at":"2025-07-11T06:39:52.000000Z","from_city_id":33,"to_city_id":1,"total_price":null,"group_number":"S25325C","tour_day_expense_id":919,"place_of_submission":"Sirdarya","time":null,"date_time":"2025-07-07T15:00:00.000000Z","send_username":null,"driver_ids":["21"],"route":"Tashkent","passenger":null,"sell_price":null,"buy_price":"450000","nameplate":"Curtis Enrico","created_by":29,"mark":"Cobalt","notified_times":2,"number":"1694","requested_by":"Sanjar","sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1694	Sanjar	\N	\N	\N	\N	\N	\N	\N	\N	\N
 366	1	\N	\N	16	2	2	\N	2025-04-23 06:09:55	2025-05-11 07:01:02	3	3	\N	A16925T	485	BHK train station 	\N	2025-05-11 12:21:00	\N	["7"]	BHK train station - Anor boutique	\N	\N	\N	\N	1	\N	{"id":366,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":null,"created_at":"2025-04-23T06:09:55.000000Z","updated_at":"2025-05-10T08:51:28.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"A16925T","tour_day_expense_id":485,"place_of_submission":"BHK train station ","time":null,"date_time":"2025-05-11T12:21:00.000000Z","send_username":null,"driver_ids":["7"],"route":"BHK train station - Anor boutique","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_at":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1421	1	\N	\N	71	2	2	\N	2026-03-11 06:53:57	2026-03-11 06:53:57	1	1	\N	A117-26T	2240	Tashkent International Airport	\N	2026-04-22 16:05:00	\N	\N	Hyatt Regency 	\N	\N	\N	\N	33	\N	\N	0	2421	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 240	3	\N	\N	7	5	3	\N	2025-03-31 14:38:09	2025-04-22 04:45:38	3	2	\N	A14725T	302	отель Ал Мадина	\N	2025-04-16 09:30:00	\N	[]	отель Ал Мадина- Вокзал г. Самарканд	\N	\N	\N	\N	1	\N	{"id":240,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":7,"status":1,"pax":3,"comment":null,"created_at":"2025-03-31T14:38:09.000000Z","updated_at":"2025-03-31T14:38:09.000000Z","from_city_id":3,"to_city_id":2,"total_price":null,"group_number":"A14725T","tour_day_expense_id":302,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u0410\\u043b \\u041c\\u0430\\u0434\\u0438\\u043d\\u0430","time":null,"date_time":"2025-04-16T09:30:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u0410\\u043b \\u041c\\u0430\\u0434\\u0438\\u043d\\u0430- \\u0412\\u043e\\u043a\\u0437\\u0430\\u043b \\u0433. \\u0421\\u0430\\u043c\\u0430\\u0440\\u043a\\u0430\\u043d\\u0434","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 241	3	\N	\N	7	5	3	\N	2025-03-31 14:52:28	2025-04-22 04:45:38	3	3	\N	A14725T	303	вокзал Бухара	\N	2025-04-16 12:21:00	\N	[]	экскурсия по Бухаре	\N	\N	\N	\N	1	\N	{"id":241,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":7,"status":1,"pax":3,"comment":null,"created_at":"2025-03-31T14:52:28.000000Z","updated_at":"2025-03-31T14:52:28.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"A14725T","tour_day_expense_id":303,"place_of_submission":"\\u0432\\u043e\\u043a\\u0437\\u0430\\u043b \\u0411\\u0443\\u0445\\u0430\\u0440\\u0430","time":null,"date_time":"2025-04-16T12:21:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u044d\\u043a\\u0441\\u043a\\u0443\\u0440\\u0441\\u0438\\u044f \\u043f\\u043e \\u0411\\u0443\\u0445\\u0430\\u0440\\u0435","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 305	1	\N	\N	16	5	2	#128-25 Mrs. Else Loes Pasma +1\n	2025-04-18 07:36:01	2025-04-21 04:56:34	\N	1	\N	\N	\N	Mirzo Hotel	\N	2025-04-21 05:30:00	\N	["2"]	Mirzo hotel - Tashkent airport T3	\N	\N	\N	\N	1	Малибу	{"id":305,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":"#128-25 Mrs. Else Loes Pasma +1\\n","created_at":"2025-04-18T07:36:01.000000Z","updated_at":"2025-04-20T18:29:20.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Mirzo Hotel","time":null,"date_time":"2025-04-21T05:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Mirzo hotel - Tashkent airport T3","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -10990,6 +12166,7 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 162	1	\N	\N	16	5	2	\N	2025-03-17 20:24:11	2025-04-22 04:30:48	14	1	\N	A13925T	171	отель Мирзо	\N	2025-04-09 07:00:00	\N	[]	отель Мирзо - Северный вокзал	\N	\N	\N	\N	1	Малибу 2	{"id":162,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":5,"pax":2,"comment":null,"created_at":"2025-03-17T20:24:11.000000Z","updated_at":"2025-04-14T04:59:54.000000Z","from_city_id":14,"to_city_id":1,"total_price":null,"group_number":"A13925T","tour_day_expense_id":171,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u041c\\u0438\\u0440\\u0437\\u043e","time":null,"date_time":"2025-04-09T07:30:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u041c\\u0438\\u0440\\u0437\\u043e - \\u0421\\u0435\\u0432\\u0435\\u0440\\u043d\\u044b\\u0439 \\u0432\\u043e\\u043a\\u0437\\u0430\\u043b","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443 2"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 320	1	\N	\N	16	5	2	#128-25 BP\nMrs. Else Loes Pasma + 1	2025-04-21 10:37:33	2025-05-06 05:02:28	\N	1	\N	\N	\N	Mirzo hotel	\N	2025-05-06 06:30:00	\N	["6"]	Mirzo Hotel - Severniy vokzal	\N	\N	\N	\N	1	\N	{"id":320,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":"#128-25 BP\\nMrs. Else Loes Pasma + 1","created_at":"2025-04-21T10:37:33.000000Z","updated_at":"2025-05-06T01:10:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Mirzo hotel","time":null,"date_time":"2025-05-06T06:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Mirzo Hotel - Severniy vokzal","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_at":"2025-05-06T01:10:02.000000Z"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1287	5	\N	\N	54	1	9	\N	2025-12-02 06:09:24	2025-12-02 06:09:24	2	3	\N	M374-26T	2037	Imperial Palace	\N	2026-09-10 09:00:00	\N	\N	Imperial Palace - Mohi Hosa - Samarkand 	\N	\N	\N	\N	30	\N	\N	0	2287	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1422	1	\N	\N	71	2	2	City Tour	2026-03-11 06:57:17	2026-03-11 06:57:17	1	1	\N	A117-26T	2243	Hyatt Regency	\N	2026-04-23 10:00:00	\N	\N	City Tour	\N	\N	\N	\N	33	\N	\N	0	2422	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 336	1	\N	\N	16	5	2	\N	2025-04-22 07:17:22	2025-04-22 07:17:22	1	1	\N	A16425T	356	межд.аэропорт Ташкент	\N	2025-04-20 00:45:00	\N	[]	межд.аэропорт Ташкент-отель Мирзо 	\N	\N	\N	\N	1	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 337	1	\N	\N	16	5	2	\N	2025-04-22 07:17:22	2025-04-22 07:17:22	1	1	\N	A16425T	357	отель Мирзо	\N	2025-04-20 10:00:00	\N	[]	экскурсия по Ташкенту	\N	\N	\N	\N	1	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 307	1	\N	\N	1	5	1	\N	2025-04-18 13:52:20	2025-04-18 13:52:33	\N	1	\N	\N	\N	Hotel Chirchiq	\N	2025-04-18 08:20:00	\N	["6"]	Hotel Chirchiq-Green Solar Acwa Powerq	\N	\N	\N	Arslan Javed	1	BYD	{"id":307,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":1,"status":2,"pax":1,"comment":null,"created_at":"2025-04-18T13:52:20.000000Z","updated_at":"2025-04-18T13:52:20.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Chirchiq","time":null,"date_time":"2025-04-18T08:20:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Hotel Chirchiq-Green Solar Acwa Powerq","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Arslan Javed","created_by":1,"mark":"BYD"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11002,7 +12179,6 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 171	6	\N	\N	17	5	16	\N	2025-03-18 10:29:20	2025-04-22 06:57:24	3	2	\N	A14125T	196	отель De Villa	\N	2025-03-31 09:00:00	\N	[]	отель De Villa - Вокзал г. Самарканд	\N	\N	\N	\N	1	\N	{"id":171,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":17,"status":5,"pax":16,"comment":null,"created_at":"2025-03-18T10:29:20.000000Z","updated_at":"2025-03-31T14:03:55.000000Z","from_city_id":3,"to_city_id":2,"total_price":null,"group_number":"A14125T","tour_day_expense_id":196,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c De Villa","time":null,"date_time":"2025-03-31T09:00:00.000000Z","send_username":null,"driver_ids":["7","6"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c De Villa - \\u0412\\u043e\\u043a\\u0437\\u0430\\u043b \\u0433. \\u0421\\u0430\\u043c\\u0430\\u0440\\u043a\\u0430\\u043d\\u0434","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 885	1	\N	\N	37	5	2	\N	2025-08-11 06:23:49	2025-09-28 16:37:37	28	28	\N	A30425T	1423	Hotel De Villa 	\N	2025-09-28 09:00:00	\N	["7"]	Samarkand- Asraf Village	\N	\N	\N	\N	1	\N	{"id":885,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":37,"status":2,"pax":2,"comment":null,"created_at":"2025-08-11T06:23:49.000000Z","updated_at":"2025-09-28T03:29:01.000000Z","from_city_id":28,"to_city_id":28,"total_price":null,"group_number":"A30425T","tour_day_expense_id":1423,"place_of_submission":"Hotel De Villa ","time":null,"date_time":"2025-09-28T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Samarkand- Asraf Village","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1885","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1885	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 332	1	\N	\N	37	2	2	#118-25 Bedu\nMr. Mauesner Chris + 1	2025-04-21 12:38:26	2025-05-06 16:20:02	1	1	\N	A16625T	395	Tashkent airport T3	\N	2025-05-06 21:40:00	\N	["6","2"]	Tashkent airport T3 - Mirzo boutique hotel	\N	\N	\N	Bedu Expeditionen	1	\N	{"id":332,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":37,"status":2,"pax":2,"comment":"#118-25 Bedu\\nMr. Mauesner Chris + 1","created_at":"2025-04-21T12:38:26.000000Z","updated_at":"2025-05-06T06:29:16.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A16625T","tour_day_expense_id":395,"place_of_submission":"Tashkent airport T3","time":null,"date_time":"2025-05-06T21:40:00.000000Z","send_username":null,"driver_ids":["6","2"],"route":"Tashkent airport T3 - Mirzo boutique hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Bedu Expeditionen","created_by":1,"mark":null,"notified_at":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1156	6	\N	\N	36	1	31	\N	2025-11-17 13:05:51	2025-11-17 13:05:51	2	1	\N	M35926T	1782	Inspira S	\N	2026-04-11 07:00:00	\N	\N	Inspira S - Severniy vokzal	\N	\N	\N	\N	30	\N	\N	0	2156	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 735	1	\N	\N	1	5	1	\N	2025-07-12 06:59:45	2025-07-14 06:55:59	1	7	\N	M26325C	1000	Hotel Navruz	\N	2025-07-14 06:30:00	\N	["2"]	Tashkent-Shirin	\N	\N	\N	Manoj Maheshwary	2	Malibu 01|M266NB	{"id":735,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":1,"status":5,"pax":1,"comment":null,"created_at":"2025-07-12T06:59:45.000000Z","updated_at":"2025-07-14T06:55:59.000000Z","from_city_id":1,"to_city_id":7,"total_price":null,"group_number":"M26325C","tour_day_expense_id":1000,"place_of_submission":"Hotel Navruz","time":null,"date_time":"2025-07-14T06:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Tashkent-Shirin","passenger":null,"sell_price":"1500000","buy_price":null,"nameplate":"Manoj Maheshwary","created_by":2,"mark":"Malibu 01|M266NB","notified_times":2,"number":"1735","requested_by":"Sevara Usmonova"}	2	1735	Sevara Usmonova	\N	\N	\N	\N	\N	\N	\N	\N	\N
 302	1	\N	\N	16	5	2	#124-25 \nMirzo hotel - Tashkent Airport\n	2025-04-18 07:23:24	2025-04-21 11:23:59	\N	1	\N	\N	\N	Mirzo Hotel	\N	2025-04-20 07:00:00	\N	["2","6"]	Mirzo hotel - Tashkent airport 	\N	\N	\N	Mr. Olaf Cremer + 1 	1	Малибу	{"id":302,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":"#124-25 \\nMirzo hotel - Tashkent Airport\\n","created_at":"2025-04-18T07:23:24.000000Z","updated_at":"2025-04-19T08:44:16.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Mirzo Hotel","time":null,"date_time":"2025-04-20T07:00:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"Mirzo hotel - Tashkent airport ","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Mr. Olaf Cremer + 1 ","created_by":1,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 747	5	\N	\N	28	1	12	\N	2025-07-14 12:51:56	2025-09-13 02:29:01	1	1	\N	A21525T	1030	Hotel Human	\N	2025-09-13 08:00:00	\N	\N	Hotel Human-Shymkent-Tashkent	\N	\N	\N	\N	1	\N	{"id":747,"transport_type":5,"transport_comfort_level":null,"price":null,"company_id":28,"status":1,"pax":12,"comment":null,"created_at":"2025-07-14T12:51:56.000000Z","updated_at":"2025-09-13T02:00:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A21525T","tour_day_expense_id":1030,"place_of_submission":"Hotel Human","time":null,"date_time":"2025-09-13T08:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Hotel Human-Shymkent-Tashkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":1,"number":"1747","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1747	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11011,7 +12187,6 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 334	1	\N	\N	16	5	2	\N	2025-04-22 04:31:52	2025-04-22 04:31:52	1	1	\N	A13925T	178	отель Мирзо	\N	2025-04-11 06:00:00	\N	[]	отель Мирзо - межд.аэропорт	\N	\N	\N	\N	1	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 173	6	\N	\N	17	5	16	\N	2025-03-18 10:53:21	2025-04-22 06:58:21	3	3	\N	A14125T	201	отель Анор	\N	2025-04-01 09:00:00	\N	[]	Бухара-Ширин-Бухара	\N	\N	\N	\N	1	\N	{"id":173,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":17,"status":5,"pax":16,"comment":null,"created_at":"2025-03-18T10:53:21.000000Z","updated_at":"2025-04-01T06:38:55.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"A14125T","tour_day_expense_id":201,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u0410\\u043d\\u043e\\u0440","time":null,"date_time":"2025-04-01T09:00:00.000000Z","send_username":null,"driver_ids":["7"],"route":"\\u0411\\u0443\\u0445\\u0430\\u0440\\u0430-\\u0428\\u0438\\u0440\\u0438\\u043d-\\u0411\\u0443\\u0445\\u0430\\u0440\\u0430","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 338	1	\N	\N	16	5	2	\N	2025-04-22 07:17:53	2025-04-22 07:17:53	10	1	\N	A16425T	360	Hotel  Mirzo	\N	2025-04-21 07:15:00	\N	[]	Hotel  Mirzo-местный аэропорт	\N	\N	\N	\N	1	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1157	6	\N	\N	36	1	31	\N	2025-11-17 13:05:51	2025-11-17 13:05:51	2	2	\N	M35926T	1783	SKD vokzal	\N	2026-04-11 10:00:00	\N	\N	SKD vokzal - City tour - Hotel City Samarkand	\N	\N	\N	\N	30	\N	\N	0	2157	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 485	1	\N	\N	11	5	3	\N	2025-05-19 10:07:46	2025-07-11 06:39:52	\N	1	\N	\N	\N	Tashkent	\N	2025-05-30 10:00:00	\N	["2"]	Tashkent	\N	\N	\N	\N	23	Cobalt	{"id":485,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":11,"status":5,"pax":3,"comment":null,"created_at":"2025-05-19T10:07:46.000000Z","updated_at":"2025-05-30T05:41:13.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Tashkent","time":null,"date_time":"2025-05-30T10:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Tashkent","passenger":null,"sell_price":"70","buy_price":null,"nameplate":null,"created_by":23,"mark":"Cobalt","notified_times":0,"number":null,"requested_by":null}	0	1485	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 149	1	\N	\N	16	5	2	\N	2025-03-17 18:43:30	2025-04-22 04:22:21	1	1	\N	A13925T	132	межд.аэропорт г. Ташкент	\N	2025-03-25 01:50:00	\N	[]	межд.аэропорт г. Ташкент - отель Мирзо	\N	\N	\N	Lynn de Haes +1	1	Malibu 2 01|M266 NB	{"id":149,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":5,"pax":2,"comment":"25.03.2025\\nTK 01:50","created_at":"2025-03-17T18:43:30.000000Z","updated_at":"2025-03-25T07:52:39.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A13925T","tour_day_expense_id":132,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0433. \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-03-25T01:50:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0433. \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 - \\u043e\\u0442\\u0435\\u043b\\u044c \\u041c\\u0438\\u0440\\u0437\\u043e","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Lynn de Haes +1","created_by":1,"mark":"Malibu 2 01|M266 NB"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 237	3	\N	\N	7	5	3	\N	2025-03-31 14:38:09	2025-04-22 04:43:10	2	1	\N	A14725T	292	отель Инспира С	\N	2025-04-14 07:00:00	\N	[]	отель Инспира С-северный вокзал	\N	\N	\N	net	1	Hyundai Starex	{"id":237,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":7,"status":5,"pax":3,"comment":null,"created_at":"2025-03-31T14:38:09.000000Z","updated_at":"2025-04-14T04:46:29.000000Z","from_city_id":2,"to_city_id":1,"total_price":null,"group_number":"A14725T","tour_day_expense_id":292,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u0418\\u043d\\u0441\\u043f\\u0438\\u0440\\u0430 \\u0421","time":null,"date_time":"2025-04-14T07:00:00.000000Z","send_username":null,"driver_ids":["6","12"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u0418\\u043d\\u0441\\u043f\\u0438\\u0440\\u0430 \\u0421-\\u0441\\u0435\\u0432\\u0435\\u0440\\u043d\\u044b\\u0439 \\u0432\\u043e\\u043a\\u0437\\u0430\\u043b","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"net","created_by":1,"mark":"Hyundai Starex"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11061,7 +12236,6 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 186	1	\N	\N	33	5	1	\N	2025-03-22 10:56:23	2025-07-11 06:39:52	\N	1	\N	\N	\N	отель HILTON TASHKENT 	\N	2025-04-30 09:00:00	\N	["13","6"]	работа по Ташкенту с 09:00 по 28 апреля 2025 22:00 (13 часов )	\N	\N	200	Dernovoy Alexander	1	Mercedes-Benz W222 B715FB	{"id":186,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":33,"status":5,"pax":1,"comment":null,"created_at":"2025-03-22T10:56:23.000000Z","updated_at":"2025-05-01T05:50:12.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c HILTON TASHKENT ","time":null,"date_time":"2025-04-30T09:00:00.000000Z","send_username":null,"driver_ids":["13","6"],"route":"\\u0440\\u0430\\u0431\\u043e\\u0442\\u0430 \\u043f\\u043e \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442\\u0443 \\u0441 09:00 \\u043f\\u043e 28 \\u0430\\u043f\\u0440\\u0435\\u043b\\u044f 2025 22:00 (13 \\u0447\\u0430\\u0441\\u043e\\u0432 )","passenger":null,"sell_price":"300","buy_price":"200","nameplate":"Dernovoy Alexander","created_by":1,"mark":"Mercedes-Benz W222 B715FB","notified_times":0,"number":null,"requested_by":null}	0	1186	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 345	1	\N	\N	16	2	2	Evgeniy trekking 	2025-04-22 07:36:16	2025-05-03 02:15:02	25	1	\N	A16425T	425	Tashkent Train station	\N	2025-05-03 07:35:00	\N	[]	TAS train station - Chimgan	\N	\N	\N	\N	1	\N	{"id":345,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":"Evgeniy trekking ","created_at":"2025-04-22T07:36:16.000000Z","updated_at":"2025-04-22T07:36:16.000000Z","from_city_id":25,"to_city_id":1,"total_price":null,"group_number":"A16425T","tour_day_expense_id":425,"place_of_submission":"Tashkent Train station","time":null,"date_time":"2025-05-03T07:35:00.000000Z","send_username":null,"driver_ids":[],"route":"TAS train station - Chimgan","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_at":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 825	6	\N	\N	36	5	33	\N	2025-08-05 12:49:17	2025-09-05 14:21:50	30	30	\N	A29625T	1246	Hotel City	\N	2025-09-05 09:00:00	\N	["7"]	Samarkand-Vobkent	\N	\N	\N	\N	1	\N	{"id":825,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":2,"pax":33,"comment":null,"created_at":"2025-08-05T12:49:17.000000Z","updated_at":"2025-09-05T03:29:01.000000Z","from_city_id":30,"to_city_id":30,"total_price":null,"group_number":"A29625T","tour_day_expense_id":1246,"place_of_submission":"Hotel City","time":null,"date_time":"2025-09-05T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Samarkand-Vobkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1825","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1825	\N	0	0	\N	\N	\N	\N	\N	\N	\N
-1162	6	\N	\N	36	2	31	\N	2025-11-18 09:38:59	2025-11-18 09:38:59	3	2	\N	M35926T	1790	City hotel Samarkand	\N	2026-04-13 09:00:00	\N	\N	Samarkand - Shirin village (Bukhara)	\N	\N	\N	\N	30	\N	\N	0	2162	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 321	1	\N	\N	16	2	2	#128-25 BP\nMrs. Else Loes Pasma + 1	2025-04-21 10:39:31	2025-05-08 15:57:01	\N	1	\N	\N	\N	Severniy vokzal	\N	2025-05-08 21:17:00	\N	["2"]	Severniy vokzal - Inspira S Hotel	\N	\N	\N	Mrs. Else Loes Pasma + 1	1	vito	{"id":321,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":"#128-25 BP\\nMrs. Else Loes Pasma + 1","created_at":"2025-04-21T10:39:31.000000Z","updated_at":"2025-05-08T15:46:50.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Severniy vokzal","time":null,"date_time":"2025-05-08T21:17:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Severniy vokzal - Inspira S Hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Mrs. Else Loes Pasma + 1","created_by":1,"mark":"vito","notified_at":null}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 401	6	\N	\N	36	5	35	\N	2025-04-29 14:29:57	2025-05-14 12:05:00	2	2	\N	A17725T	520	вокзал Самарканд	\N	2025-05-14 10:53:00	\N	[]	экскурсия по Самарканду	\N	\N	\N	\N	1	\N	{"id":401,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":2,"pax":35,"comment":null,"created_at":"2025-04-29T14:29:57.000000Z","updated_at":"2025-05-14T05:33:02.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"A17725T","tour_day_expense_id":520,"place_of_submission":"\\u0432\\u043e\\u043a\\u0437\\u0430\\u043b \\u0421\\u0430\\u043c\\u0430\\u0440\\u043a\\u0430\\u043d\\u0434","time":null,"date_time":"2025-05-14T10:53:00.000000Z","send_username":null,"driver_ids":null,"route":"\\u044d\\u043a\\u0441\\u043a\\u0443\\u0440\\u0441\\u0438\\u044f \\u043f\\u043e \\u0421\\u0430\\u043c\\u0430\\u0440\\u043a\\u0430\\u043d\\u0434\\u0443","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_at":"2025-05-14T05:33:01.000000Z"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 400	6	\N	\N	36	5	35	\N	2025-04-29 14:29:57	2025-05-14 12:04:49	2	1	\N	A17725T	519	hotel Inspira S	\N	2025-05-14 07:30:00	\N	[]	hotel Inspira S - Северный вокзал 	\N	\N	\N	\N	1	\N	{"id":400,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":2,"pax":35,"comment":null,"created_at":"2025-04-29T14:29:57.000000Z","updated_at":"2025-05-14T02:10:02.000000Z","from_city_id":2,"to_city_id":1,"total_price":null,"group_number":"A17725T","tour_day_expense_id":519,"place_of_submission":"hotel Inspira S","time":null,"date_time":"2025-05-14T07:30:00.000000Z","send_username":null,"driver_ids":null,"route":"hotel Inspira S - \\u0421\\u0435\\u0432\\u0435\\u0440\\u043d\\u044b\\u0439 \\u0432\\u043e\\u043a\\u0437\\u0430\\u043b ","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_at":"2025-05-14T02:10:02.000000Z"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11074,7 +12248,6 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 475	1	\N	\N	24	5	1	\N	2025-05-19 09:52:31	2025-07-11 06:39:52	\N	1	\N	\N	\N	Tashkent	\N	2025-05-19 10:00:00	\N	["2"]	Tashkent	\N	\N	\N	Sevara	23	BYD	{"id":475,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":24,"status":5,"pax":1,"comment":null,"created_at":"2025-05-19T09:52:31.000000Z","updated_at":"2025-05-19T19:17:53.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Tashkent","time":null,"date_time":"2025-05-19T10:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Tashkent","passenger":null,"sell_price":"85","buy_price":null,"nameplate":"Sevara","created_by":23,"mark":"BYD","notified_times":0,"number":null,"requested_by":null}	0	1475	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 328	1	\N	\N	37	5	2	#118-25 Bedu\nMr. Mauesner Chris + 1\nGuest house Rahmat | Asraf village	2025-04-21 12:28:04	2025-04-29 07:01:47	2	2	\N	A16625T	382	Reikartz Amar hotel	\N	2025-04-29 09:00:00	\N	["7"]	Reikartz Amar hotel - Asraf village (Rahmat GH)	\N	\N	\N	Bedu Expeditionen	1	\N	{"id":328,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":37,"status":2,"pax":2,"comment":"#118-25 Bedu\\nMr. Mauesner Chris + 1\\nGuest house Rahmat | Asraf village","created_at":"2025-04-21T12:28:04.000000Z","updated_at":"2025-04-29T03:40:01.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"A16625T","tour_day_expense_id":382,"place_of_submission":"Reikartz Amar hotel","time":null,"date_time":"2025-04-29T09:00:00.000000Z","send_username":null,"driver_ids":[],"route":"Reikartz Amar hotel - Asraf village (Rahmat GH)","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Bedu Expeditionen","created_by":1,"mark":null,"notified_at":"2025-04-29T03:40:01.000000Z"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 720	3	\N	\N	37	5	4	\N	2025-07-09 21:02:18	2025-09-11 11:04:51	3	3	\N	A15425T	964	Hotel Anor	\N	2025-09-11 09:00:00	\N	["7"]	full day in Bukhara	\N	\N	\N	\N	1	\N	{"id":720,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":37,"status":1,"pax":4,"comment":null,"created_at":"2025-07-09T21:02:18.000000Z","updated_at":"2025-09-11T03:29:01.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"A15425T","tour_day_expense_id":964,"place_of_submission":"Hotel Anor","time":null,"date_time":"2025-09-11T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"full day in Bukhara","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1720","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1720	\N	0	0	\N	\N	\N	\N	\N	\N	\N
-1164	6	\N	\N	36	1	31	\N	2025-11-18 09:46:41	2025-11-18 09:46:41	4	4	\N	M35926T	1803	Imperial Palace	\N	2026-04-16 09:00:00	\N	\N	Bukhara - Khiva 	\N	\N	\N	\N	30	\N	\N	0	2164	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 292	1	\N	\N	12	5	2	\N	2025-04-14 13:03:09	2025-07-11 06:39:52	\N	1	\N	\N	\N	отель Hampton by Hilton	\N	2025-04-26 09:00:00	\N	["2","6"]	Hampton by Hilton Tashkent – Международный выставочный центр CAEx, далее аренда до 19:00 	\N	\N	\N	DATSKO VALENTINA	1	Малибу 	{"id":292,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":5,"pax":2,"comment":null,"created_at":"2025-04-14T13:03:09.000000Z","updated_at":"2025-04-26T08:37:53.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c Hampton by Hilton","time":null,"date_time":"2025-04-26T09:00:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"Hampton by Hilton Tashkent \\u2013 \\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0432\\u044b\\u0441\\u0442\\u0430\\u0432\\u043e\\u0447\\u043d\\u044b\\u0439 \\u0446\\u0435\\u043d\\u0442\\u0440 CAEx, \\u0434\\u0430\\u043b\\u0435\\u0435 \\u0430\\u0440\\u0435\\u043d\\u0434\\u0430 \\u0434\\u043e 19:00 ","passenger":null,"sell_price":"80","buy_price":null,"nameplate":"DATSKO VALENTINA","created_by":1,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443 ","notified_times":0,"number":null,"requested_by":null}	0	1292	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 325	1	\N	\N	37	5	2	#118-25 Bedu\nMr. Mauesner Chris + 1\n\nflight QR 377Q @01:20	2025-04-21 12:09:43	2025-04-26 02:51:43	1	1	\N	A16625T	376	Tashkent airport	\N	2025-04-26 01:20:00	\N	["2"]	Tashkent airport - Mirzo hotel	\N	\N	\N	Bedu Expeditionen	1	\N	{"id":325,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":37,"status":2,"pax":2,"comment":"#118-25 Bedu\\nMr. Mauesner Chris + 1\\n\\nflight QR 377Q @01:20","created_at":"2025-04-21T12:09:43.000000Z","updated_at":"2025-04-25T20:00:01.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A16625T","tour_day_expense_id":376,"place_of_submission":"Tashkent airport","time":null,"date_time":"2025-04-26T01:20:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Tashkent airport - Mirzo hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Bedu Expeditionen","created_by":1,"mark":null,"notified_at":"2025-04-25T20:00:01.000000Z"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 487	\N	\N	\N	1	5	1	\N	2025-05-19 19:26:36	2025-05-19 19:26:36	1	12	\N	A19825C	589	межд.аэропорт Ташкент	\N	2025-05-19 00:50:00	\N	\N	Ташкент-Бекабад	\N	\N	\N	\N	1	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11097,6 +12270,7 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 383	1	\N	\N	14	5	1	Рейс: HY 614\n\nЛЯХОВА ЕКАТЕРИНА +79851332972\n	2025-04-26 03:51:02	2025-07-11 06:39:52	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-04-28 02:40:00	\N	["6","2"]	межд.аэропорт Ташкент - ampton by Hilton Tashkent	\N	\N	\N	ЛЯХОВА ЕКАТЕРИНА	1	Малибу	{"id":383,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":5,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: HY 614\\n\\n\\u041b\\u042f\\u0425\\u041e\\u0412\\u0410 \\u0415\\u041a\\u0410\\u0422\\u0415\\u0420\\u0418\\u041d\\u0410 +79851332972\\n","created_at":"2025-04-26T03:51:02.000000Z","updated_at":"2025-04-28T06:31:43.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-04-28T02:40:00.000000Z","send_username":null,"driver_ids":["6","2"],"route":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 - ampton by Hilton Tashkent","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041b\\u042f\\u0425\\u041e\\u0412\\u0410 \\u0415\\u041a\\u0410\\u0422\\u0415\\u0420\\u0418\\u041d\\u0410","created_by":1,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443","notified_times":0,"number":null,"requested_by":null}	0	1383	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 394	1	\N	\N	40	4	1	\N	2025-04-28 10:50:07	2025-07-11 06:39:52	\N	1	\N	\N	\N	Hyatt Regency	\N	2025-04-29 08:00:00	\N	["6"]	Hyatt Regency - airport	\N	\N	\N	\N	1	BYD	{"id":394,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":40,"status":4,"pax":1,"comment":null,"created_at":"2025-04-28T10:50:07.000000Z","updated_at":"2025-04-29T07:00:58.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hyatt Regency","time":null,"date_time":"2025-04-29T08:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Hyatt Regency - airport","passenger":null,"sell_price":"35","buy_price":null,"nameplate":null,"created_by":1,"mark":"BYD","notified_times":0,"number":null,"requested_by":null}	0	1394	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 760	6	\N	\N	36	2	34	\N	2025-07-17 12:36:23	2025-09-29 19:29:01	1	1	\N	A27325T	1070	Inter.Airport	\N	2025-09-30 01:00:00	\N	["8"]	Inter.Airport-Hotel Inspira S	\N	60	\N	\N	1	\N	{"id":760,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":2,"pax":34,"comment":null,"created_at":"2025-07-17T12:36:23.000000Z","updated_at":"2025-09-29T19:00:01.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A27325T","tour_day_expense_id":1070,"place_of_submission":"Inter.Airport","time":null,"date_time":"2025-09-30T01:00:00.000000Z","send_username":null,"driver_ids":["8"],"route":"Inter.Airport-Hotel Inspira S","passenger":null,"sell_price":"60","buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":1,"number":"1760","requested_by":null,"sell_price_result":"738000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	1760	\N	738000	0	USD	\N	\N	\N	\N	\N	\N
+1425	1	\N	\N	71	2	2	\N	2026-03-11 07:08:43	2026-03-11 07:08:43	2	2	\N	A117-26T	2252	Hilton Garden Inn	\N	2026-04-25 10:00:00	\N	\N	City Tour	\N	\N	\N	\N	33	\N	\N	0	2425	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 392	1	\N	\N	40	5	5	\N	2025-04-27 09:36:36	2025-04-28 06:32:24	\N	1	\N	\N	\N	Hotel Hyatt Regency	\N	2025-04-28 08:25:00	\N	["13"]	работа по Ташкенту	\N	\N	\N	\N	1	S class (2ta), S class Maybach, V class	{"id":392,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":40,"status":1,"pax":5,"comment":null,"created_at":"2025-04-27T09:36:36.000000Z","updated_at":"2025-04-28T03:05:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Hyatt Regency","time":null,"date_time":"2025-04-28T08:25:00.000000Z","send_username":null,"driver_ids":["13"],"route":"\\u0440\\u0430\\u0431\\u043e\\u0442\\u0430 \\u043f\\u043e \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442\\u0443","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":"S class (2ta), S class Maybach, V class","notified_at":"2025-04-28T03:05:01.000000Z"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1166	6	\N	\N	36	1	31	\N	2025-11-18 10:25:09	2025-11-18 10:25:09	1	1	\N	M36026T	1810	TAS APT	\N	2026-04-17 01:30:00	\N	\N	TAS APT - Inspira S	\N	\N	\N	\N	30	\N	\N	0	2166	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 384	1	\N	\N	14	5	1	Рейс: SU 1872\n\nКаменев Кирилл +79168153136	2025-04-26 03:55:39	2025-07-11 06:39:52	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-04-28 14:20:00	\N	["2","6"]	межд.аэропорт Ташкент - Hampton by Hilton Tashken	\N	\N	\N	Каменев Кирилл	1	\N	{"id":384,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":5,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: SU 1872\\n\\n\\u041a\\u0430\\u043c\\u0435\\u043d\\u0435\\u0432 \\u041a\\u0438\\u0440\\u0438\\u043b\\u043b +79168153136","created_at":"2025-04-26T03:55:39.000000Z","updated_at":"2025-04-28T10:10:20.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-04-28T14:20:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 - Hampton by Hilton Tashken","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041a\\u0430\\u043c\\u0435\\u043d\\u0435\\u0432 \\u041a\\u0438\\u0440\\u0438\\u043b\\u043b","created_by":1,"mark":null,"notified_times":0,"number":null,"requested_by":null}	0	1384	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11128,9 +12302,9 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 295	1	\N	\N	12	5	2	Шевченко Михаил Юрьевич +79177787007	2025-04-14 13:06:08	2025-07-11 06:39:52	\N	1	\N	\N	\N	Hampton by Hilton Tashkent 	\N	2025-05-01 09:10:00	\N	["6","2"]	Hampton by Hilton Tashkent – Международный выставочный центр CAEx Uzbekistan, далее аренда до 19:00 	\N	\N	\N	Шевченко Михаил Юрьевич 	1	\N	{"id":295,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":5,"pax":2,"comment":"\\u0428\\u0435\\u0432\\u0447\\u0435\\u043d\\u043a\\u043e \\u041c\\u0438\\u0445\\u0430\\u0438\\u043b \\u042e\\u0440\\u044c\\u0435\\u0432\\u0438\\u0447 +79177787007","created_at":"2025-04-14T13:06:08.000000Z","updated_at":"2025-05-01T05:57:30.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hampton by Hilton Tashkent ","time":null,"date_time":"2025-05-01T09:10:00.000000Z","send_username":null,"driver_ids":["6","2"],"route":"Hampton by Hilton Tashkent \\u2013 \\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0432\\u044b\\u0441\\u0442\\u0430\\u0432\\u043e\\u0447\\u043d\\u044b\\u0439 \\u0446\\u0435\\u043d\\u0442\\u0440 CAEx Uzbekistan, \\u0434\\u0430\\u043b\\u0435\\u0435 \\u0430\\u0440\\u0435\\u043d\\u0434\\u0430 \\u0434\\u043e 19:00 ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u0428\\u0435\\u0432\\u0447\\u0435\\u043d\\u043a\\u043e \\u041c\\u0438\\u0445\\u0430\\u0438\\u043b \\u042e\\u0440\\u044c\\u0435\\u0432\\u0438\\u0447 ","created_by":1,"mark":null,"notified_times":0,"number":null,"requested_by":null}	0	1295	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 435	1	\N	\N	40	5	1	рейс: НУ602	2025-05-10 13:41:10	2025-07-11 06:39:52	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-05-12 04:45:00	\N	["2","6"]	межд.аэропорт Ташкент - отель Bentley	\N	\N	0	ЗИНАИДА ТЕЛИЦЫНА	1	Малибу 01| M266NB	{"id":435,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":40,"status":5,"pax":1,"comment":"\\u0440\\u0435\\u0439\\u0441: \\u041d\\u0423602","created_at":"2025-05-10T13:41:10.000000Z","updated_at":"2025-05-12T07:10:04.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-05-12T04:45:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 - \\u043e\\u0442\\u0435\\u043b\\u044c Bentley","passenger":null,"sell_price":"35","buy_price":"0","nameplate":"\\u0417\\u0418\\u041d\\u0410\\u0418\\u0414\\u0410 \\u0422\\u0415\\u041b\\u0418\\u0426\\u042b\\u041d\\u0410","created_by":1,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443 01| M266NB","notified_times":0,"number":null,"requested_by":null}	0	1435	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 535	1	\N	\N	1	5	1	\N	2025-05-24 12:09:27	2025-07-11 06:39:52	\N	1	\N	\N	\N	Darxan 	\N	2025-05-23 08:00:00	\N	["6"]	Tashkent-Shirin	\N	\N	\N	Ayjan Ukubaeva	1	Malibu 2	{"id":535,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":1,"status":5,"pax":1,"comment":null,"created_at":"2025-05-24T12:09:27.000000Z","updated_at":"2025-05-24T12:09:27.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Darxan ","time":null,"date_time":"2025-05-23T08:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Tashkent-Shirin","passenger":null,"sell_price":"1000000","buy_price":null,"nameplate":"Ayjan Ukubaeva","created_by":1,"mark":"Malibu 2","notified_times":0,"number":null,"requested_by":null}	0	1535	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1168	6	\N	\N	36	1	31	\N	2025-11-18 10:29:49	2025-11-18 10:29:49	2	2	\N	M36026T	1815	SKD train station 	\N	2026-04-18 10:00:00	\N	\N	SKD train station  - City tour SKD - City hotel	\N	\N	\N	\N	30	\N	\N	0	2168	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 740	1	\N	\N	1	5	1	\N	2025-07-14 08:54:40	2025-07-18 11:35:32	33	1	\N	A26525C	1013	Sirdayra	\N	2025-07-17 14:00:00	\N	["21"]	Shirin-Tashkent IBC	\N	\N	450000	Mr. Emre	33	Cobalt	{"id":740,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":1,"status":5,"pax":1,"comment":null,"created_at":"2025-07-14T08:54:40.000000Z","updated_at":"2025-07-18T11:35:32.000000Z","from_city_id":33,"to_city_id":1,"total_price":null,"group_number":"A26525C","tour_day_expense_id":1013,"place_of_submission":"Sirdayra","time":null,"date_time":"2025-07-17T14:00:00.000000Z","send_username":null,"driver_ids":["21"],"route":"Shirin-Tashkent IBC","passenger":null,"sell_price":"1000000","buy_price":"450000","nameplate":"Mr. Emre","created_by":33,"mark":"Cobalt","notified_times":2,"number":"1740","requested_by":"Sanjar"}	2	1740	Sanjar	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1169	6	\N	\N	36	1	31	\N	2025-11-18 10:29:49	2025-11-18 10:29:49	2	1	\N	M36026T	1816	Inspira S hotel	\N	2026-04-18 07:00:00	\N	\N	Inspira S hotel - Severniy vokzal	\N	\N	\N	\N	30	\N	\N	0	2169	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1168	6	\N	\N	36	2	31	\N	2025-11-18 10:29:49	2026-02-25 11:06:37	2	2	\N	M102-26T	1815	SKD train station 	\N	2026-04-18 10:00:00	\N	\N	SKD train station  - City tour SKD - City hotel	\N	\N	\N	\N	30	\N	{"id":1168,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":31,"comment":null,"created_at":"2025-11-18T10:29:49.000000Z","updated_at":"2025-11-18T10:29:49.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"M36026T","tour_day_expense_id":1815,"place_of_submission":"SKD train station ","time":null,"date_time":"2026-04-18T10:00:00.000000Z","send_username":null,"driver_ids":null,"route":"SKD train station  - City tour SKD - City hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2168","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2168	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1426	1	\N	\N	71	2	2	\N	2026-03-11 07:11:20	2026-03-11 07:11:20	2	2	\N	A117-26T	2256	Hilton Garden Inn	\N	2026-04-26 10:00:00	\N	\N	City Tour	\N	\N	\N	\N	33	\N	\N	0	2426	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 793	4	\N	\N	16	2	6	7:15-08:55	2025-07-28 11:46:00	2025-09-30 00:29:01	10	1	\N	M28325T	1155	Hotel Heritage	\N	2025-09-30 06:00:00	\N	["2"]	Hotel Heritage - Domestic Airport	\N	\N	\N	\N	2	\N	{"id":793,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":6,"comment":"7:15-08:55","created_at":"2025-07-28T11:46:00.000000Z","updated_at":"2025-09-30T00:00:02.000000Z","from_city_id":10,"to_city_id":1,"total_price":null,"group_number":"M28325T","tour_day_expense_id":1155,"place_of_submission":"Hotel Heritage","time":null,"date_time":"2025-09-30T06:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Heritage - Domestic Airport","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":2,"mark":null,"notified_times":1,"number":"1793","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null}	2	1793	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 367	1	\N	\N	16	5	2	\N	2025-04-23 06:12:06	2025-05-12 07:10:18	3	3	\N	A16925T	489	Anor boutique 	\N	2025-05-12 09:00:00	\N	["7"]	Anor Boutique - BHK City tour (za gorod)	\N	\N	\N	\N	1	\N	{"id":367,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":null,"created_at":"2025-04-23T06:12:06.000000Z","updated_at":"2025-05-12T03:40:02.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"A16925T","tour_day_expense_id":489,"place_of_submission":"Anor boutique ","time":null,"date_time":"2025-05-12T09:00:00.000000Z","send_username":null,"driver_ids":[],"route":"Anor Boutique - BHK City tour (za gorod)","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_at":"2025-05-12T03:40:02.000000Z"}	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 536	1	\N	\N	1	5	1	\N	2025-05-24 12:10:25	2025-07-11 06:39:52	\N	1	\N	\N	\N	Shirin	\N	2025-05-23 17:00:00	\N	["6"]	Shirin- Tashkent	\N	\N	\N	Ayjan Ukubaeva +2	1	Malibu 2 	{"id":536,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":1,"status":5,"pax":1,"comment":null,"created_at":"2025-05-24T12:10:25.000000Z","updated_at":"2025-05-24T12:10:25.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Shirin","time":null,"date_time":"2025-05-23T17:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Shirin- Tashkent","passenger":null,"sell_price":"1000000","buy_price":null,"nameplate":"Ayjan Ukubaeva +2","created_by":1,"mark":"Malibu 2 ","notified_times":0,"number":null,"requested_by":null}	0	1536	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11465,7 +12639,6 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 411	1	\N	\N	12	2	1	Дацко Валентина Сергеевна +79615283569\n	2025-04-30 11:54:50	2025-07-11 06:39:52	\N	1	\N	\N	\N	Hampton by Hilton Tashkent	\N	2025-05-01 16:40:00	\N	["2","6"]	Hampton by Hilton Tashkent - Межд.аэропорт Ташкент 	\N	\N	\N	Дацко Валентина Сергеевна	1	\N	{"id":411,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u0414\\u0430\\u0446\\u043a\\u043e \\u0412\\u0430\\u043b\\u0435\\u043d\\u0442\\u0438\\u043d\\u0430 \\u0421\\u0435\\u0440\\u0433\\u0435\\u0435\\u0432\\u043d\\u0430 +79615283569\\n","created_at":"2025-04-30T11:54:50.000000Z","updated_at":"2025-05-01T11:20:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hampton by Hilton Tashkent","time":null,"date_time":"2025-05-01T16:40:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"Hampton by Hilton Tashkent - \\u041c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u0414\\u0430\\u0446\\u043a\\u043e \\u0412\\u0430\\u043b\\u0435\\u043d\\u0442\\u0438\\u043d\\u0430 \\u0421\\u0435\\u0440\\u0433\\u0435\\u0435\\u0432\\u043d\\u0430","created_by":1,"mark":null,"notified_times":0,"number":null,"requested_by":null}	0	1411	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 189	1	\N	\N	33	2	1	 тел Пассажира:  +79258837123\n	2025-03-22 11:06:49	2025-07-11 06:39:52	\N	3	\N	\N	\N	отель Sahid Zarafshsan	\N	2025-05-04 05:00:00	\N	["7","6"]	Sahid Zarafshon (ул. Мухаммада Икбала, 7, Бухара,)-Межд. аэропорт Бухара (Бухара, аэропорт Бухара)	\N	\N	60	 Dernovoy Alexander 	1	LI 7	{"id":189,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":33,"status":2,"pax":1,"comment":" \\u0442\\u0435\\u043b \\u041f\\u0430\\u0441\\u0441\\u0430\\u0436\\u0438\\u0440\\u0430:  +79258837123\\n","created_at":"2025-03-22T11:06:49.000000Z","updated_at":"2025-05-03T23:40:02.000000Z","from_city_id":null,"to_city_id":3,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c Sahid Zarafshsan","time":null,"date_time":"2025-05-04T05:00:00.000000Z","send_username":null,"driver_ids":["7","6"],"route":"Sahid Zarafshon (\\u0443\\u043b. \\u041c\\u0443\\u0445\\u0430\\u043c\\u043c\\u0430\\u0434\\u0430 \\u0418\\u043a\\u0431\\u0430\\u043b\\u0430, 7, \\u0411\\u0443\\u0445\\u0430\\u0440\\u0430,)-\\u041c\\u0435\\u0436\\u0434. \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0411\\u0443\\u0445\\u0430\\u0440\\u0430 (\\u0411\\u0443\\u0445\\u0430\\u0440\\u0430, \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0411\\u0443\\u0445\\u0430\\u0440\\u0430)","passenger":null,"sell_price":"80","buy_price":"60","nameplate":" Dernovoy Alexander ","created_by":1,"mark":"LI 7","notified_times":0,"number":null,"requested_by":null}	0	1189	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 433	3	\N	\N	47	5	6	\N	2025-05-10 08:58:07	2025-07-11 06:39:52	\N	1	\N	\N	\N	отель Mir Lux Plaza	\N	2025-05-14 07:00:00	\N	["2","6"]	отель Mir Lux Plaza-межд.аэропорт Ташкент	\N	\N	0	Авиакомпания RedWings	1	Mercedes Vito	{"id":433,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":47,"status":5,"pax":6,"comment":null,"created_at":"2025-05-10T08:58:07.000000Z","updated_at":"2025-05-14T12:04:38.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c Mir Lux Plaza","time":null,"date_time":"2025-05-14T07:00:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c Mir Lux Plaza-\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","passenger":null,"sell_price":"40","buy_price":"0","nameplate":"\\u0410\\u0432\\u0438\\u0430\\u043a\\u043e\\u043c\\u043f\\u0430\\u043d\\u0438\\u044f RedWings","created_by":1,"mark":"Mercedes Vito","notified_times":0,"number":null,"requested_by":null}	0	1433	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1196	6	\N	\N	36	1	31	\N	2025-11-19 06:06:26	2025-11-19 06:06:26	2	1	\N	M36426T	1915	Inspira S	\N	2026-05-08 07:00:00	\N	\N	Inspira S - Severniy vokzal	\N	\N	\N	\N	30	\N	\N	0	2196	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1197	6	\N	\N	36	2	31	\N	2025-11-19 06:06:26	2025-11-19 06:06:26	2	2	\N	M36426T	1916	Samarkand vokzal	\N	2026-05-08 10:00:00	\N	\N	Samarkand vokzal - City tour - City Samarkand hotel	\N	\N	\N	\N	30	\N	\N	0	2197	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1272	5	\N	\N	54	1	16	\N	2025-12-01 07:05:05	2025-12-01 07:05:05	1	6	\N	M373-26T	2006	Club 777 hotel	\N	2026-09-01 09:00:00	\N	\N	Club 777 hotel - Margilan - Rishtan - Kokand	\N	\N	\N	\N	30	\N	\N	0	2272	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 439	1	\N	\N	14	5	1	Марина Герасимова +79165532029	2025-05-12 14:13:03	2025-07-11 06:39:52	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-05-16 06:00:00	\N	["6"]	отель Courtyard by Marriott - междаэропорт Ташкент 	\N	\N	\N	Марина Герасимова	1	Малибу	{"id":439,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":5,"pax":1,"comment":"\\u041c\\u0430\\u0440\\u0438\\u043d\\u0430 \\u0413\\u0435\\u0440\\u0430\\u0441\\u0438\\u043c\\u043e\\u0432\\u0430 +79165532029","created_at":"2025-05-12T14:13:03.000000Z","updated_at":"2025-05-16T10:53:38.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-05-16T06:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c Courtyard by Marriott - \\u043c\\u0435\\u0436\\u0434\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 ","passenger":null,"sell_price":"50","buy_price":null,"nameplate":"\\u041c\\u0430\\u0440\\u0438\\u043d\\u0430 \\u0413\\u0435\\u0440\\u0430\\u0441\\u0438\\u043c\\u043e\\u0432\\u0430","created_by":1,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443","notified_times":0,"number":null,"requested_by":null}	0	1439	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11621,6 +12794,7 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 932	1	\N	\N	14	2	2	 Solntseva Olga +79857767653	2025-09-10 10:02:14	2025-09-15 11:59:02	\N	1	\N	\N	\N	Tashkent, 1 Ukchi Street	\N	2025-09-15 17:30:00	\N	["6"]	Отель Хилтон - Местный аэропорт Ташкент	\N	35	\N	SOLNTSEVA OLGA	20	BYD Song Plus 01|066SLA	{"id":932,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":2,"comment":" Solntseva Olga +79857767653","created_at":"2025-09-10T10:02:14.000000Z","updated_at":"2025-09-15T11:30:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Tashkent, 1 Ukchi Street","time":null,"date_time":"2025-09-15T17:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u041e\\u0442\\u0435\\u043b\\u044c \\u0425\\u0438\\u043b\\u0442\\u043e\\u043d - \\u041c\\u0435\\u0441\\u0442\\u043d\\u044b\\u0439 \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"SOLNTSEVA OLGA","created_by":20,"mark":"BYD Song Plus 01|066SLA","notified_times":1,"number":"1932","requested_by":null,"sell_price_result":"432250","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	1932	\N	432250	0	USD	\N	\N	\N	\N	\N	\N
 854	1	\N	\N	37	5	2	\N	2025-08-09 08:20:46	2025-09-16 14:28:36	1	1	\N	A30225T	1327	Hotel Huvaydo	\N	2025-09-16 09:00:00	\N	["6"]	Tasheknt-Chimgan	\N	\N	\N	\N	1	\N	{"id":854,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":37,"status":2,"pax":2,"comment":null,"created_at":"2025-08-09T08:20:46.000000Z","updated_at":"2025-09-16T05:49:59.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A30225T","tour_day_expense_id":1327,"place_of_submission":"Hotel Huvaydo","time":null,"date_time":"2025-09-16T09:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Tasheknt-Chimgan","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1854","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null}	2	1854	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 751	5	\N	\N	28	5	12	\N	2025-07-14 13:23:13	2025-09-16 05:50:31	2	2	\N	A21525T	1042	Hotel De Villa	\N	2025-09-16 09:00:00	\N	["7"]	full day in Samarkand	\N	\N	\N	\N	1	Mercedes Sprinter	{"id":751,"transport_type":5,"transport_comfort_level":null,"price":null,"company_id":28,"status":1,"pax":12,"comment":null,"created_at":"2025-07-14T13:23:13.000000Z","updated_at":"2025-09-16T03:29:01.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"A21525T","tour_day_expense_id":1042,"place_of_submission":"Hotel De Villa","time":null,"date_time":"2025-09-16T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"full day in Samarkand","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1751","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1751	\N	0	0	USD	\N	\N	\N	\N	\N	\N
+1423	1	\N	\N	71	2	2	\N	2026-03-11 07:05:40	2026-03-11 07:11:58	2	1	\N	A117-26T	2246	Hyatt Regency	\N	2026-04-24 06:50:00	\N	\N	Severniy Vokzal	\N	\N	\N	\N	33	\N	{"id":1423,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":71,"status":2,"pax":2,"comment":null,"created_at":"2026-03-11T07:05:40.000000Z","updated_at":"2026-03-11T07:05:40.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A117-26T","tour_day_expense_id":2246,"place_of_submission":"Hyatt Regency","time":null,"date_time":"2026-04-24T06:50:00.000000Z","send_username":null,"driver_ids":null,"route":"Severniy Vokzal","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":33,"mark":null,"notified_times":0,"number":"2423","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2423	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 856	1	\N	\N	37	2	2	\N	2025-08-09 08:27:15	2025-09-18 01:29:02	1	1	\N	A30225T	1333	Hotel Huvaydo 	\N	2025-09-18 07:00:00	\N	\N	Hotel Huvaydo-Train Station	\N	\N	\N	\N	1	\N	{"id":856,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":37,"status":2,"pax":2,"comment":null,"created_at":"2025-08-09T08:27:15.000000Z","updated_at":"2025-09-18T01:00:01.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A30225T","tour_day_expense_id":1333,"place_of_submission":"Hotel Huvaydo ","time":null,"date_time":"2025-09-18T07:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Hotel Huvaydo-Train Station","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":1,"number":"1856","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1856	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 857	1	\N	\N	37	2	2	\N	2025-08-09 08:27:15	2025-09-18 04:54:02	1	2	\N	A30225T	1334	Train Station Samarkand 	\N	2025-09-18 10:25:00	\N	\N	transfer to Hotel Arhan Palace, full day Samarkand 	\N	\N	\N	\N	1	\N	{"id":857,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":37,"status":2,"pax":2,"comment":null,"created_at":"2025-08-09T08:27:15.000000Z","updated_at":"2025-09-18T04:25:01.000000Z","from_city_id":1,"to_city_id":2,"total_price":null,"group_number":"A30225T","tour_day_expense_id":1334,"place_of_submission":"Train Station Samarkand ","time":null,"date_time":"2025-09-18T10:25:00.000000Z","send_username":null,"driver_ids":null,"route":"transfer to Hotel Arhan Palace, full day Samarkand ","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":1,"number":"1857","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1857	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 752	5	\N	\N	28	5	12	\N	2025-07-14 13:26:25	2025-09-17 11:16:52	2	2	\N	A21525T	1045	Hotel De Villa	\N	2025-09-17 08:00:00	\N	["7"]	Samarkand-Pendjikent	\N	\N	\N	\N	1	\N	{"id":752,"transport_type":5,"transport_comfort_level":null,"price":null,"company_id":28,"status":1,"pax":12,"comment":null,"created_at":"2025-07-14T13:26:25.000000Z","updated_at":"2025-09-17T02:29:01.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"A21525T","tour_day_expense_id":1045,"place_of_submission":"Hotel De Villa","time":null,"date_time":"2025-09-17T08:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Samarkand-Pendjikent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1752","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1752	\N	0	0	\N	\N	\N	\N	\N	\N	\N
@@ -11717,16 +12891,19 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 1065	1	\N	\N	13	1	2	\N	2025-10-14 10:26:50	2025-10-30 03:29:02	1	1	\N	B34425C	1658	Hotel Ramada Encore	\N	2025-10-30 09:00:00	\N	["2"]	full day Tashkent	\N	\N	\N	Berlin Economics GmbH	20	\N	{"id":1065,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":1,"pax":2,"comment":null,"created_at":"2025-10-14T10:26:50.000000Z","updated_at":"2025-10-30T03:00:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B34425C","tour_day_expense_id":1658,"place_of_submission":"Hotel Ramada Encore","time":null,"date_time":"2025-10-30T09:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"full day Tashkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Berlin Economics GmbH","created_by":20,"mark":null,"notified_times":1,"number":"2065","requested_by":"Suleymanov Abduvokhid","sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null}	2	2065	Suleymanov Abduvokhid	0	0	\N	\N	\N	\N	\N	\N	\N
 768	6	\N	\N	36	5	34	\N	2025-07-17 13:02:23	2025-10-06 06:10:44	4	4	\N	A27325T	1093	Hotel Imperial Palace 	\N	2025-10-06 08:00:00	\N	["7"]	Bukhara-Khiva	\N	\N	\N	\N	1	\N	{"id":768,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":34,"comment":null,"created_at":"2025-07-17T13:02:23.000000Z","updated_at":"2025-10-06T02:29:02.000000Z","from_city_id":4,"to_city_id":4,"total_price":null,"group_number":"A27325T","tour_day_expense_id":1093,"place_of_submission":"Hotel Imperial Palace ","time":null,"date_time":"2025-10-06T08:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Bukhara-Khiva","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1768","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1768	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 797	4	\N	\N	16	5	7	\N	2025-07-28 12:13:27	2025-10-06 06:27:55	3	3	\N	M28325T	1171	Hotel Ansi	\N	2025-10-06 09:00:00	\N	["7"]	full day in Bukhara	\N	\N	\N	\N	2	\N	{"id":797,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":16,"status":1,"pax":7,"comment":null,"created_at":"2025-07-28T12:13:27.000000Z","updated_at":"2025-10-06T03:29:01.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"M28325T","tour_day_expense_id":1171,"place_of_submission":"Hotel Ansi","time":null,"date_time":"2025-10-06T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"full day in Bukhara","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":2,"mark":null,"notified_times":2,"number":"1797","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1797	\N	0	0	\N	\N	\N	\N	\N	\N	\N
+1424	1	\N	\N	71	2	2	\N	2026-03-11 07:05:40	2026-03-11 07:11:58	2	2	\N	A117-26T	2248	Samarkand Train station	\N	2026-04-24 09:30:00	\N	\N	City Tour	\N	\N	\N	\N	33	\N	{"id":1424,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":71,"status":2,"pax":2,"comment":null,"created_at":"2026-03-11T07:05:40.000000Z","updated_at":"2026-03-11T07:05:40.000000Z","from_city_id":1,"to_city_id":2,"total_price":null,"group_number":"A117-26T","tour_day_expense_id":2248,"place_of_submission":"Samarkand Train station","time":null,"date_time":"2026-04-24T09:30:00.000000Z","send_username":null,"driver_ids":null,"route":"City Tour","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":33,"mark":null,"notified_times":0,"number":"2424","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2424	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1084	1	\N	\N	35	2	2	Бахром выход через бизнес будет	2025-10-17 11:36:35	2025-10-21 14:34:02	\N	1	\N	\N	\N	Int.Airport Tashkent	\N	2025-10-21 20:05:00	\N	["6"]	Int.Airport - Hotel	\N	25	\N	Вильская   Татьяна  Анна  Ключникова	20	BYD	{"id":1084,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":35,"status":2,"pax":2,"comment":"\\u0411\\u0430\\u0445\\u0440\\u043e\\u043c \\u0432\\u044b\\u0445\\u043e\\u0434 \\u0447\\u0435\\u0440\\u0435\\u0437 \\u0431\\u0438\\u0437\\u043d\\u0435\\u0441 \\u0431\\u0443\\u0434\\u0435\\u0442","created_at":"2025-10-17T11:36:35.000000Z","updated_at":"2025-10-21T14:05:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int.Airport Tashkent","time":null,"date_time":"2025-10-21T20:05:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Int.Airport - Hotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u0412\\u0438\\u043b\\u044c\\u0441\\u043a\\u0430\\u044f   \\u0422\\u0430\\u0442\\u044c\\u044f\\u043d\\u0430  \\u0410\\u043d\\u043d\\u0430  \\u041a\\u043b\\u044e\\u0447\\u043d\\u0438\\u043a\\u043e\\u0432\\u0430","created_by":20,"mark":"BYD","notified_times":1,"number":"2084","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2084	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
 1057	4	\N	\N	38	1	9	Donnerstag 30.10.2025              ab 19:40 Uhr Transfer vom Flughafen zum Hotel\nFreitag 31.10.2025                       von 09:10 Uhr bis ca. 22:00 Uhr\n\nSamstag 01.11.2025                    ab 07:30 Uhr Transfer zum Bahnhof\n\n \n\nSamarkand        Samstag 01.11.2025                     von 12:15 Uhr bis ca. 22:00 Uhr\nSonntag 02.11.2025                     ab 04:30 Uhr Transfer zum Flughafen (Abflug 06:10 Uhr)\n\n\n\nЖами: 700$ (марказий банк курси билан)	2025-10-13 10:48:18	2025-10-30 14:09:01	\N	1	\N	\N	\N	Int. Airport	\N	2025-10-30 19:40:00	\N	[]	Int. Airport - Hotel	\N	50	\N	Germany Embassy	20	Mercedes Sprinter	{"id":1057,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":38,"status":1,"pax":9,"comment":"Donnerstag 30.10.2025              ab 19:40 Uhr Transfer vom Flughafen zum Hotel\\nFreitag 31.10.2025                       von 09:10 Uhr bis ca. 22:00 Uhr\\n\\nSamstag 01.11.2025                    ab 07:30 Uhr Transfer zum Bahnhof\\n\\n \\n\\nSamarkand        Samstag 01.11.2025                     von 12:15 Uhr bis ca. 22:00 Uhr\\nSonntag 02.11.2025                     ab 04:30 Uhr Transfer zum Flughafen (Abflug 06:10 Uhr)\\n\\n\\n\\n\\u0416\\u0430\\u043c\\u0438: 700$ (\\u043c\\u0430\\u0440\\u043a\\u0430\\u0437\\u0438\\u0439 \\u0431\\u0430\\u043d\\u043a \\u043a\\u0443\\u0440\\u0441\\u0438 \\u0431\\u0438\\u043b\\u0430\\u043d)","created_at":"2025-10-13T10:48:18.000000Z","updated_at":"2025-10-30T13:40:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int. Airport","time":null,"date_time":"2025-10-30T19:40:00.000000Z","send_username":null,"driver_ids":[],"route":"Int. Airport - Hotel","passenger":null,"sell_price":"50","buy_price":null,"nameplate":"Germany Embassy","created_by":20,"mark":"Mercedes Sprinter","notified_times":1,"number":"2057","requested_by":"Rashid","sell_price_result":"600000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2057	Rashid	600000	0	USD	\N	\N	\N	\N	\N	\N
 995	1	\N	\N	16	5	2	\N	2025-10-02 06:59:24	2025-10-23 13:34:11	1	1	\N	M33725T	1601	Huvaydo hotel 	\N	2025-10-23 03:30:00	\N	["2"]	Huvaydo hotel - Tashkent airport	\N	\N	\N	\N	30	\N	{"id":995,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":null,"created_at":"2025-10-02T06:59:24.000000Z","updated_at":"2025-10-22T21:59:01.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M33725T","tour_day_expense_id":1601,"place_of_submission":"Huvaydo hotel ","time":null,"date_time":"2025-10-23T03:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Huvaydo hotel - Tashkent airport","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":2,"number":"1995","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null}	2	1995	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 1106	3	\N	\N	3	2	3	\N	2025-11-03 05:05:49	2025-11-04 15:29:01	\N	3	\N	\N	\N	Bukhara Intl Airport	\N	2025-11-04 21:00:00	\N	["7"]	Bukhara Intl Airport - Wyndham Bukhara	\N	45	\N	Acwa power	11	Хюндай гранд старекс	{"id":1106,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":3,"status":2,"pax":3,"comment":null,"created_at":"2025-11-03T05:05:49.000000Z","updated_at":"2025-11-04T15:00:02.000000Z","from_city_id":null,"to_city_id":3,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Bukhara Intl Airport","time":null,"date_time":"2025-11-04T21:00:00.000000Z","send_username":null,"driver_ids":["7"],"route":"Bukhara Intl Airport - Wyndham Bukhara","passenger":null,"sell_price":"45","buy_price":null,"nameplate":"Acwa power","created_by":11,"mark":"\\u0425\\u044e\\u043d\\u0434\\u0430\\u0439 \\u0433\\u0440\\u0430\\u043d\\u0434 \\u0441\\u0442\\u0430\\u0440\\u0435\\u043a\\u0441","notified_times":1,"number":"2106","requested_by":"\\u041a\\u0435\\u0440\\u0438\\u043c\\u0435 \\u042d\\u043d\\u043d\\u0430\\u043d\\u043e\\u0432\\u0430","sell_price_result":"540000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2106	Кериме Эннанова	540000	0	USD	\N	\N	\N	\N	\N	\N
+1427	1	\N	\N	71	2	2	\N	2026-03-11 07:18:13	2026-03-11 07:18:13	3	2	\N	A117-26T	2259	Hilton Garden Inn	\N	2026-04-27 09:00:00	\N	\N	Train Station	\N	\N	\N	\N	33	\N	\N	0	2427	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1026	1	\N	\N	34	5	1	flight HY334	2025-10-05 18:18:28	2025-10-06 12:56:18	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-10-06 16:45:00	\N	["6"]	Аэропорт- отель Астер	\N	\N	\N	Saleem Khan Khushal (Better Cotton Group)	20	BYD	{"id":1026,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":34,"status":2,"pax":1,"comment":"flight HY334","created_at":"2025-10-05T18:18:28.000000Z","updated_at":"2025-10-06T11:14:03.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-10-06T16:45:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442- \\u043e\\u0442\\u0435\\u043b\\u044c \\u0410\\u0441\\u0442\\u0435\\u0440","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Saleem Khan Khushal (Better Cotton Group)","created_by":20,"mark":"BYD","notified_times":2,"number":"2026","requested_by":"Alice N\\u2019Deye TALL","sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2026	Alice N’Deye TALL	0	0	USD	\N	\N	\N	\N	\N	\N
 1010	1	\N	\N	61	2	1	HY 232	2025-10-05 15:38:51	2025-10-06 15:24:02	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-10-06 20:55:00	\N	["6"]	межд.аэропорт Ташкент - Wyndham Tashkent	\N	25	\N	Natalia Jung	20	BYD	{"id":1010,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":61,"status":2,"pax":1,"comment":"HY 232","created_at":"2025-10-05T15:38:51.000000Z","updated_at":"2025-10-06T14:55:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-10-06T20:55:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 - Wyndham Tashkent","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Natalia Jung","created_by":20,"mark":"BYD","notified_times":1,"number":"2010","requested_by":"Natalia Jung","sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2010	Natalia Jung	300000	0	USD	\N	\N	\N	\N	\N	\N
 1027	1	\N	\N	34	5	1	flight HY424	2025-10-05 18:19:47	2025-10-06 12:56:37	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-10-06 16:45:00	\N	["6"]	Аэропорт- отель Астер	\N	\N	\N	Kalia Tanushree (Better Cotton Group)	20	BYD	{"id":1027,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":34,"status":2,"pax":1,"comment":"flight HY424","created_at":"2025-10-05T18:19:47.000000Z","updated_at":"2025-10-06T11:14:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-10-06T16:45:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442- \\u043e\\u0442\\u0435\\u043b\\u044c \\u0410\\u0441\\u0442\\u0435\\u0440","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Kalia Tanushree (Better Cotton Group)","created_by":20,"mark":"BYD","notified_times":2,"number":"2027","requested_by":"Alice N\\u2019Deye TALL","sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2027	Alice N’Deye TALL	0	0	USD	\N	\N	\N	\N	\N	\N
 1028	1	\N	\N	12	5	1	 Рейс: HY 604, \nХичина Елена (79160200725)	2025-10-05 18:48:25	2025-10-06 12:58:25	\N	1	\N	\N	\N	Int. Airport Tashkent	\N	2025-10-06 17:30:00	\N	["6"]	Int. Airport Tashkent-Oscar Hotel	\N	25	\N	Хичина Елена	20	BYD 	{"id":1028,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":" \\u0420\\u0435\\u0439\\u0441: HY 604, \\n\\u0425\\u0438\\u0447\\u0438\\u043d\\u0430 \\u0415\\u043b\\u0435\\u043d\\u0430 (79160200725)","created_at":"2025-10-05T18:48:25.000000Z","updated_at":"2025-10-06T11:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int. Airport Tashkent","time":null,"date_time":"2025-10-06T17:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Int. Airport Tashkent-Oscar Hotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u0425\\u0438\\u0447\\u0438\\u043d\\u0430 \\u0415\\u043b\\u0435\\u043d\\u0430","created_by":20,"mark":"BYD ","notified_times":2,"number":"2028","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2028	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
 799	4	\N	\N	16	5	6	\N	2025-07-30 08:54:50	2025-10-08 07:04:52	27	28	\N	M28325T	1180	Yurt camp	\N	2025-10-08 08:00:00	\N	["7"]	Yangikazgan-Asraf Village	\N	\N	\N	\N	2	\N	{"id":799,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":16,"status":1,"pax":7,"comment":null,"created_at":"2025-07-30T08:54:50.000000Z","updated_at":"2025-10-08T02:29:02.000000Z","from_city_id":27,"to_city_id":28,"total_price":null,"group_number":"M28325T","tour_day_expense_id":1180,"place_of_submission":"Yurt camp","time":null,"date_time":"2025-10-08T08:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Yangikazgan-Asraf Village","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":2,"mark":null,"notified_times":2,"number":"1799","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1799	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 993	1	\N	\N	16	2	2	Mr. Antoine Artz + 1	2025-10-02 06:56:39	2025-10-21 15:49:02	1	1	\N	M33725T	1595	Central train station	\N	2025-10-21 21:20:00	\N	\N	Train station - Huvaydo hotel	\N	\N	\N	\N	30	\N	{"id":993,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":"Mr. Antoine Artz + 1","created_at":"2025-10-02T06:56:39.000000Z","updated_at":"2025-10-21T15:20:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M33725T","tour_day_expense_id":1595,"place_of_submission":"Central train station","time":null,"date_time":"2025-10-21T21:20:00.000000Z","send_username":null,"driver_ids":null,"route":"Train station - Huvaydo hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":1,"number":"1993","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1993	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1428	1	\N	\N	71	2	2	\N	2026-03-11 07:18:13	2026-03-11 07:18:13	3	3	\N	A117-26T	2261	Train Station	\N	2026-04-27 11:47:00	\N	\N	City Tour	\N	\N	\N	\N	33	\N	\N	0	2428	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 941	1	\N	\N	58	2	2	\N	2025-09-16 14:14:46	2025-10-06 15:59:01	3	3	\N	B32825T	1513	Hotel Garden Plaza BHK	\N	2025-10-06 21:30:00	\N	["2"]	Hotel Garden Plaza- Train Station BHK	\N	35	\N	\N	20	\N	{"id":941,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":58,"status":2,"pax":2,"comment":null,"created_at":"2025-09-16T14:14:46.000000Z","updated_at":"2025-10-06T15:30:02.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"B32825T","tour_day_expense_id":1513,"place_of_submission":"Hotel Garden Plaza BHK","time":null,"date_time":"2025-10-06T21:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Garden Plaza- Train Station BHK","passenger":null,"sell_price":"35","buy_price":null,"nameplate":null,"created_by":20,"mark":null,"notified_times":1,"number":"1941","requested_by":null,"sell_price_result":"430500","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	1941	\N	430500	0	USD	\N	\N	\N	\N	\N	\N
 1015	1	\N	\N	61	5	1	flight TK370	2025-10-05 15:47:47	2025-10-08 07:07:24	\N	1	\N	\N	\N	Int. Airport Tashkent 	\N	2025-10-08 00:50:00	\N	["2"]	Int. Airport - Hotel Wyndham Tashkent	\N	25	\N	Dr. Michael Kretzer 	20	\N	{"id":1015,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":61,"status":5,"pax":1,"comment":"flight TK370","created_at":"2025-10-05T15:47:47.000000Z","updated_at":"2025-10-08T07:07:08.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int. Airport Tashkent ","time":null,"date_time":"2025-10-09T00:50:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Int. Airport - Hotel Wyndham Tashkent","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Dr. Michael Kretzer ","created_by":20,"mark":null,"notified_times":2,"number":"2015","requested_by":"Natalia Jung","sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2015	Natalia Jung	300000	0	USD	\N	\N	\N	\N	\N	\N
 1014	1	\N	\N	61	5	1	flight TK 364	2025-10-05 15:47:07	2025-10-08 07:03:59	\N	1	\N	\N	\N	Int. Airport Tashkent 	\N	2025-10-08 04:50:00	\N	["2"]	Int. Airport - Hotel Wyndham Tashkent	\N	25	\N	Michtild Köhler	20	\N	{"id":1014,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":61,"status":2,"pax":1,"comment":"flight TK 364","created_at":"2025-10-05T15:47:07.000000Z","updated_at":"2025-10-07T23:19:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int. Airport Tashkent ","time":null,"date_time":"2025-10-08T04:50:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Int. Airport - Hotel Wyndham Tashkent","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Michtild K\\u00f6hler","created_by":20,"mark":null,"notified_times":2,"number":"2014","requested_by":"Natalia Jung","sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2014	Natalia Jung	300000	0	USD	\N	\N	\N	\N	\N	\N
@@ -11737,6 +12914,7 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 769	6	\N	\N	36	5	34	\N	2025-07-17 13:13:00	2025-10-08 07:04:09	4	9	\N	A27325T	1099	Hotel New Minor	\N	2025-10-08 06:00:00	\N	["7"]	Khiva-Urgench	\N	\N	\N	\N	1	\N	{"id":769,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":34,"comment":null,"created_at":"2025-07-17T13:13:00.000000Z","updated_at":"2025-10-08T00:29:02.000000Z","from_city_id":4,"to_city_id":9,"total_price":null,"group_number":"A27325T","tour_day_expense_id":1099,"place_of_submission":"Hotel New Minor","time":null,"date_time":"2025-10-08T06:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Khiva-Urgench","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1769","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1769	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 1122	1	\N	\N	39	5	1	\N	2025-11-07 13:11:40	2025-11-11 10:26:47	\N	1	\N	\N	\N	Hotel Intercontinental	\N	2025-11-11 14:00:00	\N	["6"]	full day Tashkent	\N	100	\N	Deutsche Bank	20	BYD	{"id":1122,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":39,"status":2,"pax":1,"comment":null,"created_at":"2025-11-07T13:11:40.000000Z","updated_at":"2025-11-11T05:10:06.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Intercontinental","time":null,"date_time":"2025-11-11T14:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"full day Tashkent","passenger":null,"sell_price":"100","buy_price":null,"nameplate":"Deutsche Bank","created_by":20,"mark":"BYD","notified_times":2,"number":"2122","requested_by":"Zalmura","sell_price_result":"1200000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2122	Zalmura	1200000	0	USD	\N	\N	\N	\N	\N	\N
 1029	1	\N	\N	61	5	1	flight TK 368	2025-10-06 06:51:21	2025-10-09 10:49:14	\N	1	\N	\N	\N	Int.Airport Tashkent	\N	2025-10-09 07:55:00	\N	["2"]	Airport-Hotel Wyndham Tashkkent	\N	25	\N	Michael Leuchner	20	\N	{"id":1029,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":61,"status":2,"pax":1,"comment":"flight TK\\u00a0368","created_at":"2025-10-06T06:51:21.000000Z","updated_at":"2025-10-09T02:24:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int.Airport Tashkent","time":null,"date_time":"2025-10-09T07:55:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Airport-Hotel Wyndham Tashkkent","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Michael Leuchner","created_by":20,"mark":null,"notified_times":2,"number":"2029","requested_by":"Natalia Jung","sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2029	Natalia Jung	300000	0	USD	\N	\N	\N	\N	\N	\N
+1429	1	\N	\N	71	2	2	\N	2026-03-11 08:28:45	2026-03-11 08:28:45	3	3	\N	A117-26T	2265	Badyan Hotel Boutique	\N	2026-04-28 10:00:00	\N	\N	City Tour	\N	\N	\N	\N	33	\N	\N	0	2429	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1089	6	\N	\N	56	5	14	\N	2025-10-17 12:42:04	2025-10-22 10:54:58	4	4	\N	B34625T	1673	Hotel	\N	2025-10-22 08:00:00	\N	["6"]	Bukhara-Khiva	\N	\N	340	\N	20	\N	{"id":1089,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":56,"status":2,"pax":14,"comment":null,"created_at":"2025-10-17T12:42:04.000000Z","updated_at":"2025-10-22T02:29:02.000000Z","from_city_id":4,"to_city_id":4,"total_price":null,"group_number":"B34625T","tour_day_expense_id":1673,"place_of_submission":"Hotel","time":null,"date_time":"2025-10-22T08:00:00.000000Z","send_username":null,"driver_ids":[],"route":"Bukhara-Khiva","passenger":null,"sell_price":null,"buy_price":"340","nameplate":null,"created_by":20,"mark":null,"notified_times":2,"number":"2089","requested_by":null,"sell_price_result":"0","buy_price_result":"4080000","sell_price_currency":null,"buy_price_currency":"USD"}	2	2089	\N	0	4080000	\N	USD	\N	\N	\N	\N	\N
 996	3	\N	\N	16	5	4	LOT air LO189	2025-10-02 08:03:38	2025-10-09 10:48:58	1	1	\N	M33825T	1604	Tashkent Airport	\N	2025-10-09 01:00:00	\N	["2"]	Tashkent Airport - The Heritage hotel	\N	\N	\N	Karin Horsman + 3	30	VITO	{"id":996,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":4,"comment":"LOT air LO189","created_at":"2025-10-02T08:03:38.000000Z","updated_at":"2025-10-08T19:29:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M33825T","tour_day_expense_id":1604,"place_of_submission":"Tashkent Airport","time":null,"date_time":"2025-10-09T01:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Tashkent Airport - The Heritage hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Karin Horsman + 3","created_by":30,"mark":"VITO","notified_times":2,"number":"1996","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null}	2	1996	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 1223	1	\N	\N	48	5	1	flight SZ 225	2025-11-29 12:10:03	2025-12-04 16:14:27	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 01:00:00	\N	["6"]	Аэропорт-отель Swissotel	\N	25	\N	BATENKOVA ELENA	20	\N	{"id":1223,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":"flight SZ 225","created_at":"2025-11-29T12:10:03.000000Z","updated_at":"2025-12-03T19:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T01:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"BATENKOVA ELENA","created_by":20,"mark":null,"notified_times":2,"number":"2223","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2223	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
@@ -11763,10 +12941,13 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 1042	1	\N	\N	33	2	1	Пассажир прилетает бизнес классом.\nРейс: HY 634, \nПодколзин Алексей Владимирович +79258092150	2025-10-09 16:19:06	2025-10-12 14:34:02	\N	1	\N	\N	\N	Межд.аэропорт Ташкент	\N	2025-10-12 20:05:00	\N	["13","6"]	Межд.аэропорт Ташкент - Хаятт Ридженси Ташкент	\N	80	50	Подколзин Алексей Владимирович	20	Mercedes S Class W222	{"id":1042,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":33,"status":2,"pax":1,"comment":"\\u041f\\u0430\\u0441\\u0441\\u0430\\u0436\\u0438\\u0440 \\u043f\\u0440\\u0438\\u043b\\u0435\\u0442\\u0430\\u0435\\u0442 \\u0431\\u0438\\u0437\\u043d\\u0435\\u0441 \\u043a\\u043b\\u0430\\u0441\\u0441\\u043e\\u043c.\\n\\u0420\\u0435\\u0439\\u0441: HY 634, \\n\\u041f\\u043e\\u0434\\u043a\\u043e\\u043b\\u0437\\u0438\\u043d \\u0410\\u043b\\u0435\\u043a\\u0441\\u0435\\u0439 \\u0412\\u043b\\u0430\\u0434\\u0438\\u043c\\u0438\\u0440\\u043e\\u0432\\u0438\\u0447 +79258092150","created_at":"2025-10-09T16:19:06.000000Z","updated_at":"2025-10-12T14:05:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-10-12T20:05:00.000000Z","send_username":null,"driver_ids":["13","6"],"route":"\\u041c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 - \\u0425\\u0430\\u044f\\u0442\\u0442 \\u0420\\u0438\\u0434\\u0436\\u0435\\u043d\\u0441\\u0438 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","passenger":null,"sell_price":"80","buy_price":"50","nameplate":"\\u041f\\u043e\\u0434\\u043a\\u043e\\u043b\\u0437\\u0438\\u043d \\u0410\\u043b\\u0435\\u043a\\u0441\\u0435\\u0439 \\u0412\\u043b\\u0430\\u0434\\u0438\\u043c\\u0438\\u0440\\u043e\\u0432\\u0438\\u0447","created_by":20,"mark":"Mercedes S Class W222","notified_times":1,"number":"2042","requested_by":null,"sell_price_result":"960000","buy_price_result":"50","sell_price_currency":"USD","buy_price_currency":null}	2	2042	\N	960000	50	USD	\N	\N	\N	\N	\N	\N
 1099	1	\N	\N	12	2	1	Рейс: HY 601\nMarina Chelak +79691927585\n	2025-10-27 10:52:25	2025-10-31 10:14:02	\N	1	\N	\N	\N	City Palace Hotel	\N	2025-10-31 15:45:00	\N	["2"]	City Palace hotel- Airport	\N	25	\N	Marina Chelak	20	\N	{"id":1099,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: HY 601\\nMarina Chelak +79691927585\\n","created_at":"2025-10-27T10:52:25.000000Z","updated_at":"2025-10-31T10:05:38.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"City Palace Hotel","time":null,"date_time":"2025-10-31T15:45:00.000000Z","send_username":null,"driver_ids":["2"],"route":"City Palace hotel- Airport","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Marina Chelak","created_by":20,"mark":null,"notified_times":1,"number":"2099","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2099	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
 1093	3	\N	\N	64	2	6	Номер рейса: HY 514, Seul	2025-10-24 12:48:14	2025-10-25 08:04:02	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-10-25 13:35:00	\N	["12"]	межд.аэропорт -отель Манор	\N	30	25	NRICH	20	\N	{"id":1093,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":6,"comment":"\\u041d\\u043e\\u043c\\u0435\\u0440 \\u0440\\u0435\\u0439\\u0441\\u0430: HY 514, Seul","created_at":"2025-10-24T12:48:14.000000Z","updated_at":"2025-10-25T07:35:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-10-25T13:35:00.000000Z","send_username":null,"driver_ids":["12"],"route":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 -\\u043e\\u0442\\u0435\\u043b\\u044c \\u041c\\u0430\\u043d\\u043e\\u0440","passenger":null,"sell_price":"30","buy_price":"25","nameplate":"NRICH","created_by":20,"mark":null,"notified_times":1,"number":"2093","requested_by":"Abdulaziz Gulomov +99895 9552199","sell_price_result":"360000","buy_price_result":"300000","sell_price_currency":"USD","buy_price_currency":"USD"}	2	2093	Abdulaziz Gulomov +99895 9552199	360000	300000	USD	USD	\N	\N	\N	\N	\N
+1430	1	\N	\N	71	2	2	\N	2026-03-11 08:30:44	2026-03-11 08:30:44	3	3	\N	A117-26T	2268	Badyan Hotel	\N	2026-04-29 10:00:00	\N	\N	City Tour	\N	\N	\N	\N	33	\N	\N	0	2430	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1131	4	\N	\N	10	5	9	\N	2025-11-10 12:38:31	2025-11-18 05:51:00	\N	1	\N	\N	\N	FAR office	\N	2025-11-12 10:00:00	\N	["31"]	Tashkent-Chimgan	\N	2300000	1500000	FAR	20	Mercedes Sprinter	{"id":1131,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":10,"status":1,"pax":9,"comment":null,"created_at":"2025-11-10T12:38:31.000000Z","updated_at":"2025-11-12T04:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"FAR office","time":null,"date_time":"2025-11-12T10:00:00.000000Z","send_username":null,"driver_ids":["31"],"route":"Tashkent-Chimgan","passenger":null,"sell_price":"1300000","buy_price":"1300000","nameplate":"FAR","created_by":20,"mark":"Mercedes Sprinter","notified_times":2,"number":"2131","requested_by":"Irodaxon","sell_price_result":"1300000","buy_price_result":"1300000","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2131	Irodaxon	2300000	1500000	\N	\N	\N	\N	\N	\N	\N
 874	6	\N	\N	36	2	30	\N	2025-08-10 07:34:41	2025-10-18 03:29:01	3	3	\N	A30325T	1388	Shirin Village	\N	2025-10-18 09:00:00	\N	\N	Vobkent-Bukhara	\N	\N	\N	\N	1	\N	{"id":874,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":2,"pax":30,"comment":null,"created_at":"2025-08-10T07:34:41.000000Z","updated_at":"2025-10-18T03:00:01.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"A30325T","tour_day_expense_id":1388,"place_of_submission":"Shirin Village","time":null,"date_time":"2025-10-18T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Vobkent-Bukhara","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":1,"number":"1874","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1874	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1001	3	\N	\N	16	2	4	\N	2025-10-02 08:28:27	2025-10-18 03:29:01	3	3	\N	M33825T	1623	Anor hotel	\N	2025-10-18 09:00:00	\N	\N	City tour Bukhara	\N	\N	\N	\N	30	\N	{"id":1001,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":4,"comment":null,"created_at":"2025-10-02T08:28:27.000000Z","updated_at":"2025-10-18T03:00:01.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"M33825T","tour_day_expense_id":1623,"place_of_submission":"Anor hotel","time":null,"date_time":"2025-10-18T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"City tour Bukhara","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":1,"number":"2001","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	2001	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1081	1	\N	\N	35	5	2	\N	2025-10-17 11:28:16	2025-10-22 13:30:10	\N	1	\N	\N	\N	Int.Airport Tashkent	\N	2025-10-22 09:00:00	\N	["6"]	сделать ПИНФЛ по срочному тарифу, затем завести узбекский телефон, а к 14 часам - в банк на встречу	\N	150	\N	Вильская Татьяна Анна  Ключникова	20	BYD	{"id":1081,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":35,"status":2,"pax":2,"comment":null,"created_at":"2025-10-17T11:28:16.000000Z","updated_at":"2025-10-22T03:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int.Airport Tashkent","time":null,"date_time":"2025-10-22T09:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0441\\u0434\\u0435\\u043b\\u0430\\u0442\\u044c \\u041f\\u0418\\u041d\\u0424\\u041b \\u043f\\u043e \\u0441\\u0440\\u043e\\u0447\\u043d\\u043e\\u043c\\u0443 \\u0442\\u0430\\u0440\\u0438\\u0444\\u0443, \\u0437\\u0430\\u0442\\u0435\\u043c \\u0437\\u0430\\u0432\\u0435\\u0441\\u0442\\u0438 \\u0443\\u0437\\u0431\\u0435\\u043a\\u0441\\u043a\\u0438\\u0439 \\u0442\\u0435\\u043b\\u0435\\u0444\\u043e\\u043d, \\u0430 \\u043a 14 \\u0447\\u0430\\u0441\\u0430\\u043c - \\u0432 \\u0431\\u0430\\u043d\\u043a \\u043d\\u0430 \\u0432\\u0441\\u0442\\u0440\\u0435\\u0447\\u0443","passenger":null,"sell_price":"150","buy_price":null,"nameplate":"\\u0412\\u0438\\u043b\\u044c\\u0441\\u043a\\u0430\\u044f \\u0422\\u0430\\u0442\\u044c\\u044f\\u043d\\u0430 \\u0410\\u043d\\u043d\\u0430  \\u041a\\u043b\\u044e\\u0447\\u043d\\u0438\\u043a\\u043e\\u0432\\u0430","created_by":20,"mark":"BYD","notified_times":2,"number":"2081","requested_by":"Odil Raupov","sell_price_result":"1800000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2081	Odil Raupov	1800000	0	USD	\N	\N	\N	\N	\N	\N
+1431	1	\N	\N	71	2	2	\N	2026-03-11 08:38:53	2026-03-11 08:38:53	4	3	\N	A117-26T	2272	Badyan Hotel	\N	2026-04-30 05:00:00	\N	\N	Train Station	\N	\N	\N	\N	33	\N	\N	0	2431	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1432	1	\N	\N	71	2	2	\N	2026-03-11 08:38:53	2026-03-11 08:38:53	4	4	\N	A117-26T	2274	Train Station Khiva	\N	2026-04-30 11:37:00	\N	\N	City Tour	\N	\N	\N	\N	33	\N	\N	0	2432	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1095	1	\N	\N	12	2	1	Рейс: HY 604  время 17:10\n1. Marina Chelak +79691927585 	2025-10-26 12:21:34	2025-10-27 11:39:01	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-10-27 17:10:00	\N	["2"]	аэропорт-отель Сити палас	\N	25	\N	Marina Chelak	20	Mercedes Vito	{"id":1095,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: HY 604  \\u0432\\u0440\\u0435\\u043c\\u044f 17:10\\n1. Marina Chelak +79691927585 ","created_at":"2025-10-26T12:21:34.000000Z","updated_at":"2025-10-27T11:10:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-10-27T17:10:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c \\u0421\\u0438\\u0442\\u0438 \\u043f\\u0430\\u043b\\u0430\\u0441","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Marina Chelak","created_by":20,"mark":"Mercedes Vito","notified_times":1,"number":"2095","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2095	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
 1080	1	\N	\N	13	5	2	\N	2025-10-17 11:25:14	2025-11-01 07:47:15	\N	1	\N	\N	\N	Hotel Ramada Encore	\N	2025-11-01 00:30:00	\N	["2"]	Ramada Encore - Int.Airport	\N	30	\N	Berlin Econommics GmbH	20	Malibu	{"id":1080,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":1,"pax":2,"comment":null,"created_at":"2025-10-17T11:25:14.000000Z","updated_at":"2025-10-31T18:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Ramada Encore","time":null,"date_time":"2025-11-01T00:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Ramada Encore - Int.Airport","passenger":null,"sell_price":"30","buy_price":null,"nameplate":"Berlin Econommics GmbH","created_by":20,"mark":"Malibu","notified_times":2,"number":"2080","requested_by":"Abduvokhid Suleymanov","sell_price_result":"360000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2080	Abduvokhid Suleymanov	360000	0	USD	\N	\N	\N	\N	\N	\N
 988	1	\N	\N	16	2	2	\N	2025-10-02 06:45:05	2025-10-18 06:24:02	1	1	\N	M33725T	1583	Tashkent Central train station	\N	2025-10-18 11:55:00	\N	["2"]	Train station - Huvaydo hotel	\N	\N	\N	\N	30	\N	{"id":988,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":null,"created_at":"2025-10-02T06:45:05.000000Z","updated_at":"2025-10-18T05:55:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M33725T","tour_day_expense_id":1583,"place_of_submission":"Tashkent Central train station","time":null,"date_time":"2025-10-18T11:55:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Train station - Huvaydo hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":1,"number":"1988","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null}	2	1988	\N	0	0	\N	\N	\N	\N	\N	\N	\N
@@ -11806,7 +12987,9 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 803	4	\N	\N	16	5	6	\N	2025-07-30 11:26:17	2025-10-14 04:38:27	1	1	\N	M28325T	1194	Hotel Mirzo boutique	\N	2025-10-14 06:00:00	\N	["6"]	Hotel Mirza - Airport	\N	\N	\N	\N	2	\N	{"id":803,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":16,"status":1,"pax":6,"comment":null,"created_at":"2025-07-30T11:26:17.000000Z","updated_at":"2025-10-14T00:29:01.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M28325T","tour_day_expense_id":1194,"place_of_submission":"Hotel Mirzo boutique","time":null,"date_time":"2025-10-14T06:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Hotel Mirza - Airport","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":2,"mark":null,"notified_times":2,"number":"1803","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1803	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 990	1	\N	\N	16	2	2	\N	2025-10-02 06:49:27	2025-10-19 06:59:01	14	14	\N	M33725T	1587	Kokand train station	\N	2025-10-19 12:30:00	\N	\N	Kokand city tour - Silk road hotel	\N	\N	\N	\N	30	\N	{"id":990,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":null,"created_at":"2025-10-02T06:49:27.000000Z","updated_at":"2025-10-19T06:30:01.000000Z","from_city_id":14,"to_city_id":14,"total_price":null,"group_number":"M33725T","tour_day_expense_id":1587,"place_of_submission":"Kokand train station","time":null,"date_time":"2025-10-19T12:30:00.000000Z","send_username":null,"driver_ids":null,"route":"Kokand city tour - Silk road hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":1,"number":"1990","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1990	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1007	3	\N	\N	16	5	4	\N	2025-10-02 08:39:23	2025-10-23 13:34:32	1	2	\N	M33825T	1641	Amar hotel	\N	2025-10-23 06:50:00	\N	["7"]	Amar hotel - train station	\N	\N	\N	\N	30	\N	{"id":1007,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":4,"comment":null,"created_at":"2025-10-02T08:39:23.000000Z","updated_at":"2025-10-23T01:19:01.000000Z","from_city_id":1,"to_city_id":2,"total_price":null,"group_number":"M33825T","tour_day_expense_id":1641,"place_of_submission":"Amar hotel","time":null,"date_time":"2025-10-23T06:50:00.000000Z","send_username":null,"driver_ids":null,"route":"Amar hotel - train station","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":2,"number":"2007","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	2007	\N	0	0	\N	\N	\N	\N	\N	\N	\N
+1433	1	\N	\N	71	2	2	\N	2026-03-11 08:46:38	2026-03-11 08:46:38	4	9	\N	A117-26T	2278	Farovon Hotel	\N	2026-05-01 10:00:00	\N	\N	City Tour Ichan Kala	\N	\N	\N	\N	33	\N	\N	0	2433	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 869	6	\N	\N	36	5	30	\N	2025-08-09 11:05:58	2025-10-14 10:36:51	1	1	\N	A30325T	1375	hotel Inspira S	\N	2025-10-14 10:00:00	\N	["8"]	full day Tashkent, zangi Ota, dinner	\N	\N	\N	\N	1	\N	{"id":869,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":2,"pax":30,"comment":null,"created_at":"2025-08-09T11:05:58.000000Z","updated_at":"2025-10-14T04:29:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"A30325T","tour_day_expense_id":1375,"place_of_submission":"hotel Inspira S","time":null,"date_time":"2025-10-14T10:00:00.000000Z","send_username":null,"driver_ids":null,"route":"full day Tashkent, zangi Ota, dinner","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":2,"number":"1869","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1869	\N	0	0	\N	\N	\N	\N	\N	\N	\N
+1434	1	\N	\N	71	2	2	\N	2026-03-11 08:46:38	2026-03-11 08:46:38	4	1	\N	A117-26T	2280	Tashkent Domestic Airport	\N	2026-05-01 22:00:00	\N	\N	Hyatt Regency	\N	\N	\N	\N	33	\N	\N	0	2434	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1066	1	\N	\N	13	5	2	\N	2025-10-14 10:26:50	2025-10-31 04:53:07	1	1	\N	B34425C	1659	Hotel Ramada Encore	\N	2025-10-31 09:00:00	\N	["2"]	full day Tashkent	\N	\N	\N	\N	20	\N	{"id":1066,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":2,"pax":2,"comment":null,"created_at":"2025-10-14T10:26:50.000000Z","updated_at":"2025-10-31T03:29:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B34425C","tour_day_expense_id":1659,"place_of_submission":"Hotel Ramada Encore","time":null,"date_time":"2025-10-31T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"full day Tashkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":20,"mark":null,"notified_times":2,"number":"2066","requested_by":"Suleymanov Abduvokhid","sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	2066	Suleymanov Abduvokhid	0	0	\N	\N	\N	\N	\N	\N	\N
 1068	1	\N	\N	12	5	1	Миронов Родион Валерьевич +79255183506	2025-10-14 10:36:33	2025-10-15 14:08:17	\N	1	\N	\N	\N	Hotel Holiday Inn	\N	2025-10-15 17:30:00	\N	["2"]	Hotel Holiday Inn- Int. Airport	\N	25	\N	Миронов Родион Валерьевич	20	\N	{"id":1068,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u041c\\u0438\\u0440\\u043e\\u043d\\u043e\\u0432 \\u0420\\u043e\\u0434\\u0438\\u043e\\u043d \\u0412\\u0430\\u043b\\u0435\\u0440\\u044c\\u0435\\u0432\\u0438\\u0447 +79255183506","created_at":"2025-10-14T10:36:33.000000Z","updated_at":"2025-10-15T11:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Holiday Inn","time":null,"date_time":"2025-10-15T17:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Holiday Inn- Int. Airport","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041c\\u0438\\u0440\\u043e\\u043d\\u043e\\u0432 \\u0420\\u043e\\u0434\\u0438\\u043e\\u043d \\u0412\\u0430\\u043b\\u0435\\u0440\\u044c\\u0435\\u0432\\u0438\\u0447","created_by":20,"mark":null,"notified_times":2,"number":"2068","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2068	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
 1003	3	\N	\N	16	2	4	\N	2025-10-02 08:31:00	2025-10-19 08:14:02	2	3	\N	M33825T	1629	Anor Boutique 	\N	2025-10-19 13:45:00	\N	\N	Anor Boutique - Train station	\N	\N	\N	\N	30	\N	{"id":1003,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":4,"comment":null,"created_at":"2025-10-02T08:31:00.000000Z","updated_at":"2025-10-19T07:45:02.000000Z","from_city_id":2,"to_city_id":3,"total_price":null,"group_number":"M33825T","tour_day_expense_id":1629,"place_of_submission":"Anor Boutique ","time":null,"date_time":"2025-10-19T13:45:00.000000Z","send_username":null,"driver_ids":null,"route":"Anor Boutique - Train station","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":1,"number":"2003","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	2003	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11814,12 +12997,14 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 985	1	\N	\N	16	5	2	\N	2025-10-02 06:37:14	2025-10-15 05:38:23	2	28	\N	M33725T	1574	Rahmat Guest house	\N	2025-10-15 09:00:00	\N	["7"]	Guest house - Samarkand Al Madina hotel	\N	\N	\N	\N	30	\N	{"id":985,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":2,"comment":null,"created_at":"2025-10-02T06:37:14.000000Z","updated_at":"2025-10-15T03:29:01.000000Z","from_city_id":2,"to_city_id":28,"total_price":null,"group_number":"M33725T","tour_day_expense_id":1574,"place_of_submission":"Rahmat Guest house","time":null,"date_time":"2025-10-15T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Guest house - Samarkand Al Madina hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":2,"number":"1985","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	1985	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 1056	4	\N	\N	38	4	7	\N	2025-10-13 10:41:38	2025-10-23 03:29:02	\N	10	\N	\N	\N	отель 	\N	2025-10-23 09:00:00	\N	["29"]	Nukus-Muynak-Nukus	\N	\N	\N	Embassy Germany	20	Toyota Hiece	{"id":1056,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":38,"status":4,"pax":7,"comment":null,"created_at":"2025-10-13T10:41:38.000000Z","updated_at":"2025-10-23T03:00:02.000000Z","from_city_id":null,"to_city_id":10,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c ","time":null,"date_time":"2025-10-23T09:00:00.000000Z","send_username":null,"driver_ids":["29"],"route":"Nukus-Muynak-Nukus","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Embassy Germany","created_by":20,"mark":"Toyota Hiece","notified_times":1,"number":"2056","requested_by":"Rashid aka ","sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null}	2	2056	Rashid aka 	0	0	\N	\N	\N	\N	\N	\N	\N
 1092	1	\N	\N	12	2	2	Рейс: HY 9832, 26.10.2025 21:25	2025-10-21 07:07:53	2025-10-26 15:54:02	\N	34	\N	\N	\N	Int. Airport Andijan	\N	2025-10-26 21:25:00	\N	["16","6"]	Int. Airport - Hotel Vella Elegant (Mohitobon koʻchasi, 61, Andijan)	\N	25	20	SOPOV IURII	20	GM Cobalt	{"id":1092,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":2,"comment":"\\u0420\\u0435\\u0439\\u0441: HY 9832, 26.10.2025 21:25","created_at":"2025-10-21T07:07:53.000000Z","updated_at":"2025-10-26T15:25:02.000000Z","from_city_id":null,"to_city_id":34,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int. Airport Andijan","time":null,"date_time":"2025-10-26T21:25:00.000000Z","send_username":null,"driver_ids":["16","6"],"route":"Int. Airport - Hotel Vella Elegant (Mohitobon ko\\u02bbchasi, 61, Andijan)","passenger":null,"sell_price":"25","buy_price":"20","nameplate":"SOPOV IURII","created_by":20,"mark":"GM Cobalt","notified_times":1,"number":"2092","requested_by":null,"sell_price_result":"300000","buy_price_result":"240000","sell_price_currency":"USD","buy_price_currency":"USD"}	2	2092	\N	300000	240000	USD	USD	\N	\N	\N	\N	\N
+1435	1	\N	\N	71	2	2	\N	2026-03-11 08:47:59	2026-03-11 08:47:59	1	1	\N	A117-26T	2283	Hyatt Regency	\N	2026-05-02 14:30:00	\N	\N	Tashkent International Airport	\N	\N	\N	\N	33	\N	\N	0	2435	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1102	3	\N	\N	34	2	4	\N	2025-11-01 07:56:56	2025-11-01 07:57:01	\N	1	\N	\N	\N	toy	\N	2025-11-01 13:00:00	\N	["2"]	toy	\N	50	\N	Toy	20	VITO	{"id":1102,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":34,"status":2,"pax":4,"comment":null,"created_at":"2025-11-01T07:56:56.000000Z","updated_at":"2025-11-01T07:56:56.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"toy","time":null,"date_time":"2025-11-01T13:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"toy","passenger":null,"sell_price":"50","buy_price":null,"nameplate":"Toy","created_by":20,"mark":"VITO","notified_times":0,"number":"2102","requested_by":null,"sell_price_result":"600000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2102	\N	600000	0	USD	\N	\N	\N	\N	\N	\N
 1054	4	\N	\N	38	5	7	\N	2025-10-13 10:40:56	2025-10-24 04:29:15	\N	1	\N	\N	\N	отель Swissotel	\N	2025-10-24 09:00:00	\N	["12"]	full day Tashkent	\N	\N	100	Embassy Germany	20	Toyota Hiece	{"id":1054,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":38,"status":2,"pax":7,"comment":null,"created_at":"2025-10-13T10:40:56.000000Z","updated_at":"2025-10-24T03:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c","time":null,"date_time":"2025-10-24T09:00:00.000000Z","send_username":null,"driver_ids":["12"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c","passenger":null,"sell_price":null,"buy_price":"100","nameplate":"Embassy Germany","created_by":20,"mark":"Toyota Hiece","notified_times":2,"number":"2054","requested_by":"Rashid aka ","sell_price_result":"0","buy_price_result":"1200000","sell_price_currency":null,"buy_price_currency":"USD"}	2	2054	Rashid aka 	0	1200000	\N	USD	\N	\N	\N	\N	\N
 1069	3	\N	\N	63	2	5	\N	2025-10-14 11:19:20	2025-10-16 03:59:02	\N	1	\N	\N	\N	Mirzo Hotel (Shota Rustaveli)	\N	2025-10-16 09:30:00	\N	["2"]	Ташкент - Амирсай - Чимган - Чарвак - Бочки - Ташкент.	\N	130	\N	\N	30	VITO	{"id":1069,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":63,"status":2,"pax":5,"comment":null,"created_at":"2025-10-14T11:19:20.000000Z","updated_at":"2025-10-16T03:30:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Mirzo Hotel (Shota Rustaveli)","time":null,"date_time":"2025-10-16T09:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 - \\u0410\\u043c\\u0438\\u0440\\u0441\\u0430\\u0439 - \\u0427\\u0438\\u043c\\u0433\\u0430\\u043d - \\u0427\\u0430\\u0440\\u0432\\u0430\\u043a - \\u0411\\u043e\\u0447\\u043a\\u0438 - \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442.","passenger":null,"sell_price":"130","buy_price":null,"nameplate":null,"created_by":30,"mark":"VITO","notified_times":1,"number":"2069","requested_by":"Evgeniy","sell_price_result":"1560000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2069	Evgeniy	1560000	0	USD	\N	\N	\N	\N	\N	\N
 1002	3	\N	\N	16	2	4	\N	2025-10-02 08:31:00	2025-10-19 11:19:01	2	2	\N	M33825T	1628	Train station	\N	2025-10-19 16:50:00	\N	\N	\N	\N	\N	\N	\N	30	\N	{"id":1002,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":16,"status":2,"pax":4,"comment":null,"created_at":"2025-10-02T08:31:00.000000Z","updated_at":"2025-10-19T10:50:02.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"M33825T","tour_day_expense_id":1628,"place_of_submission":"Train station","time":null,"date_time":"2025-10-19T16:50:00.000000Z","send_username":null,"driver_ids":null,"route":null,"passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":1,"number":"2002","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null}	2	2002	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1094	1	\N	\N	12	2	1	Рейс: SU6725\nВолкова Юлия +79219618766\nДата подачи: 26 октября 2025 22:40\n	2025-10-26 12:15:27	2025-10-26 17:09:01	\N	1	\N	\N	\N	Межд.Аэропорт Ташкент	\N	2025-10-26 22:40:00	\N	["2"]	Аэропорт-Wyndham Tashkent	\N	25	\N	Волкова Юлия	20	Mercedes Vito	{"id":1094,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: SU6725\\n\\u0412\\u043e\\u043b\\u043a\\u043e\\u0432\\u0430 \\u042e\\u043b\\u0438\\u044f +79219618766\\n\\u0414\\u0430\\u0442\\u0430 \\u043f\\u043e\\u0434\\u0430\\u0447\\u0438: 26 \\u043e\\u043a\\u0442\\u044f\\u0431\\u0440\\u044f 2025 22:40\\n","created_at":"2025-10-26T12:15:27.000000Z","updated_at":"2025-10-26T16:40:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-10-26T22:40:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-Wyndham Tashkent","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u0412\\u043e\\u043b\\u043a\\u043e\\u0432\\u0430 \\u042e\\u043b\\u0438\\u044f","created_by":20,"mark":"Mercedes Vito","notified_times":1,"number":"2094","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2094	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
 1063	1	\N	\N	13	5	2	\N	2025-10-14 08:48:02	2025-10-29 06:08:38	1	1	\N	B34425C	1656	Int.Airport Tashkent	\N	2025-10-29 00:50:00	\N	["2"]	INt.Airport - Hotel Ramada Encore 	\N	\N	\N	Berlin Economics GmbH	20	\N	{"id":1063,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":2,"pax":2,"comment":null,"created_at":"2025-10-14T08:48:02.000000Z","updated_at":"2025-10-28T19:19:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B34425C","tour_day_expense_id":1656,"place_of_submission":"Int.Airport Tashkent","time":null,"date_time":"2025-10-29T00:50:00.000000Z","send_username":null,"driver_ids":["2"],"route":"INt.Airport - Hotel Ramada Encore ","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Berlin Economics GmbH","created_by":20,"mark":null,"notified_times":2,"number":"2063","requested_by":"Suleymanov Abduvokhid","sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null}	2	2063	Suleymanov Abduvokhid	0	0	\N	\N	\N	\N	\N	\N	\N
+1436	5	\N	\N	56	2	16	\N	2026-03-12 08:16:02	2026-03-12 08:16:02	2	2	\N	B118-26T	2284	International Airport SKD 	\N	2026-03-16 04:40:00	\N	\N	Airport-Hotel	\N	\N	\N	\N	20	\N	\N	0	2436	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1234	4	\N	\N	48	2	6	SHCHAHLOVA HANNA \tHY 710\nSHUBNIK ANASTASIYA HY 710\nCHUVAK KYRIL \tHY 710\nAGHAEV SHAKIR MR\t\tHY 756\nDILANOV GUNDUZ HY 756\n	2025-11-29 12:45:42	2025-12-04 14:38:57	\N	1	\N	\N	\N	Межд.аэропорт Ташкент	\N	2025-12-04 20:00:00	\N	["12"]	Аэропорт-отель Swissotel	\N	35	\N	МАСС-МЕДИА	20	Joylong	{"id":1234,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":6,"comment":"SHCHAHLOVA HANNA \\tHY 710\\nSHUBNIK ANASTASIYA HY 710\\nCHUVAK KYRIL \\tHY 710\\nAGHAEV SHAKIR MR\\t\\tHY 756\\nDILANOV GUNDUZ HY 756\\n","created_at":"2025-11-29T12:45:42.000000Z","updated_at":"2025-12-04T14:38:57.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T20:00:00.000000Z","send_username":null,"driver_ids":["12"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":"Joylong","notified_times":2,"number":"2234","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2234	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
 1113	1	\N	\N	12	5	1	 Anastasiia Kasatkina +79691927640	2025-11-06 05:23:50	2025-11-10 11:39:02	\N	1	\N	\N	\N	Inter.Airport Tashkent	\N	2025-11-10 17:10:00	\N	["2","6"]	Airport-Hotel Lotte City Tashkent Palace 	\N	25	\N	Anastasiia Kasatkina +79691927640	20	BYD	{"id":1113,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":5,"pax":1,"comment":" Anastasiia Kasatkina +79691927640","created_at":"2025-11-06T05:23:50.000000Z","updated_at":"2025-11-10T11:26:59.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Inter.Airport Tashkent","time":null,"date_time":"2025-11-10T17:10:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"Airport-Hotel Lotte City Tashkent Palace ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Anastasiia Kasatkina +79691927640","created_by":20,"mark":"BYD","notified_times":1,"number":"2113","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null}	2	2113	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
 1231	1	\N	\N	48	5	3	Максоева виктория\n17:10 fz1945\nMAKSHANTSEV SERGEI\nMOLOKOVA YULIA MRS\nHY604 17:10\n\n	2025-11-29 12:37:44	2025-12-05 06:14:17	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 17:10:00	\N	["2"]	Аэропорт-отель Swissotel	\N	25	\N	МАСС-МЕДИА	20	Mercedes Vito	{"id":1231,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":3,"comment":"\\u041c\\u0430\\u043a\\u0441\\u043e\\u0435\\u0432\\u0430 \\u0432\\u0438\\u043a\\u0442\\u043e\\u0440\\u0438\\u044f\\n17:10 fz1945\\nMAKSHANTSEV SERGEI\\nMOLOKOVA YULIA MRS\\nHY604 17:10\\n\\n","created_at":"2025-11-29T12:37:44.000000Z","updated_at":"2025-12-04T16:20:49.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T17:10:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":"Mercedes Vito","notified_times":2,"number":"2231","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2231	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
@@ -11840,17 +13025,22 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 1130	1	\N	\N	66	2	1	23:00 transfer to airport 	2025-11-10 12:14:49	2025-11-17 04:19:02	1	1	\N	D35325T	1692	dom.airport TAS	\N	2025-11-17 09:50:00	\N	["6"]	Airport FD Tashkent	\N	\N	30	MY YUAN	42	BYD	{"id":1130,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":66,"status":2,"pax":1,"comment":"23:00 transfer to airport ","created_at":"2025-11-10T12:14:49.000000Z","updated_at":"2025-11-17T03:50:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"D35325T","tour_day_expense_id":1692,"place_of_submission":"dom.airport TAS","time":null,"date_time":"2025-11-17T09:50:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Airport FD Tashkent","passenger":null,"sell_price":null,"buy_price":"30","nameplate":"MY YUAN","created_by":42,"mark":"BYD","notified_times":1,"number":"2130","requested_by":null,"sell_price_result":"0","buy_price_result":"30","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2130	\N	0	30	USD	\N	\N	\N	\N	\N	\N
 1224	1	\N	\N	48	5	1	flight HY534	2025-11-29 12:10:44	2025-12-04 16:14:34	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 04:00:00	\N	["6"]	Аэропорт-отель Swissotel	\N	25	\N	BELENKIY EVGENY	20	\N	{"id":1224,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":"flight HY534","created_at":"2025-11-29T12:10:44.000000Z","updated_at":"2025-12-03T22:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T04:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"BELENKIY EVGENY","created_by":20,"mark":null,"notified_times":2,"number":"2224","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2224	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1232	1	\N	\N	48	2	2	KVASOVA VERONIKA\tHY 272\nKRAINIUKOVA IANA MRS\tHY 778\n\n	2025-11-29 12:41:59	2025-12-04 13:29:02	\N	1	\N	\N	\N	Межд.аэропорт Ташкент	\N	2025-12-04 19:00:00	\N	["6"]	Аэропорт-отель Swissotel	\N	25	\N	МАСС-МЕДИА	20	\N	{"id":1232,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":2,"comment":"KVASOVA VERONIKA\\tHY 272\\nKRAINIUKOVA IANA MRS\\tHY 778\\n\\n","created_at":"2025-11-29T12:41:59.000000Z","updated_at":"2025-12-04T13:00:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T19:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":null,"notified_times":1,"number":"2232","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2232	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
+1438	1	\N	\N	16	1	2	\N	2026-03-13 11:42:04	2026-03-13 11:42:04	2	2	\N	M115-26T	2293	Amar Boutique	\N	2026-03-26 09:00:00	\N	\N	SKD City tour	\N	\N	\N	\N	30	\N	\N	0	2438	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1153	1	\N	\N	64	5	2	Оплата: по Карте	2025-11-17 05:24:54	2025-11-21 12:14:28	\N	1	\N	\N	\N	Int.Airport Tashkent	\N	2025-11-21 08:35:00	\N	["2"]	Airport-Hotel Manor	\N	25	\N	KOCIPER and DEL FABRO	20	\N	{"id":1153,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":2,"comment":"\\u041e\\u043f\\u043b\\u0430\\u0442\\u0430: \\u043f\\u043e \\u041a\\u0430\\u0440\\u0442\\u0435","created_at":"2025-11-17T05:24:54.000000Z","updated_at":"2025-11-21T05:10:56.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int.Airport Tashkent","time":null,"date_time":"2025-11-21T08:35:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Airport-Hotel Manor","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"KOCIPER and DEL FABRO","created_by":20,"mark":null,"notified_times":2,"number":"2153","requested_by":"Abdulaziz","sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2153	Abdulaziz	300000	0	USD	\N	\N	\N	\N	\N	\N
 1133	1	\N	\N	15	2	1	Рейс: HY 9642, \nСлепцов А.М. +79312801711\nДата подачи: 18 ноября 2025 17:05	2025-11-10 13:20:46	2025-11-18 11:34:02	\N	3	\N	\N	\N	Международный аэропорт Бухара	\N	2025-11-18 17:05:00	\N	["7"]	Airport - Hotel Paradise Plaza Luxury	\N	80	50	Слепцов А.М.	20	Mercedes S Class	{"id":1133,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":15,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: HY 9642, \\n\\u0421\\u043b\\u0435\\u043f\\u0446\\u043e\\u0432 \\u0410.\\u041c. +79312801711\\n\\u0414\\u0430\\u0442\\u0430 \\u043f\\u043e\\u0434\\u0430\\u0447\\u0438: 18 \\u043d\\u043e\\u044f\\u0431\\u0440\\u044f 2025 17:05","created_at":"2025-11-10T13:20:46.000000Z","updated_at":"2025-11-18T11:05:02.000000Z","from_city_id":null,"to_city_id":3,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0411\\u0443\\u0445\\u0430\\u0440\\u0430","time":null,"date_time":"2025-11-18T17:05:00.000000Z","send_username":null,"driver_ids":["7"],"route":"Airport - Hotel Paradise Plaza Luxury","passenger":null,"sell_price":"80","buy_price":"50","nameplate":"\\u0421\\u043b\\u0435\\u043f\\u0446\\u043e\\u0432 \\u0410.\\u041c.","created_by":20,"mark":"Mercedes S Class","notified_times":1,"number":"2133","requested_by":null,"sell_price_result":"960000","buy_price_result":"50","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2133	\N	960000	50	USD	\N	\N	\N	\N	\N	\N
 1111	2	\N	\N	10	5	3	\N	2025-11-04 10:13:33	2025-11-18 10:50:02	\N	10	\N	\N	\N	Nukus airport	\N	2025-11-18 07:00:00	\N	["29"]	Nukus-Kungrad	\N	250	207.2	AFD	20	Toyora Prado	{"id":1111,"transport_type":2,"transport_comfort_level":null,"price":null,"company_id":10,"status":2,"pax":3,"comment":null,"created_at":"2025-11-04T10:13:33.000000Z","updated_at":"2025-11-18T01:29:01.000000Z","from_city_id":null,"to_city_id":10,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Nukus airport","time":null,"date_time":"2025-11-18T07:00:00.000000Z","send_username":null,"driver_ids":["29"],"route":"Nukus-Kungrad","passenger":null,"sell_price":"250","buy_price":"207.2","nameplate":"AFD","created_by":20,"mark":"Toyora Prado","notified_times":2,"number":"2111","requested_by":"Karimova M","sell_price_result":"3000000","buy_price_result":"2486400","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2111	Karimova M	3000000	2486400	USD	USD	\N	\N	\N	\N	\N
 1296	1	\N	\N	48	5	1	\N	2025-12-02 12:51:56	2025-12-04 16:16:53	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 14:10:00	\N	["6"]	отель Manor	\N	25	\N	POMINOV ANTON 	20	\N	{"id":1296,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":5,"pax":1,"comment":null,"created_at":"2025-12-02T12:51:56.000000Z","updated_at":"2025-12-04T16:16:38.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T14:10:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"POMINOV ANTON ","created_by":20,"mark":null,"notified_times":2,"number":"2296","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2296	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
+1439	1	\N	\N	16	1	2	\N	2026-03-13 11:48:05	2026-03-13 11:48:05	3	3	\N	M115-26T	2296	BHK Train station	\N	2026-03-28 10:00:00	\N	\N	BHK Train station - Anor Boutique hotel	\N	\N	\N	\N	30	\N	\N	0	2439	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1306	3	\N	\N	67	5	3	\N	2025-12-04 16:27:56	2025-12-05 06:15:04	1	1	\N	B376-25C	2051	межд.аэропорт Ташкент	\N	2025-12-05 01:50:00	\N	["12"]	Hotel; Hyatt Regency	\N	35	25	Muharrem REÇBER	20	Hyundai starex	{"id":1306,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":67,"status":2,"pax":3,"comment":null,"created_at":"2025-12-04T16:27:56.000000Z","updated_at":"2025-12-04T20:19:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B376-25C","tour_day_expense_id":2051,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-05T01:50:00.000000Z","send_username":null,"driver_ids":["12"],"route":"Hotel; Hyatt Regency","passenger":null,"sell_price":"35","buy_price":"25","nameplate":"Muharrem RE\\u00c7BER","created_by":20,"mark":"Hyundai starex","notified_times":2,"number":"2306","requested_by":"Erkin","sell_price_result":"35","buy_price_result":"25","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2306	Erkin	35	25	\N	\N	\N	\N	\N	\N	\N
+1440	1	\N	\N	16	1	2	\N	2026-03-13 11:48:05	2026-03-13 11:48:05	3	2	\N	M115-26T	2297	Amar Boutique hotel	\N	2026-03-28 07:00:00	\N	\N	Amar Boutique hotel - SKD train station 	\N	\N	\N	\N	30	\N	\N	0	2440	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1158	3	\N	\N	10	2	3	\N	2025-11-18 05:49:55	2025-11-18 05:49:55	\N	10	\N	\N	\N	Dom.Airport Nukus	\N	2025-11-17 21:40:00	\N	["29"]	Airport Nukus-Jipek Joli	\N	460000	270000	AFD	20	Toyota Hiece	{"id":1158,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":10,"status":2,"pax":3,"comment":null,"created_at":"2025-11-18T05:49:55.000000Z","updated_at":"2025-11-18T05:49:55.000000Z","from_city_id":null,"to_city_id":10,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Dom.Airport Nukus","time":null,"date_time":"2025-11-17T21:40:00.000000Z","send_username":null,"driver_ids":["29"],"route":"Airport Nukus-Jipek Joli","passenger":null,"sell_price":"460000","buy_price":"270000","nameplate":"AFD","created_by":20,"mark":"Toyota Hiece","notified_times":0,"number":"2158","requested_by":"Karimova M","sell_price_result":"460000","buy_price_result":"270000","sell_price_currency":"UZS","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2158	Karimova M	460000	270000	UZS	\N	\N	\N	\N	\N	\N
 1175	4	\N	\N	64	2	8	WZ-1311 from Самара\n	2025-11-18 10:53:31	2025-11-24 21:29:02	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-11-25 03:00:00	\N	["36"]	Аэропорт-отель Манор	\N	50	40	SAMARA REGION	20	Спринтер	{"id":1175,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":8,"comment":"WZ-1311 from \\u0421\\u0430\\u043c\\u0430\\u0440\\u0430\\n","created_at":"2025-11-18T10:53:31.000000Z","updated_at":"2025-11-24T21:00:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-11-25T03:00:00.000000Z","send_username":null,"driver_ids":["36"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c \\u041c\\u0430\\u043d\\u043e\\u0440","passenger":null,"sell_price":"50","buy_price":"40","nameplate":"SAMARA REGION","created_by":20,"mark":"\\u0421\\u043f\\u0440\\u0438\\u043d\\u0442\\u0435\\u0440","notified_times":1,"number":"2175","requested_by":null,"sell_price_result":"600000","buy_price_result":"480000","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2175	\N	600000	480000	USD	USD	\N	\N	\N	\N	\N
 1226	3	\N	\N	48	5	4	flight TKC 127 & K9 1501	2025-11-29 12:29:49	2025-12-04 16:14:44	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 08:35:00	\N	["2"]	Аэропорт-отель Swissotel	\N	35	\N	МАСС-МЕДИА	20	Mercedes Vito	{"id":1226,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":4,"comment":"flight TKC 127 & K9 1501","created_at":"2025-11-29T12:29:49.000000Z","updated_at":"2025-12-04T03:04:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T08:35:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":"Mercedes Vito","notified_times":2,"number":"2226","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2226	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
 1304	1	\N	\N	14	5	1	\N	2025-12-04 12:08:02	2025-12-05 06:36:56	\N	1	\N	\N	\N	Frankfort Hotel &SPA	\N	2025-12-05 05:30:00	\N	["2"]	Frankfort-airport	\N	35	\N	Yury Chernyshev	20	\N	{"id":1304,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":null,"created_at":"2025-12-04T12:08:02.000000Z","updated_at":"2025-12-04T23:59:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Frankfort Hotel &SPA","time":null,"date_time":"2025-12-05T05:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Frankfort-airport","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"Yury Chernyshev","created_by":20,"mark":null,"notified_times":2,"number":"2304","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2304	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
+1441	1	\N	\N	16	1	2	stary gorod + za gorod city tour	2026-03-13 11:50:25	2026-03-13 11:50:25	3	3	\N	M115-26T	2302	Anor boutique	\N	2026-03-29 09:00:00	\N	\N	City tour BHK	\N	\N	\N	\N	30	\N	\N	0	2441	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1112	2	\N	\N	10	5	3	\N	2025-11-04 10:13:59	2025-11-19 07:29:41	\N	10	\N	\N	\N	Hotel	\N	2025-11-19 07:00:00	\N	["29"]	-Kungrad - Nukus	\N	250	207.2	AFD	20	Toyora Prado	{"id":1112,"transport_type":2,"transport_comfort_level":null,"price":null,"company_id":10,"status":1,"pax":3,"comment":null,"created_at":"2025-11-04T10:13:59.000000Z","updated_at":"2025-11-19T01:29:02.000000Z","from_city_id":null,"to_city_id":10,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel","time":null,"date_time":"2025-11-19T07:00:00.000000Z","send_username":null,"driver_ids":["29"],"route":"-Kungrad - Nukus","passenger":null,"sell_price":"250","buy_price":"207.2","nameplate":"AFD","created_by":20,"mark":"Toyora Prado","notified_times":2,"number":"2112","requested_by":"Karimova M","sell_price_result":"3000000","buy_price_result":"2486400","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2112	Karimova M	3000000	2486400	USD	USD	\N	\N	\N	\N	\N
 1229	3	\N	\N	48	5	4	flight HY 686\nBABUKHANYAN HAYK MR\nKVARCHIIA ZAUR MR\nADZYNBA IANA MRS\nBIGVAVA ALEXANDER MR	2025-11-29 12:35:20	2025-12-04 16:17:15	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 15:25:00	\N	["2"]	Аэропорт-отель Swissotel	\N	35	\N	МАСС-МЕДИА	20	Mercedes Vito	{"id":1229,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":4,"comment":"flight HY 686\\nBABUKHANYAN HAYK MR\\nKVARCHIIA ZAUR MR\\nADZYNBA IANA MRS\\nBIGVAVA ALEXANDER MR","created_at":"2025-11-29T12:35:20.000000Z","updated_at":"2025-12-04T09:54:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T15:25:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":"Mercedes Vito","notified_times":2,"number":"2229","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2229	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
+1442	1	\N	\N	16	1	2	\N	2026-03-13 11:51:45	2026-03-13 11:51:45	4	4	\N	M115-26T	2304	Anor Boutique	\N	2026-03-31 09:00:00	\N	\N	Anor Boutique - Khiva (Twins Hotel)	\N	\N	\N	\N	30	\N	\N	0	2442	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1227	1	\N	\N	48	5	1	YETISEN ALLA MRS\nflight HY 282	2025-11-29 12:31:22	2025-12-04 16:15:36	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 12:30:00	\N	["6"]	Аэропорт-отель Swissotel	\N	25	\N	YETISEN ALLA 	20	BYD	{"id":1227,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":"YETISEN ALLA MRS\\nflight HY 282","created_at":"2025-11-29T12:31:22.000000Z","updated_at":"2025-12-04T06:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T12:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"YETISEN ALLA ","created_by":20,"mark":"Mercedes Vito","notified_times":2,"number":"2227","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2227	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1105	4	\N	\N	10	2	8	\N	2025-11-01 08:09:59	2025-11-28 01:29:02	\N	1	\N	\N	\N	Hotel Crowne Plaza	\N	2025-11-28 07:00:00	\N	["12"]	Hotel Crowne Palza - Airport	\N	30	\N	PROPARCO	20	MERCEDES VITO	{"id":1105,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":10,"status":2,"pax":8,"comment":null,"created_at":"2025-11-01T08:09:59.000000Z","updated_at":"2025-11-28T01:00:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Crowne Plaza","time":null,"date_time":"2025-11-28T07:00:00.000000Z","send_username":null,"driver_ids":["12"],"route":"Hotel Crowne Palza - Airport","passenger":null,"sell_price":"30","buy_price":null,"nameplate":"PROPARCO","created_by":20,"mark":"MERCEDES VITO","notified_times":1,"number":"2105","requested_by":"Karimova Maftuna","sell_price_result":"354000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2105	Karimova Maftuna	354000	0	USD	\N	\N	\N	\N	\N	\N
 1218	1	\N	\N	34	5	1	\N	2025-11-26 11:35:47	2025-11-27 12:17:33	\N	1	\N	\N	\N	hotel old Tashkent & Spa	\N	2025-11-27 08:00:00	\N	["2"]	Hotel Old Tashkent - CAEx	\N	0	\N	SERDAR	20	Malibu	{"id":1218,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":34,"status":2,"pax":1,"comment":null,"created_at":"2025-11-26T11:35:47.000000Z","updated_at":"2025-11-27T02:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"hotel old Tashkent & Spa","time":null,"date_time":"2025-11-27T08:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Old Tashkent - CAEx","passenger":null,"sell_price":"0","buy_price":null,"nameplate":"SERDAR","created_by":20,"mark":"Malibu","notified_times":2,"number":"2218","requested_by":"Serder","sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2218	Serder	0	0	\N	\N	\N	\N	\N	\N	\N
@@ -11858,20 +13048,26 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 1235	1	\N	\N	48	2	1	PAVLENKO ANASTASIYA \n04.12.2025\t23:35\tTRAIN 715ФА VAGON 20C\n\n\n\n\n	2025-11-29 12:47:52	2025-12-04 18:04:02	\N	1	\N	\N	\N	Вокзал	\N	2025-12-04 23:35:00	\N	["2","6"]	Вокзал-отель Swissotel	\N	25	\N	МАСС-МЕДИА	20	Malibu	{"id":1235,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":"PAVLENKO ANASTASIYA \\n04.12.2025\\t23:35\\tTRAIN 715\\u0424\\u0410 VAGON 20C\\n\\n\\n\\n\\n","created_at":"2025-11-29T12:47:52.000000Z","updated_at":"2025-12-04T17:35:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u0412\\u043e\\u043a\\u0437\\u0430\\u043b","time":null,"date_time":"2025-12-04T23:35:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"\\u0412\\u043e\\u043a\\u0437\\u0430\\u043b-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":"Malibu","notified_times":1,"number":"2235","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2235	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1219	1	\N	\N	48	2	1	рейс SU 1872 \n+ 7 926 762 02 42 Одиноков Владимир Сергеевич\n\n	2025-11-27 00:47:03	2025-11-27 08:39:02	\N	1	\N	\N	\N	Аэропорт Ташкент	\N	2025-11-27 14:10:00	\N	["2"]	Аэропорт-отель Новза Палас	\N	25	\N	ODINOKOV	20	Малибу	{"id":1219,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":"\\u0440\\u0435\\u0439\\u0441 SU 1872 \\n+ 7 926 762 02 42 \\u041e\\u0434\\u0438\\u043d\\u043e\\u043a\\u043e\\u0432 \\u0412\\u043b\\u0430\\u0434\\u0438\\u043c\\u0438\\u0440 \\u0421\\u0435\\u0440\\u0433\\u0435\\u0435\\u0432\\u0438\\u0447\\n\\n","created_at":"2025-11-27T00:47:03.000000Z","updated_at":"2025-11-27T08:10:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-11-27T14:10:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c \\u041d\\u043e\\u0432\\u0437\\u0430 \\u041f\\u0430\\u043b\\u0430\\u0441","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"ODINOKOV","created_by":20,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443","notified_times":1,"number":"2219","requested_by":"Natalya Lebedeva","sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2219	Natalya Lebedeva	295000	0	USD	\N	\N	\N	\N	\N	\N
 1303	1	\N	\N	40	5	1	\N	2025-12-03 13:31:53	2025-12-04 16:15:54	\N	1	\N	\N	\N	Hotel Hilton	\N	2025-12-04 13:00:00	\N	["6"]	hotel Hilton-Airport 	\N	35	\N	Андрей Овчинников	20	Malibu 	{"id":1303,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":40,"status":2,"pax":1,"comment":null,"created_at":"2025-12-03T13:31:53.000000Z","updated_at":"2025-12-04T07:29:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Hilton","time":null,"date_time":"2025-12-04T13:00:00.000000Z","send_username":null,"driver_ids":[],"route":"hotel Hilton-Airport ","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0410\\u043d\\u0434\\u0440\\u0435\\u0439 \\u041e\\u0432\\u0447\\u0438\\u043d\\u043d\\u0438\\u043a\\u043e\\u0432","created_by":20,"mark":"Malibu ","notified_times":2,"number":"2303","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2303	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
+1443	1	\N	\N	16	1	2	\N	2026-03-13 12:04:32	2026-03-13 12:04:32	1	1	\N	M115-26T	2309	TAS APT Terminal 3	\N	2026-04-02 10:40:00	\N	\N	TAS APT Terminal 3 - Huvaydo hotel	\N	\N	\N	\N	30	\N	\N	0	2443	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1252	1	\N	\N	48	5	1	\N	2025-11-30 07:07:15	2025-12-08 13:36:29	\N	1	\N	\N	\N	Hotel Swissotel	\N	2025-12-08 04:40:00	\N	["2"]	Swissotel-airport	\N	25	\N	KVASOVA VERONIKA	20	Вито	{"id":1252,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":null,"created_at":"2025-11-30T07:07:15.000000Z","updated_at":"2025-12-07T23:09:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Swissotel","time":null,"date_time":"2025-12-08T04:40:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Swissotel-airport","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"KVASOVA VERONIKA","created_by":20,"mark":"\\u0412\\u0438\\u0442\\u043e","notified_times":2,"number":"2252","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2252	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
+1444	1	\N	\N	16	1	2	\N	2026-03-13 12:04:32	2026-03-13 12:04:32	1	9	\N	M115-26T	2310	Twins hotel	\N	2026-04-02 07:15:00	\N	\N	Twins hotel - Urgench airport	\N	\N	\N	\N	30	\N	\N	0	2444	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1159	1	\N	\N	14	5	2	Рейс: HY-604\n1. Четкина Лия Гурамовна +79269091309\n2. Софина Чамрон 	2025-11-18 07:45:11	2025-11-19 17:22:27	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-11-19 17:10:00	\N	["6"]	Аэропорт-отель Swissotel	\N	35	\N	Четкина Лия Гурамовна & Софина Чамрон	20	\N	{"id":1159,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":2,"comment":"\\u0420\\u0435\\u0439\\u0441: HY-604\\n1. \\u0427\\u0435\\u0442\\u043a\\u0438\\u043d\\u0430 \\u041b\\u0438\\u044f \\u0413\\u0443\\u0440\\u0430\\u043c\\u043e\\u0432\\u043d\\u0430 +79269091309\\n2. \\u0421\\u043e\\u0444\\u0438\\u043d\\u0430 \\u0427\\u0430\\u043c\\u0440\\u043e\\u043d ","created_at":"2025-11-18T07:45:11.000000Z","updated_at":"2025-11-19T11:39:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-11-19T17:10:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0427\\u0435\\u0442\\u043a\\u0438\\u043d\\u0430 \\u041b\\u0438\\u044f \\u0413\\u0443\\u0440\\u0430\\u043c\\u043e\\u0432\\u043d\\u0430 & \\u0421\\u043e\\u0444\\u0438\\u043d\\u0430 \\u0427\\u0430\\u043c\\u0440\\u043e\\u043d","created_by":20,"mark":null,"notified_times":2,"number":"2159","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2159	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
 1160	1	\N	\N	14	5	1	Рейс: SU 1871\nБорисков Антон Викторович +79123966181\n	2025-11-18 07:49:12	2025-11-21 05:10:46	\N	1	\N	\N	\N	Узбекистан, Ташкент, улица Укчи, 1	\N	2025-11-21 01:45:00	\N	["2"]	улица Укчи, 1 - межд.аэропорт 	\N	35	\N	Борисков Антон Викторович 	20	\N	{"id":1160,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: SU 1871\\n\\u0411\\u043e\\u0440\\u0438\\u0441\\u043a\\u043e\\u0432 \\u0410\\u043d\\u0442\\u043e\\u043d \\u0412\\u0438\\u043a\\u0442\\u043e\\u0440\\u043e\\u0432\\u0438\\u0447 +79123966181\\n","created_at":"2025-11-18T07:49:12.000000Z","updated_at":"2025-11-20T20:14:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d, \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0443\\u043b\\u0438\\u0446\\u0430 \\u0423\\u043a\\u0447\\u0438, 1","time":null,"date_time":"2025-11-21T01:45:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0443\\u043b\\u0438\\u0446\\u0430 \\u0423\\u043a\\u0447\\u0438, 1 - \\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 ","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0411\\u043e\\u0440\\u0438\\u0441\\u043a\\u043e\\u0432 \\u0410\\u043d\\u0442\\u043e\\u043d \\u0412\\u0438\\u043a\\u0442\\u043e\\u0440\\u043e\\u0432\\u0438\\u0447 ","created_by":20,"mark":null,"notified_times":2,"number":"2160","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2160	\N	420000	0	USD	USD	\N	\N	\N	\N	\N
 1213	1	\N	\N	12	5	1	Volkova Yulia +79219618766	2025-11-21 05:20:02	2025-11-26 08:11:01	\N	1	\N	\N	\N	Int.Airport	\N	2025-11-26 02:15:00	\N	["6"]	Int.Airport-Hotel Lotte City Tashkent Palace	\N	25	\N	Volkova Yulia	20	BYD	{"id":1213,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":1,"pax":1,"comment":"Volkova Yulia +79219618766","created_at":"2025-11-21T05:20:02.000000Z","updated_at":"2025-11-25T20:44:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int.Airport","time":null,"date_time":"2025-11-26T02:15:00.000000Z","send_username":null,"driver_ids":[],"route":"Int.Airport-Hotel Lotte City Tashkent Palace","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Volkova Yulia","created_by":20,"mark":null,"notified_times":2,"number":"2213","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2213	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1237	1	\N	\N	48	5	2	ZABELIN IVAN\tSU 1870\n\n\n\n\n\n\n	2025-11-29 12:53:00	2025-12-05 06:31:11	\N	1	\N	\N	\N	Аэропорт Ташкент	\N	2025-12-05 02:15:00	\N	["6","2"]	Аэропорт-отель Swissotel	\N	25	\N	МАСС-МЕДИА	20	\N	{"id":1237,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":2,"comment":"ZABELIN IVAN\\tSU 1870\\n\\n\\n\\n\\n\\n\\n","created_at":"2025-11-29T12:53:00.000000Z","updated_at":"2025-12-04T20:44:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-05T02:15:00.000000Z","send_username":null,"driver_ids":["6","2"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":null,"notified_times":2,"number":"2237","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2237	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
+1445	1	\N	\N	16	1	2	\N	2026-03-13 12:06:35	2026-03-13 12:06:35	1	1	\N	M115-26T	2313	Huvaydo hotel	\N	2026-04-04 07:00:00	\N	\N	Huvaydo hotel - TAS APT terminal 2	\N	\N	\N	\N	30	\N	\N	0	2445	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1096	3	\N	\N	64	5	4	гости оплатят сами на месте. 	2025-10-26 12:27:02	2025-11-21 12:54:41	\N	1	\N	\N	\N	Hotel Manor	\N	2025-10-27 09:00:00	\N	["2"]	Hotel Manor -государтсвенный музей	\N	30	\N	\N	20	мерседес вито 	{"id":1096,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":4,"comment":"\\u0433\\u043e\\u0441\\u0442\\u0438 \\u043e\\u043f\\u043b\\u0430\\u0442\\u044f\\u0442 \\u0441\\u0430\\u043c\\u0438 \\u043d\\u0430 \\u043c\\u0435\\u0441\\u0442\\u0435. ","created_at":"2025-10-26T12:27:02.000000Z","updated_at":"2025-10-27T03:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Manor","time":null,"date_time":"2025-10-27T09:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Manor -\\u0433\\u043e\\u0441\\u0443\\u0434\\u0430\\u0440\\u0442\\u0441\\u0432\\u0435\\u043d\\u043d\\u044b\\u0439 \\u043c\\u0443\\u0437\\u0435\\u0439","passenger":null,"sell_price":"30","buy_price":null,"nameplate":null,"created_by":20,"mark":"\\u043c\\u0435\\u0440\\u0441\\u0435\\u0434\\u0435\\u0441 \\u0432\\u0438\\u0442\\u043e ","notified_times":2,"number":"2096","requested_by":"Ruxshona","sell_price_result":"360000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2096	Ruxshona	360000	0	USD	\N	\N	\N	\N	\N	\N
 1217	3	\N	\N	12	2	1	Михайлов Кузьма Глебович +79166841743	2025-11-26 10:32:16	2025-11-26 13:29:02	\N	1	\N	\N	\N	межд.аэропорт	\N	2025-11-26 19:00:00	\N	["2"]	аэропорт- отель Radisson Blu Tashkent	\N	35	\N	Михайлов Кузьма Глебович 	20	Vito	{"id":1217,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u041c\\u0438\\u0445\\u0430\\u0439\\u043b\\u043e\\u0432 \\u041a\\u0443\\u0437\\u044c\\u043c\\u0430 \\u0413\\u043b\\u0435\\u0431\\u043e\\u0432\\u0438\\u0447 +79166841743","created_at":"2025-11-26T10:32:16.000000Z","updated_at":"2025-11-26T13:00:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","time":null,"date_time":"2025-11-26T19:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442- \\u043e\\u0442\\u0435\\u043b\\u044c Radisson Blu Tashkent","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041c\\u0438\\u0445\\u0430\\u0439\\u043b\\u043e\\u0432 \\u041a\\u0443\\u0437\\u044c\\u043c\\u0430 \\u0413\\u043b\\u0435\\u0431\\u043e\\u0432\\u0438\\u0447 ","created_by":20,"mark":"Vito","notified_times":1,"number":"2217","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2217	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
 1216	1	\N	\N	14	5	1	Мусин Дамир Ильдусович +79859911421	2025-11-22 06:21:38	2025-11-27 12:17:25	\N	1	\N	\N	\N	Укчи 1	\N	2025-11-27 07:30:00	\N	["2"]	Укчи 1 -межд.аэропорт 	\N	35	\N	Мусин Дамир Ильдусович	20	Vito	{"id":1216,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":"\\u041c\\u0443\\u0441\\u0438\\u043d \\u0414\\u0430\\u043c\\u0438\\u0440 \\u0418\\u043b\\u044c\\u0434\\u0443\\u0441\\u043e\\u0432\\u0438\\u0447 +79859911421","created_at":"2025-11-22T06:21:38.000000Z","updated_at":"2025-11-27T01:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u0423\\u043a\\u0447\\u0438 1","time":null,"date_time":"2025-11-27T07:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0423\\u043a\\u0447\\u0438 1 -\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 ","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041c\\u0443\\u0441\\u0438\\u043d \\u0414\\u0430\\u043c\\u0438\\u0440 \\u0418\\u043b\\u044c\\u0434\\u0443\\u0441\\u043e\\u0432\\u0438\\u0447","created_by":20,"mark":"Vito","notified_times":2,"number":"2216","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2216	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
+1446	5	\N	\N	56	2	16	\N	2026-03-15 05:46:24	2026-03-15 05:46:24	3	3	\N	B118-26T	2314	Hotel Reikartz Hanzade 	\N	2026-03-17 09:00:00	\N	\N	SKD-BHK	\N	\N	\N	\N	20	\N	\N	0	2446	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1221	1	\N	\N	40	2	1	рейс SU-1872	2025-11-29 08:19:41	2025-12-01 08:39:02	\N	1	\N	\N	\N	Межд.Аэропорт Ташкент	\N	2025-12-01 14:10:00	\N	["2"]	Аэропорт-Отель Хилтон 	\N	100	\N	\N	20	Малибу 	{"id":1221,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":40,"status":2,"pax":1,"comment":"\\u0440\\u0435\\u0439\\u0441 SU-1872","created_at":"2025-11-29T08:19:41.000000Z","updated_at":"2025-12-01T08:10:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-01T14:10:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u041e\\u0442\\u0435\\u043b\\u044c \\u0425\\u0438\\u043b\\u0442\\u043e\\u043d ","passenger":null,"sell_price":"100","buy_price":null,"nameplate":null,"created_by":20,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443 ","notified_times":1,"number":"2221","requested_by":null,"sell_price_result":"100","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2221	\N	100	0	\N	\N	\N	\N	\N	\N	\N
 1212	1	\N	\N	14	2	3	1. Щербаков Александр +79104705604\n2. Ивченкова Евгения ()\n3. Валеев Александр ()	2025-11-21 05:16:43	2025-11-22 01:59:02	\N	1	\N	\N	\N	Hotel Wyndham Tashkent	\N	2025-11-22 07:30:00	\N	["6"]	hotel Wyndham - Int.Airport	\N	35	\N	Щербаков Александр+2	20	BYD	{"id":1212,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":3,"comment":"1. \\u0429\\u0435\\u0440\\u0431\\u0430\\u043a\\u043e\\u0432 \\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440 +79104705604\\n2. \\u0418\\u0432\\u0447\\u0435\\u043d\\u043a\\u043e\\u0432\\u0430 \\u0415\\u0432\\u0433\\u0435\\u043d\\u0438\\u044f ()\\n3. \\u0412\\u0430\\u043b\\u0435\\u0435\\u0432 \\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440 ()","created_at":"2025-11-21T05:16:43.000000Z","updated_at":"2025-11-22T01:30:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Wyndham Tashkent","time":null,"date_time":"2025-11-22T07:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"hotel Wyndham - Int.Airport","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0429\\u0435\\u0440\\u0431\\u0430\\u043a\\u043e\\u0432 \\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440+2","created_by":20,"mark":"BYD","notified_times":1,"number":"2212","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2212	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1447	5	\N	\N	56	2	16	\N	2026-03-15 05:48:01	2026-03-15 05:48:01	4	4	\N	B118-26T	2317	Hotel Sahid Zarafshan	\N	2026-03-18 09:00:00	\N	\N	BHK-KHIVA	\N	\N	\N	\N	20	\N	\N	0	2447	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1244	1	\N	\N	40	5	2	3 декабря\nS class + Maybach с утра до вылета на полный день аренды	2025-11-29 13:17:57	2025-12-03 12:48:34	\N	1	\N	\N	\N	Hotel Hilton	\N	2025-12-03 09:00:00	\N	["26"]	full day Tashkent	\N	400	250	\N	20	Mercedes S Class (Maybach)	{"id":1244,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":40,"status":2,"pax":2,"comment":"3 \\u0434\\u0435\\u043a\\u0430\\u0431\\u0440\\u044f\\nS class + Maybach \\u0441 \\u0443\\u0442\\u0440\\u0430 \\u0434\\u043e \\u0432\\u044b\\u043b\\u0435\\u0442\\u0430 \\u043d\\u0430 \\u043f\\u043e\\u043b\\u043d\\u044b\\u0439 \\u0434\\u0435\\u043d\\u044c \\u0430\\u0440\\u0435\\u043d\\u0434\\u044b","created_at":"2025-11-29T13:17:57.000000Z","updated_at":"2025-12-03T03:29:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Hilton","time":null,"date_time":"2025-12-03T09:00:00.000000Z","send_username":null,"driver_ids":["26"],"route":"full day Tashkent","passenger":null,"sell_price":"400","buy_price":"250","nameplate":null,"created_by":20,"mark":"Mercedes S Class (Maybach)","notified_times":2,"number":"2244","requested_by":null,"sell_price_result":"4720000","buy_price_result":"2950000","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2244	\N	4720000	2950000	USD	USD	\N	\N	\N	\N	\N
 1103	4	\N	\N	10	5	8	\N	2025-11-01 08:08:45	2025-11-26 10:39:24	\N	1	\N	\N	\N	Hotel Crowne Plaza	\N	2025-11-26 09:00:00	\N	["12"]	FULL DAY TASHKENT	\N	120	80	PROPORCA	20	Joylong	{"id":1103,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":10,"status":2,"pax":8,"comment":null,"created_at":"2025-11-01T08:08:45.000000Z","updated_at":"2025-11-26T08:12:05.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Crowne Plaza","time":null,"date_time":"2025-11-26T09:00:00.000000Z","send_username":null,"driver_ids":["12"],"route":"FULL DAY TASHKENT","passenger":null,"sell_price":"120","buy_price":"80","nameplate":"PROPORCA","created_by":20,"mark":"Joylong","notified_times":2,"number":"2103","requested_by":"Karimova Maftuna","sell_price_result":"1416000","buy_price_result":"944000","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2103	Karimova Maftuna	1416000	944000	USD	USD	\N	\N	\N	\N	\N
 1242	5	\N	\N	54	1	16	pick up time TBC	2025-11-29 13:16:45	2025-11-29 13:16:45	1	1	\N	M372-26T	1980	Tashkent airport	\N	2026-05-30 12:00:00	\N	\N	Tashkent airport - Huvaydo hotel	\N	\N	\N	\N	30	\N	\N	0	2242	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1230	1	\N	\N	48	5	1	flight FZ1945\nMAKSOEVA VIKTORIA MRS	2025-11-29 12:36:48	2025-12-04 16:30:33	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 15:50:00	\N	["6"]	Аэропорт-отель Swissotel	\N	25	\N	МАСС-МЕДИА	20	Malibu	{"id":1230,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":"flight FZ1945\\nMAKSOEVA VIKTORIA MRS","created_at":"2025-11-29T12:36:48.000000Z","updated_at":"2025-12-04T10:19:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T15:50:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":"Malibu","notified_times":2,"number":"2230","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2230	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
+1448	5	\N	\N	56	2	16	\N	2026-03-15 05:51:29	2026-03-15 05:51:29	4	9	\N	B118-26T	2321	Orient Star khiva	\N	2026-03-19 21:00:00	\N	\N	Khiva-Urgench Airport	\N	\N	\N	\N	20	\N	\N	0	2448	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1104	4	\N	\N	10	5	8	\N	2025-11-01 08:08:56	2025-11-27 12:17:50	\N	1	\N	\N	\N	Hotel Crowne Plaza	\N	2025-11-27 09:00:00	\N	["12"]	FULL DAY TASHKENT	\N	120	80	FAR	20	MERCEDES VITO	{"id":1104,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":10,"status":2,"pax":8,"comment":null,"created_at":"2025-11-01T08:08:56.000000Z","updated_at":"2025-11-27T12:17:39.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Crowne Plaza","time":null,"date_time":"2025-11-27T09:00:00.000000Z","send_username":null,"driver_ids":["12"],"route":"FULL DAY TASHKENT","passenger":null,"sell_price":"120","buy_price":"80","nameplate":"FAR","created_by":20,"mark":"MERCEDES VITO","notified_times":2,"number":"2104","requested_by":"Karimova Maftuna","sell_price_result":"1416000","buy_price_result":"80","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2104	Karimova Maftuna	1416000	80	USD	\N	\N	\N	\N	\N	\N
 1228	4	\N	\N	48	5	5	flight SU SU 1869 & SU 1872\nHARUTYUNYAN LILIT\nSAPOZHNIKOVA GALINA SU 1872\nUSMONOV FARIDUN SU 1872\nODINOKOV VLADIDMIR SU 1872\nCHEKUNOV IGOR SU 1872\n	2025-11-29 12:34:10	2025-12-04 16:16:13	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-04 14:10:00	\N	["12"]	Аэропорт-отель Swissotel	\N	35	\N	МАСС-МЕДИА	20	\N	{"id":1228,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":5,"comment":"flight SU SU 1869 & SU 1872\\nHARUTYUNYAN LILIT\\nSAPOZHNIKOVA GALINA SU 1872\\nUSMONOV FARIDUN SU 1872\\nODINOKOV VLADIDMIR SU 1872\\nCHEKUNOV IGOR SU 1872\\n","created_at":"2025-11-29T12:34:10.000000Z","updated_at":"2025-12-04T08:39:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-04T14:10:00.000000Z","send_username":null,"driver_ids":["12"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421-\\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":null,"notified_times":2,"number":"2228","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2228	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
 1220	1	\N	\N	48	5	1	рейс SU 1873 с вылетом в 15:40\n+ 7 926 762 02 42 Одиноков Владимир Сергеевич\n\n	2025-11-27 00:48:32	2025-11-29 12:55:49	\N	1	\N	\N	\N	Отель Новза Палас	\N	2025-11-29 12:00:00	\N	["2"]	отель Новза Палас - Аэропорт	\N	25	\N	ODINOKOV	20	Малибу	{"id":1220,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":"\\u0440\\u0435\\u0439\\u0441 SU 1873 \\u0441 \\u0432\\u044b\\u043b\\u0435\\u0442\\u043e\\u043c \\u0432 15:40\\n+ 7 926 762 02 42 \\u041e\\u0434\\u0438\\u043d\\u043e\\u043a\\u043e\\u0432 \\u0412\\u043b\\u0430\\u0434\\u0438\\u043c\\u0438\\u0440 \\u0421\\u0435\\u0440\\u0433\\u0435\\u0435\\u0432\\u0438\\u0447\\n\\n","created_at":"2025-11-27T00:48:32.000000Z","updated_at":"2025-11-29T06:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041e\\u0442\\u0435\\u043b\\u044c \\u041d\\u043e\\u0432\\u0437\\u0430 \\u041f\\u0430\\u043b\\u0430\\u0441","time":null,"date_time":"2025-11-29T12:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u041d\\u043e\\u0432\\u0437\\u0430 \\u041f\\u0430\\u043b\\u0430\\u0441 - \\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"ODINOKOV","created_by":20,"mark":"\\u041c\\u0430\\u043b\\u0438\\u0431\\u0443","notified_times":2,"number":"2220","requested_by":"Natalya Lebedeva","sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2220	Natalya Lebedeva	295000	0	USD	\N	\N	\N	\N	\N	\N
@@ -11906,49 +13102,109 @@ COPY public.transfers (id, transport_type, transport_comfort_level, price, compa
 1310	1	\N	\N	48	5	1	PAVLENKO ANASTASIYA MRS	2025-12-05 07:35:11	2025-12-07 22:00:45	\N	1	\N	\N	\N	Hotel Swissotel	\N	2025-12-07 19:30:00	\N	["2"]	отель Swissotel-Вокзал	\N	25	\N	PAVLENKO ANASTASIYA MRS	20	Вито	{"id":1310,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":"PAVLENKO ANASTASIYA MRS","created_at":"2025-12-05T07:35:11.000000Z","updated_at":"2025-12-07T13:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Swissotel","time":null,"date_time":"2025-12-07T19:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c Swissotel-\\u0412\\u043e\\u043a\\u0437\\u0430\\u043b","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"PAVLENKO ANASTASIYA MRS","created_by":20,"mark":"\\u0412\\u0438\\u0442\\u043e","notified_times":2,"number":"2310","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2310	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1261	1	\N	\N	48	1	1	PLYASHESHNIK DIONISSIY MR\t08.12.2025\t20:40\tHY 765\n	2025-11-30 07:24:04	2025-12-08 12:09:02	\N	1	\N	\N	\N	Hotel Swissotel	\N	2025-12-08 17:40:00	\N	[]	Swissotel-Airport	\N	25	\N	PLYASHESHNIK DIONISSIY	20	\N	{"id":1261,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":1,"pax":1,"comment":"PLYASHESHNIK DIONISSIY MR\\t08.12.2025\\t20:40\\tHY 765\\n","created_at":"2025-11-30T07:24:04.000000Z","updated_at":"2025-12-08T11:40:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Swissotel","time":null,"date_time":"2025-12-08T17:40:00.000000Z","send_username":null,"driver_ids":[],"route":"Swissotel-Airport","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"PLYASHESHNIK DIONISSIY","created_by":20,"mark":null,"notified_times":1,"number":"2261","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2261	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1300	1	\N	\N	48	5	1	\N	2025-12-02 13:46:07	2025-12-08 13:37:16	\N	1	\N	\N	\N	Hotel Swissotel	\N	2025-12-08 12:30:00	\N	[]	Hotel Swissotel - Airport	\N	25	\N	POMINOV ANTON	20	\N	{"id":1300,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":1,"pax":1,"comment":null,"created_at":"2025-12-02T13:46:07.000000Z","updated_at":"2025-12-08T06:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Swissotel","time":null,"date_time":"2025-12-08T12:30:00.000000Z","send_username":null,"driver_ids":[],"route":"Hotel Swissotel - Airport","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"POMINOV ANTON","created_by":20,"mark":null,"notified_times":2,"number":"2300","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2300	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
+1156	6	\N	\N	36	2	31	\N	2025-11-17 13:05:51	2026-02-25 11:03:41	2	1	\N	M101-26T	1782	Inspira S	\N	2026-04-11 07:00:00	\N	\N	Inspira S - Severniy vokzal	\N	\N	\N	\N	30	\N	{"id":1156,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":31,"comment":null,"created_at":"2025-11-17T13:05:51.000000Z","updated_at":"2025-11-17T13:05:51.000000Z","from_city_id":2,"to_city_id":1,"total_price":null,"group_number":"M35926T","tour_day_expense_id":1782,"place_of_submission":"Inspira S","time":null,"date_time":"2026-04-11T07:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Inspira S - Severniy vokzal","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2156","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2156	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1196	6	\N	\N	36	1	31	\N	2025-11-19 06:06:26	2026-02-26 07:38:24	2	1	\N	M105-26T	1915	Inspira S	\N	2026-05-08 07:00:00	\N	\N	Inspira S - Severniy vokzal	\N	\N	\N	\N	30	\N	{"id":1196,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":31,"comment":null,"created_at":"2025-11-19T06:06:26.000000Z","updated_at":"2025-11-19T06:06:26.000000Z","from_city_id":2,"to_city_id":1,"total_price":null,"group_number":"M36426T","tour_day_expense_id":1915,"place_of_submission":"Inspira S","time":null,"date_time":"2026-05-08T07:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Inspira S - Severniy vokzal","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2196","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2196	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1249	1	\N	\N	48	5	1	\N	2025-11-30 07:01:37	2025-12-08 02:39:54	\N	1	\N	\N	\N	hotel Swissotel	\N	2025-12-08 00:45:00	\N	["2"]	hotel Swissotel-airport	\N	25	\N	SAPOZHNIKOVA GALINA 	20	Вито	{"id":1249,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":1,"comment":null,"created_at":"2025-11-30T07:01:37.000000Z","updated_at":"2025-12-07T19:14:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"hotel Swissotel","time":null,"date_time":"2025-12-08T00:45:00.000000Z","send_username":null,"driver_ids":["2"],"route":"hotel Swissotel-airport","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"SAPOZHNIKOVA GALINA ","created_by":20,"mark":"\\u0412\\u0438\\u0442\\u043e","notified_times":2,"number":"2249","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2249	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
+1369	1	\N	\N	14	5	1	Рейс: SU1870\nСвистушкин Валерий Михайлович +79166779609\n	2026-02-05 11:47:37	2026-02-10 08:27:46	\N	1	\N	\N	\N	Меж. аэропорт Ташкент	\N	2026-02-10 02:15:00	\N	["2","6"]	Меж. аэропорт Ташкент - Hotel Hilton	\N	35	\N	Свистушкин Валерий Михайлович	20	BYD	{"id":1369,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: SU1870\\n\\u0421\\u0432\\u0438\\u0441\\u0442\\u0443\\u0448\\u043a\\u0438\\u043d \\u0412\\u0430\\u043b\\u0435\\u0440\\u0438\\u0439 \\u041c\\u0438\\u0445\\u0430\\u0439\\u043b\\u043e\\u0432\\u0438\\u0447 +79166779609\\n","created_at":"2026-02-05T11:47:37.000000Z","updated_at":"2026-02-09T20:44:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436. \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-02-10T02:15:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"\\u041c\\u0435\\u0436. \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442 - Hotel Hilton","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0421\\u0432\\u0438\\u0441\\u0442\\u0443\\u0448\\u043a\\u0438\\u043d \\u0412\\u0430\\u043b\\u0435\\u0440\\u0438\\u0439 \\u041c\\u0438\\u0445\\u0430\\u0439\\u043b\\u043e\\u0432\\u0438\\u0447","created_by":20,"mark":"BYD","notified_times":2,"number":"2369","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2369	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1367	1	\N	\N	14	5	1	Екушева Евгения +79166786201	2026-02-03 11:56:12	2026-02-04 07:12:25	\N	1	\N	\N	\N	Hotel Panarams Tashkent	\N	2026-02-04 01:45:00	\N	["6"]	Hotel Panarams - Airport	\N	35	\N	Екушева Евгения 	20	BYD	{"id":1367,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":"\\u0415\\u043a\\u0443\\u0448\\u0435\\u0432\\u0430 \\u0415\\u0432\\u0433\\u0435\\u043d\\u0438\\u044f +79166786201","created_at":"2026-02-03T11:56:12.000000Z","updated_at":"2026-02-03T20:14:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Panarams Tashkent","time":null,"date_time":"2026-02-04T01:45:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Hotel Panarams - Airport","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0415\\u043a\\u0443\\u0448\\u0435\\u0432\\u0430 \\u0415\\u0432\\u0433\\u0435\\u043d\\u0438\\u044f ","created_by":20,"mark":"BYD","notified_times":2,"number":"2367","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2367	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1393	6	\N	\N	36	1	31	\N	2026-02-26 08:22:01	2026-02-26 08:22:01	1	1	\N	M113-26T	2174	TAS Airport	\N	2026-05-11 01:00:00	\N	\N	TAS Airport - Inspira S Hotel	\N	\N	\N	\N	30	\N	\N	0	2393	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1394	6	\N	\N	36	1	31	\N	2026-02-26 08:22:01	2026-02-26 08:22:01	1	1	\N	M113-26T	2175	Inspira S 	\N	2026-05-11 10:00:00	\N	\N	Tashkent City Tour	\N	\N	\N	\N	30	\N	\N	0	2394	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1377	1	\N	\N	39	5	3	\N	2026-02-20 07:15:15	2026-02-27 09:17:19	\N	1	\N	\N	\N	International Airport Tashkent	\N	2026-02-23 08:30:00	\N	["6"]	full day Tashkent	\N	90	\N	Deutsche Bank	20	BYD	{"id":1377,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":39,"status":1,"pax":3,"comment":null,"created_at":"2026-02-20T07:15:15.000000Z","updated_at":"2026-02-23T02:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"International Airport Tashkent","time":null,"date_time":"2026-02-23T08:30:00.000000Z","send_username":null,"driver_ids":[],"route":"full day Tashkent","passenger":null,"sell_price":"110","buy_price":null,"nameplate":"Deutsche Bank","created_by":20,"mark":"BYD","notified_times":2,"number":"2377","requested_by":"Zalmura","sell_price_result":"1342000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2377	Zalmura	1098000	0	USD	\N	\N	\N	\N	\N	\N
 1313	1	\N	\N	12	5	1	Никифорова Юлия Николаевна +7998909446215	2025-12-07 16:53:00	2025-12-08 02:39:36	\N	1	\N	\N	\N	4-й квартал, 50 (массив Городок Авиастроителей, Яшнабадский район, Ташкент, Узбекистан)	\N	2025-12-08 00:15:00	\N	["2"]	Городок Авиастроителей - аэропорт	\N	25	\N	Никифорова Юлия Николаевна	20	Malibu 266	{"id":1313,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u041d\\u0438\\u043a\\u0438\\u0444\\u043e\\u0440\\u043e\\u0432\\u0430 \\u042e\\u043b\\u0438\\u044f \\u041d\\u0438\\u043a\\u043e\\u043b\\u0430\\u0435\\u0432\\u043d\\u0430 +7998909446215","created_at":"2025-12-07T16:53:00.000000Z","updated_at":"2025-12-07T18:44:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"4-\\u0439 \\u043a\\u0432\\u0430\\u0440\\u0442\\u0430\\u043b, 50 (\\u043c\\u0430\\u0441\\u0441\\u0438\\u0432 \\u0413\\u043e\\u0440\\u043e\\u0434\\u043e\\u043a \\u0410\\u0432\\u0438\\u0430\\u0441\\u0442\\u0440\\u043e\\u0438\\u0442\\u0435\\u043b\\u0435\\u0439, \\u042f\\u0448\\u043d\\u0430\\u0431\\u0430\\u0434\\u0441\\u043a\\u0438\\u0439 \\u0440\\u0430\\u0439\\u043e\\u043d, \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)","time":null,"date_time":"2025-12-08T00:15:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0413\\u043e\\u0440\\u043e\\u0434\\u043e\\u043a \\u0410\\u0432\\u0438\\u0430\\u0441\\u0442\\u0440\\u043e\\u0438\\u0442\\u0435\\u043b\\u0435\\u0439 - \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041d\\u0438\\u043a\\u0438\\u0444\\u043e\\u0440\\u043e\\u0432\\u0430 \\u042e\\u043b\\u0438\\u044f \\u041d\\u0438\\u043a\\u043e\\u043b\\u0430\\u0435\\u0432\\u043d\\u0430","created_by":20,"mark":"Malibu 266","notified_times":2,"number":"2313","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2313	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1301	1	\N	\N	48	5	2	AGHAEV SHAKIR C6 251\nDILANOV GUNDUZ C6 251\n	2025-12-02 13:48:46	2025-12-08 13:37:32	\N	1	\N	\N	\N	Hotel Swissotel	\N	2025-12-08 13:00:00	\N	[]	Hotel Swissotel-Airprort	\N	25	\N	Масс Медиа	20	\N	{"id":1301,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":48,"status":1,"pax":2,"comment":"AGHAEV SHAKIR C6 251\\nDILANOV GUNDUZ C6 251\\n","created_at":"2025-12-02T13:48:46.000000Z","updated_at":"2025-12-08T07:29:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Swissotel","time":null,"date_time":"2025-12-08T13:00:00.000000Z","send_username":null,"driver_ids":[],"route":"Hotel Swissotel-Airprort","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041c\\u0430\\u0441\\u0441 \\u041c\\u0435\\u0434\\u0438\\u0430","created_by":20,"mark":null,"notified_times":2,"number":"2301","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2301	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1260	4	\N	\N	48	1	3	TSYGANKOVA ERTURK YULIA\t08.12.2025\t16:50\tHY 273\nYETISEN ALLA MRS\t08.12.2025\t16:50\tHY 273\nMOLOKOVA YULIA MRS\t08.12.2025\t17:00\tHY 613\n\n\n	2025-11-30 07:19:32	2025-12-08 08:29:01	\N	1	\N	\N	\N	Hotel Swissotel	\N	2025-12-08 14:00:00	\N	[]	Swissotel-Airport	\N	35	\N	МАСС МЕДИА	20	\N	{"id":1260,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":48,"status":1,"pax":3,"comment":"TSYGANKOVA ERTURK YULIA\\t08.12.2025\\t16:50\\tHY 273\\nYETISEN ALLA MRS\\t08.12.2025\\t16:50\\tHY 273\\nMOLOKOVA YULIA MRS\\t08.12.2025\\t17:00\\tHY 613\\n\\n\\n","created_at":"2025-11-30T07:19:32.000000Z","updated_at":"2025-12-08T08:00:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Swissotel","time":null,"date_time":"2025-12-08T14:00:00.000000Z","send_username":null,"driver_ids":[],"route":"Swissotel-Airport","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421 \\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":null,"notified_times":1,"number":"2260","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2260	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
+1370	1	\N	\N	14	2	1	Шмакова Анна Игоревна +79163036404\n10 февраля 2026 14:10\t\n SU 1872	2026-02-05 11:51:17	2026-02-10 08:39:02	\N	1	\N	\N	\N	Aэропорт Ташкент	\N	2026-02-10 14:10:00	\N	["6","2"]	International Airport - Hotel Hilton	\N	35	\N	Шмакова Анна Игоревна	20	BYD	{"id":1370,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":"\\u0428\\u043c\\u0430\\u043a\\u043e\\u0432\\u0430 \\u0410\\u043d\\u043d\\u0430 \\u0418\\u0433\\u043e\\u0440\\u0435\\u0432\\u043d\\u0430 +79163036404\\n10 \\u0444\\u0435\\u0432\\u0440\\u0430\\u043b\\u044f 2026 14:10\\t\\n SU 1872","created_at":"2026-02-05T11:51:17.000000Z","updated_at":"2026-02-10T08:10:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"A\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-02-10T14:10:00.000000Z","send_username":null,"driver_ids":["6","2"],"route":"International Airport - Hotel Hilton","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0428\\u043c\\u0430\\u043a\\u043e\\u0432\\u0430 \\u0410\\u043d\\u043d\\u0430 \\u0418\\u0433\\u043e\\u0440\\u0435\\u0432\\u043d\\u0430","created_by":20,"mark":"BYD","notified_times":1,"number":"2370","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2370	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1378	1	\N	\N	39	1	3	\N	2026-02-20 07:15:44	2026-02-24 03:29:01	\N	1	\N	\N	\N	InterContinental	\N	2026-02-24 09:00:00	\N	[]	full day Tashkent	\N	90	\N	Deutsche Bank	20	BYD	{"id":1378,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":39,"status":1,"pax":3,"comment":null,"created_at":"2026-02-20T07:15:44.000000Z","updated_at":"2026-02-24T03:00:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"InterContinental","time":null,"date_time":"2026-02-24T09:00:00.000000Z","send_username":null,"driver_ids":[],"route":"full day Tashkent","passenger":null,"sell_price":"90","buy_price":null,"nameplate":"Deutsche Bank","created_by":20,"mark":"BYD","notified_times":1,"number":"2378","requested_by":"Zalmura","sell_price_result":"1098000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2378	Zalmura	1098000	0	USD	\N	\N	\N	\N	\N	\N
+1395	6	\N	\N	36	1	31	\N	2026-02-26 08:26:28	2026-02-26 08:26:28	2	1	\N	M113-26T	2179	Inspira S hotel 	\N	2026-05-12 07:00:00	\N	\N	Inspira S hotel  - Severniy vokzal	\N	\N	\N	\N	30	\N	\N	0	2395	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1396	6	\N	\N	36	1	31	\N	2026-02-26 08:26:28	2026-02-26 08:26:28	2	2	\N	M113-26T	2180	SKD train station 	\N	2026-05-12 10:00:00	\N	\N	SKD train station - City Tour 	\N	\N	\N	\N	30	\N	\N	0	2396	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1258	4	\N	\N	48	5	9	ISMAGULOV ALZHAN MR\t08.12.2025\t15:10\tHY 721\nKRAINIUKOVA IANA MRS\t08.12.2025\t15:20\tHY 777\nSEREBRYANYY ROMAN MR\t08.12.2025\t15:40\tSU 1873\nMAKSHANTSEV SERGEI MR\t08.12.2025\t15:40\tSU 1873\nODINOKOV VLADIDMIR MR\t08.12.2025\t15:40\tSU 1873\nCHEKUNOV IGOR MR\t08.12.2025\t15:40\tSU 1873\nKOLESNIKOVA ANNA MRS\t08.12.2025\t15:40\tSU 1873\nAGHAEV SHAKIR MR"\t08.12.2025\t16:00\tC6 251\nDILANOV GUNDUZ\t08.12.2025\t16:00\tC6 251\n\n\n	2025-11-30 07:17:48	2025-12-08 13:37:23	\N	1	\N	\N	\N	Hotel Swissotel	\N	2025-12-08 12:30:00	\N	["6","12"]	Swissotel-Airport	\N	80	\N	МАСС МЕДИА	20	JOYLONG	{"id":1258,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":48,"status":2,"pax":9,"comment":"ISMAGULOV ALZHAN MR\\t08.12.2025\\t15:10\\tHY 721\\nKRAINIUKOVA IANA MRS\\t08.12.2025\\t15:20\\tHY 777\\nSEREBRYANYY ROMAN MR\\t08.12.2025\\t15:40\\tSU 1873\\nMAKSHANTSEV SERGEI MR\\t08.12.2025\\t15:40\\tSU 1873\\nODINOKOV VLADIDMIR MR\\t08.12.2025\\t15:40\\tSU 1873\\nCHEKUNOV IGOR MR\\t08.12.2025\\t15:40\\tSU 1873\\nKOLESNIKOVA ANNA MRS\\t08.12.2025\\t15:40\\tSU 1873\\nAGHAEV SHAKIR MR\\"\\t08.12.2025\\t16:00\\tC6 251\\nDILANOV GUNDUZ\\t08.12.2025\\t16:00\\tC6 251\\n\\n\\n","created_at":"2025-11-30T07:17:48.000000Z","updated_at":"2025-12-08T06:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Swissotel","time":null,"date_time":"2025-12-08T12:30:00.000000Z","send_username":null,"driver_ids":["6","12"],"route":"Swissotel-Airport","passenger":null,"sell_price":"80","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421 \\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":"JOYLONG","notified_times":2,"number":"2258","requested_by":null,"sell_price_result":"944000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2258	\N	944000	0	USD	\N	\N	\N	\N	\N	\N
 1262	3	\N	\N	48	1	3	BELENKIY EVGENY MR\t08.12.2025\t22:30\tHY 531\nUSMONOV FARIDUN MR\t08.12.2025\t22:50\tCZ 226\nBATENKOVA ELENA MRS\t08.12.2025\t22:50\tCZ 226\n\n	2025-11-30 07:25:05	2025-12-08 13:59:02	\N	1	\N	\N	\N	Hotel Swissotel	\N	2025-12-08 19:30:00	\N	[]	Swissotel-Airport	\N	35	\N	МАСС МЕДИА	20	\N	{"id":1262,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":48,"status":1,"pax":3,"comment":"BELENKIY EVGENY MR\\t08.12.2025\\t22:30\\tHY 531\\nUSMONOV FARIDUN MR\\t08.12.2025\\t22:50\\tCZ 226\\nBATENKOVA ELENA MRS\\t08.12.2025\\t22:50\\tCZ 226\\n\\n","created_at":"2025-11-30T07:25:05.000000Z","updated_at":"2025-12-08T13:30:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Swissotel","time":null,"date_time":"2025-12-08T19:30:00.000000Z","send_username":null,"driver_ids":[],"route":"Swissotel-Airport","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041c\\u0410\\u0421\\u0421 \\u041c\\u0415\\u0414\\u0418\\u0410","created_by":20,"mark":null,"notified_times":1,"number":"2262","requested_by":null,"sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2262	\N	413000	0	USD	\N	\N	\N	\N	\N	\N
 1317	1	\N	\N	64	2	1	0.12.2025, 23:00\nНомер рейса, откуда:  HY 212,  Riga	2025-12-10 12:03:47	2025-12-10 17:29:01	\N	1	\N	\N	\N	мжде.аэропорт 	\N	2025-12-10 23:00:00	\N	["6"]	отель Манор	\N	20	\N	Andres Rannamae	20	BYD 	{"id":1317,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":1,"comment":"0.12.2025, 23:00\\n\\u041d\\u043e\\u043c\\u0435\\u0440 \\u0440\\u0435\\u0439\\u0441\\u0430, \\u043e\\u0442\\u043a\\u0443\\u0434\\u0430:  HY 212,  Riga","created_at":"2025-12-10T12:03:47.000000Z","updated_at":"2025-12-10T17:00:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0436\\u0434\\u0435.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 ","time":null,"date_time":"2025-12-10T23:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u041c\\u0430\\u043d\\u043e\\u0440","passenger":null,"sell_price":"20","buy_price":null,"nameplate":"Andres Rannamae","created_by":20,"mark":"BYD ","notified_times":1,"number":"2317","requested_by":"Rukhshana","sell_price_result":"236000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2317	Rukhshana	236000	0	USD	\N	\N	\N	\N	\N	\N
 1322	3	\N	\N	\N	2	6	16 декабрь 13:10  HY514 From Korea 	2025-12-15 06:42:45	2025-12-15 06:42:45	\N	1	\N	\N	\N	Межд.Аэропорт Ташкент	\N	2026-12-16 13:10:00	\N	["2"]	отель	\N	35	\N	\N	20	Вито	{"id":1322,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":null,"status":2,"pax":6,"comment":"16 \\u0434\\u0435\\u043a\\u0430\\u0431\\u0440\\u044c 13:10\\u00a0 HY514 From Korea ","created_at":"2025-12-15T06:42:45.000000Z","updated_at":"2025-12-15T06:42:45.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-12-16T13:10:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c","passenger":null,"sell_price":"35","buy_price":null,"nameplate":null,"created_by":20,"mark":"\\u0412\\u0438\\u0442\\u043e","notified_times":0,"number":"2322","requested_by":"\\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440 id: 954\\u00a0690\\u00a0502","sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2322	Александр id: 954 690 502	413000	0	USD	\N	\N	\N	\N	\N	\N
+1397	6	\N	\N	36	1	31	\N	2026-02-26 08:30:11	2026-02-26 08:30:11	2	2	\N	M113-26T	2185	City Hotel	\N	2026-05-13 09:00:00	\N	\N	City Tour Samarkand	\N	\N	\N	\N	30	\N	\N	0	2397	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1406	1	\N	\N	16	1	2	\N	2026-03-06 10:21:09	2026-03-06 10:40:35	1	1	\N	M115-26T	2212	Huvaydo hotel 	\N	2026-03-24 09:00:00	\N	["6"]	Tashkent city tour	\N	\N	\N	\N	30	BYD 	{"id":1406,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":1,"pax":2,"comment":null,"created_at":"2026-03-06T10:21:09.000000Z","updated_at":"2026-03-06T10:21:09.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M115-26T","tour_day_expense_id":2212,"place_of_submission":"Huvaydo hotel ","time":null,"date_time":"2026-03-24T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Tashkent city tour","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2406","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2406	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 1318	6	\N	\N	12	5	25	\N	2025-12-11 10:21:06	2025-12-12 10:24:24	\N	1	\N	\N	\N	отель Stay inn	\N	2025-12-12 09:30:00	\N	["12"]	full day Tashkent	\N	240	150	нет	20	Bus	{"id":1318,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":25,"comment":null,"created_at":"2025-12-11T10:21:06.000000Z","updated_at":"2025-12-12T03:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c Stay inn","time":null,"date_time":"2025-12-12T09:30:00.000000Z","send_username":null,"driver_ids":["12"],"route":"full day Tashkent","passenger":null,"sell_price":"240","buy_price":"150","nameplate":"\\u043d\\u0435\\u0442","created_by":20,"mark":"Bus","notified_times":2,"number":"2318","requested_by":null,"sell_price_result":"2832000","buy_price_result":"1770000","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2318	\N	2832000	1770000	USD	USD	\N	\N	\N	\N	\N
 1314	1	\N	\N	12	5	2	Дополнительные заезды:\n1. улица Камарнисо, 21 (Ташкент, Узбекистан)\nМахмудова Нигора +998935034154\n	2025-12-09 07:31:42	2025-12-10 06:42:05	\N	1	\N	\N	\N	улица Камарнисо, 11Б (Ташкент, Узбекистан)	\N	2025-12-10 05:30:00	\N	["6"]	Аэропорт	\N	30	\N	Nodira Makhmudova	20	\N	{"id":1314,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":2,"comment":"\\u0414\\u043e\\u043f\\u043e\\u043b\\u043d\\u0438\\u0442\\u0435\\u043b\\u044c\\u043d\\u044b\\u0435 \\u0437\\u0430\\u0435\\u0437\\u0434\\u044b:\\n1. \\u0443\\u043b\\u0438\\u0446\\u0430 \\u041a\\u0430\\u043c\\u0430\\u0440\\u043d\\u0438\\u0441\\u043e, 21 (\\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)\\n\\u041c\\u0430\\u0445\\u043c\\u0443\\u0434\\u043e\\u0432\\u0430 \\u041d\\u0438\\u0433\\u043e\\u0440\\u0430 +998935034154\\n","created_at":"2025-12-09T07:31:42.000000Z","updated_at":"2025-12-09T23:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u0443\\u043b\\u0438\\u0446\\u0430 \\u041a\\u0430\\u043c\\u0430\\u0440\\u043d\\u0438\\u0441\\u043e, 11\\u0411 (\\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)","time":null,"date_time":"2025-12-10T05:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","passenger":null,"sell_price":"30","buy_price":null,"nameplate":"Nodira Makhmudova","created_by":20,"mark":null,"notified_times":2,"number":"2314","requested_by":null,"sell_price_result":"354000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2314	\N	354000	0	USD	\N	\N	\N	\N	\N	\N
 1323	3	\N	\N	68	2	6	\N	2025-12-16 06:16:39	2025-12-16 07:39:02	\N	1	\N	\N	\N	межд.аэропорт 	\N	2025-12-16 13:10:00	\N	["2"]	Hotel	\N	35	\N	KCTUBE" MCHJ	20	Mercedes Vito	{"id":1323,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":68,"status":2,"pax":6,"comment":null,"created_at":"2025-12-16T06:16:39.000000Z","updated_at":"2025-12-16T07:10:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 ","time":null,"date_time":"2025-12-16T13:10:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"KCTUBE\\" MCHJ","created_by":20,"mark":"Mercedes Vito","notified_times":1,"number":"2323","requested_by":"Alexandr","sell_price_result":"413000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2323	Alexandr	413000	0	USD	\N	\N	\N	\N	\N	\N
 1327	1	\N	\N	64	2	3	15.01.26\nHY514 	2026-01-14 11:51:38	2026-01-15 07:39:01	\N	1	\N	\N	\N	Tashkent airport 	\N	2026-01-15 13:10:00	\N	["2"]	Tashkent airport - Hotel Manor	\N	30	\N	Mr. Alexander	30	BYD	{"id":1327,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":3,"comment":"15.01.26\\nHY514 ","created_at":"2026-01-14T11:51:38.000000Z","updated_at":"2026-01-15T07:10:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Tashkent airport ","time":null,"date_time":"2026-01-15T13:10:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Tashkent airport - Hotel Manor","passenger":null,"sell_price":"30","buy_price":null,"nameplate":"Mr. Alexander","created_by":30,"mark":"BYD","notified_times":1,"number":"2327","requested_by":"Alexander","sell_price_result":"354000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2327	Alexander	354000	0	USD	\N	\N	\N	\N	\N	\N
-1355	1	\N	\N	65	1	1	Julia Mikhailova\nтел. +97450310576	2026-01-30 10:46:05	2026-01-30 10:46:05	\N	1	\N	\N	\N	Hotel Mercure Tashkent	\N	2026-02-12 01:00:00	\N	[]	Hotel Mercure Tashkent ⇒ Международный Аэропорт 	\N	25	\N	Julia Mikhailova	20	\N	\N	0	2355	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1398	6	\N	\N	36	1	31	\N	2026-02-26 08:31:39	2026-02-26 08:31:39	30	30	\N	M113-26T	2189	City Hotel	\N	2026-05-14 09:00:00	\N	\N	City Hotel - Shirin village	\N	\N	\N	\N	30	\N	\N	0	2398	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1380	1	\N	\N	39	1	3	\N	2026-02-20 07:16:09	2026-02-26 03:29:02	\N	1	\N	\N	\N	InterContinental	\N	2026-02-26 09:00:00	\N	[]	full day Tashkent	\N	90	\N	Deutsche Bank	20	BYD	{"id":1380,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":39,"status":1,"pax":3,"comment":null,"created_at":"2026-02-20T07:16:09.000000Z","updated_at":"2026-02-26T03:00:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"InterContinental","time":null,"date_time":"2026-02-26T09:00:00.000000Z","send_username":null,"driver_ids":[],"route":"full day Tashkent","passenger":null,"sell_price":"90","buy_price":null,"nameplate":"Deutsche Bank","created_by":20,"mark":"BYD","notified_times":1,"number":"2380","requested_by":"Zalmura","sell_price_result":"1098000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2380	Zalmura	1098000	0	USD	\N	\N	\N	\N	\N	\N
+1407	1	\N	\N	16	1	2	\N	2026-03-06 12:04:39	2026-03-06 12:04:39	2	2	\N	M115-26T	2214	SKD train station	\N	2026-03-25 11:30:00	\N	\N	SKD train station - City tour	\N	\N	\N	\N	30	\N	\N	0	2407	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1408	1	\N	\N	16	1	2	\N	2026-03-06 12:04:39	2026-03-06 12:04:39	2	1	\N	M115-26T	2215	Huvaydo hotel	\N	2026-03-25 07:15:00	\N	\N	Huvaydo hotel - Severniy vokzal	\N	\N	\N	\N	30	\N	\N	0	2408	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1324	1	\N	\N	12	2	1	\N	2025-12-16 06:22:47	2025-12-16 06:22:47	\N	1	\N	\N	\N	Hotel Tinchlik Plaza Navoi	\N	2025-12-13 12:30:00	\N	[]	Samarkand Airport	\N	200	84	Григорьев Григорий	20	Malibu 	\N	0	2324	\N	2360000	991200	USD	USD	\N	\N	\N	\N	\N
 1312	1	\N	\N	12	4	1	рейс: UT 805\nКрылов Илья Александрович (79017577558)	2025-12-06 06:19:00	2025-12-11 21:49:02	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-12 03:20:00	\N	[]	отель Holiday Inn	\N	25	\N	Крылов Илья Александрович (79017577558)	20	\N	{"id":1312,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":4,"pax":1,"comment":"\\u0440\\u0435\\u0439\\u0441: UT 805\\n\\u041a\\u0440\\u044b\\u043b\\u043e\\u0432 \\u0418\\u043b\\u044c\\u044f \\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440\\u043e\\u0432\\u0438\\u0447 (79017577558)","created_at":"2025-12-06T06:19:00.000000Z","updated_at":"2025-12-11T21:20:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-12T03:20:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c Holiday Inn","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041a\\u0440\\u044b\\u043b\\u043e\\u0432 \\u0418\\u043b\\u044c\\u044f \\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440\\u043e\\u0432\\u0438\\u0447 (79017577558)","created_by":20,"mark":null,"notified_times":1,"number":"2312","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2312	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1333	1	\N	\N	33	2	1	\N	2026-01-24 08:40:55	2026-01-28 07:59:02	\N	1	\N	\N	\N	отель Хаятт Ридженси 	\N	2026-01-28 13:30:00	\N	["6"]	отель Хаятт Ридженси -аэропорт	\N	80	50	Сергей Хотимский	20	Mercedes S Class W222	{"id":1333,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":33,"status":2,"pax":1,"comment":null,"created_at":"2026-01-24T08:40:55.000000Z","updated_at":"2026-01-28T07:30:03.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u0425\\u0430\\u044f\\u0442\\u0442 \\u0420\\u0438\\u0434\\u0436\\u0435\\u043d\\u0441\\u0438 ","time":null,"date_time":"2026-01-28T13:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c \\u0425\\u0430\\u044f\\u0442\\u0442 \\u0420\\u0438\\u0434\\u0436\\u0435\\u043d\\u0441\\u0438 -\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","passenger":null,"sell_price":"80","buy_price":"50","nameplate":"\\u0421\\u0435\\u0440\\u0433\\u0435\\u0439 \\u0425\\u043e\\u0442\\u0438\\u043c\\u0441\\u043a\\u0438\\u0439","created_by":20,"mark":"Mercedes S Class W222","notified_times":1,"number":"2333","requested_by":null,"sell_price_result":"960000","buy_price_result":"600000","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2333	\N	960000	600000	USD	USD	\N	\N	\N	\N	\N
-1352	3	\N	\N	14	2	3	Екатерина Чебуркова +79859776958	2026-01-30 07:01:08	2026-01-30 07:01:08	\N	1	\N	\N	\N	Hotel Courtyard by Marriott	\N	2026-02-10 18:45:00	\N	[]	Hotel Courtyard by Marriott - Airport	\N	35	\N	Екатерина Чебуркова	20	Mercedes Vito 01|684OGA	\N	0	2352	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
 1328	1	\N	\N	64	2	3	16.01.26\nHY687 	2026-01-14 11:52:18	2026-01-15 22:29:04	\N	1	\N	\N	\N	Manor Hotel	\N	2026-01-16 04:00:00	\N	["2"]	Hotel Manor - Tashkent airport	\N	30	\N	\N	30	BYD	{"id":1328,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":3,"comment":"16.01.26\\nHY687 ","created_at":"2026-01-14T11:52:18.000000Z","updated_at":"2026-01-15T22:00:03.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Manor Hotel","time":null,"date_time":"2026-01-16T04:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Manor - Tashkent airport","passenger":null,"sell_price":"30","buy_price":null,"nameplate":null,"created_by":30,"mark":"BYD","notified_times":1,"number":"2328","requested_by":"Alexander","sell_price_result":"354000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2328	Alexander	354000	0	USD	\N	\N	\N	\N	\N	\N
-1356	1	\N	\N	65	1	1	рейс SU 720\nSvetlana Mikhailova\nтел. +79117325032\t\n\n	2026-01-30 10:48:58	2026-01-30 10:48:58	\N	1	\N	\N	\N	Международный Аэропорт имени Ислама Каримова (TAS)	\N	2026-02-07 08:55:00	\N	[]	Международный Аэропорт ⇒ Mercure Tashkent 	\N	25	\N	Svetlana Mikhailova	20	\N	\N	0	2356	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1352	3	\N	\N	14	2	3	Екатерина Чебуркова +79859776958	2026-01-30 07:01:08	2026-02-10 13:14:02	\N	1	\N	\N	\N	Hotel Courtyard by Marriott	\N	2026-02-10 18:45:00	\N	["2","6"]	Hotel Courtyard by Marriott - Airport	\N	35	\N	Екатерина Чебуркова	20	Mercedes Vito 01|684OGA	{"id":1352,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":3,"comment":"\\u0415\\u043a\\u0430\\u0442\\u0435\\u0440\\u0438\\u043d\\u0430 \\u0427\\u0435\\u0431\\u0443\\u0440\\u043a\\u043e\\u0432\\u0430 +79859776958","created_at":"2026-01-30T07:01:08.000000Z","updated_at":"2026-02-10T12:45:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Courtyard by Marriott","time":null,"date_time":"2026-02-10T18:45:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"Hotel Courtyard by Marriott - Airport","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0415\\u043a\\u0430\\u0442\\u0435\\u0440\\u0438\\u043d\\u0430 \\u0427\\u0435\\u0431\\u0443\\u0440\\u043a\\u043e\\u0432\\u0430","created_by":20,"mark":"Mercedes Vito 01|684OGA","notified_times":1,"number":"2352","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2352	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1169	6	\N	\N	36	2	31	\N	2025-11-18 10:29:49	2026-02-25 11:06:37	2	1	\N	M102-26T	1816	Inspira S hotel	\N	2026-04-18 07:00:00	\N	\N	Inspira S hotel - Severniy vokzal	\N	\N	\N	\N	30	\N	{"id":1169,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":31,"comment":null,"created_at":"2025-11-18T10:29:49.000000Z","updated_at":"2025-11-18T10:29:49.000000Z","from_city_id":2,"to_city_id":1,"total_price":null,"group_number":"M36026T","tour_day_expense_id":1816,"place_of_submission":"Inspira S hotel","time":null,"date_time":"2026-04-18T07:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Inspira S hotel - Severniy vokzal","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2169","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2169	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1399	6	\N	\N	36	1	31	\N	2026-02-26 08:33:10	2026-02-26 08:33:10	3	3	\N	M113-26T	2191	Shirin Ethno house	\N	2026-05-15 14:00:00	\N	\N	Shirin Ethno house - Bukhara 	\N	\N	\N	\N	30	\N	\N	0	2399	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1316	1	\N	\N	12	5	2	Рейс: РН 601\n1. Израильбекова Камилла +998946331349\n\n	2025-12-09 07:34:52	2025-12-12 05:40:52	\N	1	\N	\N	\N	 2-я улица Ташми, 2 (Алмазарский район, Ташкент, Узбекистан)	\N	2025-12-11 16:00:00	\N	["6","2"]	Аэропорт	\N	30	\N	Kamila Izrailbekova	20	\N	{"id":1316,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":2,"comment":"\\u0420\\u0435\\u0439\\u0441: \\u0420\\u041d 601\\n1. \\u0418\\u0437\\u0440\\u0430\\u0438\\u043b\\u044c\\u0431\\u0435\\u043a\\u043e\\u0432\\u0430 \\u041a\\u0430\\u043c\\u0438\\u043b\\u043b\\u0430 +998946331349\\n\\n","created_at":"2025-12-09T07:34:52.000000Z","updated_at":"2025-12-11T10:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":" 2-\\u044f \\u0443\\u043b\\u0438\\u0446\\u0430 \\u0422\\u0430\\u0448\\u043c\\u0438, 2 (\\u0410\\u043b\\u043c\\u0430\\u0437\\u0430\\u0440\\u0441\\u043a\\u0438\\u0439 \\u0440\\u0430\\u0439\\u043e\\u043d, \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)","time":null,"date_time":"2025-12-11T16:00:00.000000Z","send_username":null,"driver_ids":["6","2"],"route":"\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","passenger":null,"sell_price":"30","buy_price":null,"nameplate":"Kamila Izrailbekova","created_by":20,"mark":null,"notified_times":2,"number":"2316","requested_by":null,"sell_price_result":"354000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2316	\N	354000	0	USD	\N	\N	\N	\N	\N	\N
 1311	1	\N	\N	12	5	1	рейс: SU1870\nКаракулова Юлия Владимировна +79128844007	2025-12-06 06:15:06	2025-12-12 05:41:00	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2025-12-12 02:50:00	\N	["2"]	Azimut grand Hotel (ex. International) (просп. Амира Темура, 107А, Ташкент, Узбекистан)	\N	25	\N	Каракулова Юлия Владимировна (79128844007)	20	\N	{"id":1311,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u0440\\u0435\\u0439\\u0441: SU1870\\n\\u041a\\u0430\\u0440\\u0430\\u043a\\u0443\\u043b\\u043e\\u0432\\u0430 \\u042e\\u043b\\u0438\\u044f \\u0412\\u043b\\u0430\\u0434\\u0438\\u043c\\u0438\\u0440\\u043e\\u0432\\u043d\\u0430 +79128844007","created_at":"2025-12-06T06:15:06.000000Z","updated_at":"2025-12-11T21:19:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-12T02:50:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Azimut grand Hotel (ex. International) (\\u043f\\u0440\\u043e\\u0441\\u043f. \\u0410\\u043c\\u0438\\u0440\\u0430 \\u0422\\u0435\\u043c\\u0443\\u0440\\u0430, 107\\u0410, \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041a\\u0430\\u0440\\u0430\\u043a\\u0443\\u043b\\u043e\\u0432\\u0430 \\u042e\\u043b\\u0438\\u044f \\u0412\\u043b\\u0430\\u0434\\u0438\\u043c\\u0438\\u0440\\u043e\\u0432\\u043d\\u0430 (79128844007)","created_by":20,"mark":null,"notified_times":2,"number":"2311","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2311	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1319	1	\N	\N	12	5	1	вылет Рейс: SU 1891\nДата/время рейса: 14.12.2025 10:30\nМаршрут на карте\nПассажиры:\n1. Каракулова Юлия Владимировна (79128844007)\nДата подачи: 14 декабря 2025 07:30	2025-12-12 05:55:56	2025-12-16 09:15:52	\N	1	\N	\N	\N	Hotel Azimut Grand (ex. International)	\N	2025-12-14 07:30:00	\N	["2"]	International Airport	\N	25	\N	Каракулова Юлия Владимировна 	20	BYD	{"id":1319,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u0432\\u044b\\u043b\\u0435\\u0442 \\u0420\\u0435\\u0439\\u0441: SU 1891\\n\\u0414\\u0430\\u0442\\u0430\\/\\u0432\\u0440\\u0435\\u043c\\u044f \\u0440\\u0435\\u0439\\u0441\\u0430: 14.12.2025 10:30\\n\\u041c\\u0430\\u0440\\u0448\\u0440\\u0443\\u0442 \\u043d\\u0430 \\u043a\\u0430\\u0440\\u0442\\u0435\\n\\u041f\\u0430\\u0441\\u0441\\u0430\\u0436\\u0438\\u0440\\u044b:\\n1. \\u041a\\u0430\\u0440\\u0430\\u043a\\u0443\\u043b\\u043e\\u0432\\u0430 \\u042e\\u043b\\u0438\\u044f \\u0412\\u043b\\u0430\\u0434\\u0438\\u043c\\u0438\\u0440\\u043e\\u0432\\u043d\\u0430 (79128844007)\\n\\u0414\\u0430\\u0442\\u0430 \\u043f\\u043e\\u0434\\u0430\\u0447\\u0438: 14 \\u0434\\u0435\\u043a\\u0430\\u0431\\u0440\\u044f 2025 07:30","created_at":"2025-12-12T05:55:56.000000Z","updated_at":"2025-12-14T01:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Azimut Grand (ex. International)","time":null,"date_time":"2025-12-14T07:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"International Airport","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u041a\\u0430\\u0440\\u0430\\u043a\\u0443\\u043b\\u043e\\u0432\\u0430 \\u042e\\u043b\\u0438\\u044f \\u0412\\u043b\\u0430\\u0434\\u0438\\u043c\\u0438\\u0440\\u043e\\u0432\\u043d\\u0430 ","created_by":20,"mark":"BYD","notified_times":2,"number":"2319","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2319	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
 1329	3	\N	\N	64	2	5	рейс: НУ 762,  из Алматы	2026-01-22 10:04:39	2026-01-23 06:44:02	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2026-01-23 12:15:00	\N	["2"]	аэропорт-отель Манор	\N	35	\N	Олег Кононенко 	20	Мерседес Вито	{"id":1329,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":5,"comment":"\\u0440\\u0435\\u0439\\u0441: \\u041d\\u0423 762,  \\u0438\\u0437 \\u0410\\u043b\\u043c\\u0430\\u0442\\u044b","created_at":"2026-01-22T10:04:39.000000Z","updated_at":"2026-01-23T06:15:04.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-01-23T12:15:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c \\u041c\\u0430\\u043d\\u043e\\u0440","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u041e\\u043b\\u0435\\u0433 \\u041a\\u043e\\u043d\\u043e\\u043d\\u0435\\u043d\\u043a\\u043e ","created_by":20,"mark":"\\u041c\\u0435\\u0440\\u0441\\u0435\\u0434\\u0435\\u0441 \\u0412\\u0438\\u0442\\u043e","notified_times":1,"number":"2329","requested_by":"Abdulaziz","sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2329	Abdulaziz	420000	0	USD	\N	\N	\N	\N	\N	\N
 1334	6	\N	\N	6	2	26	\N	2026-01-26 07:01:24	2026-01-26 07:01:24	1	1	\N	M357-26T	2058	hotel Hyatt Regency	\N	2026-04-03 09:00:00	\N	\N	full day Tashent	\N	\N	\N	\N	20	\N	\N	0	2334	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1357	1	\N	\N	65	1	1	Svetlana Mikhailova\nтел. +79117325032\t\n\n\n\n	2026-01-30 10:50:09	2026-01-30 10:50:09	\N	1	\N	\N	\N	Hotel Mercure Tashkent	\N	2026-02-12 08:00:00	\N	[]	Международный Аэропорт ⇒ Mercure Tashkent 	\N	25	\N	Svetlana Mikhailova	20	\N	\N	0	2357	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1379	1	\N	\N	39	1	3	\N	2026-02-20 07:15:59	2026-02-25 03:29:01	\N	1	\N	\N	\N	InterContinental	\N	2026-02-25 09:00:00	\N	[]	full day Tashkent	\N	90	\N	Deutsche Bank	20	BYD	{"id":1379,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":39,"status":1,"pax":3,"comment":null,"created_at":"2026-02-20T07:15:59.000000Z","updated_at":"2026-02-25T03:00:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"InterContinental","time":null,"date_time":"2026-02-25T09:00:00.000000Z","send_username":null,"driver_ids":[],"route":"full day Tashkent","passenger":null,"sell_price":"90","buy_price":null,"nameplate":"Deutsche Bank","created_by":20,"mark":"BYD","notified_times":1,"number":"2379","requested_by":"Zalmura","sell_price_result":"1098000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2379	Zalmura	1098000	0	USD	\N	\N	\N	\N	\N	\N
 1118	1	\N	\N	12	4	2	SALMENBAYEVA TAMARA +77778686864\n2. SALMENBAYEV ZEINOLLA 	2025-11-06 12:29:31	2025-12-14 14:39:01	\N	1	\N	\N	\N	Int.Airport Tashkent	\N	2025-12-14 20:10:00	\N	[]	Airport - «ТАШТЕРМАЛ» по адресу Узбекистан, Ташкентская обл, Куксарой, Махалля «Кушкунди», ул. Шабнам 21	\N	60	\N	SALMENBAYEVA TAMARA 	20	\N	{"id":1118,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":4,"pax":2,"comment":"SALMENBAYEVA TAMARA +77778686864\\n2. SALMENBAYEV ZEINOLLA ","created_at":"2025-11-06T12:29:31.000000Z","updated_at":"2025-12-14T14:10:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Int.Airport Tashkent","time":null,"date_time":"2025-12-14T20:10:00.000000Z","send_username":null,"driver_ids":[],"route":"Airport - \\u00ab\\u0422\\u0410\\u0428\\u0422\\u0415\\u0420\\u041c\\u0410\\u041b\\u00bb \\u043f\\u043e \\u0430\\u0434\\u0440\\u0435\\u0441\\u0443 \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d, \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442\\u0441\\u043a\\u0430\\u044f \\u043e\\u0431\\u043b, \\u041a\\u0443\\u043a\\u0441\\u0430\\u0440\\u043e\\u0439, \\u041c\\u0430\\u0445\\u0430\\u043b\\u043b\\u044f \\u00ab\\u041a\\u0443\\u0448\\u043a\\u0443\\u043d\\u0434\\u0438\\u00bb, \\u0443\\u043b. \\u0428\\u0430\\u0431\\u043d\\u0430\\u043c 21","passenger":null,"sell_price":"60","buy_price":null,"nameplate":"SALMENBAYEVA TAMARA ","created_by":20,"mark":null,"notified_times":1,"number":"2118","requested_by":null,"sell_price_result":"708000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2118	\N	708000	0	USD	\N	\N	\N	\N	\N	\N
 1320	1	\N	\N	12	5	1	Рейс: HY 602то встречи: \n1. Израильбекова Камилла +998946331349	2025-12-12 06:47:39	2025-12-15 06:33:48	\N	1	\N	\N	\N	Международный аэропорт Ташкент	\N	2025-12-15 04:40:00	\N	["6"]	проспект Бунёдкор, 1 (Чиланзарский район, Ташкент, Узбекистан)	\N	25	\N	Израильбекова Камилла	20	\N	{"id":1320,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":1,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: HY 602\\u0442\\u043e \\u0432\\u0441\\u0442\\u0440\\u0435\\u0447\\u0438: \\n1. \\u0418\\u0437\\u0440\\u0430\\u0438\\u043b\\u044c\\u0431\\u0435\\u043a\\u043e\\u0432\\u0430 \\u041a\\u0430\\u043c\\u0438\\u043b\\u043b\\u0430 +998946331349","created_at":"2025-12-12T06:47:39.000000Z","updated_at":"2025-12-14T23:09:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-15T04:40:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u043f\\u0440\\u043e\\u0441\\u043f\\u0435\\u043a\\u0442 \\u0411\\u0443\\u043d\\u0451\\u0434\\u043a\\u043e\\u0440, 1 (\\u0427\\u0438\\u043b\\u0430\\u043d\\u0437\\u0430\\u0440\\u0441\\u043a\\u0438\\u0439 \\u0440\\u0430\\u0439\\u043e\\u043d, \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"\\u0418\\u0437\\u0440\\u0430\\u0438\\u043b\\u044c\\u0431\\u0435\\u043a\\u043e\\u0432\\u0430 \\u041a\\u0430\\u043c\\u0438\\u043b\\u043b\\u0430","created_by":20,"mark":null,"notified_times":2,"number":"2320","requested_by":null,"sell_price_result":"295000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2320	\N	295000	0	USD	\N	\N	\N	\N	\N	\N
-1335	6	\N	\N	6	2	26	\N	2026-01-26 07:15:36	2026-01-26 07:15:36	2	1	\N	M357-26T	2062	Hotel Hyattt Regncy	\N	2026-04-04 06:00:00	\N	\N	Hotel Hyatt Regency-Train Station	\N	\N	\N	\N	20	\N	\N	0	2335	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1325	3	\N	\N	68	2	6	\N	2025-12-16 10:48:24	2025-12-16 22:29:02	\N	1	\N	\N	\N	Hotel 	\N	2025-12-17 04:00:00	\N	["2"]	Airport	\N	30	\N	\N	20	Mercedes Vito	{"id":1325,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":68,"status":2,"pax":6,"comment":null,"created_at":"2025-12-16T10:48:24.000000Z","updated_at":"2025-12-16T22:00:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel ","time":null,"date_time":"2025-12-17T04:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Airport","passenger":null,"sell_price":"30","buy_price":null,"nameplate":null,"created_by":20,"mark":"Mercedes Vito","notified_times":1,"number":"2325","requested_by":null,"sell_price_result":"354000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2325	\N	354000	0	USD	\N	\N	\N	\N	\N	\N
 1336	6	\N	\N	6	2	26	\N	2026-01-26 07:15:36	2026-01-26 07:15:36	2	2	\N	M357-26T	2064	Train Station Samarkand	\N	2026-04-04 10:22:00	\N	\N	full day Samaarkand	\N	\N	\N	\N	20	\N	\N	0	2336	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1358	1	\N	\N	14	1	1	Рейс: SU‑1872\n1. Александр Марков +79099364022\n	2026-01-30 11:03:59	2026-01-30 11:04:30	\N	1	\N	\N	\N	Межд.аэропорт Ташкент	\N	2026-03-03 14:10:00	\N	[]	межд.аэропорт-Hotel Hyatt Regebcy	\N	35	\N	Александр Марков	20	\N	{"id":1358,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":1,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: SU\\u20111872\\n1. \\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440 \\u041c\\u0430\\u0440\\u043a\\u043e\\u0432 +79099364022\\n","created_at":"2026-01-30T11:03:59.000000Z","updated_at":"2026-01-30T11:03:59.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"1","time":null,"date_time":"2026-03-03T14:10:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-Hotel Hyatt Regebcy","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440 \\u041c\\u0430\\u0440\\u043a\\u043e\\u0432","created_by":20,"mark":null,"notified_times":0,"number":"2358","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2358	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1335	6	\N	\N	6	5	25	\N	2026-01-26 07:15:36	2026-02-23 12:29:33	2	1	\N	M100-26T	2062	Hotel Hyattt Regncy	\N	2026-04-04 06:00:00	\N	\N	Hotel Hyatt Regency-Train Station	\N	\N	\N	\N	20	\N	{"id":1335,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":6,"status":2,"pax":26,"comment":null,"created_at":"2026-01-26T07:15:36.000000Z","updated_at":"2026-01-26T07:15:36.000000Z","from_city_id":2,"to_city_id":1,"total_price":null,"group_number":"M357-26T","tour_day_expense_id":2062,"place_of_submission":"Hotel Hyattt Regncy","time":null,"date_time":"2026-04-04T06:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Hotel Hyatt Regency-Train Station","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":20,"mark":null,"notified_times":0,"number":"2335","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2335	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1164	6	\N	\N	36	2	31	\N	2025-11-18 09:46:41	2026-02-25 11:02:39	4	4	\N	M101-26T	1803	Imperial Palace	\N	2026-04-16 09:00:00	\N	\N	Bukhara - Khiva 	\N	\N	\N	\N	30	\N	{"id":1164,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":31,"comment":null,"created_at":"2025-11-18T09:46:41.000000Z","updated_at":"2025-11-18T09:46:41.000000Z","from_city_id":4,"to_city_id":4,"total_price":null,"group_number":"M35926T","tour_day_expense_id":1803,"place_of_submission":"Imperial Palace","time":null,"date_time":"2026-04-16T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Bukhara - Khiva ","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2164","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2164	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1400	6	\N	\N	36	2	31	\N	2026-02-26 08:34:31	2026-02-26 08:34:31	3	3	\N	M113-26T	2197	Imperial Palace	\N	2026-05-16 09:00:00	\N	\N	City tour Bukhara	\N	\N	\N	\N	30	\N	\N	0	2400	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1337	6	\N	\N	6	2	26	\N	2026-01-26 07:21:23	2026-01-26 07:21:23	2	2	\N	M357-26T	2070	Hotel  Mövenpick	\N	2026-04-05 09:00:00	\N	\N	full day Samarkand	\N	\N	\N	\N	20	\N	\N	0	2337	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1321	1	\N	\N	12	5	2	Рейс: HY 602, \nКуда: улица Камарнисо, 11Б (Ташкент, Узбекистан)\nМахмудова Нигора +998935034154	2025-12-12 06:50:32	2025-12-16 06:02:56	\N	1	\N	\N	\N	Межд.Аэропорт Ташкент	\N	2025-12-16 04:40:00	\N	["6"]	улица Камарнисо, 11Б (Ташкент, Узбекистан)	\N	30	\N	Nodira Makhmudova	20	\N	{"id":1321,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":2,"comment":"\\u0420\\u0435\\u0439\\u0441: HY 602, \\n\\u041a\\u0443\\u0434\\u0430: \\u0443\\u043b\\u0438\\u0446\\u0430 \\u041a\\u0430\\u043c\\u0430\\u0440\\u043d\\u0438\\u0441\\u043e, 11\\u0411 (\\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)\\n\\u041c\\u0430\\u0445\\u043c\\u0443\\u0434\\u043e\\u0432\\u0430 \\u041d\\u0438\\u0433\\u043e\\u0440\\u0430 +998935034154","created_at":"2025-12-12T06:50:32.000000Z","updated_at":"2025-12-15T23:09:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2025-12-16T04:40:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0443\\u043b\\u0438\\u0446\\u0430 \\u041a\\u0430\\u043c\\u0430\\u0440\\u043d\\u0438\\u0441\\u043e, 11\\u0411 (\\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d)","passenger":null,"sell_price":"30","buy_price":null,"nameplate":"Nodira Makhmudova","created_by":20,"mark":null,"notified_times":2,"number":"2321","requested_by":null,"sell_price_result":"354000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2321	\N	354000	0	USD	\N	\N	\N	\N	\N	\N
 157	1	\N	\N	16	5	2	\N	2025-03-17 19:30:56	2025-12-22 06:48:50	2	2	\N	A139-25T	153	отель Arhan Palace	\N	2025-04-03 00:00:00	\N	[]	экскурсия по г. Самарканд	\N	\N	\N	\N	1	\N	{"id":157,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":5,"pax":2,"comment":null,"created_at":"2025-03-17T19:30:56.000000Z","updated_at":"2025-04-22T04:25:22.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"A13925T","tour_day_expense_id":153,"place_of_submission":"\\u043e\\u0442\\u0435\\u043b\\u044c Arhan Palace","time":null,"date_time":"2025-04-03T00:00:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u044d\\u043a\\u0441\\u043a\\u0443\\u0440\\u0441\\u0438\\u044f \\u043f\\u043e \\u0433. \\u0421\\u0430\\u043c\\u0430\\u0440\\u043a\\u0430\\u043d\\u0434","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":1,"mark":null,"notified_times":0,"number":null,"requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	1157	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1359	1	\N	\N	64	2	1	\N	2026-01-30 13:00:33	2026-01-30 13:00:33	\N	1	\N	\N	\N	Hotel Manor	\N	2026-01-30 00:25:00	\N	["6"]	Hotel Manor-International Airport	\N	25	\N	Ghaws Naadir	20	BYD	{"id":1359,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":1,"comment":null,"created_at":"2026-01-30T13:00:33.000000Z","updated_at":"2026-01-30T13:00:33.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Manor","time":null,"date_time":"2026-01-30T00:25:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Hotel Manor-International Airport","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Ghaws Naadir","created_by":20,"mark":"BYD","notified_times":0,"number":"2359","requested_by":"Samandar","sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2359	Samandar	300000	0	USD	\N	\N	\N	\N	\N	\N
+1382	6	\N	\N	36	2	31	\N	2026-02-26 06:39:19	2026-02-26 06:39:19	1	1	\N	M112-26T	2140	Tashkent Airport	\N	2026-04-27 01:30:00	\N	\N	Tashkent Airport - Inspira S Hotel	\N	\N	\N	\N	30	\N	\N	0	2382	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1383	6	\N	\N	36	2	31	\N	2026-02-26 06:39:19	2026-02-26 06:39:19	1	1	\N	M112-26T	2141	Inspira S Hotel 	\N	2026-04-27 10:00:00	\N	\N	Tashkent City tour	\N	\N	\N	\N	30	\N	\N	0	2383	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1401	6	\N	\N	36	1	31	\N	2026-02-26 08:36:31	2026-02-26 08:36:31	4	4	\N	M113-26T	2200	Imperial Palace	\N	2026-05-17 09:00:00	\N	\N	Imperial Palace - Khiva Said Islom Khodja hotel	\N	\N	\N	\N	30	\N	\N	0	2401	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1411	1	\N	\N	70	2	1	\N	2026-03-10 06:15:52	2026-03-10 09:55:03	2	1	\N	M116-26T	2222	Inspira S 	\N	2026-03-16 07:00:00	\N	["6"]	Inspira S - Severniy vokzal	\N	0	0	Gantner Johannes	30	BYD	{"id":1411,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:15:52.000000Z","updated_at":"2026-03-10T09:55:03.000000Z","from_city_id":2,"to_city_id":1,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2222,"place_of_submission":"Inspira S ","time":null,"date_time":"2026-03-16T07:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Inspira S - Severniy vokzal","passenger":null,"sell_price":"0","buy_price":"0","nameplate":"Gantner Johannes","created_by":30,"mark":"BYD","notified_times":0,"number":"2411","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2411	\N	0	0	USD	\N	\N	\N	\N	\N	\N
 1326	1	\N	\N	12	1	1	Точный адрес: Nurli yo'l" MFY 64-daha hududi Бекабад Бекабадский район, 100506, Узбекистан Bek отель\n\n1. Федотов Антон Андреевич +79636308326\n	2025-12-23 06:02:31	2026-01-14 11:52:44	\N	1	\N	\N	\N	Hotel Bek Bekabad	\N	2026-01-14 01:30:00	\N	["2"]	Hotel Bek Bekabad - Int. Airport Tashkent	\N	140	\N	Федотов Антон Андреевич	20	Cobalt	{"id":1326,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":1,"pax":1,"comment":"\\u0422\\u043e\\u0447\\u043d\\u044b\\u0439 \\u0430\\u0434\\u0440\\u0435\\u0441: Nurli yo'l\\" MFY 64-daha hududi \\u0411\\u0435\\u043a\\u0430\\u0431\\u0430\\u0434 \\u0411\\u0435\\u043a\\u0430\\u0431\\u0430\\u0434\\u0441\\u043a\\u0438\\u0439 \\u0440\\u0430\\u0439\\u043e\\u043d, 100506, \\u0423\\u0437\\u0431\\u0435\\u043a\\u0438\\u0441\\u0442\\u0430\\u043d Bek \\u043e\\u0442\\u0435\\u043b\\u044c\\n\\n1. \\u0424\\u0435\\u0434\\u043e\\u0442\\u043e\\u0432 \\u0410\\u043d\\u0442\\u043e\\u043d \\u0410\\u043d\\u0434\\u0440\\u0435\\u0435\\u0432\\u0438\\u0447 +79636308326\\n","created_at":"2025-12-23T06:02:31.000000Z","updated_at":"2026-01-14T11:52:33.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Bek Bekabad","time":null,"date_time":"2026-01-14T01:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Bek Bekabad - Int. Airport Tashkent","passenger":null,"sell_price":"140","buy_price":null,"nameplate":"\\u0424\\u0435\\u0434\\u043e\\u0442\\u043e\\u0432 \\u0410\\u043d\\u0442\\u043e\\u043d \\u0410\\u043d\\u0434\\u0440\\u0435\\u0435\\u0432\\u0438\\u0447","created_by":20,"mark":"Cobalt","notified_times":2,"number":"2326","requested_by":"Alexander","sell_price_result":"1652000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2326	\N	1652000	0	USD	\N	\N	\N	\N	\N	\N
 1331	1	\N	\N	67	4	2	\N	2026-01-22 11:01:13	2026-01-23 08:59:07	\N	1	\N	\N	\N	Hyatt Regency	\N	2026-01-23 14:25:00	\N	["6","2"]	отель Hyatt Regncy-аэропорт	\N	25	\N	Firat KOYUNCU, Necmi BIRINCI	20	BYD 	{"id":1331,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":67,"status":2,"pax":2,"comment":null,"created_at":"2026-01-22T11:01:13.000000Z","updated_at":"2026-01-23T08:54:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hyatt Regency","time":null,"date_time":"2026-01-23T14:25:00.000000Z","send_username":null,"driver_ids":["6","2"],"route":"\\u043e\\u0442\\u0435\\u043b\\u044c Hyatt Regncy-\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Firat KOYUNCU, Necmi BIRINCI","created_by":20,"mark":"BYD ","notified_times":2,"number":"2331","requested_by":"\\u041d\\u0443\\u0440\\u0430\\u043d\\u0433\\u0438\\u0437","sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2331	Нурангиз	300000	0	USD	\N	\N	\N	\N	\N	\N
 1330	1	\N	\N	67	2	2	\N	2026-01-22 10:58:47	2026-01-23 06:20:18	\N	1	\N	\N	\N	Мест.аэропорт Ташкент	\N	2026-01-23 10:05:00	\N	["6"]	аэропорт-отель Hyatt Regncy	\N	25	\N	Firat KOYUNCU, Necmi BIRINCI	20	BYD 	{"id":1330,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":67,"status":2,"pax":2,"comment":null,"created_at":"2026-01-22T10:58:47.000000Z","updated_at":"2026-01-23T06:20:18.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0441\\u0442.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-01-23T10:05:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Hyatt Regncy","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Firat KOYUNCU, Necmi BIRINCI","created_by":20,"mark":"BYD ","notified_times":2,"number":"2330","requested_by":"\\u041d\\u0443\\u0440\\u0430\\u043d\\u0433\\u0438\\u0437","sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2330	Нурангиз	300000	0	USD	\N	\N	\N	\N	\N	\N
 1338	6	\N	\N	6	2	26	через перевал, нужно заказать 9 легковых машин (Музаффар)	2026-01-26 07:25:27	2026-01-26 07:25:27	2	2	\N	M357-26T	2074	Hotel Movenpick	\N	2026-04-06 08:00:00	\N	\N	Samarkand-Shakhrisabz-Samarkand 	\N	\N	\N	\N	20	\N	\N	0	2338	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1332	1	\N	\N	33	2	1	\N	2026-01-24 08:39:50	2026-01-27 22:29:02	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2026-01-28 04:00:00	\N	["6"]	аэропорт-отель Хаятт Ридженси 	\N	80	50	Сергей Хотимский	20	Mercedes S Class W222	{"id":1332,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":33,"status":2,"pax":1,"comment":null,"created_at":"2026-01-24T08:39:50.000000Z","updated_at":"2026-01-27T22:00:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-01-28T04:00:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c \\u0425\\u0430\\u044f\\u0442\\u0442 \\u0420\\u0438\\u0434\\u0436\\u0435\\u043d\\u0441\\u0438 ","passenger":null,"sell_price":"80","buy_price":"50","nameplate":"\\u0421\\u0435\\u0440\\u0433\\u0435\\u0439 \\u0425\\u043e\\u0442\\u0438\\u043c\\u0441\\u043a\\u0438\\u0439","created_by":20,"mark":"Mercedes S Class W222","notified_times":1,"number":"2332","requested_by":null,"sell_price_result":"960000","buy_price_result":"600000","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2332	\N	960000	600000	USD	USD	\N	\N	\N	\N	\N
-1351	3	\N	\N	14	2	3	Рейс: SU-1974,\n1. Екатерина Чебуркова +79859776958	2026-01-30 06:41:55	2026-01-30 07:20:40	\N	1	\N	\N	\N	International Airport	\N	2026-02-08 19:00:00	\N	["2"]	Airport-Hotel Courtyard by Marriott	\N	35	\N	Екатерина Чебуркова	20	Mercedes Vito 01|684OGA	{"id":1351,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":3,"comment":"\\u0420\\u0435\\u0439\\u0441: SU-1974,\\n1. \\u0415\\u043a\\u0430\\u0442\\u0435\\u0440\\u0438\\u043d\\u0430 \\u0427\\u0435\\u0431\\u0443\\u0440\\u043a\\u043e\\u0432\\u0430 +79859776958","created_at":"2026-01-30T06:41:55.000000Z","updated_at":"2026-01-30T07:20:40.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"International Airport","time":null,"date_time":"2026-02-08T19:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Airport-Hotel Courtyard by Marriott","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0415\\u043a\\u0430\\u0442\\u0435\\u0440\\u0438\\u043d\\u0430 \\u0427\\u0435\\u0431\\u0443\\u0440\\u043a\\u043e\\u0432\\u0430","created_by":20,"mark":"Mercedes Vito 01|684OGA","notified_times":0,"number":"2351","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2351	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
-1354	1	\N	\N	65	1	1	РЕЙС: QR 377\nJulia Mikhailova +97450310576	2026-01-30 10:37:11	2026-01-30 10:41:48	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2026-02-07 01:45:00	\N	[]	Международный Аэропорт имени Ислама Каримова ⇒ Mercure Tashkent (Ex. Lumiere Hotel & Spa)	\N	25	\N	Julia Mikhailova	20	\N	{"id":1354,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":65,"status":1,"pax":1,"comment":"\\u0420\\u0415\\u0419\\u0421: QR 377\\nJulia Mikhailova +97450310576","created_at":"2026-01-30T10:37:11.000000Z","updated_at":"2026-01-30T10:40:46.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-02-12T01:00:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0438\\u043c\\u0435\\u043d\\u0438 \\u0418\\u0441\\u043b\\u0430\\u043c\\u0430 \\u041a\\u0430\\u0440\\u0438\\u043c\\u043e\\u0432\\u0430 \\u21d2 Mercure Tashkent (Ex. Lumiere Hotel & Spa)","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Julia Mikhailova","created_by":20,"mark":null,"notified_times":0,"number":"2354","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2354	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
-1353	1	\N	\N	12	2	1	Рейс: HY-9672\n Елена Лежачева +79200053800\nДата подачи: 09 февраля 2026 03:30	2026-01-30 07:05:53	2026-01-30 10:43:15	\N	1	\N	\N	\N	International Airport Tashkent	\N	2026-02-09 03:30:00	\N	["2"]	Airport - Hotel Courtyard by Marriott 	\N	25	\N	 Елена Лежачева 	20	\N	{"id":1353,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: HY-9672\\n \\u0415\\u043b\\u0435\\u043d\\u0430 \\u041b\\u0435\\u0436\\u0430\\u0447\\u0435\\u0432\\u0430 +79200053800\\n\\u0414\\u0430\\u0442\\u0430 \\u043f\\u043e\\u0434\\u0430\\u0447\\u0438: 09 \\u0444\\u0435\\u0432\\u0440\\u0430\\u043b\\u044f 2026 03:30","created_at":"2026-01-30T07:05:53.000000Z","updated_at":"2026-01-30T10:43:15.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"International Airport Tashkent","time":null,"date_time":"2026-02-09T03:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Airport - Hotel Courtyard by Marriott ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":" \\u0415\\u043b\\u0435\\u043d\\u0430 \\u041b\\u0435\\u0436\\u0430\\u0447\\u0435\\u0432\\u0430 ","created_by":20,"mark":null,"notified_times":0,"number":"2353","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2353	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1373	3	\N	\N	64	5	5	6 февраль 04 : 00 быть в гостинице HY687 	2026-02-05 11:59:32	2026-02-06 05:52:11	\N	1	\N	\N	\N	Hotel Manor	\N	2026-02-06 04:00:00	\N	["2"]	Hotel Manor-International Airport	\N	35	\N	\N	20	Vito	{"id":1373,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":5,"comment":"6 \\u0444\\u0435\\u0432\\u0440\\u0430\\u043b\\u044c 04 : 00 \\u0431\\u044b\\u0442\\u044c \\u0432 \\u0433\\u043e\\u0441\\u0442\\u0438\\u043d\\u0438\\u0446\\u0435 HY687\\u00a0","created_at":"2026-02-05T11:59:32.000000Z","updated_at":"2026-02-05T22:29:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Manor","time":null,"date_time":"2026-02-06T04:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Manor-International Airport","passenger":null,"sell_price":"35","buy_price":null,"nameplate":null,"created_by":20,"mark":"Vito","notified_times":2,"number":"2373","requested_by":"Alexsandr ","sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2373	Alexsandr 	420000	0	USD	\N	\N	\N	\N	\N	\N
+1351	3	\N	\N	14	2	3	Рейс: SU-1974,\n1. Екатерина Чебуркова +79859776958	2026-01-30 06:41:55	2026-02-08 13:29:01	\N	1	\N	\N	\N	International Airport	\N	2026-02-08 19:00:00	\N	["2"]	Airport-Hotel Courtyard by Marriott	\N	35	\N	Екатерина Чебуркова	20	Mercedes Vito 01|684OGA	{"id":1351,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":3,"comment":"\\u0420\\u0435\\u0439\\u0441: SU-1974,\\n1. \\u0415\\u043a\\u0430\\u0442\\u0435\\u0440\\u0438\\u043d\\u0430 \\u0427\\u0435\\u0431\\u0443\\u0440\\u043a\\u043e\\u0432\\u0430 +79859776958","created_at":"2026-01-30T06:41:55.000000Z","updated_at":"2026-02-08T13:00:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"International Airport","time":null,"date_time":"2026-02-08T19:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Airport-Hotel Courtyard by Marriott","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0415\\u043a\\u0430\\u0442\\u0435\\u0440\\u0438\\u043d\\u0430 \\u0427\\u0435\\u0431\\u0443\\u0440\\u043a\\u043e\\u0432\\u0430","created_by":20,"mark":"Mercedes Vito 01|684OGA","notified_times":1,"number":"2351","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2351	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1371	1	\N	\N	14	5	1	Свистушкин Валерий Михайлович +79166779609	2026-02-05 11:54:25	2026-02-11 05:26:57	\N	1	\N	\N	\N	Hilton Tashkent	\N	2026-02-11 00:45:00	\N	["2","6"]	Hilton Tashkent-International Airport Tashkent	\N	35	\N	Свистушкин Валерий Михайлович	20	Malibu	{"id":1371,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":"\\u0421\\u0432\\u0438\\u0441\\u0442\\u0443\\u0448\\u043a\\u0438\\u043d \\u0412\\u0430\\u043b\\u0435\\u0440\\u0438\\u0439 \\u041c\\u0438\\u0445\\u0430\\u0439\\u043b\\u043e\\u0432\\u0438\\u0447 +79166779609","created_at":"2026-02-05T11:54:25.000000Z","updated_at":"2026-02-10T19:14:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hilton Tashkent","time":null,"date_time":"2026-02-11T00:45:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"Hilton Tashkent-International Airport Tashkent","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0421\\u0432\\u0438\\u0441\\u0442\\u0443\\u0448\\u043a\\u0438\\u043d \\u0412\\u0430\\u043b\\u0435\\u0440\\u0438\\u0439 \\u041c\\u0438\\u0445\\u0430\\u0439\\u043b\\u043e\\u0432\\u0438\\u0447","created_by":20,"mark":"Malibu","notified_times":2,"number":"2371","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2371	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1353	1	\N	\N	12	5	1	Рейс: HY-9672\n Елена Лежачева +79200053800\nДата подачи: 09 февраля 2026 03:30	2026-01-30 07:05:53	2026-02-09 10:09:45	\N	1	\N	\N	\N	International Airport Tashkent	\N	2026-02-09 03:30:00	\N	["2","6"]	Airport - Hotel Courtyard by Marriott 	\N	25	\N	 Елена Лежачева 	20	\N	{"id":1353,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":12,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: HY-9672\\n \\u0415\\u043b\\u0435\\u043d\\u0430 \\u041b\\u0435\\u0436\\u0430\\u0447\\u0435\\u0432\\u0430 +79200053800\\n\\u0414\\u0430\\u0442\\u0430 \\u043f\\u043e\\u0434\\u0430\\u0447\\u0438: 09 \\u0444\\u0435\\u0432\\u0440\\u0430\\u043b\\u044f 2026 03:30","created_at":"2026-01-30T07:05:53.000000Z","updated_at":"2026-02-08T21:59:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"International Airport Tashkent","time":null,"date_time":"2026-02-09T03:30:00.000000Z","send_username":null,"driver_ids":["2","6"],"route":"Airport - Hotel Courtyard by Marriott ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":" \\u0415\\u043b\\u0435\\u043d\\u0430 \\u041b\\u0435\\u0436\\u0430\\u0447\\u0435\\u0432\\u0430 ","created_by":20,"mark":null,"notified_times":2,"number":"2353","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2353	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1384	6	\N	\N	36	1	31	\N	2026-02-26 06:41:26	2026-02-26 07:15:31	2	1	\N	M112-26T	2143	\N	\N	2026-04-28 00:00:00	\N	\N	\N	\N	\N	\N	\N	30	\N	{"id":1384,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":31,"comment":null,"created_at":"2026-02-26T06:41:26.000000Z","updated_at":"2026-02-26T06:41:26.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M112-26T","tour_day_expense_id":2143,"place_of_submission":null,"time":null,"date_time":"2026-04-28T00:00:00.000000Z","send_username":null,"driver_ids":null,"route":null,"passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2384","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2384	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1402	6	\N	\N	36	2	31	\N	2026-02-26 08:37:41	2026-02-26 08:37:41	4	4	\N	M113-26T	2204	\N	\N	2026-05-18 09:00:00	\N	\N	\N	\N	\N	\N	\N	30	\N	\N	0	2402	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1162	6	\N	\N	36	2	31	\N	2025-11-18 09:38:59	2026-02-25 11:03:12	3	2	\N	M101-26T	1790	City hotel Samarkand	\N	2026-04-13 09:00:00	\N	\N	Samarkand - Shirin village (Bukhara)	\N	\N	\N	\N	30	\N	{"id":1162,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":2,"pax":31,"comment":null,"created_at":"2025-11-18T09:38:59.000000Z","updated_at":"2025-11-18T09:38:59.000000Z","from_city_id":3,"to_city_id":2,"total_price":null,"group_number":"M35926T","tour_day_expense_id":1790,"place_of_submission":"City hotel Samarkand","time":null,"date_time":"2026-04-13T09:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Samarkand - Shirin village (Bukhara)","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2162","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2162	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1368	3	\N	\N	64	2	5	13:10  HY514 From Korea	2026-02-04 13:07:33	2026-02-05 07:59:03	\N	1	\N	\N	\N	International Airport	\N	2026-02-05 13:30:00	\N	["2"]	International Airport - Hotel Manor	\N	35	\N	\N	20	Mercedes Vito	{"id":1368,"transport_type":3,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":5,"comment":"13:10\\u00a0 HY514 From Korea","created_at":"2026-02-04T13:07:33.000000Z","updated_at":"2026-02-05T07:30:04.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"International Airport","time":null,"date_time":"2026-02-05T13:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"International Airport - Hotel Manor","passenger":null,"sell_price":"35","buy_price":null,"nameplate":null,"created_by":20,"mark":"Mercedes Vito","notified_times":1,"number":"2368","requested_by":"Alexsandr","sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2368	Alexsandr	420000	0	USD	\N	\N	\N	\N	\N	\N
+1357	1	\N	\N	65	4	1	Svetlana Mikhailova\nтел. +79117325032\t\n\n\n\n	2026-01-30 10:50:09	2026-02-12 02:29:02	\N	1	\N	\N	\N	Hotel Mercure Tashkent	\N	2026-02-12 08:00:00	\N	[]	Международный Аэропорт ⇒ Mercure Tashkent 	\N	25	\N	Svetlana Mikhailova	20	\N	{"id":1357,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":65,"status":4,"pax":1,"comment":"Svetlana Mikhailova\\n\\u0442\\u0435\\u043b. +79117325032\\t\\n\\n\\n\\n","created_at":"2026-01-30T10:50:09.000000Z","updated_at":"2026-02-12T02:00:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Mercure Tashkent","time":null,"date_time":"2026-02-12T08:00:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u21d2 Mercure Tashkent ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Svetlana Mikhailova","created_by":20,"mark":null,"notified_times":1,"number":"2357","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2357	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1360	4	\N	\N	62	2	6	\N	2026-02-02 08:02:55	2026-02-25 05:32:59	39	39	\N	A110-26T	2120	DMaar Business Center	\N	2026-02-04 10:00:00	\N	["2"]	Tashkennt - Amirsay-Avenue park	\N	\N	\N	Better Cotton	33	Mercedes Vito	{"id":1360,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":62,"status":2,"pax":6,"comment":null,"created_at":"2026-02-02T08:02:55.000000Z","updated_at":"2026-02-04T04:29:02.000000Z","from_city_id":39,"to_city_id":39,"total_price":null,"group_number":"A110-26T","tour_day_expense_id":2120,"place_of_submission":"DMaar Business Center","time":null,"date_time":"2026-02-04T10:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Tashkennt - Amirsay-Avenue park","passenger":null,"sell_price":"1200000","buy_price":null,"nameplate":"Better Cotton","created_by":33,"mark":"Mercedes Vito","notified_times":2,"number":"2360","requested_by":null,"sell_price_result":"1200000","buy_price_result":"0","sell_price_currency":"UZS","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2360	\N	1200000	0	UZS	\N	\N	\N	\N	\N	\N
+1361	4	\N	\N	62	5	6	\N	2026-02-02 09:14:33	2026-02-25 05:35:07	39	1	\N	A110-26T	2129	Avenue Park Hotel	\N	2026-02-06 00:00:00	\N	["2"]	Avenue park -Amirsoy (до 2ой парковки)-Tashkent	\N	\N	\N	Better Cotton	33	Mercedes Vito	{"id":1361,"transport_type":4,"transport_comfort_level":null,"price":null,"company_id":62,"status":2,"pax":6,"comment":null,"created_at":"2026-02-02T09:14:33.000000Z","updated_at":"2026-02-06T04:29:02.000000Z","from_city_id":39,"to_city_id":1,"total_price":null,"group_number":"A110-26T","tour_day_expense_id":2129,"place_of_submission":"Avenue Park Hotel","time":null,"date_time":"2026-02-06T10:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Avenue park -Amirsoy (\\u0434\\u043e 2\\u043e\\u0439 \\u043f\\u0430\\u0440\\u043a\\u043e\\u0432\\u043a\\u0438)-Tashkent","passenger":null,"sell_price":"1800000","buy_price":null,"nameplate":"Better Cotton","created_by":33,"mark":"Mercedes Vito","notified_times":2,"number":"2361","requested_by":null,"sell_price_result":"21600000000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2361	\N	21600000000	0	USD	\N	\N	\N	\N	\N	\N
+1385	6	\N	\N	36	1	31	\N	2026-02-26 06:43:48	2026-02-26 06:43:49	2	2	\N	M112-26T	2144	SKD Train station	\N	2026-04-28 00:00:00	\N	\N	Train station - Reikartz Hanzade Hotel	\N	\N	\N	\N	30	\N	{"id":1385,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":31,"comment":null,"created_at":"2026-02-26T06:43:48.000000Z","updated_at":"2026-02-26T06:43:48.000000Z","from_city_id":1,"to_city_id":2,"total_price":null,"group_number":"M112-26T","tour_day_expense_id":2144,"place_of_submission":"SKD Train station","time":null,"date_time":"2026-04-28T00:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Train station - Reikartz Hanzade Hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2385","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2385	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1403	6	\N	\N	36	1	31	\N	2026-02-26 08:38:13	2026-02-26 08:38:13	4	9	\N	M113-26T	2207	Said Islom Khodja 	\N	2026-05-19 05:00:00	\N	\N	Said Islom Khodja - UGC Airport	\N	\N	\N	\N	30	\N	\N	0	2403	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1354	1	\N	\N	65	4	1	РЕЙС: QR 377\nJulia Mikhailova +97450310576	2026-01-30 10:37:11	2026-02-06 20:14:01	\N	1	\N	\N	\N	межд.аэропорт Ташкент	\N	2026-02-07 01:45:00	\N	[]	Международный Аэропорт имени Ислама Каримова ⇒ Mercure Tashkent (Ex. Lumiere Hotel & Spa)	\N	25	\N	Julia Mikhailova	20	\N	{"id":1354,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":65,"status":4,"pax":1,"comment":"\\u0420\\u0415\\u0419\\u0421: QR 377\\nJulia Mikhailova +97450310576","created_at":"2026-01-30T10:37:11.000000Z","updated_at":"2026-02-06T19:45:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-02-07T01:45:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0438\\u043c\\u0435\\u043d\\u0438 \\u0418\\u0441\\u043b\\u0430\\u043c\\u0430 \\u041a\\u0430\\u0440\\u0438\\u043c\\u043e\\u0432\\u0430 \\u21d2 Mercure Tashkent (Ex. Lumiere Hotel & Spa)","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Julia Mikhailova","created_by":20,"mark":null,"notified_times":1,"number":"2354","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2354	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1356	1	\N	\N	65	4	1	рейс SU 720\nSvetlana Mikhailova\nтел. +79117325032\t\n\n	2026-01-30 10:48:58	2026-02-07 03:24:02	\N	1	\N	\N	\N	Международный Аэропорт имени Ислама Каримова (TAS)	\N	2026-02-07 08:55:00	\N	[]	Международный Аэропорт ⇒ Mercure Tashkent 	\N	25	\N	Svetlana Mikhailova	20	\N	{"id":1356,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":65,"status":4,"pax":1,"comment":"\\u0440\\u0435\\u0439\\u0441 SU 720\\nSvetlana Mikhailova\\n\\u0442\\u0435\\u043b. +79117325032\\t\\n\\n","created_at":"2026-01-30T10:48:58.000000Z","updated_at":"2026-02-07T02:55:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0438\\u043c\\u0435\\u043d\\u0438 \\u0418\\u0441\\u043b\\u0430\\u043c\\u0430 \\u041a\\u0430\\u0440\\u0438\\u043c\\u043e\\u0432\\u0430 (TAS)","time":null,"date_time":"2026-02-07T08:55:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u21d2 Mercure Tashkent ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Svetlana Mikhailova","created_by":20,"mark":null,"notified_times":1,"number":"2356","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2356	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1386	6	\N	\N	36	1	31	\N	2026-02-26 07:20:23	2026-02-26 07:20:23	2	2	\N	M112-26T	2148	Hanzade hotel 	\N	2026-04-29 09:00:00	\N	\N	Samarkand City tour	\N	\N	\N	\N	30	\N	\N	0	2386	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1414	1	\N	\N	70	2	1	\N	2026-03-10 06:26:25	2026-03-10 09:58:29	4	4	\N	M116-26T	2234	Anor Butik hotel	\N	2026-03-19 09:00:00	\N	["2"]	Anor Butik hotel - Khiva, New Minor hotel	\N	\N	\N	Gantner Johannes	30	Malibu	{"id":1414,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:26:25.000000Z","updated_at":"2026-03-10T09:58:29.000000Z","from_city_id":4,"to_city_id":4,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2234,"place_of_submission":"Anor Butik hotel","time":null,"date_time":"2026-03-19T09:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Anor Butik hotel - Khiva, New Minor hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Gantner Johannes","created_by":30,"mark":"Malibu","notified_times":0,"number":"2414","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2414	\N	0	0	\N	\N	\N	\N	\N	\N	\N
+1374	1	\N	\N	34	2	1	FLIGHT FROM ALMATY 12:30	2026-02-11 05:30:40	2026-02-11 07:09:02	\N	1	\N	\N	\N	межд.аэропорт-отель Panarams 	\N	2026-02-11 12:40:00	\N	["2"]	АЭРРОПОРТ-ОТЕЛЬ ПАНАРАМС	\N	150000	\N	Mr Luka Gagliardi	20	BYD	{"id":1374,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":34,"status":2,"pax":1,"comment":"FLIGHT FROM ALMATY 12:30","created_at":"2026-02-11T05:30:40.000000Z","updated_at":"2026-02-11T06:40:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u043e\\u0442\\u0435\\u043b\\u044c Panarams ","time":null,"date_time":"2026-02-11T12:40:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0410\\u042d\\u0420\\u0420\\u041e\\u041f\\u041e\\u0420\\u0422-\\u041e\\u0422\\u0415\\u041b\\u042c \\u041f\\u0410\\u041d\\u0410\\u0420\\u0410\\u041c\\u0421","passenger":null,"sell_price":"150000","buy_price":null,"nameplate":"Mr Luka Gagliardi","created_by":20,"mark":"BYD","notified_times":1,"number":"2374","requested_by":"Bekzod WSU","sell_price_result":"150000","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2374	Bekzod WSU	150000	0	\N	\N	\N	\N	\N	\N	\N
+1355	1	\N	\N	65	4	1	Julia Mikhailova\nтел. +97450310576	2026-01-30 10:46:05	2026-02-11 19:29:01	\N	1	\N	\N	\N	Hotel Mercure Tashkent	\N	2026-02-12 01:00:00	\N	[]	Hotel Mercure Tashkent ⇒ Международный Аэропорт 	\N	25	\N	Julia Mikhailova	20	\N	{"id":1355,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":65,"status":4,"pax":1,"comment":"Julia Mikhailova\\n\\u0442\\u0435\\u043b. +97450310576","created_at":"2026-01-30T10:46:05.000000Z","updated_at":"2026-02-11T19:00:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"Hotel Mercure Tashkent","time":null,"date_time":"2026-02-12T01:00:00.000000Z","send_username":null,"driver_ids":[],"route":"Hotel Mercure Tashkent \\u21d2 \\u041c\\u0435\\u0436\\u0434\\u0443\\u043d\\u0430\\u0440\\u043e\\u0434\\u043d\\u044b\\u0439 \\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Julia Mikhailova","created_by":20,"mark":null,"notified_times":1,"number":"2355","requested_by":null,"sell_price_result":"300000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2355	\N	300000	0	USD	\N	\N	\N	\N	\N	\N
+1363	1	\N	\N	13	2	2	\N	2026-02-02 09:30:11	2026-02-17 04:29:03	1	1	\N	B111-26C	2133	Hotel Wyndham Tashkent	\N	2026-02-17 10:00:00	\N	["2"]	full day Tashkent	\N	\N	\N	Berlin Economics 	20	\N	{"id":1363,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":2,"pax":2,"comment":null,"created_at":"2026-02-02T09:30:11.000000Z","updated_at":"2026-02-17T04:00:03.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B111-26C","tour_day_expense_id":2133,"place_of_submission":"Hotel Wyndham Tashkent","time":null,"date_time":"2026-02-17T10:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"full day Tashkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Berlin Economics ","created_by":20,"mark":null,"notified_times":1,"number":"2363","requested_by":"Abduvokhid Suleymanov","sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2363	Abduvokhid Suleymanov	0	0	\N	\N	\N	\N	\N	\N	\N
+1362	1	\N	\N	13	5	2	\N	2026-02-02 09:30:10	2026-02-17 06:53:50	1	1	\N	B111-26C	2132	International Airpopprt	\N	2026-02-17 01:50:00	\N	["2"]	Airport-Hotel Wyndham Tashkent	\N	\N	\N	Berlin Economics 	20	\N	{"id":1362,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":2,"pax":2,"comment":null,"created_at":"2026-02-02T09:30:10.000000Z","updated_at":"2026-02-16T20:19:03.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B111-26C","tour_day_expense_id":2132,"place_of_submission":"International Airpopprt","time":null,"date_time":"2026-02-17T01:50:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Airport-Hotel Wyndham Tashkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Berlin Economics ","created_by":20,"mark":null,"notified_times":2,"number":"2362","requested_by":"Abduvokhid Suleymanov","sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2362	Abduvokhid Suleymanov	0	0	\N	\N	\N	\N	\N	\N	\N
+1372	1	\N	\N	14	1	1	Шмакова Анна Игоревна +79163036404	2026-02-05 11:57:00	2026-02-12 10:59:02	\N	1	\N	\N	\N	улица Укчи, 3, Ташкент	\N	2026-02-12 16:30:00	\N	[]	улица Укчи, 3, Ташкент-Межд.Аэропорт 	\N	35	\N	 Шмакова Анна Игоревна	20	Malibu	{"id":1372,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":1,"pax":1,"comment":"\\u0428\\u043c\\u0430\\u043a\\u043e\\u0432\\u0430 \\u0410\\u043d\\u043d\\u0430 \\u0418\\u0433\\u043e\\u0440\\u0435\\u0432\\u043d\\u0430 +79163036404","created_at":"2026-02-05T11:57:00.000000Z","updated_at":"2026-02-12T10:30:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u0443\\u043b\\u0438\\u0446\\u0430 \\u0423\\u043a\\u0447\\u0438, 3, \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-02-12T16:30:00.000000Z","send_username":null,"driver_ids":[],"route":"\\u0443\\u043b\\u0438\\u0446\\u0430 \\u0423\\u043a\\u0447\\u0438, 3, \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442-\\u041c\\u0435\\u0436\\u0434.\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 ","passenger":null,"sell_price":"35","buy_price":null,"nameplate":" \\u0428\\u043c\\u0430\\u043a\\u043e\\u0432\\u0430 \\u0410\\u043d\\u043d\\u0430 \\u0418\\u0433\\u043e\\u0440\\u0435\\u0432\\u043d\\u0430","created_by":20,"mark":"Malibu","notified_times":1,"number":"2372","requested_by":null,"sell_price_result":"420000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2372	\N	420000	0	USD	\N	\N	\N	\N	\N	\N
+1157	6	\N	\N	36	2	31	\N	2025-11-17 13:05:51	2026-02-25 11:03:41	2	2	\N	M101-26T	1783	SKD vokzal	\N	2026-04-11 10:00:00	\N	\N	SKD vokzal - City tour - Hotel City Samarkand	\N	\N	\N	\N	30	\N	{"id":1157,"transport_type":6,"transport_comfort_level":null,"price":null,"company_id":36,"status":1,"pax":31,"comment":null,"created_at":"2025-11-17T13:05:51.000000Z","updated_at":"2025-11-17T13:05:51.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"M35926T","tour_day_expense_id":1783,"place_of_submission":"SKD vokzal","time":null,"date_time":"2026-04-11T10:00:00.000000Z","send_username":null,"driver_ids":null,"route":"SKD vokzal - City tour - Hotel City Samarkand","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2157","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2157	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1387	6	\N	\N	36	1	31	\N	2026-02-26 07:24:10	2026-02-26 07:24:10	3	30	\N	M112-26T	2152	Hanzade hotel	\N	2026-04-30 09:00:00	\N	\N	Samarkand - Shirin village	\N	\N	\N	\N	30	\N	\N	0	2387	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1375	1	\N	\N	64	2	1	рейс: Лондон (Gatwick) 	2026-02-15 18:10:37	2026-02-16 00:24:02	\N	1	\N	\N	\N	межд.Аэропорт Ташкент	\N	2026-02-16 05:55:00	\N	["6"]	Межд.Аэропорт-Отель Манор 	\N	25	\N	Masma Najaf zada.	20	BYD 01|066SLA	{"id":1375,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":1,"comment":"\\u0440\\u0435\\u0439\\u0441: \\u041b\\u043e\\u043d\\u0434\\u043e\\u043d (Gatwick) ","created_at":"2026-02-15T18:10:37.000000Z","updated_at":"2026-02-15T23:55:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u043c\\u0435\\u0436\\u0434.\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-02-16T05:55:00.000000Z","send_username":null,"driver_ids":["6"],"route":"\\u041c\\u0435\\u0436\\u0434.\\u0410\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-\\u041e\\u0442\\u0435\\u043b\\u044c \\u041c\\u0430\\u043d\\u043e\\u0440 ","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Masma Najaf zada.","created_by":20,"mark":"BYD 01|066SLA","notified_times":1,"number":"2375","requested_by":"Samandar","sell_price_result":"305000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2375	Samandar	305000	0	USD	\N	\N	\N	\N	\N	\N
+1366	1	\N	\N	13	2	2	\N	2026-02-02 09:30:11	2026-02-20 00:59:02	1	1	\N	B111-26C	2136	Hotel Wyndham Tashkent	\N	2026-02-20 06:30:00	\N	["2"]	Hotel Wyndham - Inter. Airport	\N	\N	\N	Berlin Economics 	20	\N	{"id":1366,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":2,"pax":2,"comment":null,"created_at":"2026-02-02T09:30:11.000000Z","updated_at":"2026-02-20T00:30:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B111-26C","tour_day_expense_id":2136,"place_of_submission":"Hotel Wyndham Tashkent","time":null,"date_time":"2026-02-20T06:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Hotel Wyndham - Inter. Airport","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Berlin Economics ","created_by":20,"mark":null,"notified_times":1,"number":"2366","requested_by":"Abduvokhid Suleymanov","sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2366	Abduvokhid Suleymanov	0	0	USD	\N	\N	\N	\N	\N	\N
+1364	1	\N	\N	13	2	2	\N	2026-02-02 09:30:11	2026-02-18 04:29:02	1	1	\N	B111-26C	2134	Hotel Wyndham Tashkent	\N	2026-02-18 10:00:00	\N	["2"]	full day Tashkent	\N	\N	\N	Berlin Economics 	20	\N	{"id":1364,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":2,"pax":2,"comment":null,"created_at":"2026-02-02T09:30:11.000000Z","updated_at":"2026-02-18T04:00:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B111-26C","tour_day_expense_id":2134,"place_of_submission":"Hotel Wyndham Tashkent","time":null,"date_time":"2026-02-18T10:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"full day Tashkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Berlin Economics ","created_by":20,"mark":null,"notified_times":1,"number":"2364","requested_by":"Abduvokhid Suleymanov","sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2364	Abduvokhid Suleymanov	0	0	USD	\N	\N	\N	\N	\N	\N
+1376	1	\N	\N	64	2	1	Номер рейса.   HY612	2026-02-16 12:55:45	2026-02-18 11:14:02	\N	1	\N	\N	\N	Межд.аэропорт Ташкент	\N	2026-02-18 16:45:00	\N	["2"]	АЭРОПОРТ-ОТЕЛЬ МАНОР	\N	25	\N	Margarita Chamorro	20	BYD	{"id":1376,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":64,"status":2,"pax":1,"comment":"\\u041d\\u043e\\u043c\\u0435\\u0440 \\u0440\\u0435\\u0439\\u0441\\u0430.   HY612","created_at":"2026-02-16T12:55:45.000000Z","updated_at":"2026-02-18T10:45:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-02-18T16:45:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u0410\\u042d\\u0420\\u041e\\u041f\\u041e\\u0420\\u0422-\\u041e\\u0422\\u0415\\u041b\\u042c \\u041c\\u0410\\u041d\\u041e\\u0420","passenger":null,"sell_price":"25","buy_price":null,"nameplate":"Margarita Chamorro","created_by":20,"mark":"BYD","notified_times":1,"number":"2376","requested_by":"Samandar","sell_price_result":"305000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2376	Samandar	305000	0	USD	\N	\N	\N	\N	\N	\N
+1388	6	\N	\N	36	1	31	\N	2026-02-26 07:25:42	2026-02-26 07:25:42	3	3	\N	M112-26T	2155	Shirin Ethno House	\N	2026-05-01 14:00:00	\N	\N	Shirin Ethno House - Bukhara	\N	\N	\N	\N	30	\N	\N	0	2388	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1365	1	\N	\N	13	2	2	\N	2026-02-02 09:30:11	2026-02-19 04:29:02	1	1	\N	B111-26C	2135	Hotel Wyndham Tashkent	\N	2026-02-19 10:00:00	\N	["2"]	full day Tashkent	\N	\N	\N	Berlin Economics 	20	\N	{"id":1365,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":13,"status":2,"pax":2,"comment":null,"created_at":"2026-02-02T09:30:11.000000Z","updated_at":"2026-02-19T04:00:01.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"B111-26C","tour_day_expense_id":2135,"place_of_submission":"Hotel Wyndham Tashkent","time":null,"date_time":"2026-02-19T10:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"full day Tashkent","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Berlin Economics ","created_by":20,"mark":null,"notified_times":1,"number":"2365","requested_by":"Abduvokhid Suleymanov","sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2365	Abduvokhid Suleymanov	0	0	USD	\N	\N	\N	\N	\N	\N
+1415	1	\N	\N	70	2	1	\N	2026-03-10 06:28:05	2026-03-10 10:12:12	1	9	\N	M116-26T	2236	New Minor hotel	\N	2026-03-20 21:30:00	\N	["2"]	Urgench airport	\N	\N	\N	\N	30	\N	{"id":1415,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:28:05.000000Z","updated_at":"2026-03-10T10:12:12.000000Z","from_city_id":1,"to_city_id":9,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2236,"place_of_submission":"New Minor hotel","time":null,"date_time":"2026-03-20T21:30:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Urgench airport","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2415","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2415	\N	0	0	\N	\N	\N	\N	\N	\N	\N
+1381	1	\N	\N	39	5	3	\N	2026-02-20 07:16:18	2026-02-27 09:18:26	\N	1	\N	\N	\N	InterContinental	\N	2026-02-27 09:00:00	\N	["6"]	full day Tashkent	\N	90	\N	Deutsche Bank	20	BYD	{"id":1381,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":39,"status":1,"pax":3,"comment":null,"created_at":"2026-02-20T07:16:18.000000Z","updated_at":"2026-02-27T03:29:01.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"InterContinental","time":null,"date_time":"2026-02-27T09:00:00.000000Z","send_username":null,"driver_ids":[],"route":"full day Tashkent","passenger":null,"sell_price":"90","buy_price":null,"nameplate":"Deutsche Bank","created_by":20,"mark":"BYD","notified_times":2,"number":"2381","requested_by":"Zalmura","sell_price_result":"1098000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2381	Zalmura	1098000	0	USD	\N	\N	\N	\N	\N	\N
+1413	1	\N	\N	70	2	1	\N	2026-03-10 06:25:25	2026-03-10 09:58:05	3	3	\N	M116-26T	2230	City Samarkand hotel	\N	2026-03-18 09:00:00	\N	["2"]	City Samarkand hotel - Bukhara, Anor Butik hotel	\N	\N	\N	Gantner Johannes	30	Malibu	{"id":1413,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:25:25.000000Z","updated_at":"2026-03-10T09:58:05.000000Z","from_city_id":3,"to_city_id":3,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2230,"place_of_submission":"City Samarkand hotel","time":null,"date_time":"2026-03-18T09:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"City Samarkand hotel - Bukhara, Anor Butik hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Gantner Johannes","created_by":30,"mark":"Malibu","notified_times":0,"number":"2413","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2413	\N	0	0	USD	USD	\N	\N	\N	\N	\N
+1416	1	\N	\N	70	2	1	\N	2026-03-10 06:29:38	2026-03-10 10:12:41	1	1	\N	M116-26T	2238	Tashkent airport Terminal 3	\N	2026-03-21 00:30:00	\N	["6"]	Tashkent airport Terminal 3 - Inspira S hotel	\N	\N	\N	\N	30	BYD	{"id":1416,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:29:38.000000Z","updated_at":"2026-03-10T10:12:41.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2238,"place_of_submission":"Tashkent airport Terminal 3","time":null,"date_time":"2026-03-21T00:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Tashkent airport Terminal 3 - Inspira S hotel","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":"BYD","notified_times":0,"number":"2416","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2416	\N	0	0	\N	\N	\N	\N	\N	\N	\N
+1358	1	\N	\N	14	2	1	Рейс: SU‑1872\n1. Александр Марков +79099364022\n	2026-01-30 11:03:59	2026-03-03 08:39:02	\N	1	\N	\N	\N	Межд.аэропорт Ташкент	\N	2026-03-03 14:10:00	\N	["2"]	межд.аэропорт-Hotel Hyatt Regebcy	\N	35	\N	Александр Марков	20	BYD	{"id":1358,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":14,"status":2,"pax":1,"comment":"\\u0420\\u0435\\u0439\\u0441: SU\\u20111872\\n1. \\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440 \\u041c\\u0430\\u0440\\u043a\\u043e\\u0432 +79099364022\\n","created_at":"2026-01-30T11:03:59.000000Z","updated_at":"2026-03-03T08:10:02.000000Z","from_city_id":null,"to_city_id":1,"total_price":null,"group_number":null,"tour_day_expense_id":null,"place_of_submission":"\\u041c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442 \\u0422\\u0430\\u0448\\u043a\\u0435\\u043d\\u0442","time":null,"date_time":"2026-03-03T14:10:00.000000Z","send_username":null,"driver_ids":["2"],"route":"\\u043c\\u0435\\u0436\\u0434.\\u0430\\u044d\\u0440\\u043e\\u043f\\u043e\\u0440\\u0442-Hotel Hyatt Regebcy","passenger":null,"sell_price":"35","buy_price":null,"nameplate":"\\u0410\\u043b\\u0435\\u043a\\u0441\\u0430\\u043d\\u0434\\u0440 \\u041c\\u0430\\u0440\\u043a\\u043e\\u0432","created_by":20,"mark":"BYD","notified_times":1,"number":"2358","requested_by":null,"sell_price_result":"427000","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2358	\N	427000	0	USD	\N	\N	\N	\N	\N	\N
+1405	1	\N	\N	16	1	2	\N	2026-03-06 10:19:36	2026-03-06 10:21:41	1	1	\N	M115-26T	2209	Tashkent airport 	\N	2026-03-23 23:00:00	\N	["6"]	Tashkent airport  - Huvaydo hotel 	\N	15	\N	\N	30	BYD	{"id":1405,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":16,"status":1,"pax":2,"comment":null,"created_at":"2026-03-06T10:19:36.000000Z","updated_at":"2026-03-06T10:19:36.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M115-26T","tour_day_expense_id":2209,"place_of_submission":"Tashkent airport ","time":null,"date_time":"2026-03-23T23:00:00.000000Z","send_username":null,"driver_ids":null,"route":"Tashkent airport  - Huvaydo hotel ","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":null,"notified_times":0,"number":"2405","requested_by":null,"sell_price_result":null,"buy_price_result":null,"sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2405	\N	183000	0	USD	\N	\N	\N	\N	\N	\N
+1410	1	\N	\N	70	2	1	\N	2026-03-10 06:15:52	2026-03-10 09:57:07	2	2	\N	M116-26T	2221	Samarkand train station	\N	2026-03-16 10:25:00	\N	["2"]	Samarkand train station - City Samarkand hotel - City tour Samarkand	\N	\N	\N	Gantner Johannes	30	Malibu	{"id":1410,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:15:52.000000Z","updated_at":"2026-03-10T09:57:07.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2221,"place_of_submission":"Samarkand train station","time":null,"date_time":"2026-03-16T10:25:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Samarkand train station - City Samarkand hotel - City tour Samarkand","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Gantner Johannes","created_by":30,"mark":"Malibu","notified_times":0,"number":"2410","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2410	\N	0	0	USD	USD	\N	\N	\N	\N	\N
+1412	1	\N	\N	70	2	1	\N	2026-03-10 06:20:11	2026-03-10 09:57:35	2	2	\N	M116-26T	2227	City Samarkand hotel	\N	2026-03-17 09:00:00	\N	["2"]	City tour	\N	\N	\N	Gantner Johannes	30	Malibu	{"id":1412,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:20:11.000000Z","updated_at":"2026-03-10T09:57:35.000000Z","from_city_id":2,"to_city_id":2,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2227,"place_of_submission":"City Samarkand hotel","time":null,"date_time":"2026-03-17T09:00:00.000000Z","send_username":null,"driver_ids":["2"],"route":"City tour","passenger":null,"sell_price":null,"buy_price":null,"nameplate":"Gantner Johannes","created_by":30,"mark":"Malibu","notified_times":0,"number":"2412","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":"USD","from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2412	\N	0	0	USD	USD	\N	\N	\N	\N	\N
+1418	1	\N	\N	12	1	2	 Рейс: SU 1872\n1. Krutov Dmitrii +79777051060\n2. Kirik Vladislav +79853129166\n	2026-03-11 05:12:44	2026-03-11 05:12:44	\N	1	\N	\N	\N	Межд.Аэропорт Ташкент	\N	2026-03-16 14:10:00	\N	[]	Аэропорт-отель Хаятт Редженси	\N	25	\N	Krutov Dmitrii+1	20	\N	\N	0	2418	\N	305000	0	USD	\N	\N	\N	\N	\N	\N
+1409	1	\N	\N	70	2	1	\N	2026-03-10 06:10:56	2026-03-15 03:04:02	1	1	\N	M116-26T	2218	Tashkent airport 	\N	2026-03-15 08:35:00	\N	["2"]	Tashkent airport - Inspira S hotel - City tour Tashkent	\N	0	0	Gantner Johannes	30	Malibu	{"id":1409,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:10:56.000000Z","updated_at":"2026-03-15T02:35:02.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2218,"place_of_submission":"Tashkent airport ","time":null,"date_time":"2026-03-15T08:35:00.000000Z","send_username":null,"driver_ids":["2"],"route":"Tashkent airport - Inspira S hotel - City tour Tashkent","passenger":null,"sell_price":"0","buy_price":"0","nameplate":"Gantner Johannes","created_by":30,"mark":"Malibu","notified_times":1,"number":"2409","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":"USD","buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	2	2409	\N	0	0	USD	\N	\N	\N	\N	\N	\N
+1417	1	\N	\N	70	2	1	\N	2026-03-10 06:29:38	2026-03-10 10:12:59	1	1	\N	M116-26T	2239	Inspira S hotel	\N	2026-03-21 07:30:00	\N	["6"]	Inspira S hotel - Tashkent airport T2	\N	\N	\N	\N	30	BYD	{"id":1417,"transport_type":1,"transport_comfort_level":null,"price":null,"company_id":70,"status":2,"pax":1,"comment":null,"created_at":"2026-03-10T06:29:38.000000Z","updated_at":"2026-03-10T10:12:59.000000Z","from_city_id":1,"to_city_id":1,"total_price":null,"group_number":"M116-26T","tour_day_expense_id":2239,"place_of_submission":"Inspira S hotel","time":null,"date_time":"2026-03-21T07:30:00.000000Z","send_username":null,"driver_ids":["6"],"route":"Inspira S hotel - Tashkent airport T2","passenger":null,"sell_price":null,"buy_price":null,"nameplate":null,"created_by":30,"mark":"BYD","notified_times":0,"number":"2417","requested_by":null,"sell_price_result":"0","buy_price_result":"0","sell_price_currency":null,"buy_price_currency":null,"from":null,"to":null,"transfer_request_id":null,"user_notified_at":null,"location_details":null}	0	2417	\N	0	0	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -11961,8 +13217,8 @@ COPY public.transport_classes (id, name, description, price_per_km, photo, creat
 6	Микровтобус	Микроавтобус - это лучший вариант для трансфера участников конференций, сотрудников и других больших групп людей.	1.00	\N	2025-11-05 10:17:52	2025-11-05 10:17:52	10	10	60	t	t	Mercedes Sprinter, Toyota Coaster	\N	\N
 7	Автобус	Автобус — удобный и вместительный транспорт для групповых поездок, экскурсий и трансферов. Комфортабельные сиденья, кондиционер и просторный салон обеспечат приятное путешествие на любые расстояния.	1.00	\N	2025-11-05 10:20:10	2025-11-05 10:20:10	13	40	60	t	t	King Long Bus, Higer Bus	\N	\N
 1	Comfort Sedan (до 3 чел)	Трансфер Комфорт-класса — идеальный выбор для тех, кто ценит комфорт и привык к высокому уровню сервиса.	10.00	transport-classes/01K4SPZ1TNAK1WZ46511SS10GS.png	2025-09-10 11:42:51	2025-11-05 10:24:35	3	2	60	t	t	Malibu	\N	\N
-2	Standard Sedan (до 3 чел)	Закажите частный трансфер стандартного класса по привлекательной цене, сохранив высокий уровень комфорта	5.00	\N	2025-10-27 12:40:20	2025-11-05 10:24:48	2	2	60	f	t	\N	\N	\N
 4	Бизнес и представительский	Поддерживайте безупречную репутацию — закажите представительский трансфер для деловых встреч и переговоров	10.00	transport-classes/01K99E9JE819TPVF1B8VRMF0ST.jpg	2025-11-05 07:21:56	2025-11-05 10:26:57	2	2	60	t	t	Автомобили класса E Toyota Avalon, Kia K8, Audi A6, BMW 5, Cadillac CT6, Lexus ES, Lexus GS, Hongqi H5, Mercedes E-class, Chrysler 300, Volvo S90 И аналогичные авто внутри класса  Автомобили класса F Mercedes S class, BMW 7, Audi A8, Lexus LS, Rolls-Royce	\N	\N
+2	Standard Sedan (до 3 чел)	Закажите частный трансфер стандартного класса по привлекательной цене, сохранив высокий уровень комфорта	25.00	\N	2025-10-27 12:40:20	2026-02-21 08:26:59	2	2	60	f	t	\N	\N	\N
 \.
 
 
@@ -11984,19 +13240,16 @@ COPY public.transports (id, type, comfort_level, price) FROM stdin;
 COPY public.users (id, name, email, email_verified_at, password, remember_token, created_at, updated_at, role, operator_percent_tps, country_id, status, phone, photo, birthday, gender, avatar, google_id, timezone, timezone_updated_at) FROM stdin;
 44	Abdurashid	abdurj7777@gmail.com	\N	$2y$12$JA6brh0xK5QozE2Us5AYA.2BKHsHse5FeyEITGANWelgfkCj0B9NW	\N	2025-10-18 07:52:36	2025-12-01 12:14:38	10	\N	\N	1	\N	\N	\N	\N	\N	\N	Asia/Tashkent	\N
 38	Baxa	baxarauslev@gmail.com	\N	$2y$12$mTUEXTM8rO8bbhdChyZOfOuBWqlehNWjeLBolKlpiNKFP0OO3Gfb6	\N	2025-08-21 06:11:12	2025-08-21 06:11:12	10	\N	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
-20	Bakhrom Rasulev	baxarasulev@gmail.com	\N	$2y$12$UXY4KT7ET1cQlPDMy36ZCuxGQP3xSrH6hozb6i4zW546iH5VW59X6	28Cqs7V00GVfjrUryelQSLVCN0f5mZlcihuUl9IvTNv6Omk5SMxIeFn7O1gg	2025-04-02 05:54:38	2025-08-20 06:07:43	0	\N	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 23	Sarvinoz O'razalieva	orozaliyevasarvinoz@gmail.com	\N	$2y$12$ug82QbbsjJN2VUcZho.OM.lPp77fqumWhudfCm24zGGhCQkmYJJte	IWqrM1ydGfwkBYfJx8Umz8uBtkxbnHqUPI3yFHJ1EmYAFuOxtGkg9HgI3TUA	2025-04-25 09:14:10	2025-04-25 09:14:10	1	10	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 29	Shokhrukh	shokhrukhbek.karimov@bk.ru	\N	$2y$12$D.BK/OCwovELJYc1eHDAm.pG6UzppD6brHKr.rS16jUX60RmCGc5C	QAjs29qcQaRPDVgLPIgf9VdSDdualA9mjHIQOKrIrqFDyjPmjak5TUUGcutk	2025-06-10 05:51:03	2025-06-16 07:03:09	1	\N	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 25	Larisa Pavlovna	finance.lp.eap@gmail.com	\N	$2y$12$3BL7quGsTrS2zIC64f1um.638KFk.hsWPz0jO8P2AI7/axStYR9nK	EqbuuPfveEifRAn1uxKSHjrvFCMWYLilbjn3nafUQ1wVFKdTXQtpI5WgW4kB	2025-04-30 11:59:23	2025-11-15 08:45:46	2	0	\N	1	\N	\N	\N	\N	\N	\N	Asia/Tashkent	\N
 47	Sayidamin Bakhtiyorov	mercuryyy74@gmail.com	\N	$2y$12$Z0bYhB/4hSlGr/MiDxtr.ecGeyuq4eIYR.rdcg2x3mqK6xaR37bW6	\N	2025-11-17 05:56:56	2025-11-17 05:56:56	0	0	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 2	Mahmud	info@asia-point.uzzz	\N	$2y$12$NdnCapxm34aM0yI.KXAKNuw.YNOcBONAxpyo.Kt/9gmBtY6D2G5/a	JmtYBcWOUsVw1jBgNuIBIxnxYHcdYzWGqQrQF9A9N1IcHyh9fCzwhJteIHzX	2025-01-08 10:08:40	2025-09-10 05:33:10	0	0	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
-1	Admin	admin@gmail.com	\N	$2y$12$2wnPWtydkdS8Q73s3iv8kejyhRU3M.ZnKEdbWEhpPVdGdI1HdxS.6	oxnZWCkOhA3T8A8PJVJjmRoudgm2V6Aau6gZkEE3gRoZjlshQ9KiQ2cIPZoB	2024-12-05 14:13:59	2024-12-05 14:15:47	0	\N	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 39	Abdurashid Jo'raboyev	abdurashidjoraboyevs@gmail.com	\N	\N	\N	2025-09-10 08:49:50	2025-09-10 08:49:50	10	\N	\N	1	\N	\N	\N	\N	https://lh3.googleusercontent.com/a/ACg8ocJ2pOI_WRAPIrCv-f1Y1mTJ-YVQbdjARMHBz-_k7QiR1CYAlA=s96-c	115815348705866452310	UTC	\N
 30	Mahmud	info@asia-point.uz	\N	$2y$12$q1n6pSzlkQccaoqON2In5.RGypXLHbJCWvq/dTxFWqgEncnVTOEKK	R3kg54t6xYh4DnXWImDPvQjETsxE0iBQqI9uX0ZOY7ApfylbCghPDNxIWST7	2025-06-16 04:42:52	2025-11-22 06:38:54	0	0	\N	1	\N	\N	\N	\N	\N	103026146828776867691	Asia/Tashkent	\N
 6	sanjar	saidakhmatov99@gmail.com	\N	$2y$12$799/fuV2bpbfjX0G5G4fkOnK7pDONWP15dM0wGimuS2ypgcCLreLe	\N	2025-01-18 05:01:12	2025-12-01 12:16:33	0	10	\N	1	\N	\N	\N	\N	https://lh3.googleusercontent.com/a/ACg8ocK5F2swDfw-2GqXOR56M1sLj2JgFUZ0Hu7CySGNmoxaJGty2jI=s96-c	110642398474150829154	Australia/Sydney	\N
 11	Abbos Isakov	shakhtours.uz@gmail.com	\N	$2y$12$NzLeifFYQ1AOJBhGu5QyNOrT6sVJzOyg0T4GKz.FMvhSq8RKx.Ccy	6rOoWvghCTqgQoKCPROHxTMgvRTBWMdB9IkZnNjKeDQVwNYOv9aJWdZiDiZc	2025-02-18 12:28:23	2025-09-26 07:08:45	1	0	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 48	Fotima Yusufbekova	yusufbekovafotima3@gmail.com	\N	\N	\N	2025-11-26 03:54:37	2025-11-26 03:54:37	10	\N	\N	1	\N	\N	\N	\N	https://lh3.googleusercontent.com/a/ACg8ocIe_VFie31baxExnB81PeSC7a24gXmCpNcmflSswmuito5G3A=s96-c	102272167228870527390	Asia/Tashkent	\N
-33	Abdulloh Ibrohimov	ibrohimovabdulloh0902@gmail.com	\N	$2y$12$WB1hPN2RGIA8uMNGq.hVVO3AcYENZTJ07GUCXuxiYVPtj1Vk5Ncue	PiV9NEnTEbaoTfGht4h5Pd9FF0vdO24hp6357OhLCIkLGl0Mpb3u8b9bFvNi	2025-06-27 07:09:42	2026-01-27 13:20:21	1	10	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 43	maksat	maksat010527@gmail.com	\N	$2y$12$YMpYXzQm/a8cFeN5ylVQXOfe8AQhZ5ZVZ1xe7MC7k90KH6SXJJH4i	\N	2025-10-13 11:03:27	2025-10-13 11:03:27	10	\N	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 41	sanjar	sanjarsaidakhmatov@gmail.com	\N	$2y$12$QHu8WjTfx/kjWmMDYUmxXO0ZlRvOO4hSoLFqfqxD9dQ0pC07pRTWK	\N	2025-10-07 08:44:06	2025-11-29 16:05:21	10	\N	\N	1	\N	\N	\N	\N	https://lh3.googleusercontent.com/a/ACg8ocLiEkvp6hOkv9xK86N32qmR0Ej2kXlRsfRVIJOL4v-Oy_JoqA=s96-c	106047494706386991445	Australia/Sydney	\N
 46	Ravshan Davlatov	davlatovravshan014@gmail.com	\N	\N	\N	2025-10-24 09:36:41	2025-10-24 09:36:41	10	\N	\N	1	\N	\N	\N	\N	https://lh3.googleusercontent.com/a/ACg8ocI_YbAYJ8cmOapqhe_6KpKC5tZ2WvASkXjYoNYd8Dz-OW1Xg0Q=s96-c	108419529819633907120	UTC	\N
@@ -12005,6 +13258,9 @@ COPY public.users (id, name, email, email_verified_at, password, remember_token,
 50	Sam	fortiktokonly77@gmail.com	\N	\N	\N	2025-12-17 14:27:10	2025-12-17 14:27:11	10	\N	\N	1	\N	\N	\N	\N	https://lh3.googleusercontent.com/a/ACg8ocKcvgtF_PXpApOA_wXvbwm63LnlkDNv0n9fmaNUCkqiQnNPJw=s96-c	105573206364367127214	Australia/Sydney	\N
 49	Абдулазиз Маннопов (ПроСайты)	abdulazizmannopov07@gmail.com	\N	\N	\N	2025-11-30 16:59:17	2025-11-30 16:59:17	10	\N	\N	1	\N	\N	\N	\N	https://lh3.googleusercontent.com/a/ACg8ocJlq3Fd7lY2c1sNXlJrrYB86jt06EdAOjfYKEF6fc0Y5jpn5w=s96-c	105608193447958120868	Asia/Tashkent	\N
 51	a	mannopov481@gmail.com	\N	$2y$12$fUN5IAT0qpSIZk5.yadZC.vSLXOQXHY8RuP7x0diAR4R0KwaukWva	\N	2025-12-23 02:48:27	2025-12-23 02:48:27	10	\N	\N	1	\N	\N	\N	\N	\N	\N	Asia/Tashkent	\N
+33	Abdulloh Ibrohimov	ibrohimovabdulloh0902@gmail.com	\N	$2y$12$ARFK1vvpBqFa4JIQ9zxpQOefffENmC/WJjr.7/MPJzQFNtbekuGJC	PiV9NEnTEbaoTfGht4h5Pd9FF0vdO24hp6357OhLCIkLGl0Mpb3u8b9bFvNi	2025-06-27 07:09:42	2026-02-13 06:58:26	3	10	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
+1	Admin	admin@gmail.com	\N	$2y$12$2wnPWtydkdS8Q73s3iv8kejyhRU3M.ZnKEdbWEhpPVdGdI1HdxS.6	HYfHkQJBQ1WlDmPfmo6DuZNt00Sp8JmnhFgplBi2B0T0tn2t7fcNH2t35VYD	2024-12-05 14:13:59	2024-12-05 14:15:47	0	\N	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
+20	Bakhrom Rasulev	baxarasulev@gmail.com	\N	$2y$12$UXY4KT7ET1cQlPDMy36ZCuxGQP3xSrH6hozb6i4zW546iH5VW59X6	eGKK0hdbFtc1W43kEl0FkEweQNU3A9kIQ5bal9peb1jbEz1WvkZxU4JyTE53	2025-04-02 05:54:38	2025-08-20 06:07:43	0	\N	\N	1	\N	\N	\N	\N	\N	\N	UTC	\N
 \.
 
 
@@ -12060,6 +13316,33 @@ COPY public.web_tour_accommodations (id, web_tour_id, header_ru, header_en, desc
 12	5	No Accommodation	No Accommodation	\N	\N	\N	\N	2025-12-01 13:43:16	2025-12-26 06:10:25
 16	9	No Accommodation	No Accommodation	\N	\N	\N	\N	2025-12-19 13:25:18	2025-12-26 06:11:48
 18	11	123	123	\N	\N	\N	\N	2026-01-31 10:12:57	2026-01-31 10:12:57
+19	12	Ташкент	Tashkent	Inspira S  или аналогичный отель	Inspira S or similar	\N	\N	2026-02-03 12:01:41	2026-02-03 12:25:55
+20	12	Самарканд	Samarkand	Meridian Plaza by Reikartz Samarkand или аналогичный отель	Meridian Plaza by Reikartz Samarkand or similar	\N	\N	2026-02-03 12:23:15	2026-02-03 12:25:55
+21	12	Бишкек	Bishkek	Novotel или аналогичный отель	Novotel or similar	\N	\N	2026-02-03 12:23:15	2026-02-03 12:25:55
+22	12	Иссык-Куль	Issyk Kul	Karven 4 seasons или аналогичный отель	Karven 4 seasons or similar	\N	\N	2026-02-03 12:23:15	2026-02-03 12:25:55
+23	12	Чон-Кемин	Chon-Kemin	Ashu Guest House или аналогичный отель	Ashu Guest House or similar	\N	\N	2026-02-03 12:23:15	2026-02-03 12:25:55
+24	12	Алматы	Almaty	Resident Abay или аналогичный отель	Resident Abay or similar	\N	\N	2026-02-03 12:23:15	2026-02-03 12:25:55
+25	13	Бишкек	Bishkek	Soluxe/Bugu or similar 3* / Golden Dragon / Plaza Bishkek 4*\n	Soluxe/Bugu or similar 3* / Golden Dragon / Plaza Bishkek 4*	\N	\N	2026-02-04 10:59:04	2026-02-04 10:59:04
+26	13	Чон-Кемин 	Chonkemin	Jekshen guest house / Ashu hotel	Jekshen guest house / Ashu hotel	\N	\N	2026-02-04 10:59:04	2026-02-04 10:59:04
+27	13	Сон-Куль	Sonkul 	Yurt Camp	Yurt Camp	\N	\N	2026-02-04 10:59:04	2026-02-04 10:59:04
+28	13	Иссык-Куль	Issykul	Karpiz / Karven	Karpiz / Karven	\N	\N	2026-02-04 10:59:04	2026-02-04 10:59:04
+29	13	Каракол	Karakol	Green Yard / Suncor 3* / Karagat / /78Karakol 4*	Green Yard / Suncor 3* / Karagat / /78Karakol 4*	\N	\N	2026-02-04 10:59:04	2026-02-04 10:59:04
+30	13	Саты	Saty	Guest house	Guest house	\N	\N	2026-02-04 10:59:04	2026-02-04 10:59:04
+31	13	Алматы	Almaty	Kazzhol Almaty / Renion 3* / Renion Park / Kazzhol Park 4*	Kazzhol Almaty / Renion 3* / Renion Park / Kazzhol Park 4*	\N	\N	2026-02-04 10:59:04	2026-02-04 10:59:04
+32	14	Ташкент	Tashkent	Inspira S или аналогичный	Inspira S or similar	\N	\N	2026-02-05 12:27:56	2026-02-05 12:42:45
+33	14	Бухара	Bukhara	Wyndham Bukhara / Sahid Zarafshon или аналогичный	Wyndham Bukhara / Sahid Zarafshon or similar	\N	\N	2026-02-05 12:42:45	2026-02-05 12:42:45
+34	14	Самарканд	Samarkand	Movenpick Samarkand или аналогичный	Movenpick Samarkand or similar	\N	\N	2026-02-05 12:42:45	2026-02-05 12:42:45
+35	14	Хива	Khiva	New Minor / Art Minor или аналогичный	New Minor/Art Minor or similar	\N	\N	2026-02-05 12:42:45	2026-02-05 12:42:45
+36	14	Чимган	Chimgan	 Krocus Park или аналогичный	Krocus Park or similar	\N	\N	2026-02-05 12:42:45	2026-02-05 12:42:45
+38	16	авава	ваввав	\N	\N	\N	\N	2026-02-10 11:35:23	2026-02-10 11:35:23
+\.
+
+
+--
+-- Data for Name: web_tour_categories; Type: TABLE DATA; Schema: public; Owner: developer
+--
+
+COPY public.web_tour_categories (id, web_tour_id, category_id) FROM stdin;
 \.
 
 
@@ -12102,6 +13385,73 @@ COPY public.web_tour_days (id, web_tour_id, day_number, place_name_ru, place_nam
 29	10	\N	Мары – Древний Мерв – граница Фарап – Бухара – Ташкент	\N	01KCXSH0EB0253EZV9MEV0NZRS.avif	\N	2025-12-20 11:49:19	2025-12-20 11:50:09	Ранний завтрак в отеле в Мары.\n08:30 – 10:00 – Посещение Древнего Мерва — объекта Всемирного наследия ЮНЕСКО и одного из крупнейших археологических комплексов Центральной Азии. Более 2000 лет Мерв играл ключевую роль в развитии Великого шелкового пути.\nОсмотр основных исторических частей Мерва:\n•\tЭрк-кала (VI век до н.э.)\n•\tГяур-кала (III век)\n•\tКыз-кала (VI век)\n•\tСултан-кала (XI век)\n•\tАбдуллахан-кала (XV век)\n•\tБайрамали-хан-кала (предположительно XVIII век)\n10:00 – Переезд в Лебапский велаят и далее к пограничному пункту Фарап.\n15:00 – Прибытие на границу Фарап. Прохождение пограничных и таможенных процедур.\nПосле пересечения границы трансфер в аэропорт Бухары.\nВылет внутренним рейсом Бухара – Ташкент.\nОкончание тура.	Enjoy an early morning breakfast at the hotel in Mary.\n08:30 – 10:00 – Visit Ancient Merv, a UNESCO World Heritage Site and one of the most significant archaeological complexes in Central Asia. For over 2,000 years, Merv was a major center of the Silk Road, playing a crucial role in trade, culture, and civilization.\nExplore the main historical sections of Merv, including:\n•\tErk-Kala (6th century BC)\n•\tGyaur-Kala (3rd century)\n•\tKyz-Kala (6th century)\n•\tSultan-Kala (11th century)\n•\tAbdullakhan-Kala (15th century)\n•\tBairamali Khan-Kala (18th century, approximate)\n10:00 – Drive toward Lebap Province and continue to the Farap border crossing.\n15:00 – Arrival at the Farap border point. Complete border and customs formalities.\nAfter crossing into Uzbekistan, transfer to Bukhara Domestic Airport.\nTake a domestic flight from Bukhara to Tashkent.\nEnd of the tour.	\N
 20	5	\N	Отрар-Туркестан	Otrar-Turkestan	01KBD2EFXMQVK6N5JG8RJ3GQV2.jpg	\N	2025-12-01 13:43:16	2025-12-26 06:08:06	В 09:00 гид и водитель встретят вас у вашего отеля в Шымкенте. Путешествие начнётся с поездки в село Шаульдер, где вы увидите мавзолей Арыстан-Баба и археологические раскопки городища Отрар.\nЗатем вы отправитесь в Туркестан — один из древнейших городов не только Казахстана, но и всей Средней Азии. Город был основан в 490 году н. э. на пересечении торговых путей из Самарканда, Бухары и Хивы в северный Казахстан. В Средние века Туркестан стал административным, политическим и духовным центром региона, а в XVI–XVIII веках — столицей Казахского ханства.\nВы посетите историко-архитектурный комплекс «Азрет-Султан», мавзолей Ходжи Ахмеда Яссави и городище Туркестана, где сможете почувствовать атмосферу далёкого прошлого.\nДалее — прогулка по крупнейшему туристическому комплексу Средней Азии «Каравансарай». С первых шагов вы погрузитесь в волшебную атмосферу восточной сказки, пропитанную духом истории, культуры и романтики Казахстана. Здесь вы сможете посетить единственный в стране 8D-кинотеатр «Алтын Самрук» или покататься на гондолах.\nПосле насыщенного путешествия — возвращение в отель в Шымкенте (160 км, около 2 часов). Завершение тура.\n	At 9:00 a.m., the guide and driver will meet you at your hotel in Shymkent. The journey will begin with a drive to the village of Shaulder, where you will see the Arystan-Bab Mausoleum and the archaeological excavations of the ancient settlement of Otrar.\n\nNext, you will travel to Turkestan—one of the oldest cities not only in Kazakhstan but in all of Central Asia. The city was founded in 490 AD at the crossroads of trade routes from Samarkand, Bukhara, and Khiva to northern Kazakhstan. In the Middle Ages, Turkestan became the administrative, political, and spiritual center of the region, and in the 16th–18th centuries it served as the capital of the Kazakh Khanate.\n\nYou will visit the Azret-Sultan Historical and Architectural Complex, the Mausoleum of Khoja Ahmed Yasawi, and the ancient settlement of Turkestan, where you can truly feel the atmosphere of the distant past.\n\nThen comes a walk through the largest tourist complex in Central Asia, the Karavansaray. From the very first steps, you will be immersed in the magical atmosphere of an Eastern fairy tale, infused with the spirit of Kazakhstan’s history, culture, and romance. Here, you can visit the country’s only 8D cinema, Altyn Samruk, or enjoy a gondola ride.\n\nAfter the journey, you will return to your hotel in Shymkent (160 km, approximately 2 hours). End of the tour.	\N
 26	9	\N	Samarkand	Samarkand	01KCVCJGVXDVMSG8T2FMDZ4RXJ.jpg	\N	2025-12-19 13:25:18	2025-12-26 06:09:41	Утром — трансфер на железнодорожный вокзал. Отправление в Самарканд на скоростном поезде «Афросиаб» (время в пути — около 2 часов 10 минут). По прибытии — встреча с гидом и водителем на вокзале и начало экскурсионной программы.\nВ ходе тура вы посетите мавзолей Гур-Эмир, знаменитую площадь Регистан, архитектурный ансамбль Шахи-Зинда, обсерваторию Улугбека, мечеть Биби-Ханум, а также Сиабский базар.\nПо завершении экскурсии — трансфер на вокзал и отправление поездом в Ташкент. По прибытии — трансфер в гостиницу.\nОкончание однодневного тура в Самарканд из Ташкента.	In the morning, you will be transferred to the railway station to board the high-speed Afrosiyob train to Samarkand (travel time approx. 2 hours 10 minutes). Upon arrival, your professional guide and driver will meet you at the station to begin your Samarkand city tour.\nThe sightseeing program includes visits to the Gur-Emir Mausoleum, Registan Square, Bibi-Khanym Mosque, Shah-i-Zinda Necropolis, Ulugh Beg Observatory, and the central Samarkand Bazaar.\nAfter the tour, you will be transferred to the railway station for the return high-speed train to Tashkent. Upon arrival, a transfer to your hotel will be provided.\nEnd of the one-day Samarkand tour from Tashkent.	\N
+32	12	\N	Ташкент – Прибытие	Tashkent - Arrival	01KGHQTYAD6HJYKS70XDPMQSZR.webp	\N	2026-02-03 12:01:41	2026-02-03 12:32:31	Местный водитель встретит вас в аэропорту и сопроводит в отель.\n\nСвободное время.\n\nПитание: ужин в местном ресторане	Local driver will pick you up at Airport and accompany you the hotel.\nFree time.\n\nMeals: Dinner at local restaurant\n	1
+37	12	\N	Бишкек – озеро Иссык-Куль (264 км / 4 часа)	Bishkek – Issyk-Kul Lake 264km/4hrs	\N	\N	2026-02-03 12:14:50	2026-02-03 12:14:50	Посещение:\n\nПлощадь Ала-Тоо (пешеходная ориентация)\n\nТеатр оперы и балета (фото-стоп)\n\nПарк Победы (проездом)\n\nПосле завтрака переезд в Чолпон-Ату — главный город на северном побережье озера Иссык-Куль.\n\nПо прибытии посещение музея петроглифов под открытым небом.\nОбед в ресторане курорта.\nЗаселение в отель.\n\nЧасовая прогулка на лодке с шампанским.\n\nУжин в местном ресторане и ночь в отеле.\n\nПитание: завтрак в отеле, обед и ужин в местном ресторане	Visits:\n-\tAla-Too Square (Walking orientation)\n-\tTheater of Opera and Ballet (Photo Stop)\n-\tVictory Park (Drive Pass)\n\nAfter breakfast, drive to Cholpon-Ata, the main city on the northern coast of Issyk-Kul Lake.\nVisit the Open Air Museum of Petroglyphs upon arrival.\nLunch at resort restaurant.  Check-in at the hotel.\n1hr boating with champagne.\nDinner at local restaurant and overnight at the hotel.\n\nMeals: Breakfast at hotel, Lunch at local restaurant, Dinner at local restaurant\n	\N
+35	12	\N	Самарканд – Ташкент (на поезде)	Samarkand – Tashkent (by train)	01KGHQTYAFPA99YXE6TD7XST5W.jpg	\N	2026-02-03 12:01:41	2026-02-03 12:32:31	После завтрака в 09:00 продолжение экскурсии по Самарканду.\nПосещение обсерватории Улугбека, местного бульвара, базара Сиаб (шопинг) и ковровой фабрики.\n\nВо второй половине дня / вечером поезд в Ташкент.\nПо прибытии трансфер в отель, ночь в Ташкенте.\n\nПитание: завтрак в отеле, обед и ужин в местном ресторане	After breakfast at 09:00 continue city tour in Samarkand. Visit Ulugbek Observatory, Local broadway, Siab bazar for shopping and carpet factory. Afternoon/Evening train to Tashkent. Upon arrival transfer to hotel, overnight in Tashkent. \n\nMeals: Breakfast at hotel, Lunch & Dinner at local restaurant	\N
+36	12	\N	Ташкент – Бишкек (перелёт)	Tashkent – Bishkek (flight)	01KGHQTYAG6AE4GAK49MD4TMWY.jpg	\N	2026-02-03 12:01:41	2026-02-03 12:32:31	Завтрак в отеле.\nВыселение и трансфер в аэропорт для вылета в Бишкек.\n\nВстреча с водителем и гидом в международном аэропорту Манас в 16:30.\nТрансфер в Бишкек.\n\nОбзорная экскурсия по Бишкеку с основными достопримечательностями:\n\nКыргызская государственная филармония (пешеходная ориентация)\n\nРусский православный собор (фото-стоп)\n\nУжин в местном ресторане.\nЗаселение в отель и ночь в Бишкеке.\n\nПитание: завтрак в отеле, ужин в местном ресторане	Breakfast at hotel. Check out and transfer to the airport for departure flight to Bishkek. Meet the driver and guide at the Manas International Airport at 16.30pm.  Transfer to Bishkek. \nBishkek city tour with the main highlights:\n-\tKyrgyz State Philharmonic (Walking orientation)\n-\tRussian Orthodox Cathedral (Photo Stop)\nDinner at the local restaurant.\nCheck-in and overnight at the hotel.\n\nMeals: Breakfast at hotel, dinner at local restaurant	\N
+38	12	\N	Озеро Иссык-Куль – Бурана – долина Чон-Кемин (160 км / 3,5 часа)	Issyk-Kul Lake – Burana –Chon Kemin valley  160км-3.5h 	01KGHQTYAHSF03K6BEY3BM9VA7.jpg	\N	2026-02-03 12:14:50	2026-02-03 12:32:31	09:00 — завтрак в отеле, затем трансфер к башне Бурана через долину Чон-Кемин.\n\nДолина и ущелье Чон-Кемин — одно из самых красивых мест Кыргызстана, популярное среди любителей активного отдыха. Река Чон-Кемин протекает через горные хребты Кунгей-Ала-Тоо и Илийский Ала-Тоо, протяжённостью более 70 миль, с семью озёрами в своём бассейне. Здесь расположен Чон-Кеминский национальный парк — охраняемая природная зона с богатой флорой и фауной. Склоны долины покрыты хвойными лесами, где растут различные травы, ягоды и грибы. Долина считается практически нетронутой природой.\n\n12:00 — прибытие и посещение башни Бурана, экскурсия.\n13:00 — трансфер в деревню Шабдан.\n14:00 — обед в гостевом доме «Ашуу».\n15:00 — презентация мастер-класса по строительству юрты.\n16:30 — представление национальных конных игр на местном стадионе.\n17:40 — возвращение в гостевой дом, знакомство с культурой и сельской жизнью.\n\nВозможность пешего похода к панорамной точке или конной прогулки (за дополнительную плату).\n\n19:00 — ужин на террасе гостевого дома.\n20:00 — свободное время.\n\nПитание: завтрак на курорте, обед и ужин в гостевом доме	09.00 After breakfast at the hotel  transfer to Burana Tower via Chon-Kemin valley.\nChon-Kemin Valley and Gorge - known as one of Kyrgyzstan's most beautiful locales, the Chon-Kemin valley is popular with those who enjoy extreme sports. Its eponymous river flows across the Kungei-Ala-Too and Iliysky Ala-Too mountain ranges, stretching over 70 miles, with seven lakes in its basin. Here also lies a specially protected region, Chon-Kemin National Park, a lush natural area brimming with diverse flora and fauna. Forming the sides of the valley are conifer forests, which are home to many varieties of herbs, berries, and mushrooms. The Chon-Kemin valley is a popular spot amongst those who truly appreciate natural beauty, as it remains - many say - in its virgin state.\n12.00 Upon arrival visit   and stop at  Burana Tower. Excursion. 13.00 Transfer to Shabdan village.\n14.00 lunch at guest house Ashuu. \n15.00 presentation of master class on yurt building\n16.30 at local  stadium presentationof National horse games. 17.40 return back to the guest house, explore the area and culture of local country side life. \nPossibility to go the hiking to panorama view point or just horseback riding for supplement. \n19.00 dinner at the terrace of the guest house. \n20.00 free time. \nMeals: Breakfast at resort, Lunch at guest house, Dinner at guest house	\N
+39	12	\N	Долина Чон-Кемин – граница Кордай – Алматы (2 часа в пути)	Chon Kemin valley  - Korday border 2h to drive 	01KGHQTYAHSF03K6BEY3BM9VA8.jpg	\N	2026-02-03 12:14:50	2026-02-03 12:32:31	09:00 — завтрак в гостевом доме.\n10:00 — трансфер к пограничному пункту Кордай в направлении Алматы / Казахстан.\n\nВстреча с местным водителем и гидом на границе Кордай и сопровождение в город Алматы.\n\nПрибытие в Алматы.\n~19:00 — ужин в китайском ресторане.\nНочь в Алматы.\n\nПитание: завтрак, обед, ужин	09.00 breakfast at guest house. \n10.00 transfer to Korday border toward Almaty/Kazakhstan \nLocal driver and guide will pick you up at Kordai border and accompany you to Almaty city.\nArrival to Almaty city.\n~19:00 Dinner at the chinese restaurant.\nOvenright in Almaty.\nMeals: Breakfast, Lunch, Dinner	\N
+79	16	\N	Дарваза – Ашхабад (Туркменистан)	Darvaza Gas Crater – Ashgabat (Turkmenistan)	01KHE09X0ZASFZJYE3E52T6BCT.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	\nЗавтрак. Поездка в Ашхабад (280 км) с остановками у водяных и грязевых кратеров. Посещение Национального музея истории. Свободное время.\nНочь в отеле.\nПитание: завтрак.\n	After a camp-style breakfast, drive to Ashgabat (280 km). En route, stop at the water and mud craters. Upon arrival, visit the National Museum of History.\nCheck in to the hotel.\nFree time.\nOvernight at the hotel.\n	\N
+33	12	\N	Ташкент	Tashkent	01KGHQTYAE5472WA95PZYP08KB.avif	\N	2026-02-03 12:01:41	2026-02-03 12:32:31	После завтрака в 09:00 — обзорная экскурсия по Ташкенту.\nПосещение комплекса Хаст-Имам, медресе Кукельдаш, базара Чорсу, площади Амира Темура, Площади Независимости, а также Ташкентской телебашни (осмотр снаружи).\n\nВечером ужин в местном семейном доме, где вы сможете насладиться блюдами и познакомиться с местным гостеприимством.\n\nПитание: завтрак в отеле, обед в местном ресторане, ужин в традиционном местном семейном доме	After breakfast at 09:00 city tour in Tashkent. Visit Khast Imam complex, Kukaldosh madrassah, Chorsu Bazar, Amir Temur square & Independence square & Tashkent TV tower (from outside). In the evening dinner at local family house where you can enjoy the meals and experience the local hospitalily.\n\nMeals: Breakfast at hotel, Lunch at local restaurant, Dinner at traditional local family house\n	1
+34	12	\N	Ташкент – Самарканд (на поезде)	Tashkent – Samarkand (by train)	01KGHQTYAE5472WA95PZYP08KC.jpg	\N	2026-02-03 12:01:41	2026-02-03 12:32:31	Трансфер на вокзал в 06:00.\nУтренний поезд в Самарканд.\n\nПо прибытии начало обзорной экскурсии по городу.\nПосещение мавзолея Амира Темура, площади Регистан, мечети Биби-Ханум и комплекса Шахи-Зинда.\n\nНочь в Самарканде.\n\nПитание: ранний завтрак, обед и ужин в местном ресторане	Transfer to the station at 06:00. \nMorning train to Samarkand. \nUpon arrival we will start the city tour. Visit to Amir Temur Mausoleum, Registan Square, Bibi Khanim Mosque and Shakhi Zinda complex. Overnight in Samarkand.\n\nMeals: Early breakfast, Lunch & Dinner at local restaurant\n	2
+41	12	\N	Алматы	Almaty	01KGHQTYAK5KDDFPNPFNWKWXMK.jpg	\N	2026-02-03 12:14:50	2026-02-03 12:32:31	Завтрак в отеле.\n09:00 — встреча с гидом и водителем в лобби отеля, трансфер в Центральный государственный музей (кроме вторника).\n\nМузей искусств Алматы — коллекция включает более 700 произведений казахского искусства.\n\nОбед в местном ресторане.\n16:00 — посещение Вознесенского собора (Зенковский собор).\n16:20 — Зелёный базар (кроме понедельника).\n16:45 — магазин шоколада «Рахат» (кроме понедельника).\n17:00 — прогулка по парку Панфилова.\n17:30 — трансфер на ужин.\n19:00 — возвращение в отель.\n\nПитание: завтрак в отеле, обед и ужин в местном ресторане	Breakfast at the hotel.\n09:00 Meet guide and driver at the hotel lobby and transfer to the excursion to Central History Museum (except Tuesday) \nAlmaty museum of arts-The collection includes more than seven hundred works of Kazakh art, making it one of the largest private collections of its kind.\nLunch at the local restaurant. \n16:00 Visit Zenkov Cathedral \n16:20 Green Bazar (except Mon) \n16:45 Rakhat Chocolate Shop (except Mon). \n17:00 Have a walk to Panfilov Park\n17:30 Transfer to the dinner\n19:00 Transfer to the hotel\nMeals: Breakfast at hotel, Lunch & Dinner at local restaurant.	\N
+42	12	\N	Алматы – Отъезд	Almaty - Departure	01KGHQTYAK5KDDFPNPFNWKWXMM.jpg	\N	2026-02-03 12:14:50	2026-02-03 12:32:31	Завтрак в отеле.\n10:00 — посещение холма Кок-Тобе, где расположена телебашня высотой 372 м, смотровая площадка с панорамным видом, сувенирные магазины и бронзовый памятник группе The Beatles.\n\n12:00 — прогулка по улицам Арбат и Панфилова — популярному району с художниками и ремесленниками.\n\n13:00 — трансфер в местный ресторан (Navat).\n14:00 — посещение метро Алматы — чистого и красивого, с мраморными полами и художественным оформлением.\n15:00 — трансфер в аэропорт.\n\nПитание: завтрак в отеле, обед в местном ресторане	Breakfast at the hotel.\n10:00 Visit Kok Tobe Hill, where the 372 meters tall TV Tower is located. There is a great viewing deck offering sweeping panoramic views of Almaty, as well as souvenir shops and bizarrely enough a bronze monument devoted to the Beatles.\n12:00 Have a walk along Arbat and Panfilov streets, which are a popular area and nice place to visit when traveling to Almaty, as it’s filled with artists selling their works of art of local landscapes, giving a good representation of the beauty of Kazakhstan.\n13:00 Transfer to the local restaurant (Navat) \n14:00 Visiting of Almaty’s underground - The metro compared to the London Underground, is spanking clean and beautiful with Marble floors and various forms of Artwork on the walls. With trains arriving every 10-15 mins, and the Temperature below 20 degrees Celsius, this is defiantly the way to travel during the summer, when outside air temperature is in the 30 degrees Celsius range.\n15:00 Transfer to the airport.\nMeals: Breakfast at hotel, Lunch at local restaurant	\N
+40	12	\N	Алматы	Almaty	01KGHQTYAJT6J0HV89HQR5FBGM.webp	\N	2026-02-03 12:14:50	2026-02-03 12:32:31	09:00 — встреча с гидом и трансфер в ущелье Медео, краткая остановка у плотины Медео, защищающей город от селевых потоков.\n\nКанатная дорога Медео – Шымбулак (гондола, подъём).\n\nГорнолыжный курорт Шымбулак — великолепные виды на снежные вершины и горы Тянь-Шаня. Курорт расположен на высоте 2260 м над уровнем моря, в 25 км от центра Алматы.\n\n13:00 — возвращение в Алматы.\n13:30 — обед в местном ресторане (Juz).\n14:30 — посещение Площади Республики и Монумента Независимости.\n16:00 — посещение соколиного питомника «Сункар» (кроме понедельника и вторника).\n17:00 — трансфер на ужин.\n18:00 — трансфер в отель.\n\nПитание: завтрак в отеле, обед и ужин в местном ресторане	9:00 Meeting with the guide and transfer to Medeo gorge, where you will have a brief stop on the huge Medeo dam, which protects the city from destructive mudflows formed on the tops of the western Tien Shan.\nMedeo - Shymbulak cable car (gondola, way up) \nMountain ski resort Shymbulak- amazing views of the snow peaks and the Tien-Shan Mountains.\nThe Ski Resort Shymbulak is located on a picturesque valley in the Zailiyskiy Alatau within the height 2260 m above sea level, 25 km from the center of Almaty.\n13:00 Return to Almaty\n13:30 Lunch at the local restaurant. (Juz)\n14:30 Afternoon visit Republic square, Monument of Independence.\n16:00 – visit Sunkar Falcon farm for a group show (except Mon and Tuesday.) \n17:00 Transfer to the dinner \n18:00 Transfer to the hotel\nMeals: Breakfast at hotel, Lunch & Dinner at local restaurant.\n	\N
+43	13	\N	Аэропорт – Бишкек (30 км, 40 мин)	Airport – Bishkek (30 km, 40 min)	01KGM4WHEPY1G439GC7MTGEHF3.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	По прибытии в Бишкек вас встретят в аэропорту Манас. Гид сопроводит вас в столицу Кыргызстана — город Бишкек (примерно 30 минут в пути). После отдыха и завтрака в отеле состоится обзорная экскурсия по городу.\n\nБишкек расположен на высоте 750 метров над уровнем моря. Вы посетите площадь Ала-Тоо, Дубовый парк, бульвар Эркиндик, Площадь Победы и Исторический музей (обратите внимание: музей закрыт по понедельникам). Также вы побываете на Азиатском базаре (Ошский базар закрыт по понедельникам), открытом в советский период и реконструированном в 2001 году. Здесь можно приобрести местные продукты: сухофрукты, овощи, свежие фрукты и специи.\n\nУжин в местном ресторане Бишкека. Затем возвращение в отель для отдыха и первых впечатлений.\n\nПитание: Завтрак\nРазмещение: Отель	Upon arrival in Bishkek, you will be met at the airport (Manas International Airport) by your guide. He will accompany you to the capital, Bishkek (approx. 30 min drive). After a break and breakfast at the hotel, you will go on a city tour. Bishkek is located 750 meters above sea level. You will visit Ala-Too Square, Oak Park, Erkindik Boulevard, Victory Square, and the History Museum (note: the museum is closed on Mondays). Today you will also visit the Asia Bazaar (Osh Bazaar is closed on Mondays), which was opened during the Soviet era and renovated in 2001. There you can buy many interesting local foods such as dried fruits, vegetables, fresh fruits, and spices. Dinner at a local restaurant in Bishkek. Afterwards, you will be taken back to the hotel where you can reflect on your first impressions.\n\nMeals: B\nAccommodation: Hotel\n	\N
+44	13	\N	Экскурсия в национальный парк Ала-Арча (80 км)	Excursion to Ala Archa (Bishkek, Ala Archa) (80 km) 	01KGM4WHEQCY20WQFWTS0205YF.webp	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Сегодня вы посетите национальный парк Ала-Арча, расположенный в 40 км к югу от Бишкека. Его площадь составляет около 200 км², высоты — от 1500 до 4895 метров, включая пик Семёнова-Тян-Шанского. В парке охраняются редкие виды животных и священные можжевеловые деревья. Здесь до сих пор обитают снежные барсы, находящиеся под угрозой исчезновения.\n\nПарк популярен для пеших прогулок, горнолыжного спорта и альпинизма. Сегодня вы совершите пеший поход вдоль реки Ала-Арча.\n\nПосле прогулки возвращение в Бишкек.\nУжин в местном ресторане.\n\nПитание: Завтрак\nРазмещение: Отель	Today we visit Ala Archa National Park, 40 km south of Bishkek. It covers about 200 km² with elevations from 1,500 to 4,895 meters, including Semenov-Tian-Shansky Peak. Rare animal species and revered juniper trees are protected. Snow leopards still live here, considered endangered. The park is popular for hiking, skiing, and mountaineering. We will hike along the Ala Archa River today\nAfter the hike, we return to Bishkek. \nDinner will be at a local restaurant.\n\nMeals: B\nAccommodation: Hotel\n	\N
+45	13	\N	Бишкек – Чон-Кемин (180 км, ~3 часа)	Bishkek – Chon-Kemin (180 km, approx. 3 hrs)	01KGM4WHER3X7E30AGWG0YR37P.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Переезд в долину Чон-Кемин — уникальный природный район на севере Кыргызстана с высотами от 1400 до 2800 метров. Долину пересекает река длиной 116 км, окружённая горами, ледниками и еловыми лесами. Туристические маршруты ведут к горным перевалам, соединяющим долину с регионом Иссык-Куль.\n\nПо пути остановка у Башни Бурана — минарета XI века, расположенного на Великом Шёлковом пути, а также посещение музея под открытым небом с каменными изваяниями в честь храбрых воинов.\n\nПродолжение пути в долину Чон-Кемин.\n\nОпционально: конная прогулка к живописной смотровой площадке (за дополнительную плату).\n\nПитание: Завтрак / Ужин\nРазмещение: Гостевой дом	Today we drive to the Chon-Kemin Valley, a unique natural area in the north with elevations from 1,400 to 2,800 meters. The valley is traversed by a river stretching 116 kilometers, surrounded by mountains, glaciers, and fir forests. Trekking routes lead to mountain passes connecting the valley with the Issyk-Kul region. We stop at the Burana Tower, an 11th-century minaret on the Great Silk Road, and visit an open-air museum with stone figures honoring brave soldiers. Continuing our journey, we head to the Chon-Kemin Valley.\nOptional: Horseback riding to a scenic viewpoint (for an additional fee).\nMeals: B/D\nAccommodation: Guesthouse	\N
+46	13	\N	Чон-Кемин – озеро Сон-Куль (220 км)	Chon-Kemin – Son-Kul Lake (the Most Beloved Lake visitors) (220 km) 	01KGM4WHESTJ7AYHPNJD8CE7H0.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Сон-Куль — второе по величине озеро Кыргызстана, расположенное на высоте 3013 метров над уровнем моря и окружённое горами. Кочевники используют этот регион для летнего выпаса скота. Для путешественников ночёвка в юрте на Сон-Куле — уникальный и умиротворяющий опыт.\n\nНочью можно увидеть Млечный Путь и звёздное небо, а утром насладиться живописными видами озера, юртовых лагерей и гор.\n\nУжин и ночёвка в юртовом лагере.\n\nПитание: Завтрак / Обед / Ужин\nРазмещение: Юртовый лагерь	Son-Kul is Kyrgyzstan's second-largest lake, surrounded by mountains, at an altitude of 3,013 meters. Kyrgyz nomads and herders visit this region for relaxation and grazing. For travelers, sleeping in a yurt at Lake Son-Kul is a unique and tranquil experience. At night, you can see the Milky Way and stars. In the morning, enjoy the beautiful landscape with yurt camps, the lake, and mountains. \nDinner and overnight in a yurt camp.\n\nMeals: B/L/D\n\nAccommodation: Yurt Camp	\N
+47	13	\N	Озеро Сон-Куль	Lake Son-Kul	01KGM4WHET362T94C3QZK1YTD2.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Сегодня вас ждёт активный пеший поход по живописным окрестностям озера Сон-Куль. Подъём на близлежащие холмы откроет захватывающие панорамные виды на озеро. Также возможна конная прогулка.\n\nУжин и ночёвка в юртовом лагере.\n\nПитание: Завтрак / Обед / Ужин\nРазмещение: Юртовый лагерь	Today, we embark on an invigorating hike in the picturesque surroundings of Lake Son-Kul. We shall ascend the nearby hills that offer breathtaking vistas of the lake. Additionally, there exists a splendid opportunity for horseback riding in this enchanting locale.\nDinner and overnight in a yurt camp.\nMeals: B/L/D	\N
+48	13	\N	Сон-Куль – Чолпон-Ата (270 км)	Son-Kul – Cholpon-Ata (270 km)	01KGM4WHEVKNETMRME3V180P4G.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	После завтрака переезд к озеру Иссык-Куль — одному из крупнейших высокогорных озёр мира, расположенному на высоте 1608 метров над уровнем моря. Его часто называют «Жемчужиной Кыргызстана» благодаря целебным свойствам солоноватой воды.\n\nПродолжение пути вдоль живописных берегов Иссык-Куля до Чолпон-Аты.\n\nПитание: Завтрак\nРазмещение: Отель	After a delightful breakfast, embark on an enchanting journey to Lake Issyk-Kul, a magnificent body of water embraced by two majestic mountain ranges. This lake holds the distinction of being the second-largest high-altitude lake in the world, perched at an impressive 1,608 meters above sea level. Often referred to as the “Pearl of Kyrgyzstan,” it is celebrated for the purported healing properties of its saline waters. Continue your drive towards the breathtaking shores of Lake Issyk-Kul.\nMeals: B\n	\N
+49	13	\N	Чолпон-Ата	Cholpon-Ata exploration	01KGM4WHEXHTTJ6DHYQBVM13BY.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Посещение культурного центра «Рух Ордо» имени Чингиза Айтматова, расположенного на северном берегу Иссык-Куля. Комплекс объединяет религиозные памятники буддизма, ислама и христианства и служит местом гармонии для людей разных культур и вероисповеданий. Здесь также проводятся культурные мероприятия и конференции.\n\nЗатем вы посетите петроглифы Чолпон-Аты — музей под открытым небом с древними наскальными изображениями. После экскурсии трансфер в яхт-клуб и прогулка на лодке по озеру Иссык-Куль.\n\nВозвращение в отель. Свободное время.\n\nПитание: Завтрак\nРазмещение: Отель	Today, you will visit the Ruh Ordo Cultural Center, named in honor of the esteemed writer Chingiz Aitmatov. This exceptional cultural complex is situated on the picturesque northern shore of Lake Issyk-Kul. It showcases religious monuments that represent Buddhism, Islam, and Christianity, serving as a harmonious gathering place for individuals of diverse nationalities, faiths, and cultures. The center also hosts a variety of cultural events, including conferences. \nFollowing this, you will explore the Cholpon-Ata Petroglyphs, an open-air museum that offers a glimpse into ancient artistry. After your tour, you will be transferred to the yacht club, where you can indulge in a delightful boat ride on the tranquil waters of Lake Issyk-Kul. Subsequently, you will return to your hotel. \nEnjoy your free time.\n\nMeals: B\nAccommodation: Hotel	\N
+50	13	\N	Чолпон-Ата – ущелье Григорьевское – Каракол	Cholpon-Ata – Grigoriev Gorge – Karakol	01KGM4WHEY32H3WC52KPMFN18R.avif	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	После завтрака переезд в Каракол вдоль северного берега Иссык-Куля. Каракол — уютный город на востоке Иссык-Кульской котловины, расположенный на высоте 1760 метров, основанный русскими казаками.\n\nПо пути пешая прогулка в Григорьевском ущелье, известном своими живописными горными пейзажами.\n\nПеред въездом в Каракол посещение музея Н. М. Пржевальского, посвящённого знаменитому русскому путешественнику. Мемориальный комплекс включает экспозиции его экспедиций, рядом находится его могила.\n\nВ Караколе вы также посетите Дунганскую мечеть, построенную в китайском стиле без использования металлических гвоздей, и деревянную православную церковь.\n\nПитание: Завтрак\nРазмещение: Отель	After breakfast, we continue our journey to Karakol, traveling along the northern shore of Lake Issyk-Kul. Karakol is a charming town located in the far east of the Issyk-Kul basin, at an altitude of 1,760 meters. The town was founded by Russian Cossacks and lies along the river of the same name.\nOn the way to Karakol, we will take a hike in the Grigoriev Gorge, known for its scenic beauty and mountain landscapes. After the hike, we continue on to Karakol.\nBefore reaching the town, we’ll stop at the Przhevalsky Museum, dedicated to the famous Russian explorer Nikolay M. Przhevalsky. The memorial complex includes interesting exhibits from his travels and work, and his tomb is located nearby.\nIn Karakol, we’ll also visit the Dungan Mosque, a wooden structure built in Chinese style without using a single metal nail, as well as the wooden Russian Orthodox Church, another architectural highlight.\n\nMeals: B\nAccommodation: Hotel\n\n	\N
+51	13	\N	Экскурсия в ущелье Джети-Огуз	Excursion to Jeti-Ögüz Gorge 	01KGM4WHEZ78EK24MDRRC5JYH6.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Переезд в ущелье Джети-Огуз, известное своими красными песчаниковыми скалами «Семь быков» и «Разбитое сердце». С этим местом связано множество легенд.\n\nДалее путь ведёт в «Долину цветов», откуда начинается пеший маршрут. При удаче можно увидеть ледник Огуз-Баши («Голова быка»), вершина которого действительно напоминает голову быка с рогами.\n\nПеший поход по зелёному лесистому ущелью. В конце маршрута — пикник у реки с видом на заснеженные вершины. Возвращение к транспорту.\n\nПродолжительность похода: 4–5 часов\nПерепад высот: +500 м / −500 м\n\nПитание: Завтрак\nРазмещение: Отель	After breakfast, we drive to Jeti-Ögüz Gorge, a valley famous for its striking natural red sandstone formations. The impressive rock formations have names like "The Broken Heart" and "The Seven Bulls", and many legends are told about this valley. You’ll be amazed to learn when and how this unique landscape came to be!\nA bit further up the valley, we reach the "Valley of Flowers", where our hike begins. With some luck, we may catch a view of the Oguz-Bashi Glacier. The name “Oguz-Bashi” translates to "the head of the bull", and the peak indeed resembles a bull’s head with horns!\nWe’ll hike through a lush, tree-covered gorge. At the end of the trail, we’ll take a break for a picnic by the riverside, enjoying the view of the snow-covered peaks. After resting, we’ll walk back to the vehicle at a relaxed pace.\n(Duration of the hike: 4–5 hours or more. Elevation gain/loss: +500m / -500m)\nMeals: B\nAccommodation: Hotel\n	\N
+52	13	\N	Каракол – Кеген – Саты (380 км)	Karakol – Kegen– Saty (380 km) 	01KGM4WHF13FCFM845B6JX8VD2.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	После завтрака короткий переезд к горячим источникам недалеко от Каракола. Купание в термальном источнике.\n\nВо второй половине дня выезд в Казахстан через пограничный пункт Кеген. Прибытие в село Саты, прогулка по деревне.\n\nУжин и ночёвка в гостевом доме.\n\nПитание: Завтрак / Ужин\nРазмещение: Гостевой дом	After breakfast, short drive to Hot springs near Karakol. Swimming at the hot spring spa. \nAfternoon, you’ll depart from Karakol to the Kazakhstan border via the Kegen checkpoint. Arrive in Saty village. Exploration the village. Dinner and overnight in a guest house of Saty.  \nMeals: B/D\nAccommodation: Guest house\n	\N
+53	13	\N	Саты – озеро Каинды – озеро Кольсай – Саты	Saty - Kolsai Lake – Kayindi Lake - Saty Village	01KGM4WHF2KT5HFNHB91CH9B9X.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	После завтрака трансфер в Каиндинское ущелье. Осмотр озера Каинды (Берёзовое озеро), расположенного среди хвойных лесов на высоте 2000 метров. Озеро образовалось в 1911 году в результате землетрясения и оползня, перегородившего долину. Холодная вода сохранила затопленные деревья, стволы которых возвышаются над поверхностью воды, напоминая мачты кораблей.\n\nОбед в гостевом доме в Саты.\nВо второй половине дня переезд к озеру Кольсай, прогулка и осмотр. Возвращение в Саты.\n\nПитание: Завтрак / Обед / Ужин\nРазмещение: Гостевой дом	After breakfast, transfer to Kaindy Gorge. Sightseeing at Kaindy Lake. Kaindy Lake (Birch Lake) is situated among magnificent pine forests at an altitude of 2000 meters above sea level and is famous for its origin. It was formed in 1911 due to the powerful earthquake that triggered the landslide that blocked the valley by the natural dam, and the water has flooded the valley. The water of the lake is very cold, that is why the needles of the flooded trees are well preserved and clearly visible through the transparent surface of the water, and dry stems of fir trees overlook the water surface, like the masts of the submarine squadron. It is impossible to describe in words all this mystical splendor of the lake – it is necessary to go there and see everything with your own eyes. Lunch at the guest house in Saty. Afternoon drive to Kolsia Lake. \nExploration of Kolsai Lake. Later drive back to Saty village.\n\nMeals: B/L/D\nAccommodation: Guest house\n	\N
+54	13	\N	Саты – Чарынский каньон – Алматы	Saty village - Charyn Canyons – Almaty 	01KGM4WHF2KT5HFNHB91CH9B9Y.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Переезд в Чарынский каньон. Пешее исследование каньона. Чарынский каньон (Шарын) расположен в 195 км восточнее Алматы, протяжённость — 154 км вдоль реки Чарын. Он сформировался около 12 миллионов лет назад, высота склонов — 150–300 метров.\n\nПосле обеда переезд в Алматы.\n\nПитание: Завтрак\nРазмещение: Отель	Drive to Charyn canyons. Hiking exploration in Charyn Canyons. Charyn Canyon (Kazakh spelling “Sharyn”), located 195 km east of Almaty, near the border with China, stretches for 154 km along the Charyn River. The canyon is a natural monument consisting of sedimentary rocks formed about 12 million years ago. The slope's height is about 150-300 meters. Afternoon drive to Almaty. \nMeals: B\nAccommodation: Hotel\n	\N
+55	13	\N	Обзорная экскурсия по Алматы	Almaty city tour	01KGM4WHF34Y56TFCWESAEEMEX.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Экскурсия по Алматы с посещением Парка Панфилова, Зенковского собора, Музея музыкальных инструментов, Центрального государственного музея и Медео.\n\nПарк Панфилова назван в честь героев-панфиловцев. Зенковский собор — один из восьми уникальных деревянных зданий мира, построенный без гвоздей и переживший землетрясение 1911 года. Центральный музей знакомит с историей Казахстана и включает копию «Золотого человека». Медео — высокогорный спортивный комплекс с крупнейшим в мире катком для скоростного бега.\n\nВозвращение в отель. Отдых перед вылетом.\n\nПитание: Завтрак\nРазмещение: Отель	Sightseeing around Almaty includes visiting Panfilov Park, Zenkov Cathedral, National Musical Instruments Museum, Central State Museum, Medeo. The name of the Panfilov Park comes after the heroes of Panfilov. Inside the park there is a big monument in commemoration of the heroic actions made by 28 Almaty Soldiers who died back in 1941 fighting against Nazi tanks somewhere near Moscow. Zenkov Wooden Cathedral is one of the eight most unique wooden buildings in the world. It is one of the few tsarist-era buildings to survive the 1911 earthquake, despite the fact it is built entirely of wood and constructed without nails. Central State Museum provides an introduction to Kazakhstan's history and includes a miniature replica of the country's chief archeological treasure, the Golden Man - a warrior's costume made from 4.000 gold pieces, many finely decorated with animal motifs. In the Museum of Musical Instruments one can find various national musical instruments, the oldest of which are dated from the XVII century. Medeo is a picturesque valley located 15 km above Almaty. Besides beautiful nature, there are some other attractions to see, one of which is the world's largest speed skating ring known as Medeo. Back to the hotel. Rest before the morning flight. \nMeals: B\nAccommodation: Hotel\n	\N
+56	13	\N	Вылет (Алматы)	Almaty (Departure)	01KGM4WHF4EAJ4BXMV1JJWC9VF.jpg	\N	2026-02-04 10:59:04	2026-02-04 10:59:04	Трансфер в международный аэропорт Алматы.\nВылет из Казахстана.\n\n*** КОНЕЦ ОБСЛУЖИВАНИЯ ***	Transfer to Almaty International Airport.\nDeparture from Kazakhstan.\n\n\n\n*** END OF SERVICES ***\n	\N
+58	14	\N	Хива	Khiva	01KGRSEYCZBZXETARS14RRDDXV.jpg	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	День посвящён неспешному знакомству с архитектурными шедеврами Хивы внутри древних городских стен. Посещение самых значимых памятников с возможностью полюбоваться панорамными видами и тихими уголками старого города. Также возможен визит во дворец Нуруллабой, расположенный за пределами Ичан-Калы. Вторая половина дня — свободное время. Ночь в Хиве.\n\nПитание: завтрак в отеле	Today is devoted to a thoughtfully paced exploration of Khiva’s architectural masterpieces within the ancient city walls. Your visits focus on the most significant monuments, complemented by moments to enjoy panoramic viewpoints and quieter corners of the old town. Also, you can visit the Nurullaboy Palace just outside of Ichan Qala. The remainder of the afternoon is at leisure, allowing time to relax or explore independently. Overnight in Khiva.\n\nMeals: Breakfast at hotel\n	\N
+59	14	\N	Хива – Бухара (минивэн, 380 км)	Khiva – Bukhara (by minivan 380km)	01KGRSEYD0PYRQ0D0F6GGXACM9.png	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	После завтрака выезд из Хивы в Бухару на частном кондиционированном минивэне (около 7 часов в пути). Этот маршрут выбран для максимального комфорта и надёжности, так как железнодорожное сообщение на данном участке ограничено. По дороге предусмотрены остановки для отдыха. Прибытие в Бухару — во второй половине дня, заселение в отель и вечерняя прогулка у ансамбля Ляби-Хауз. Ночь в Бухаре.\n\nПитание: завтрак в отеле	After breakfast, depart Khiva by private, air-conditioned minivan for the journey to Bukhara, taking approximately 7 hours. This route is deliberately chosen to ensure the most reliable timing and overall comfort, as rail connections on this sector are limited and not well suited for a premium travel experience. The drive is broken up with planned comfort stops, allowing you to stretch your legs and enjoy refreshments along the way. Arrival in Bukhara is scheduled for the late afternoon, with ample time to settle into your hotel before an atmospheric evening walk around the Lyabi Hauz ensemble. Overnight in Bukhara.\n\nMeals: Breakfast at hotel\n	\N
+60	14	\N	Бухара	Bukhara	01KGRSEYD382ZSY1N4B6FD0TJK.webp	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	Полный день посвящён главным достопримечательностям Бухары: крепость Арк, величественный ансамбль Пои-Калян, торговые купола и традиционные кварталы, отражающие наследие Великого шёлкового пути. После обеда — свободное время. Ночь в Бухаре.\n\nПитание: завтрак в отеле	A full day is dedicated to the timeless highlights of Bukhara. Visits include the Ark Fortress, the majestic Poi Kalon complex, historic trading domes and traditional neighborhoods that reflect the city’s legacy as a Silk Road crossroads. The afternoon is left intentionally free, offering space for rest or individual exploration at your own rhythm. Overnight in Bukhara.\n\nMeals: Breakfast at hotel\n	\N
+61	14	\N	Бухара – Самарканд (поезд)	Bukhara – Samarkand (by train)	01KGRSEYD49E4FWWCEQ9G7NRFC.jpg	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	Свободное время до трансфера на вокзал. Поездка на скоростном поезде в Самарканд около 15:00, выбранном за комфорт и удобство. По прибытии — трансфер в отель. Ночь в Самарканде.\n\nПитание: завтрак в отеле	At leisure, transfer to the railway station for a high-speed train journey to Samarkand around 3PM, selected for its comfort, efficiency and spacious seating. Upon arrival, transfer to hotel. Overnight in Samarkand.\n\nMeals: Breakfast at hotel\n	\N
+63	14	\N	Самарканд – Ташкент (поезд)	Samarkand – Tashkent (by train)	01KGRSEYD7S2Y4XD5GRQY51Y11.jpg	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	Утренний поезд в Ташкент около 08:00. По прибытии — трансфер в отель и обзорная экскурсия по городу, включая знаменитые станции метро и прогулку по старому городу. Ночь в Ташкенте.\n\nПитание: завтрак в отеле	Take the morning train to Tashkent around 08 am. Upon arrival transfer to hotel and enjoy a carefully curated introduction to the city, including selected metro stations renowned for their design and a gentle walk through the historic old town. Overnight in Tashkent.\n\nMeals: Breakfast at hotel	\N
+57	14	\N	Прибытие в Ургенч – Хива (30 км)	Urgench - Arrival - Khiva (30km)	01KGRSEYCWCRJND7JVYFT05RDK.avif	\N	2026-02-05 12:27:56	2026-02-06 06:15:36	Прибытие рейсом TK262 в 07:10 в Ургенч. По прибытии встреча и трансфер в Хиву. Во второй половине дня — элегантная пешеходная прогулка по объекту Всемирного наследия ЮНЕСКО Ичан-Кала с его знаменитыми минаретами, медресе и крепостными стенами. Программа выстроена в спокойном ритме, чтобы вы могли насладиться атмосферой города. Ночь в Хиве.\n\nПитание: —	Arrival flight TK262 at 07:10 to Urgench, upon arrival, you are met and transferred to Khiva. The afternoon is dedicated to an elegant walking exploration of the UNESCO-listed Ichan Kala, unveiling its iconic minarets, madrassas and city walls. Time is intentionally left to enjoy the atmosphere at a relaxed and refined pace. Overnight in Khiva.\n\nMeals: -\n	\N
+62	14	\N	Самарканд	Samarkand	01KGRSEYD5MZM5QNPP2VVSP90T.jpg	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	Осмотр главных достопримечательностей Самарканда: площадь Регистан, некрополь Шахи-Зинда, мавзолей Гур-Эмир и мечеть Биби-Ханым. Программа сбалансирована и оставляет время для самостоятельных прогулок. Ночь в Самарканде.\n\nПитание: завтрак в отеле	Today you explore Samarkand’s most celebrated monuments, including Registan Square, the elegant Shah-i-Zinda necropolis, the Gur-Emir Mausoleum and the monumental Bibi-Khanym Mosque. The program is carefully balanced with time to enjoy the city independently or opt for a light, scenic excursion. Overnight in Samarkand.\n\nMeals: Breakfast at hotel\n	\N
+64	14	\N	Ташкент – Чимган (90 км)	Tashkent – Chimgan (90km)	01KGRSEYD98E72CCWEKEZX8NWM.jpg	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	Утром выезд в Чимганские горы (около 80 км, ~2 часа). По дороге — живописные пейзажи с деревнями, садами и ручьями. Посещение нового курорта Amirsoy. Подъём на канатной дороге к хребту Кумбель (2300 м, стоимость 10–18 USD в зависимости от дня и возраста), откуда открывается вид на вершину Большой Чимган (3300 м). Далее трансфер в Чимган, где по желанию возможна прогулка на лошадях или подъём на смотровую площадку. Посещение Чарвакского водохранилища. Ночь в Чимгане.\n\nПитание: завтрак в отеле	In the morning, depart to Chimgan Mountains (80 km, ~2 h.). You will be driving the road lying in picturesque surroundings full of local villages, gardens, and streams. Visit a brand new Amirsoy resort. You can ride the cable car to the Kumbel Ridge (2,300 m) (сable car fee (10-18 US$ depends on day, age) where you can clearly see the surrounding mountains and the peak known as 'Big Chimgan' (3,300 m). Then transfer to the Chimgan camp site, where, if you wish, you can take a cable car to the observation deck of the Big Chimgan or ride horses along the gorge at the foot of the mountain. Continue to the shore of Charvak reservoir, surrounded by green mountain flanks. With numerous resorts, beaches, and children summer camps. Overnight in Chimgan. \nMeals: Breakfast at hotel	\N
+65	14	\N	Чимган – Ташкент (90 км)	Chimgan – Tashkent (90km)	01KGRSEYDAWS64K0Q7E79FBAMF.jpg	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	Во второй половине дня выезд обратно в Ташкент. Свободное время для прогулок или покупок перед вылетом. Ночь в Ташкенте.\n\nПитание: завтрак в отеле	In the afternoon, check out from the hotel and drive back to Tashkent. Take the opportunity to explore the city again or indulge in some shopping before your return flight. Overnight stay in Tashkent.\n\nMeals: Breakfast at hotel\n	\N
+66	14	\N	Ташкент – Вылет	Tashkent – Departure	01KGRSEYDBNCYJC05MPPJZF3FZ.avif	\N	2026-02-05 12:42:45	2026-02-06 06:15:36	Трансфер в аэропорт для вылета.\n\nПитание: завтрак в отеле	Transfer to the airport for departure flight.\nMeals: Breakfast at hotel\n	\N
+68	16	\N	Астана-Прибытие (Казахстан)	Astana – Arrival (Kazakhstan)	01KH3SX5J6NAM7EWE4MYQEK4X4.jpg	\N	2026-02-10 11:35:23	2026-02-10 12:55:01	Прибытие в Астану. Трансфер в отель и размещение с 14:00. Свободное время для отдыха или самостоятельного знакомства с городом. Ночь в отеле.\nПитание: завтрак в отеле. Ужин в местном ресторане\n	Arrive in Astana. Transfer to the hotel and check-in at 14:00. Free time at leisure to relax or explore the city independently. Overnight at the hotel.\nMeals: Breakfast at Hotel. Dinner at local restaurant.	\N
+69	16	\N	Астана (Казахстан)	Astana (Kazakhstan)	01KH3SX5J7C1TGN3A22HN0Y5NM.jpg	\N	2026-02-10 12:55:01	2026-02-10 12:55:01	Завтрак в отеле.\nВ 09:00 встреча с гидом в лобби отеля. Обзорная экскурсия по столице Казахстана: посещение Большой мечети Астаны — крупнейшей в Центральной Азии, торгово-развлекательного центра Хан Шатыр, экскурсия в Астанинский театр оперы и балета.\nПрогулка по бульвару Нуржол, знакомство с «Осью тысячелетия», подъём на монумент Байтерек с панорамным видом на город. Приветственный обед с блюдами национальной казахской кухни.\nВо второй половине дня — Площадь Независимости, комплекс EXPO 2017 и торговый центр Mega Silk Way. Возвращение в отель.\nСвободное время.\nНочь в отеле.\n\nПитание: Завтрак/ Ужин \n	Breakfast at the hotel.\nAt 09:00, meet your guide and fellow group members in the hotel lobby to begin a comprehensive sightseeing tour of Kazakhstan’s capital. Visit the Astana Grand Mosque, the largest mosque in Central Asia, and admire its impressive architecture and peaceful atmosphere. Continue to the futuristic Khan Shatyr shopping and entertainment center, followed by a guided visit to the renowned Astana Opera House.\nTake a walk along Nurzhol Boulevard to learn about the city’s Millennium Axis, then ascend the iconic Bayterek Tower for panoramic views of Astana. Enjoy a welcome lunch featuring authentic Kazakh cuisine.\nIn the afternoon, explore Independence Square with its monumental landmarks and symbols of national history. Conclude the day with a visit to the EXPO 2017 complex and the Mega Silk Way Mall before returning to the hotel.\nFree time.\nOvernight at the hotel.\n\nMeals: Lunch/ Dinner\n	\N
+70	16	\N	Астана – Алматы (Казахстан)	Astana – Almaty (Kazakhstan)	01KH5RZJBW6R0GM2HYNSHAFP57.jpg	\N	2026-02-10 12:55:01	2026-02-11 07:17:20	Ранний завтрак навынос в отеле. Трансфер в аэропорт и перелёт в Алматы. Обзорная экскурсия по крупнейшему городу Казахстана: Панфиловский парк, исторический Зенковский собор, Музей национальных музыкальных инструментов. Поездка на Кок-Тобе, канатная дорога и панорамные виды на город. Прогулка по оживлённой пешеходной улице Арбат.\nСвободное время.\nНочь в отеле.\nПитание: завтрак.\n	Early in the morning, collect a take-away breakfast from the hotel and transfer to the airport for your flight to Almaty. Upon arrival, begin a sightseeing tour of Kazakhstan’s largest city.\nHighlights of the day include Panfilov Park, the historic Zenkov (Ascension) Cathedral, and the Museum of National Musical Instruments. Continue to Kok Tobe, a scenic park situated at an altitude of 1,100 meters, popular with both locals and visitors. Enjoy a cable car ride and take in magnificent panoramic views of the city.\nConclude the tour with free time on the lively Arbat Street (Zhybek Zholy Street), Almaty’s main pedestrian avenue.\nFree time.\nOvernight at the hotel\n	\N
+72	16	\N	Каракол – Жети-Огуз – Кочкор (Кыргызстан)	Karakol – Jety Oguz – Kochkor (Kyrgyzstan)	01KHDW8MYT2EKEP1714KZGYD38.jpg	\N	2026-02-14 08:19:36	2026-02-14 10:48:39	Завтрак. Экскурсия по деревянной православной церкви и дунганской мечети. Поездка в ущелье Жети-Огуз, короткая прогулка среди красных скал. Дорога вдоль озера Иссык-Куль, остановка в селе Боконбаево для демонстрации охоты с орлами. Прибытие в Кочкор. Вечером — ужин с местной семьёй.\nНочь в отеле.\nПитание: завтрак, обед, ужин.\n	Breakfast at the hotel.\nAfter breakfast, visit the Wooden Orthodox Church and the distinctive Dungan Mosque, built in traditional Chinese architectural style. Continue with a scenic drive to the Jety-Oguz Gorge, famous for its striking red rock formations. Enjoy a short walk in the gorge surrounded by beautiful mountain landscapes.\nLater, drive along the southern shore of Lake Issyk-Kul, one of the largest alpine lakes in the world. En route, stop in the village of Bokonbaevo to watch a traditional eagle hunting demonstration. Continue the journey to Kochkor, enjoying some of the most impressive views of Lake Issyk-Kul along the way.\nIn the evening, enjoy a traditional dinner with a local Kyrgyz family.\nOvernight at the hotel in Kochkor.\nMeals: Breakfast, lunch, dinner.	\N
+71	16	\N	Алматы – Чарынский каньон – Каракол (Казахстан / Кыргызстан)	Almaty – Charyn Canyon – Karakol (Kazakhstan/Kyrgyzstan)	01KHDW8MYQEA4J1Q1YDSAAMTEW.jpg	\N	2026-02-10 12:55:01	2026-02-14 10:48:39	Завтрак в отеле. В 08:00 встреча с гидом и выезд к Чарынскому каньону (220 км, 3–4 ч). Исследование «Долины Замков» с уникальными скальными образованиями. Пикник на природе. Поездка к кыргызско-казахской границе и далее в Каракол через живописную долину Каркара. Вечером — ужин с уйгурской семьёй и кыргызский фольклорный концерт.\nНочь в отеле.\nПитание: завтрак, пикник, ужин.\n	Breakfast at the hotel.\nAt 08:00, meet your guide and driver in the hotel lobby and depart Almaty for Charyn Canyon (220 km, approximately 3–4 hours). Located in eastern Kazakhstan, Charyn Canyon is part of Charyn National Park and is often compared to the Grand Canyon for its dramatic scale and striking multi-colored rock formations.\nExplore the famous Valley of Castles, home to unique tower-like cliffs and an ancient ash-tree grove. Take time to enjoy a picnic lunch and a short rest surrounded by unforgettable natural scenery. Afterwards, enjoy a walk through the canyon, admiring its breathtaking landscapes.\nContinue with a transfer to the Kazakh–Kyrgyz border crossing at Kegen (116 km). After border formalities, meet your Kyrgyz guide and driver and proceed to Karakol via the picturesque Karkara Valley (110 km).\nIn the evening, enjoy a traditional dinner with a Uyghur family, accompanied by a Kyrgyz folkloric show featuring national music and songs.\nOvernight at the hotel in Karakol.\nMeals: Breakfast, picnic lunch, dinner.	\N
+81	16	\N	Мары – Мерв – Бухара (Туркменистан / Узбекистан)	Mary – Merv – Bukhara (Turkmenistan/Uzbekistan)	01KHE09X10HGS65KJM1FEY806E.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Экскурсия по древнему городу Мерв (ЮНЕСКО), затем трансфер через границу в Бухару. Размещение в отеле.\nНочь в отеле.\nПитание: завтрак, обед.	Breakfast at the hotel.\nDrive to the ancient city of Merv and explore the UNESCO-listed Historical and Cultural Park of Ancient Merv, including the Sultan Sanjar Mausoleum, Erk Gala, Gyaur Gala, and Gyz Gala fortresses.\nIn the afternoon, drive to the Turkmenistan–Uzbekistan border at Farap–Alat. After border formalities, continue to Bukhara.\nArrival and hotel check-in.\nOvernight at the hotel.\nMeals: Breakfast, lunch.	\N
+74	16	\N	Сон-Куль – Бишкек (Кыргызстан)	Son-Kul – Bishkek (Kyrgyzstan)	01KHDW8MYWB39G1R0C0TBF3Y7R.jpg	\N	2026-02-14 08:19:36	2026-02-14 10:48:39	Завтрак в лагере. Выезд в Бишкек (400 км), остановка в Кочкоре для посещения мастерской по изготовлению войлочных ковров шырдак. После обеда — Башня Бурана. Прибытие в Бишкек вечером.\nНочь в отеле.\nПитание: завтрак, обед, ужин.\n	Breakfast at the camp.\nAt 09:00, depart for Bishkek (400 km). En route, stop in Kochkor to visit a local workshop and learn about the traditional process of making Kyrgyz felt carpets (shyrdaks). After lunch, continue the journey via the Burana Tower, a historical minaret that once belonged to the ancient city of Balasagun (11th–13th centuries).\nArrival in Bishkek in the evening.\nOvernight at the hotel.\nMeals: Breakfast, lunch, dinner.	\N
+75	16	\N	Бишкек – Ташкент (Кыргызстан / Узбекистан)	Bishkek – Tashkent (Kyrgyzstan/Uzbekistan)	01KHDW8MYWB39G1R0C0TBF3Y7S.webp	\N	2026-02-14 08:19:36	2026-02-14 10:48:39	Завтрак. Обзорная экскурсия по Бишкеку: Парк Дуб, площадь Ала-Тоо, Филармония, статуя Манаса, площадь Победы, Мечеть Махмуда Кашгари. После обеда — свободное время. Вечером трансфер в аэропорт и перелёт в Ташкент.\nНочь в отеле.\nПитание: завтрак.	Breakfast at the hotel.\nAt 09:00, begin a sightseeing tour of Bishkek. Visit Oak Park, Ala-Too Square, the Philharmonic Hall, the Statue of Manas, Victory Square, and the modern Mahmud Kashgari Mosque.\nAfter lunch, enjoy some free time in the city. In the evening, transfer to Bishkek Airport for your flight to Tashkent. Upon arrival, transfer to the hotel.\nOvernight at the hotel.	\N
+76	16	\N	Ташкент (Узбекистан)	Tashkent (Uzbekistan)	01KHE09X0W6315GKWT7FF2WB9Z.webp	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Экскурсия по старому городу: комплекс Хаст-Имам, Чорсу-базар, музей прикладного искусства, площадь Амир Тимура, Метро Ташкента. Свободное время.\nНочь в отеле.\nПитание: завтрак.	Breakfast at the hotel.\nAt 09:00, start a guided tour of Tashkent. Explore the Old City, including the Khast-Imam Complex and the lively Chorsu Bazaar. Continue with a ride on the Tashkent Metro to the city center. Visit the Museum of Applied Arts and walk past the Navoi Theatre to Amir Timur Square, where the tour concludes.\nFree time.\nOvernight at the hotel.	\N
+77	16	\N	Ташкент – Ургенч – Хива (Узбекистан)	Tashkent – Urgench – Khiva (Uzbekistan)	01KHE09X0Y9GC5KDCQP0DJPAZQ.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Ранний завтрак навынос. Перелёт в Ургенч (1,5 ч) и трансфер в Хиву (30 км). Размещение с 14:00. Пешеходная экскурсия по Ичан-Кале: медресе, минареты, дворцы и мавзолеи. Свободное время.\nНочь в отеле.\nПитание: завтрак.	Early in the morning, collect a take-away breakfast and transfer to the domestic airport for your flight to Urgench (1 hr 30 min). Upon arrival, transfer to Khiva (30 km) and leave luggage at the hotel. Check-in from 14:00.\nBegin a guided walking tour of Khiva’s Ichan-Kala Fortress, a UNESCO World Heritage Site. Visit the Muhammad Amin Khan Madrassah, Muhammad Rahim Khan Madrassah, Kalta Minor Minaret, Juma Mosque, Toshkhovli Palace, Pakhlavan Mahmud Mausoleum, and the Islam Khodja Minaret.\nFree time in the afternoon.\nOvernight at the hotel.	\N
+78	16	\N	Хива – Дарваза (Узбекистан / Туркменистан)	Khiva – Darvaza Gas Crater* (Uzbekistan/Turkmenistan)	01KHE09X0Y9GC5KDCQP0DJPAZR.avif	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Поездка к туркменской границе, далее — к Дарвазскому газовому кратеру (270 км). Размещение в палаточном/юртовом лагере у кратера, ужин у костра.\nНочь в лагере.\nПитание: завтрак, ужин.\nПримечание: Путешествие через пустыню Каракумы осуществляется на внедорожниках 4x4 по грунтовым дорогам — захватывающий опыт внедорожного путешествия. В лагере доступны базовые совместные удобства на открытом воздухе.\n\nОпция: посещение Дарвазского кратера можно пропустить в пользу дополнительной ночи в Ашхабаде (за дополнительную плату).	Breakfast at the hotel.\nAt 09:30, drive to the Uzbekistan–Turkmenistan border at Shavat–Dashoguz (60 km). After completing border formalities, meet your Turkmen guide and continue to the Darvaza Gas Crater, located deep in the Karakum Desert (270 km).\nUpon arrival, set up camp and enjoy a fire-cooked dinner near the spectacular burning crater.\nOvernight in tents / yurts near the crater.\nMeals: Breakfast, dinner.\n\nNote: Travel across the Karakum Desert is by 4x4 vehicles on unpaved roads, offering a thrilling off-road experience. Basic shared outdoor facilities are available at the camp.\nOptional: The Darvaza visit may be skipped in favor of an additional night in Ashgabat (at extra cost).	\N
+89	16	\N	Душанбе – Выезд (Таджикистан)	Dushanbe – Departure (Tajikistan)	\N	\N	2026-02-14 08:19:36	2026-02-14 08:19:36	Завтрак. Выезд из отеля к Международному аэропорту Душанбе. Окончание тура.\nПитание: завтрак	Breakfast at the hotel.\nCheck-out by noon. Free time until transfer to Dushanbe International Airport.\nDeparture. End of the tour.	\N
+82	16	\N	Бухара (Узбекистан)	Bukhara (Uzbekistan)	01KHE09X11NT60RCHV2RDPV546.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Пешеходная экскурсия по Старому городу: ансамбли, медресе, минареты, крепости и мавзолеи. Вечером — национальный фольклорный шоу-программа.\nНочь в отеле.\nПитание: завтрак.\n	Breakfast at the hotel.\nEnjoy a guided walking tour of Bukhara’s Old City. Visit the Lyabi-Hauz Ensemble, Magoki-Attori Mosque, trading domes, Kalyan Minaret and Mosque, Miri-Arab Madrassah, Ulugbek and Abdulazizkhan Madrassahs, Ark Fortress, Bolo-Khauz Mosque, and the Ismail Samani and Chashma Ayub Mausoleums.\nIn the evening, attend a national folklore show at the Nadir Divan-Begi Madrassah.\nOvernight at the hotel.\n	\N
+83	16	\N	Бухара – Самарканд (Узбекистан)	Bukhara – Samarkand (Uzbekistan)	01KHE09X12EEKRAKGY7CN9VAFE.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Дальнейшее знакомство с Бухарой. После 15:00 трансфер на поезд в Самарканд. Размещение в отеле, свободное время.\nНочь в отеле.\nПитание: завтрак.\n	Breakfast at the hotel.\nContinue sightseeing in and around Bukhara. Visit Chor-Minor Madrassah, Sitorai Mokhi-Khosa Palace, and the Mausoleum of Bakhouddin Naqshbandi.\nAt 15:00, transfer to the railway station for the train to Samarkand. Arrival and transfer to the hotel.\nFree time.\nOvernight at the hotel.\n	\N
+84	16	\N	Самарканд (Узбекистан)	Samarkand (Uzbekistan)	01KHE09X13NWATQC22W53XF86T.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Самарканд (Узбекистан)\nЗавтрак. Экскурсия: Регистан, Гур-Эмир, Биби-Ханум, Шахи-Зинда. Посещение деревни Кони-Гиль и мастерской по изготовлению бумаги из шелковицы. Свободный вечер.\nНочь в отеле.\nПитание: завтрак.	Breakfast at the hotel.\nAt 09:00, begin a city tour of Samarkand. Visit Registan Square, Gur-Emir Mausoleum, Bibi-Khanum Mosque, and the Shakhi-Zinda Necropolis. Continue to the village of Koni-Ghil to learn about traditional Samarkand paper-making from mulberry bark.\nFree evening.\nOvernight at the hotel.	\N
+86	16	\N	Пенджикент – Семь Озёр – Пенджикент (Таджикистан)	Penjikent – Seven Lakes – Penjikent (Tajikistan)	01KHE09X17BH21J6EW82KDMVZS.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Поездка к Семьям Озёрам (Haft Kul), прогулки, обед на природе. Возвращение в Пенджикент.\nНочь в отеле.\nПитание: завтрак, обед.	Breakfast at the hotel.\nDrive to the Seven Lakes (Haft Kul), a chain of seven stunning mountain lakes, each with its own color and character. Enjoy lunch and scenic walks.\nReturn to Penjikent.\nOvernight at the hotel.\nMeals: Breakfast, lunch.	\N
+87	16	\N	Пенджикент – Искандеркуль – Душанбе (Таджикистан)	Penjikent – Iskanderkul – Dushanbe (Tajikistan)	01KHE09X187PY93QA207569D3Q.avif	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Поездка к озеру Искандеркуль через перевал Анзоб (3 300 м), прогулка к водопаду «Фан Ниагара». После обеда трансфер в Душанбе.\nНочь в отеле.\nПитание: завтрак, обед.	Breakfast at the hotel.\nDrive to Iskanderkul Lake via the Anzob Pass. Explore the lake area and walk to the “Fan Niagara” waterfall. After lunch, continue to Dushanbe.\nArrival and hotel check-in.\nOvernight at the hotel.\nMeals: Breakfast, lunch.	\N
+88	16	\N	Душанбе (Таджикистан)	Dushanbe (Tajikistan)	01KHE09X187PY93QA207569D3R.webp	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Экскурсия по Душанбе: крепость Хисар, музеи, парк Рудаки, памятники. Свободное время. Вечером прощальный ужин.\nНочь в отеле.\nПитание: завтрак, ужин.	Breakfast at the hotel.\nBegin a city tour of Dushanbe. Visit the Hissar Fortress, National Museum of Tajikistan, Gurminj Musical Instruments Museum, Statue of Ismail Samani, and Rudaki Park.\nFree time. In the evening, enjoy a farewell dinner.\nOvernight at the hotel.\nMeals: Breakfast, dinner	\N
+73	16	\N	Кочкор – Сон-Куль (Кыргызстан)	Kochkor – Son-Kul (Kyrgyzstan)	01KHDW8MYVPRETEH1B88KRNCRA.jpg	\N	2026-02-14 08:19:36	2026-02-14 10:48:39	Завтрак. Поездка к высокогорному озеру Сон-Куль (3 016 м) через перевал Калмак-Ашу (3 400 м). Вечером знакомство с кочевым образом жизни: дегустация кымыза, хлеба, молочных продуктов. По желанию — конная прогулка (за доп. плату).\nУжин и ночь в юртовом лагере.\nПитание: завтрак, обед, ужин.\n	Breakfast at the hotel.\nDrive to Son-Kul Lake (120 km), a remote high-mountain lake located at an altitude of 3,016 meters above sea level, via the Kalmak Ashu Pass (3,400 m). Son-Kul lies on a vast, treeless alpine plateau where shepherds bring their livestock during the summer months and set up traditional yurt camps.\nUpon arrival, immerse yourself in the nomadic way of life. Accompanied by your guide, learn about Kyrgyz traditions and observe the preparation of kymyz, the national drink made from mare’s milk. You will be invited to taste kymyz, along with traditional bread, dairy products, and homemade jam. The area is also known for its grazing herds, yurt settlements, edelweiss flowers, and even camels.\nOptional horse riding is available (at an additional cost).\nDinner and overnight at a traditional yurt camp.\nMeals: Breakfast, lunch, dinner.	\N
+80	16	\N	Ашхабад – Мары (Туркменистан)	Ashgabat – Mary (Turkmenistan)	01KHE09X0ZASFZJYE3E52T6BCV.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Обзорная экскурсия по Ашхабаду: Ниса, мечети, памятники, парк, конюшни ахалтекинских лошадей. Вечером перелёт в Мары, трансфер в отель.\nНочь в отеле.\nПитание: завтрак, обед, ужин.\n	Breakfast at the hotel.\nBegin a sightseeing tour of Ashgabat, the capital of Turkmenistan, known for holding the Guinness World Record for the highest concentration of white marble buildings. Visit Old Nisa (UNESCO World Heritage Site), the Spiritual Mosque, the Monument of Neutrality, Ertugrul Gazi Mosque, Independence Park, and the Akhal-Teke horse stables.\nIn the evening, transfer to the airport for your flight to Mary. Upon arrival, transfer to the hotel.\nFree time.\nMeals: Breakfast, lunch, dinner.\n	\N
+85	16	\N	Самарканд – Пенджикент (Узбекистан / Таджикистан)	Samarkand – Penjikent (Uzbekistan / Tajikistan)	01KHE09X16AZEZ1CM0KRPA02YA.jpg	\N	2026-02-14 08:19:36	2026-02-14 11:59:14	Завтрак. Переезд к таджикской границе, экскурсия по Пенджикенту: Саразм (ЮНЕСКО), руины древнего города, музей Рудаки. Свободное время.\nНочь в отеле.\nПитание: завтрак.\n\nПримечание: В более удалённом и аутентичном регионе Фанских гор туристическая инфраструктура проще. Размещение будет в лучшем доступном местном отеле советской эпохи. Ожидайте более скромные удобства по сравнению с крупными городами — это часть настоящего приключения!	Breakfast at the hotel.\nTransfer to the Jartepa border crossing and complete border formalities. Meet your Tajik guide and begin sightseeing in Penjikent. Visit the ancient settlement of Sarazm (UNESCO World Heritage Site), the ruins of Ancient Penjikent, and the Rudaki Museum.\nFree time.\nOvernight at the hotel.\nDuration of sightseeing tour: 3–4 hours.\nNote: Accommodation is in the best available local hotel with basic facilities, reflecting the authentic character of the region.	\N
+\.
+
+
+--
+-- Data for Name: web_tour_free_prices; Type: TABLE DATA; Schema: public; Owner: developer
+--
+
+COPY public.web_tour_free_prices (id, web_tour_id, pax_count, price, created_at, updated_at) FROM stdin;
+1	10	1	950.00	2026-02-27 20:24:07	2026-02-27 20:24:07
+2	10	2	920.00	2026-02-27 20:24:07	2026-02-27 20:24:07
 \.
 
 
@@ -12110,15 +13460,9 @@ COPY public.web_tour_days (id, web_tour_id, day_number, place_name_ru, place_nam
 --
 
 COPY public.web_tour_packages (id, web_tour_id, package_id, is_include, created_at, updated_at) FROM stdin;
-63	11	8	t	\N	\N
-64	11	9	t	\N	\N
-3	2	1	t	\N	\N
-4	2	4	t	\N	\N
-5	2	7	t	\N	\N
-6	2	9	t	\N	\N
-7	2	10	t	\N	\N
-8	2	11	t	\N	\N
-9	2	12	t	\N	\N
+68	11	11	t	\N	\N
+65	11	12	t	\N	\N
+11	2	21	f	\N	\N
 37	6	4	t	\N	\N
 38	6	1	t	\N	\N
 39	6	8	t	\N	\N
@@ -12128,20 +13472,13 @@ COPY public.web_tour_packages (id, web_tour_id, package_id, is_include, created_
 43	6	13	t	\N	\N
 44	6	21	f	\N	\N
 45	6	19	f	\N	\N
-65	11	12	t	\N	\N
-66	11	13	t	\N	\N
-67	11	1	t	\N	\N
-68	11	11	t	\N	\N
-10	2	13	t	\N	\N
-13	2	16	f	\N	\N
-12	2	18	f	\N	\N
-14	2	19	f	\N	\N
-15	2	20	f	\N	\N
-11	2	21	f	\N	\N
 69	11	4	f	\N	\N
 70	11	17	f	\N	\N
+64	11	9	t	\N	\N
+66	11	13	t	\N	\N
 71	11	19	f	\N	\N
 72	11	21	f	\N	\N
+67	11	1	t	\N	\N
 49	7	1	t	\N	\N
 46	7	8	t	\N	\N
 47	7	9	t	\N	\N
@@ -12163,8 +13500,30 @@ COPY public.web_tour_packages (id, web_tour_id, package_id, is_include, created_
 30	4	19	f	\N	\N
 31	4	20	f	\N	\N
 32	4	21	f	\N	\N
+109	14	19	f	\N	\N
 53	8	1	t	\N	\N
 54	8	8	t	\N	\N
+110	14	20	f	\N	\N
+111	14	21	f	\N	\N
+73	12	6	t	\N	\N
+86	13	1	t	\N	\N
+87	13	7	t	\N	\N
+88	13	9	t	\N	\N
+89	13	11	t	\N	\N
+90	13	13	t	\N	\N
+91	13	22	t	\N	\N
+92	13	16	f	\N	\N
+93	13	18	f	\N	\N
+94	13	19	f	\N	\N
+95	13	20	f	\N	\N
+96	13	17	f	\N	\N
+97	13	21	f	\N	\N
+99	14	4	t	\N	\N
+3	2	1	t	\N	\N
+4	2	4	t	\N	\N
+74	12	7	t	\N	\N
+75	12	9	t	\N	\N
+76	12	10	t	\N	\N
 33	5	1	t	\N	\N
 34	5	8	t	\N	\N
 36	5	9	t	\N	\N
@@ -12177,6 +13536,52 @@ COPY public.web_tour_packages (id, web_tour_id, package_id, is_include, created_
 57	9	13	t	\N	\N
 61	9	19	f	\N	\N
 62	9	21	f	\N	\N
+77	12	11	t	\N	\N
+78	12	12	t	\N	\N
+79	12	13	t	\N	\N
+80	12	16	f	\N	\N
+81	12	17	f	\N	\N
+82	12	18	f	\N	\N
+83	12	19	f	\N	\N
+84	12	20	f	\N	\N
+85	12	21	f	\N	\N
+5	2	7	t	\N	\N
+6	2	9	t	\N	\N
+7	2	10	t	\N	\N
+8	2	11	t	\N	\N
+9	2	12	t	\N	\N
+10	2	13	t	\N	\N
+13	2	16	f	\N	\N
+12	2	18	f	\N	\N
+14	2	19	f	\N	\N
+15	2	20	f	\N	\N
+100	14	8	t	\N	\N
+101	14	9	t	\N	\N
+102	14	10	t	\N	\N
+103	14	11	t	\N	\N
+104	14	12	t	\N	\N
+98	14	1	t	\N	\N
+105	14	13	t	\N	\N
+106	14	16	f	\N	\N
+107	14	17	f	\N	\N
+108	14	18	f	\N	\N
+113	16	4	t	\N	\N
+114	16	7	t	\N	\N
+115	16	9	t	\N	\N
+116	16	11	t	\N	\N
+117	16	12	t	\N	\N
+118	16	13	t	\N	\N
+119	16	14	t	\N	\N
+120	16	22	t	\N	\N
+121	16	10	f	\N	\N
+122	16	15	f	\N	\N
+123	16	16	f	\N	\N
+124	16	18	f	\N	\N
+125	16	19	f	\N	\N
+126	16	20	f	\N	\N
+127	16	21	f	\N	\N
+63	11	8	t	\N	\N
+112	16	1	t	\N	\N
 \.
 
 
@@ -12185,7 +13590,6 @@ COPY public.web_tour_packages (id, web_tour_id, package_id, is_include, created_
 --
 
 COPY public.web_tour_prices (id, web_tour_id, from_date, to_date, deadline, price, created_at, updated_at, status) FROM stdin;
-2	2	2026-04-02 00:00:00	2026-04-09 00:00:00	2026-02-20 00:00:00	810	2025-10-07 11:35:26	2025-11-24 10:59:48	1
 4	2	2026-05-04 00:00:00	2026-05-11 00:00:00	2026-03-20 00:00:00	810	2025-11-24 11:02:36	2025-11-24 11:19:29	1
 5	2	2026-09-03 00:00:00	2026-09-10 00:00:00	2026-07-20 00:00:00	810	2025-11-24 11:02:36	2025-11-24 11:19:29	1
 6	2	2026-10-07 00:00:00	2026-10-14 00:00:00	2026-08-20 00:00:00	810	2025-11-24 11:02:36	2025-11-24 11:19:29	1
@@ -12197,7 +13601,15 @@ COPY public.web_tour_prices (id, web_tour_id, from_date, to_date, deadline, pric
 14	10	2026-01-01 00:00:00	2026-12-31 00:00:00	2026-12-31 00:00:00	900	2025-12-20 11:49:19	2025-12-20 11:50:09	1
 13	9	2026-01-03 00:00:00	2026-12-05 00:00:00	2026-12-05 00:00:00	220	2025-12-19 13:25:18	2025-12-26 06:09:41	1
 8	5	2026-01-02 00:00:00	2026-12-31 00:00:00	2026-12-31 00:00:00	150	2025-12-01 13:43:16	2025-12-26 06:10:59	1
-15	11	2026-01-01 00:00:00	2026-12-31 00:00:00	2026-12-31 00:00:00	149	2026-01-31 10:12:57	2026-01-31 10:14:51	1
+2	2	2026-04-02 00:00:00	2026-04-09 00:00:00	2026-02-20 00:00:00	810	2025-10-07 11:35:26	2026-02-02 09:50:40	2
+16	12	2026-04-01 00:00:00	2026-09-16 00:00:00	2026-08-15 00:00:00	2075	2026-02-03 12:01:41	2026-02-03 12:01:41	1
+17	2	2026-09-16 00:00:00	2026-09-23 00:00:00	2026-08-01 00:00:00	810	2026-02-04 07:32:31	2026-02-04 07:32:31	1
+18	2	2026-06-01 00:00:00	2026-06-08 00:00:00	2026-05-01 00:00:00	810	2026-02-04 07:32:31	2026-02-04 07:33:50	1
+19	13	2026-06-01 00:00:00	2026-09-15 00:00:00	2026-09-15 00:00:00	0	2026-02-04 10:59:04	2026-02-04 10:59:04	1
+20	14	2026-04-01 00:00:00	2026-10-15 00:00:00	2026-10-15 00:00:00	0	2026-02-05 12:27:56	2026-02-05 12:27:56	1
+22	16	2026-06-04 00:00:00	2026-06-25 00:00:00	2026-05-04 00:00:00	5980	2026-02-10 11:35:23	2026-02-14 08:30:54	1
+23	16	2026-08-06 00:00:00	2026-08-27 00:00:00	2026-07-06 00:00:00	5980	2026-02-14 08:30:54	2026-02-14 08:30:54	\N
+15	11	2026-01-01 00:00:00	2026-12-31 00:00:00	2026-12-31 00:00:00	130	2026-01-31 10:12:57	2026-02-21 08:11:41	1
 \.
 
 
@@ -12213,16 +13625,20 @@ COPY public.web_tour_requests (id, user_id, web_tour_id, phone, citizenship, com
 -- Data for Name: web_tours; Type: TABLE DATA; Schema: public; Owner: developer
 --
 
-COPY public.web_tours (id, name_ru, name_en, start_date, end_date, deadline, status, description_ru, description_en, photo, created_at, updated_at, is_popular) FROM stdin;
-2	Интенсивный курс «Шелковый путь» (тур с фиксированным выездом) 8 дней	Silk Road Intensive (fixed departure tour) 8D	2026-04-02 00:00:00	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Программа путешествия составлена ​​с учётом дат рейсов Turkish Airlines из ЕС через Стамбул. Если клиенты летят в Ташкент другими авиакомпаниями, мы предлагаем дополнительный трансфер на автомобиле «аэропорт-отель/отель-аэропорт» (в одну сторону) за 20 долларов США.\n\nОтели могут быть изменены!	The travel program is created with the date of the Turkish Airlines flights from EU via Istanbul. If customers fly to Tashkent with other airlines, we offer an additional transfer by car “airport-hotel/hotel-airport” (one way) for US$20.\nEarly and later check-outs outside of the program are not included in the price.\n\nHotels are subject to change!	01K6ZC1VBG9SH6S65MFC9DAKEQ.jpg	2025-10-07 11:35:26	2025-11-24 10:59:48	t
-4	Погрузитесь в мир Узбекистана за 7 дней	Discover Uzbekistan 7 days	2026-01-01 00:00:00	2026-10-15 00:00:00	2026-09-01 00:00:00	1	Этот тур охватывает основные достопримечательности Ташкента, Ферганской долины, Бухары и Самарканда. Мы рекомендуем начинать путешествие с Кыргызстана и сочетать его с этим маршрутом.	This tour covers the main highlight of Tashkent, Fergana valley, Bukhara and Samarkand. We recommend this tour to combine and start with Kyrgyzstan first. 	01KAZPS3BCG31Q794XSEP90ND8.webp	2025-11-24 11:33:06	2025-11-26 09:09:13	f
-5	Однодневный тур в Отрар и Туркестан	Day trip to Otrar and Turkestan 	2026-01-01 00:00:00	2026-12-31 00:00:00	2026-01-01 00:00:00	1	Однодневная экскурсия по древним городам Южного Казахстана – отличный способ познакомиться со средневековой историей региона и увидеть его уникальные архитектурные памятники. В ходе поездки вы посетите археологические раскопки, исторический музей «Отрар», архитектурный комплекс в Туркестане и другие знаковые места.	A one-day tour of the ancient cities of Southern Kazakhstan is an excellent way to explore the region’s medieval history and see its unique architectural landmarks. During the trip, you will visit archaeological excavation sites, the Otrar Historical Museum, the architectural complex in Turkestan, and other iconic places.	01KBD2JYYFTMH6VBA3614ARX3E.jpg	2025-12-01 13:43:16	2025-12-26 06:08:06	f
-8	Экскурсия на винодельню Uzumfermer в Кибрае	Uzumfermer winery Kibray tour	2026-01-01 00:00:00	2026-12-31 00:00:00	2026-12-31 23:59:00	1	Приглашаем вас отправиться в атмосферное путешествие в мир ремесленного виноделия и открыть для себя подлинный вкус узбекских традиций — там, где ароматное вино рождается из солнечного винограда и заботы мастеров.\nВ Кибрае, на семейной винодельне Uzumfermer, вас ждёт:\n•\tПрогулка по живописному экзотическому саду\n•\tПосещение ухоженных виноградников\n•\tЗнакомство с полным циклом производства вина\n•\tОбзор современного винодельческого оборудования\n•\tИнтересные факты и секреты мастерства от владельцев винодельни\nЭто путешествие идеально подойдёт тем, кто ценит природу, гастрономические открытия и новые яркие впечатления.\n	We invite you to embark on an atmospheric journey into the world of artisan winemaking and discover the authentic taste of Uzbek traditions — right at the place where fragrant wine is born from sun-ripened grapes and the passion of local winemakers.\nAt Uzumfermer, a family-run winery in Kibray, you will enjoy:\n•\tA walk through a picturesque exotic garden\n•\tA visit to well-maintained vineyards\n•\tAn introduction to the full wine production cycle\n•\tAn overview of modern winemaking equipment\n•\tFascinating stories, facts, and family secrets shared by the winemakers\nThis tour is perfect for those who appreciate nature, gastronomy, and new memorable experiences.\n	01KC1P5TR41BSN6F13FRFFR83C.jpg	2025-12-09 13:52:53	2025-12-09 13:58:00	t
-6	Трехдневный тур в Самарканд и Бухару	Three-Day Tour to Samarkand and Bukhara	2026-01-01 00:01:00	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Если у вас есть всего пара свободных дней или вы хотите получить общее впечатление об Узбекистане, трехдневный тур в Самарканд и Бухару станет лучшим выбором. Путешествие начинается в легендарном Самарканде — городе, который ставят в один ряд с Римом и Вавилоном и который заслуженно входит в список объектов Всемирного наследия ЮНЕСКО. Затем вы отправитесь в бухарский оазис тишины и старины — город, где минареты и медресе создают практически неизменный на протяжении веков пейзаж. Проведите день на Великом шёлковом пути, познакомьтесь с самыми значимыми достопримечательностями страны и откройте для себя атмосферу двух её главных исторических центров. Этот тур позволит максимально насыщенно и интересно провести два дня, открыв Узбекистан с его самой узнаваемой стороны.	\N	\N	2025-12-07 19:12:25	2025-12-07 19:25:05	f
-7	Однодневный тур по Ташкенту	One-Day Tashkent City Tour	2026-01-01 00:01:00	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Ташкент, очаровательная столица Узбекистана, сочетает в себе динамику современного мегаполиса и неповторимое очарование восточного города. Прогуливаясь по его улицам, вы увидите изящные европейские здания эпохи Туркестанского генерал-губернаторства, впечатляющие постройки советского периода, голубые купола мечетей и медресе, а также современные стильные сооружения. Экскурсия по Ташкенту — прекрасная возможность познакомиться с богатой историей и достопримечательностями этого яркого города	Tashkent, the captivating capital of Uzbekistan, combines the energy of a modern metropolis with the distinctive charm of an Eastern city. Walking through its streets, you’ll encounter graceful European architecture from the Turkestan Governor-Generalship period, impressive Soviet-era buildings, the turquoise domes of mosques and madrasas, and the polished silhouettes of contemporary structures. A tour of Tashkent is an excellent way to explore the city’s vibrant atmosphere, rich history, and remarkable sights	\N	2025-12-07 21:20:26	2025-12-07 21:20:26	f
-9	Однодневный индивидуальный тур в Самарканд из Ташкента на скоростном поезде	One-Day Private Samarkand Tour from Tashkent by High-Speed Train	2026-01-01 00:00:00	2026-12-31 23:59:59	2026-12-31 23:59:00	1	Выбрав однодневный культурный тур в Самарканд из Ташкента на поезде «Афросиаб», вы увидите всё архитектурное великолепие одного из древнейших городов на земле. Памятники Самарканда, как ветхие страницы истории, «перелистывая» которые можно узнать историю этого великого города. В Самарканде сохранились в основном постройки времён правления Амира Тимура, его внука Улугбека и других правителей династии Тимуридов. За один день экскурсии вы увидите самые знаменитые достопримечательности Самарканда: площадь Регистан, мавзолей Гур-Эмир, комплекс Шахи-Зинда, обсерваторию Улугбека и мечеть Биби-Ханум.	By choosing the Cultural Day Tour to Samarkand from Tashkent by "Afrosiyob" Train, you will see the whole architectural grandeur of one of the most ancient cities in the world. The Samarkand monuments like shabby pages of history, by “skimming” of which, you can learn the history of the great city. Structures, built mainly under Amir Timur, his grandson Ulugbek and other rulers from the Temurid dynasty have survived in Samarkand up to date. For one sightseeing day you will see the best-known sights of Samarkand: Registan Square, the Gur-Emir Mausoleum, Shakhi-Zinda complex, Ulugbek Observatory and Bibi-Khanum Mosque. If you would like to explore more routes and experiences, you can also check out Samarkand tours that offer extended programs and thematic trips.	01KCVCJGVV0EYAN6SE8MV0X19D.jpg	2025-12-19 13:25:18	2025-12-19 13:25:18	t
-10	3 дневный тур в Туркменистан из Ташкента	3 Days Tour to Turkmenistan from Tashkent	2026-01-01 00:00:00	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Исследуйте Туркменистан в сопровождении гида, отправившись в путешествие из Ташкента, и откройте для себя уникальную архитектуру и богатую историю этой страны. Насладитесь захватывающими панорамными видами Ашхабада, посетите древний город Мерв в Марыйском велаяте — объект Всемирного наследия ЮНЕСКО, а также полюбуйтесь историческими руинами Куня-Ургенча с высоты. Это незабываемое путешествие сочетает в себе культуру, историю и впечатляющие природные пейзажи.	Explore Turkmenistan on a guided tour from Tashkent and discover the country’s unique architecture and history. Enjoy breathtaking panoramic views of Ashgabat, visit the ancient city of Merv in Mary Province — a UNESCO World Heritage Site — and admire the	01KCXSH0E89Q8RHVXDYYB0FAP4.avif	2025-12-20 11:49:19	2025-12-20 11:50:09	f
-11	Stopover в Ташкенте	Stopover in Tashkent	2026-01-01 00:00:01	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Stopover в Ташкенте — это отличная возможность познакомиться со столицей Узбекистана: увидеть исторические достопримечательности, уникальные станции метро, колоритные базары и попробовать блюда национальной кухни, сделав ваше путешествие более комфортным и насыщенным	A stopover in Tashkent is a great opportunity to discover the capital of Uzbekistan — explore its rich history, impressive architecture, colorful bazaars, unique metro stations, and enjoy authentic local cuisine — all while making your journey more comfortable and memorable.	01KG9RN75RD26E1T9PM1PTQJF8.avif	2026-01-31 10:12:57	2026-01-31 10:12:57	f
+COPY public.web_tours (id, name_ru, name_en, start_date, end_date, deadline, status, description_ru, description_en, photo, created_at, updated_at, is_popular, type) FROM stdin;
+2	Интенсивный курс «Шелковый путь» (тур с фиксированным выездом) 8 дней	Silk Road Intensive (fixed departure tour) 8D	2026-04-02 00:00:00	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Программа путешествия составлена ​​с учётом дат рейсов Turkish Airlines из ЕС через Стамбул. Если клиенты летят в Ташкент другими авиакомпаниями, мы предлагаем дополнительный трансфер на автомобиле «аэропорт-отель/отель-аэропорт» (в одну сторону) за 20 долларов США.\n\nОтели могут быть изменены!	The travel program is created with the date of the Turkish Airlines flights from EU via Istanbul. If customers fly to Tashkent with other airlines, we offer an additional transfer by car “airport-hotel/hotel-airport” (one way) for US$20.\nEarly and later check-outs outside of the program are not included in the price.\n\nHotels are subject to change!	01K6ZC1VBG9SH6S65MFC9DAKEQ.jpg	2025-10-07 11:35:26	2025-11-24 10:59:48	t	default
+14	Откройте для себя Узбекистан 10 дней / 9 ночей - Turkish airlines	Discover Uzbekistan 10D/9N - Turkish Airlines	2026-04-01 00:00:00	2026-10-15 00:00:00	2026-10-15 00:00:00	1	Узбекистан — это перекрёсток цивилизаций и сердце Великого шёлкового пути, где древняя история, восточная архитектура и живые традиции сочетаются с современным комфортом и искренним гостеприимством.\n\nЦены по запросу!	Uzbekistan is the heart of the Great Silk Road, where ancient cities, Eastern architecture, and living traditions come together with warm hospitality and modern infrastructure.\n\nPrices upon request!	01KGPYDHDWJ0NYCE5RNX9RQVZS.jpg	2026-02-05 12:27:56	2026-02-06 06:16:38	t	default
+4	Погрузитесь в мир Узбекистана за 7 дней	Discover Uzbekistan 7 days	2026-01-01 00:00:00	2026-10-15 00:00:00	2026-09-01 00:00:00	1	Этот тур охватывает основные достопримечательности Ташкента, Ферганской долины, Бухары и Самарканда. Мы рекомендуем начинать путешествие с Кыргызстана и сочетать его с этим маршрутом.	This tour covers the main highlight of Tashkent, Fergana valley, Bukhara and Samarkand. We recommend this tour to combine and start with Kyrgyzstan first. 	01KAZPS3BCG31Q794XSEP90ND8.webp	2025-11-24 11:33:06	2025-11-26 09:09:13	f	default
+5	Однодневный тур в Отрар и Туркестан	Day trip to Otrar and Turkestan 	2026-01-01 00:00:00	2026-12-31 00:00:00	2026-01-01 00:00:00	1	Однодневная экскурсия по древним городам Южного Казахстана – отличный способ познакомиться со средневековой историей региона и увидеть его уникальные архитектурные памятники. В ходе поездки вы посетите археологические раскопки, исторический музей «Отрар», архитектурный комплекс в Туркестане и другие знаковые места.	A one-day tour of the ancient cities of Southern Kazakhstan is an excellent way to explore the region’s medieval history and see its unique architectural landmarks. During the trip, you will visit archaeological excavation sites, the Otrar Historical Museum, the architectural complex in Turkestan, and other iconic places.	01KBD2JYYFTMH6VBA3614ARX3E.jpg	2025-12-01 13:43:16	2025-12-26 06:08:06	f	default
+8	Экскурсия на винодельню Uzumfermer в Кибрае	Uzumfermer winery Kibray tour	2026-01-01 00:00:00	2026-12-31 00:00:00	2026-12-31 23:59:00	1	Приглашаем вас отправиться в атмосферное путешествие в мир ремесленного виноделия и открыть для себя подлинный вкус узбекских традиций — там, где ароматное вино рождается из солнечного винограда и заботы мастеров.\nВ Кибрае, на семейной винодельне Uzumfermer, вас ждёт:\n•\tПрогулка по живописному экзотическому саду\n•\tПосещение ухоженных виноградников\n•\tЗнакомство с полным циклом производства вина\n•\tОбзор современного винодельческого оборудования\n•\tИнтересные факты и секреты мастерства от владельцев винодельни\nЭто путешествие идеально подойдёт тем, кто ценит природу, гастрономические открытия и новые яркие впечатления.\n	We invite you to embark on an atmospheric journey into the world of artisan winemaking and discover the authentic taste of Uzbek traditions — right at the place where fragrant wine is born from sun-ripened grapes and the passion of local winemakers.\nAt Uzumfermer, a family-run winery in Kibray, you will enjoy:\n•\tA walk through a picturesque exotic garden\n•\tA visit to well-maintained vineyards\n•\tAn introduction to the full wine production cycle\n•\tAn overview of modern winemaking equipment\n•\tFascinating stories, facts, and family secrets shared by the winemakers\nThis tour is perfect for those who appreciate nature, gastronomy, and new memorable experiences.\n	01KC1P5TR41BSN6F13FRFFR83C.jpg	2025-12-09 13:52:53	2025-12-09 13:58:00	t	default
+6	Трехдневный тур в Самарканд и Бухару	Three-Day Tour to Samarkand and Bukhara	2026-01-01 00:01:00	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Если у вас есть всего пара свободных дней или вы хотите получить общее впечатление об Узбекистане, трехдневный тур в Самарканд и Бухару станет лучшим выбором. Путешествие начинается в легендарном Самарканде — городе, который ставят в один ряд с Римом и Вавилоном и который заслуженно входит в список объектов Всемирного наследия ЮНЕСКО. Затем вы отправитесь в бухарский оазис тишины и старины — город, где минареты и медресе создают практически неизменный на протяжении веков пейзаж. Проведите день на Великом шёлковом пути, познакомьтесь с самыми значимыми достопримечательностями страны и откройте для себя атмосферу двух её главных исторических центров. Этот тур позволит максимально насыщенно и интересно провести два дня, открыв Узбекистан с его самой узнаваемой стороны.	\N	\N	2025-12-07 19:12:25	2025-12-07 19:25:05	f	default
+7	Однодневный тур по Ташкенту	One-Day Tashkent City Tour	2026-01-01 00:01:00	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Ташкент, очаровательная столица Узбекистана, сочетает в себе динамику современного мегаполиса и неповторимое очарование восточного города. Прогуливаясь по его улицам, вы увидите изящные европейские здания эпохи Туркестанского генерал-губернаторства, впечатляющие постройки советского периода, голубые купола мечетей и медресе, а также современные стильные сооружения. Экскурсия по Ташкенту — прекрасная возможность познакомиться с богатой историей и достопримечательностями этого яркого города	Tashkent, the captivating capital of Uzbekistan, combines the energy of a modern metropolis with the distinctive charm of an Eastern city. Walking through its streets, you’ll encounter graceful European architecture from the Turkestan Governor-Generalship period, impressive Soviet-era buildings, the turquoise domes of mosques and madrasas, and the polished silhouettes of contemporary structures. A tour of Tashkent is an excellent way to explore the city’s vibrant atmosphere, rich history, and remarkable sights	\N	2025-12-07 21:20:26	2025-12-07 21:20:26	f	default
+9	Однодневный индивидуальный тур в Самарканд из Ташкента на скоростном поезде	One-Day Private Samarkand Tour from Tashkent by High-Speed Train	2026-01-01 00:00:00	2026-12-31 23:59:59	2026-12-31 23:59:00	1	Выбрав однодневный культурный тур в Самарканд из Ташкента на поезде «Афросиаб», вы увидите всё архитектурное великолепие одного из древнейших городов на земле. Памятники Самарканда, как ветхие страницы истории, «перелистывая» которые можно узнать историю этого великого города. В Самарканде сохранились в основном постройки времён правления Амира Тимура, его внука Улугбека и других правителей династии Тимуридов. За один день экскурсии вы увидите самые знаменитые достопримечательности Самарканда: площадь Регистан, мавзолей Гур-Эмир, комплекс Шахи-Зинда, обсерваторию Улугбека и мечеть Биби-Ханум.	By choosing the Cultural Day Tour to Samarkand from Tashkent by "Afrosiyob" Train, you will see the whole architectural grandeur of one of the most ancient cities in the world. The Samarkand monuments like shabby pages of history, by “skimming” of which, you can learn the history of the great city. Structures, built mainly under Amir Timur, his grandson Ulugbek and other rulers from the Temurid dynasty have survived in Samarkand up to date. For one sightseeing day you will see the best-known sights of Samarkand: Registan Square, the Gur-Emir Mausoleum, Shakhi-Zinda complex, Ulugbek Observatory and Bibi-Khanum Mosque. If you would like to explore more routes and experiences, you can also check out Samarkand tours that offer extended programs and thematic trips.	01KCVCJGVV0EYAN6SE8MV0X19D.jpg	2025-12-19 13:25:18	2025-12-19 13:25:18	t	default
+13	Комбинированный тур 14 дней / 13 ночей (Kyrgyzstan & Kazakhstan)	Combi tour 14 days / 13 nights (Kyrgyzstan & Kazakhstan)	2026-06-01 00:00:00	2026-09-15 00:00:00	2026-09-15 00:00:00	1	Этот 14-дневный комбинированный тур предлагает увлекательное путешествие по самым живописным регионам Кыргызстан и Казахстан, сочетая природные красоты, культуру и активный отдых.\n\nМаршрут начинается в Бишкеке и проходит через величественные горы, зелёные долины и высокогорные озёра. Вас ждут пешие прогулки по национальным паркам, знакомство с кочевой культурой и ночёвки в традиционных юртах. Среди ключевых достопримечательностей — озеро Иссык-Куль, высокогорное озеро Сон-Куль, красные скалы ущелья Джети-Огуз и уникальное озеро Каинды с затопленным лесом.\n\nПосле пересечения границы с Казахстаном программа продолжается посещением озёр Кольсай, впечатляющего Чарынского каньона и завершается обзорной экскурсией по Алматы, где гармонично сочетаются история, архитектура и природные пейзажи.\n\nТур идеально подойдёт любителям природы, активного отдыха и аутентичных путешествий, предлагая гармоничное сочетание приключений, культуры и комфорта.\n\nЦЕНЫ ПО ЗАПРОСУ!	This 14-day combined cultural and nature tour takes you through the heart of Central Asia, exploring the most scenic regions of Kyrgyzstan and Kazakhstan.\n\nThe journey begins in Bishkek and leads you through dramatic mountain landscapes, alpine valleys, and pristine lakes. You will hike in national parks, experience traditional nomadic life while staying in yurts at high-altitude lakes, and discover ancient Silk Road heritage sites. Highlights include the crystal-clear waters of Issyk-Kul, the remote beauty of Son-Kul Lake, the red rock formations of Jeti-Ögüz Gorge, and the magical submerged forest of Kaindy Lake.\n\nCrossing into Kazakhstan, the tour continues with visits to the breathtaking Kolsai Lakes, the spectacular Charyn Canyon—often compared to the Grand Canyon—and concludes in Almaty with a rich city tour combining history, culture, and nature.\n\nThis itinerary is perfect for nature lovers, active travelers, and cultural explorers, offering a balanced mix of soft adventure, authentic local experiences, and comfortable accommodations.\n\n\nPRICES UPON REQUEST!	01KGM4WHEJ92Y0Z1XDKZ47KTB9.jpeg	2026-02-04 10:59:04	2026-02-04 10:59:04	f	default
+12	Комбинированный тур «3 СТАНА» (Узбекистан, Кыргызстан, Казахстан)	Combi tour 3STANs (Uzbekistan, Kyrgyzstan, Kazakhstan)	2026-04-01 12:00:00	2026-09-16 00:00:00	2026-08-15 00:00:00	1	Откройте для себя сердце Центральной Азии в рамках увлекательного 11-дневного комбинированного тура по Узбекистану, Кыргызстану и Казахстану — трём странам с богатейшей историей, самобытной культурой и впечатляющей природой.\n\nПутешествие начинается в Узбекистане, где древние города Великого Шёлкового пути — Ташкент и Самарканд — поражают своей архитектурой, восточными базарами и памятниками Всемирного наследия ЮНЕСКО. Комфортные переезды и экскурсии позволят глубоко погрузиться в историю и традиции региона.\n\nДалее маршрут ведёт в Кыргызстан — страну величественных гор и кочевой культуры. Вы посетите Бишкек, отдохнёте на берегу живописного озера Иссык-Куль, а также познакомитесь с традиционным укладом жизни в долине Чон-Кемин, включая юрточную культуру и национальные конные игры.\n\nЗавершается тур в Казахстане, в современном и зелёном городе Алматы. Вас ждут горные пейзажи Медео и Шымбулака, музеи, исторические достопримечательности, колоритные рынки и одна из самых красивых станций метро в мире.\n\nЭтот тур идеально подойдёт путешественникам, которые хотят совместить культуру, историю, природу и аутентичные впечатления, наслаждаясь комфортом, профессиональным сопровождением и продуманной программой.	Discover the heart of Central Asia on this unforgettable 11-day combined tour through Uzbekistan, Kyrgyzstan, and Kazakhstan — three countries rich in history, culture, and breathtaking natural landscapes.\n\nYour journey begins in Uzbekistan, where ancient Silk Road cities like Tashkent and Samarkand reveal magnificent Islamic architecture, bustling bazaars, and UNESCO-listed monuments. Travel comfortably by train and immerse yourself in centuries of history, traditions, and warm local hospitality.\n\nContinue to Kyrgyzstan, a land of pristine nature and nomadic heritage. Explore Bishkek, relax by the crystal-clear waters of Issyk-Kul Lake, and experience authentic rural life in the scenic Chon Kemin Valley, including traditional yurt culture and national horse games.\n\nThe tour concludes in Kazakhstan, in the vibrant city of Almaty. Enjoy panoramic mountain views at Medeo and Shymbulak, visit cultural landmarks, museums, colorful bazaars, and ride one of the most beautiful metro systems in the region.\n\nThis tour is ideal for travelers seeking a perfect balance of culture, history, nature, and local experiences, all combined with comfortable accommodation, guided sightseeing, and carefully planned logistics.	01KGHQTYAAW0ZNT6YE61SW1BF5.jpg	2026-02-03 12:01:41	2026-02-03 12:36:06	f	default
+11	Stopover в Ташкенте	Stopover in Tashkent	2026-01-01 00:00:01	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Stopover в Ташкенте — это отличная возможность познакомиться со столицей Узбекистана: увидеть исторические достопримечательности, уникальные станции метро, колоритные базары и попробовать блюда национальной кухни, сделав ваше путешествие более комфортным и насыщенным	A stopover in Tashkent is a great opportunity to discover the capital of Uzbekistan — explore its rich history, impressive architecture, colorful bazaars, unique metro stations, and enjoy authentic local cuisine — all while making your journey more comfortable and memorable.	01KG9RN75RD26E1T9PM1PTQJF8.avif	2026-01-31 10:12:57	2026-02-21 07:42:59	t	default
+16	22-дневный тур «Погружение в Центральную Азию»	22-Day Central Asia Immersion Tour	2026-01-01 12:00:00	2026-12-31 23:59:00	\N	1	22-дневный групповой тур по Центральной Азии — это насыщенное путешествие по пяти странам: Узбекистану, Казахстану, Кыргызстану, Таджикистану и Туркменистану. Тур проходит по фиксированным датам в международной группе и позволяет за одну поездку познакомиться с культурой, историей и природой всего региона.\nВ программе — древние города Самарканд, Бухара и Хива, горные пейзажи Кыргызстана и Таджикистана, степи и каньоны Казахстана, а также пустыни и мраморная столица Туркменистана — Ашхабад. Идеальный выбор для тех, кто ищет экскурсионный тур по Центральной Азии и путешествие в компании единомышленников со всего мира.\n	The 22-Day Central Asia Immersion Group Tour is a comprehensive journey through five Central Asian countries: Uzbekistan, Kazakhstan, Kyrgyzstan, Tajikistan, and Turkmenistan. This fixed-date group tour offers an in-depth exploration of the region’s rich history, diverse cultures, and breathtaking landscapes.\nHighlights include the legendary Silk Road cities of Samarkand, Bukhara, and Khiva, the mountains of Kyrgyzstan and Tajikistan, Kazakhstan’s steppes and canyons, and Turkmenistan’s deserts with its white-marble capital Ashgabat. This tour is perfect for travelers looking for a multi-country Central Asia tour with an international group experience.	01KH3SX5J3SNWYRCJN108RBMMF.jpg	2026-02-10 11:35:23	2026-02-10 12:55:01	t	default
+10	3 дневный тур в Туркменистан из Ташкента	3 Days Tour to Turkmenistan from Tashkent	2026-01-01 00:00:00	2026-12-31 23:59:00	2026-12-31 23:59:00	1	Исследуйте Туркменистан в сопровождении гида, отправившись в путешествие из Ташкента, и откройте для себя уникальную архитектуру и богатую историю этой страны. Насладитесь захватывающими панорамными видами Ашхабада, посетите древний город Мерв в Марыйском велаяте — объект Всемирного наследия ЮНЕСКО, а также полюбуйтесь историческими руинами Куня-Ургенча с высоты. Это незабываемое путешествие сочетает в себе культуру, историю и впечатляющие природные пейзажи.	Explore Turkmenistan on a guided tour from Tashkent and discover the country’s unique architecture and history. Enjoy breathtaking panoramic views of Ashgabat, visit the ancient city of Merv in Mary Province — a UNESCO World Heritage Site — and admire the	01KCXSH0E89Q8RHVXDYYB0FAP4.avif	2025-12-20 11:49:19	2026-02-27 20:25:40	f	default
 \.
 
 
@@ -12230,7 +13646,7 @@ COPY public.web_tours (id, name_ru, name_en, start_date, end_date, deadline, sta
 -- Name: attachments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.attachments_id_seq', 719, true);
+SELECT pg_catalog.setval('public.attachments_id_seq', 971, true);
 
 
 --
@@ -12248,31 +13664,38 @@ SELECT pg_catalog.setval('public.buy_requests_id_seq', 1, false);
 
 
 --
+-- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
+--
+
+SELECT pg_catalog.setval('public.categories_id_seq', 1, false);
+
+
+--
 -- Name: cities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.cities_id_seq', 44, true);
+SELECT pg_catalog.setval('public.cities_id_seq', 58, true);
 
 
 --
 -- Name: companies_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.companies_id_seq', 68, true);
+SELECT pg_catalog.setval('public.companies_id_seq', 71, true);
 
 
 --
 -- Name: contact_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.contact_requests_id_seq', 5, true);
+SELECT pg_catalog.setval('public.contact_requests_id_seq', 6, true);
 
 
 --
 -- Name: countries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.countries_id_seq', 23, true);
+SELECT pg_catalog.setval('public.countries_id_seq', 26, true);
 
 
 --
@@ -12286,7 +13709,7 @@ SELECT pg_catalog.setval('public.currencies_id_seq', 1, true);
 -- Name: drivers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.drivers_id_seq', 36, true);
+SELECT pg_catalog.setval('public.drivers_id_seq', 37, true);
 
 
 --
@@ -12300,7 +13723,7 @@ SELECT pg_catalog.setval('public.employees_id_seq', 1, false);
 -- Name: expense_guides_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.expense_guides_id_seq', 133, true);
+SELECT pg_catalog.setval('public.expense_guides_id_seq', 153, true);
 
 
 --
@@ -12335,28 +13758,28 @@ SELECT pg_catalog.setval('public.groups_id_seq', 5, true);
 -- Name: hotel_facilities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.hotel_facilities_id_seq', 560, true);
+SELECT pg_catalog.setval('public.hotel_facilities_id_seq', 839, true);
 
 
 --
 -- Name: hotel_periods_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.hotel_periods_id_seq', 683, true);
+SELECT pg_catalog.setval('public.hotel_periods_id_seq', 777, true);
 
 
 --
 -- Name: hotel_phones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.hotel_phones_id_seq', 243, true);
+SELECT pg_catalog.setval('public.hotel_phones_id_seq', 269, true);
 
 
 --
 -- Name: hotel_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.hotel_requests_id_seq', 1, true);
+SELECT pg_catalog.setval('public.hotel_requests_id_seq', 2, true);
 
 
 --
@@ -12370,28 +13793,28 @@ SELECT pg_catalog.setval('public.hotel_reviews_id_seq', 6, true);
 -- Name: hotel_room_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.hotel_room_types_id_seq', 1902, true);
+SELECT pg_catalog.setval('public.hotel_room_types_id_seq', 2031, true);
 
 
 --
 -- Name: hotel_rules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.hotel_rules_id_seq', 10, true);
+SELECT pg_catalog.setval('public.hotel_rules_id_seq', 31, true);
 
 
 --
 -- Name: hotels_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.hotels_id_seq', 205, true);
+SELECT pg_catalog.setval('public.hotels_id_seq', 217, true);
 
 
 --
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 208, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 210, true);
 
 
 --
@@ -12412,7 +13835,7 @@ SELECT pg_catalog.setval('public.museums_id_seq', 21, true);
 -- Name: packages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.packages_id_seq', 21, true);
+SELECT pg_catalog.setval('public.packages_id_seq', 22, true);
 
 
 --
@@ -12447,7 +13870,7 @@ SELECT pg_catalog.setval('public.recommended_hotels_id_seq', 3, true);
 -- Name: restaurants_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.restaurants_id_seq', 42, true);
+SELECT pg_catalog.setval('public.restaurants_id_seq', 43, true);
 
 
 --
@@ -12468,7 +13891,7 @@ SELECT pg_catalog.setval('public.roles_id_seq', 1, false);
 -- Name: room_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.room_types_id_seq', 80, true);
+SELECT pg_catalog.setval('public.room_types_id_seq', 83, true);
 
 
 --
@@ -12489,14 +13912,14 @@ SELECT pg_catalog.setval('public.settings_id_seq', 1, true);
 -- Name: shows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.shows_id_seq', 2, true);
+SELECT pg_catalog.setval('public.shows_id_seq', 3, true);
 
 
 --
 -- Name: similar_tours_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.similar_tours_id_seq', 2, true);
+SELECT pg_catalog.setval('public.similar_tours_id_seq', 6, true);
 
 
 --
@@ -12510,35 +13933,35 @@ SELECT pg_catalog.setval('public.suppliers_id_seq', 3, true);
 -- Name: tour_day_expense_room_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.tour_day_expense_room_types_id_seq', 96, true);
+SELECT pg_catalog.setval('public.tour_day_expense_room_types_id_seq', 97, true);
 
 
 --
 -- Name: tour_day_expenses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.tour_day_expenses_id_seq', 2118, true);
+SELECT pg_catalog.setval('public.tour_day_expenses_id_seq', 2321, true);
 
 
 --
 -- Name: tour_days_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.tour_days_id_seq', 632, true);
+SELECT pg_catalog.setval('public.tour_days_id_seq', 691, true);
 
 
 --
 -- Name: tour_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.tour_groups_id_seq', 166, true);
+SELECT pg_catalog.setval('public.tour_groups_id_seq', 167, true);
 
 
 --
 -- Name: tour_hotel_room_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.tour_hotel_room_types_id_seq', 120, true);
+SELECT pg_catalog.setval('public.tour_hotel_room_types_id_seq', 131, true);
 
 
 --
@@ -12552,14 +13975,14 @@ SELECT pg_catalog.setval('public.tour_hotels_id_seq', 1, false);
 -- Name: tour_passengers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.tour_passengers_id_seq', 266, true);
+SELECT pg_catalog.setval('public.tour_passengers_id_seq', 268, true);
 
 
 --
 -- Name: tours_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.tours_id_seq', 282, true);
+SELECT pg_catalog.setval('public.tours_id_seq', 292, true);
 
 
 --
@@ -12587,7 +14010,7 @@ SELECT pg_catalog.setval('public.transfer_requests_id_seq', 21, true);
 -- Name: transfers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tour_crm
 --
 
-SELECT pg_catalog.setval('public.transfers_id_seq', 1359, true);
+SELECT pg_catalog.setval('public.transfers_id_seq', 1448, true);
 
 
 --
@@ -12615,14 +14038,21 @@ SELECT pg_catalog.setval('public.users_id_seq', 52, true);
 -- Name: web_tour_accommodation_hotels_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.web_tour_accommodation_hotels_id_seq', 32, true);
+SELECT pg_catalog.setval('public.web_tour_accommodation_hotels_id_seq', 34, true);
 
 
 --
 -- Name: web_tour_accommodations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.web_tour_accommodations_id_seq', 18, true);
+SELECT pg_catalog.setval('public.web_tour_accommodations_id_seq', 38, true);
+
+
+--
+-- Name: web_tour_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
+--
+
+SELECT pg_catalog.setval('public.web_tour_categories_id_seq', 1, false);
 
 
 --
@@ -12636,21 +14066,28 @@ SELECT pg_catalog.setval('public.web_tour_day_facilities_id_seq', 1, true);
 -- Name: web_tour_days_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.web_tour_days_id_seq', 31, true);
+SELECT pg_catalog.setval('public.web_tour_days_id_seq', 89, true);
+
+
+--
+-- Name: web_tour_free_prices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
+--
+
+SELECT pg_catalog.setval('public.web_tour_free_prices_id_seq', 2, true);
 
 
 --
 -- Name: web_tour_packages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.web_tour_packages_id_seq', 72, true);
+SELECT pg_catalog.setval('public.web_tour_packages_id_seq', 127, true);
 
 
 --
 -- Name: web_tour_prices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.web_tour_prices_id_seq', 15, true);
+SELECT pg_catalog.setval('public.web_tour_prices_id_seq', 23, true);
 
 
 --
@@ -12664,7 +14101,7 @@ SELECT pg_catalog.setval('public.web_tour_requests_id_seq', 4, true);
 -- Name: web_tours_id_seq; Type: SEQUENCE SET; Schema: public; Owner: developer
 --
 
-SELECT pg_catalog.setval('public.web_tours_id_seq', 11, true);
+SELECT pg_catalog.setval('public.web_tours_id_seq', 16, true);
 
 
 --
@@ -12689,6 +14126,14 @@ ALTER TABLE ONLY public.banners
 
 ALTER TABLE ONLY public.buy_requests
     ADD CONSTRAINT buy_requests_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.categories
+    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
 
 
 --
@@ -13212,6 +14657,14 @@ ALTER TABLE ONLY public.web_tour_accommodations
 
 
 --
+-- Name: web_tour_categories web_tour_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.web_tour_categories
+    ADD CONSTRAINT web_tour_categories_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: web_tour_day_facilities web_tour_day_facilities_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
 --
 
@@ -13225,6 +14678,14 @@ ALTER TABLE ONLY public.web_tour_day_facilities
 
 ALTER TABLE ONLY public.web_tour_days
     ADD CONSTRAINT web_tour_days_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: web_tour_free_prices web_tour_free_prices_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.web_tour_free_prices
+    ADD CONSTRAINT web_tour_free_prices_pkey PRIMARY KEY (id);
 
 
 --
@@ -14052,6 +15513,22 @@ ALTER TABLE ONLY public.web_tour_accommodations
 
 
 --
+-- Name: web_tour_categories web_tour_categories_category_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.web_tour_categories
+    ADD CONSTRAINT web_tour_categories_category_id_foreign FOREIGN KEY (category_id) REFERENCES public.categories(id) ON DELETE CASCADE;
+
+
+--
+-- Name: web_tour_categories web_tour_categories_web_tour_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.web_tour_categories
+    ADD CONSTRAINT web_tour_categories_web_tour_id_foreign FOREIGN KEY (web_tour_id) REFERENCES public.web_tours(id) ON DELETE CASCADE;
+
+
+--
 -- Name: web_tour_day_facilities web_tour_day_facilities_facility_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: developer
 --
 
@@ -14081,6 +15558,14 @@ ALTER TABLE ONLY public.web_tour_days
 
 ALTER TABLE ONLY public.web_tour_days
     ADD CONSTRAINT web_tour_days_web_tour_id_foreign FOREIGN KEY (web_tour_id) REFERENCES public.web_tours(id) ON DELETE CASCADE;
+
+
+--
+-- Name: web_tour_free_prices web_tour_free_prices_web_tour_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.web_tour_free_prices
+    ADD CONSTRAINT web_tour_free_prices_web_tour_id_foreign FOREIGN KEY (web_tour_id) REFERENCES public.web_tours(id) ON DELETE CASCADE;
 
 
 --
@@ -14135,5 +15620,5 @@ ALTER TABLE ONLY public.web_tour_requests
 -- PostgreSQL database dump complete
 --
 
-\unrestrict G71mB24tGqc0QyJ58QgJS4yMjfcaKGF0QCNx15yMR5uDK0xpUWPissn4gYjv7iA
+\unrestrict ygVORFwMfbpUvBqLo6JTbPIsY2hbzFmH1ZTBsDhvQassWaOg2ivrUAzOGR0Gz6R
 

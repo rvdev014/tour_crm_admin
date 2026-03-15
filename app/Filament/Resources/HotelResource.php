@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\City;
 use App\Models\Hotel;
 use App\Enums\RateEnum;
 use Filament\Forms\Form;
@@ -266,6 +267,12 @@ class HotelResource extends Resource
                     ->columnSpanFull()
                     ->form([
                         Forms\Components\Grid::make(6)->schema([
+                            Forms\Components\Select::make('city_id')
+                                ->label('City')
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
+                                ->options(fn($get) => TourService::getCities()),
                             Forms\Components\Select::make('currency')
                                 ->label('Currency')
                                 ->native(false)
@@ -287,10 +294,14 @@ class HotelResource extends Resource
                         ])
                     ])
                     ->query(function(Builder $query, $data) {
-                        return $query;
+                        return $query
+                            ->when($data['city_id'], fn($query, $cityId) => $query->where('city_id', $cityId));
                     })
                     ->indicateUsing(function(array $data): array {
                         $indicators = [];
+                        if (isset($data['city_id'])) {
+                            $indicators[] = 'City: ' . City::find($data['city_id'])->name;
+                        }
                         if (isset($data['currency'])) {
                             $indicators[] = 'Currency: ' . CurrencyEnum::tryFrom($data['currency'])?->getLabel();
                         }

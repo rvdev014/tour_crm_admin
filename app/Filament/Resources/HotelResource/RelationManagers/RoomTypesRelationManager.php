@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\HotelPeriod;
 use App\Models\HotelRoomType;
+use App\Enums\RoomSeasonType;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -36,36 +37,55 @@ class RoomTypesRelationManager extends RelationManager
                     ->required()
                     ->rules([
                         fn(Get $get): Closure => function(string $attribute, $value, $fail) use ($get) {
-                            /** @var Hotel $hotel */
                             $hotel = $this->getOwnerRecord();
-                            if (
-                                $hotel->roomTypes()
-                                    ->when(
-                                        $get('id'),
-                                        fn($query) => $query->whereNot('id', $get('id'))
-                                    )
-                                    ->where('room_type_id', $value)
-                                    ->where('hotel_period_id', $get('hotel_period_id'))
-                                    ->exists()
-                            ) {
-                                $fail('The selected room type is already associated with the hotel.');
+                            $seasonType = $get('season_type');
+                            $year = $get('year');
+                            
+                            // Wait until all fields are filled before running the query
+                            if (!$seasonType || !$year) {
+                                return;
+                            }
+                            
+                            $exists = $hotel->roomTypes()
+                                ->when(
+                                    $get('id'),
+                                    fn(Builder $query) => $query->whereKeyNot($get('id'))
+                                )
+                                ->where('room_type_id', $value)
+                                ->where('season_type', $seasonType)
+                                ->where('year', $year)
+                                ->exists();
+                            
+                            if ($exists) {
+                                $fail('Pricing for this room type, season, and year already exists. Please find and update the existing record instead.');
                             }
                         },
                     ]),
-                Forms\Components\Select::make('hotel_period_id')
-                    ->label('Hotel Period')
-                    ->options(fn(Forms\Get $get) => HotelPeriod::query()
-                        ->where('hotel_id', $this->getOwnerRecord()->id)
-                        ->get()
-                        ->pluck('extended_label', 'id')
-                    )
-                    ->searchable()
-                    ->preload()
+                
+                Forms\Components\Select::make('season_type')
+                    ->label('Season Type')
+                    // Adjust these options to match your actual season types
+                    ->options(RoomSeasonType::class)
                     ->required(),
+                
+                Forms\Components\Select::make('year')
+                    ->label('Year')
+                    ->default(now()->year)
+                    ->options(function() {
+                        $currentYear = (int)date('Y');
+                        $startYear = $currentYear - 5;
+                        $endYear = $currentYear + 3;
+                        return array_combine(
+                            $yearsArray = range($startYear, $endYear),
+                            $yearsArray
+                        );
+                    }),
+                
                 Forms\Components\TextInput::make('price')
                     ->label('Price Uz')
                     ->required()
                     ->maxLength(255),
+                
                 Forms\Components\TextInput::make('price_foreign')
                     ->label('Price Foreign')
                     ->required()
@@ -90,24 +110,23 @@ class RoomTypesRelationManager extends RelationManager
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'],
-                            fn (Builder $query, $date): Builder => $query->whereHas('period', function ($q) use ($date) {
-                                $q->whereYear('start_date', $date);
-                            })
+                            fn (Builder $query, $date): Builder => $query->where('year', $date)
                         );
                     })
             ])
             ->filtersLayout(FiltersLayout::AboveContent)
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),
-                Tables\Columns\TextColumn::make('period.season_type')
-                    ->label('Period')
-                    ->badge() // Превращает текст в цветной бадж
-                    // Цвет и иконка подтянутся из Enum автоматически,
-                    // так как колонка ссылается на поле с типом RoomSeasonType
-                    ->formatStateUsing(function($state, $record) {
-                        /** @var HotelRoomType $record */
-                        return $record->period?->getExtendedLabelAttribute() ?? '-';
-                    }),
+                Tables\Columns\TextColumn::make('season_type'),
+//                Tables\Columns\TextColumn::make('period.season_type')
+//                    ->label('Period')
+//                    ->badge() // Превращает текст в цветной бадж
+//                    // Цвет и иконка подтянутся из Enum автоматически,
+//                    // так как колонка ссылается на поле с типом RoomSeasonType
+//                    ->formatStateUsing(function($state, $record) {
+//                        /** @var HotelRoomType $record */
+//                        return $record->period?->getExtendedLabelAttribute() ?? '-';
+//                    }),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Price Uz')
                     ->money()
