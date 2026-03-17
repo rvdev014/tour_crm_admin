@@ -91,7 +91,7 @@ class WebTourResource extends Resource
                             ->color('danger')
                             ->extraAttributes([
                                 // The '!' is the Tailwind 'important' modifier
-                                'class' => '[&_svg]:!text-red-600 [&_svg]:!fill-red-600',
+                                'class' => 'delete-btn',
                             ])
                     )
                     ->itemLabel(function ($get, $uuid) {

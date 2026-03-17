@@ -5,8 +5,12 @@
 .fi-sidebar-nav .fi-sidebar-item-label,
 .fi-sidebar-group-label, .fi-sidebar-item-icon,
 .fi-sidebar-nav .fi-icon-btn-icon,
-.fi-fo-repeater-item .fi-icon-btn-icon {
+.fi-fo-repeater .fi-icon-btn-icon {
     color: #fff !important;
+}
+
+.fi-fo-repeater .delete-btn > svg {
+    color: #f87171 !important;
 }
 
 .fi-fo-repeater-item.simple .fi-icon-btn-icon {

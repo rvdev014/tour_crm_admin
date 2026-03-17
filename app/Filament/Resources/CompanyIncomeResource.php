@@ -39,7 +39,7 @@ class CompanyIncomeResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery();
+        return parent::getEloquentQuery()->where('is_cancelled', false);
     }
 
     public static function table(Table $table): Table
