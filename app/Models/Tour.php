@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property string $group_number
  * @property Carbon $start_date
  * @property Carbon $end_date
+ * @property bool $is_cancelled
  * @property int $pax
  * @property int $leader_pax
  * @property string $comment

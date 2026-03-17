@@ -8,7 +8,10 @@ use App\Models\Tour;
 use App\Services\ExpenseService;
 use App\Services\TourService;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 class EditTour extends EditRecord
 {
@@ -23,7 +26,7 @@ class EditTour extends EditRecord
         ExpenseService::convertExpensePrice($data, 'transport_price');
 
         $totalPax = $data['pax'] + ($data['leader_pax'] ?? 0);
-        
+
         $data['price_result'] = $data['price_converted'] ?? $data['price'] ?? 0;
         $data['total_price'] = round($data['price_result'] * $totalPax, 2);
 
@@ -40,6 +43,28 @@ class EditTour extends EditRecord
     protected function afterSave(): void
     {
         TourService::sendTelegram($this->form->getRawState(), isUpdated: true);
+    }
+
+    public function getTitle(): string | Htmlable
+    {
+        $title = parent::getTitle();
+
+        if ($this->record->is_cancelled) {
+            return new HtmlString(
+                $title . ' <span style="color: #ef4444; font-weight: bold; margin-left: 10px;">[CANCELLED!]</span>'
+            );
+        }
+
+        return $title;
+    }
+
+    public function getSubheading(): string | Htmlable | null
+    {
+        if ($this->record->is_cancelled) {
+            return new HtmlString('<div class="text-danger-600 font-bold uppercase underline">This tour has been officially cancelled and is no longer active.</div>');
+        }
+
+        return null;
     }
 
     protected function getHeaderActions(): array
@@ -59,6 +84,28 @@ class EditTour extends EditRecord
 //                ->label('Report')
 //                ->icon('heroicon-o-document-text')
 //                ->url(route('export', $this->record)),
+            Actions\Action::make('cancelTour')
+                ->label('Cancel')
+                ->icon('heroicon-o-no-symbol')
+                ->color('danger')
+                // Add a confirmation modal so it's not clicked by accident
+                ->requiresConfirmation()
+                ->modalHeading('Cancel Tour')
+                ->modalDescription('Are you sure you want to cancel this tour? This will mark it as cancelled in the system.')
+                ->modalSubmitActionLabel('Yes, cancel it')
+                ->action(function () {
+                    // This logic runs when the button is clicked
+                    $this->record->update([
+                        'is_cancelled' => true,
+                    ]);
+
+                    Notification::make()
+                        ->title('Tour Cancelled')
+                        ->success()
+                        ->send();
+                })
+                // Hide the button if the tour is already cancelled
+                ->hidden(fn () => $this->record->is_cancelled),
             SendMailAction::make('mail_hotel')
                 ->tour($tour)
                 ->type('hotels')

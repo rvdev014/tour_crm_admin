@@ -14,7 +14,6 @@ use Filament\Tables\Table;
 use App\Enums\PaymentStatus;
 use App\Enums\InvoiceStatus;
 use App\Services\TourService;
-use App\Models\CompanyExpense;
 use App\Models\TourDayExpense;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
