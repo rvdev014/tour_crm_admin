@@ -26,6 +26,7 @@ class HotelController extends Controller
         $sort = $request->get('sort'); // 'cheapest' или 'most_expensive'
 
         $query = Hotel::query()
+            ->where('is_visible', true)
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q
@@ -54,20 +55,20 @@ class HotelController extends Controller
         if (!empty($facilityIds)) {
             $query->whereHas('facilities', fn($q) => $q->whereIn('facilities.id', $facilityIds));
         }
-        
+
         if (!empty($sort)) {
             $now = now()->format('Y-m-d');
             $sortDirection = $sort === 'cheap' ? 'asc' : 'desc';
-            
+
             // 1. Получаем константы из сервисов, чтобы передать их в SQL
             $tourSborValue = \App\Services\TourService::getTourSborValue(); // Например: 34000 (сумы) или 3 (доллары)
-            
+
             // Получаем процент наценки группы 'website'.
             // Предполагаем, что он фиксированный. Если он зависит от цены, это усложнит SQL.
             $websiteGroup = \App\Models\Group::where('name', 'website')->first();
             $groupPercent = $websiteGroup ? $websiteGroup->value : 0; // Например, 10 (процентов)
             $groupMultiplier = 1 + ($groupPercent / 100); // Например, 1.10
-            
+
             $query
                 ->addSelect([
                     'today_price' => function ($subquery) use ($now, $tourSborValue, $groupMultiplier) {
@@ -76,7 +77,7 @@ class HotelController extends Controller
                         // WithNds = Base * (nds_included ? 1.12 : 1)
                         // WithSbor = WithNds + (TourSborValue * tour_sbor_percent / 100)
                         // Final = WithSbor * GroupMultiplier
-                        
+
                         $subquery
                             ->selectRaw('
                         (
@@ -91,19 +92,23 @@ class HotelController extends Controller
                             )
                         ) * ? as calculated_total
                     ', [$tourSborValue, $groupMultiplier]) // Передаем переменные в запрос
-                            
+
                             ->from('hotel_room_types')
-                            ->join('hotel_periods', function ($join) use ($now) {
-                                $join->on('hotel_periods.id', '=', 'hotel_room_types.hotel_period_id');
+                            ->join('hotel_periods', function ($join) {
+                                $join->on('hotel_periods.hotel_id', '=', 'hotel_room_types.hotel_id')
+                                    ->on('hotel_periods.season_type', '=', 'hotel_room_types.season_type')
+                                    // Сопоставляем год из миграции (Carbon::parse($rt->start_date)->year)
+                                    // Используем синтаксис PostgreSQL:
+                                    ->whereRaw('hotel_room_types.year = EXTRACT(YEAR FROM hotel_periods.start_date::date)');
                             })
                             ->whereColumn('hotel_room_types.hotel_id', 'hotels.id')
                             ->where('hotel_periods.start_date', '<=', $now)
                             ->where('hotel_periods.end_date', '>=', $now)
-                            
+
                             // --- НОВАЯ СОРТИРОВКА ---
                             // 1. Сначала выбираем самый короткий период (end_date - start_date ASC)
-                            ->orderByRaw('("hotel_periods"."end_date" - "hotel_periods"."start_date") ASC')
-                            
+                            ->orderByRaw('("hotel_periods"."end_date"::date - "hotel_periods"."start_date"::date) ASC')
+
                             // 2. Если длины одинаковые, берем самую дешевую комнату
                             ->orderBy('hotel_room_types.price_foreign', 'asc')
                             ->limit(1);
@@ -118,7 +123,7 @@ class HotelController extends Controller
             ->paginate(10);
 
 //        dd($hotels->items());
-        
+
         return response()->json([
             'data' => HotelResource::collection($hotels->items()),
             'pagination' => [

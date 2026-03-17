@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use Illuminate\Support\Arr;
-use App\Enums\WebTourPriceType;
 use App\Enums\WebTourPriceStatus;
+use App\Enums\WebTourPriceType;
 use App\Enums\WebTourStatus;
 use App\Filament\Resources\WebTourResource\Pages;
 use App\Filament\Resources\WebTourResource\RelationManagers;
@@ -16,7 +15,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use App\Filament\Resources\WebTourResource\Actions\PricesAction;
 
 class WebTourResource extends Resource
 {
@@ -55,7 +53,7 @@ class WebTourResource extends Resource
                     Forms\Components\Toggle::make('is_popular')
                         ->label('Popular Tour')
                         ->default(false),
-                    
+
                     Forms\Components\Select::make('categories')
                         ->relationship('categories', 'name_ru')
                         ->multiple()
@@ -71,8 +69,8 @@ class WebTourResource extends Resource
                 ]),
 
                 Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\Textarea::make('description_ru'),
-                    Forms\Components\Textarea::make('description_en'),
+                    Forms\Components\RichEditor::make('description_ru'),
+                    Forms\Components\RichEditor::make('description_en'),
                     Forms\Components\FileUpload::make('photo')
                         ->image(),
                 ]),
@@ -80,10 +78,26 @@ class WebTourResource extends Resource
                 Forms\Components\Repeater::make('days')
                     ->relationship('days')
                     ->columnSpanFull()
+                    ->extraAttributes([
+                        // This adds a custom class we can target and forces the SVG color
+                        'class' => 'red-delete-repeater',
+                        'style' => '
+                            --c-500: 239, 68, 68;
+                            --c-600: 220, 38, 38;
+                        ',
+                    ])
+                    ->deleteAction(
+                        fn (Forms\Components\Actions\Action $action) => $action
+                            ->color('danger')
+                            ->extraAttributes([
+                                // The '!' is the Tailwind 'important' modifier
+                                'class' => '[&_svg]:!text-red-600 [&_svg]:!fill-red-600',
+                            ])
+                    )
                     ->itemLabel(function ($get, $uuid) {
                         $index = array_search($uuid, array_keys($get('days'))) ?? 0;
                         $index++;
-                        
+
                         return "Day - $index";
                     })
                     ->addActionAlignment('end')
@@ -111,9 +125,9 @@ class WebTourResource extends Resource
                                 ->preload(),
                         ]),
                         Forms\Components\Grid::make()->schema([
-                            Forms\Components\Textarea::make('description_ru')
+                            Forms\Components\RichEditor::make('description_ru')
                                 ->required(),
-                            Forms\Components\Textarea::make('description_en'),
+                            Forms\Components\RichEditor::make('description_en'),
                         ]),
                     ]),
 
@@ -155,8 +169,8 @@ class WebTourResource extends Resource
                         ]),
 
                         Forms\Components\Grid::make()->schema([
-                            Forms\Components\Textarea::make('description_ru'),
-                            Forms\Components\Textarea::make('description_en'),
+                            Forms\Components\RichEditor::make('description_ru'),
+                            Forms\Components\RichEditor::make('description_en'),
                         ]),
 
                         Forms\Components\Select::make('hotels')
@@ -169,7 +183,7 @@ class WebTourResource extends Resource
                     ->relationship('prices')
                     ->columnSpanFull()
                     ->addActionAlignment('end')
-                    ->visible(fn ($get) => $get('type') == WebTourPriceType::Default->value || $get('type') == null)
+                    ->visible(fn($get) => $get('type') == WebTourPriceType::Default->value || $get('type') == null)
                     ->schema([
                         Forms\Components\Grid::make(3)->schema([
                             Forms\Components\DatePicker::make('from_date')
@@ -186,13 +200,13 @@ class WebTourResource extends Resource
                                 ->options(WebTourPriceStatus::class)
                         ]),
                     ]),
-                
+
                 // --- CONDITIONAL REPEATER 2: FREE PRICES ---
                 Forms\Components\Repeater::make('freePrices')
                     ->relationship('freePrices')
                     ->columnSpanFull()
                     ->addActionAlignment('end')
-                    ->visible(fn ($get) => $get('type') === WebTourPriceType::Free->value)
+                    ->visible(fn($get) => $get('type') === WebTourPriceType::Free->value)
                     ->schema([
                         Forms\Components\Grid::make(2)->schema([
                             Forms\Components\TextInput::make('pax_count')
@@ -253,7 +267,7 @@ class WebTourResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('status_updated_by')
-                    ->formatStateUsing(function($record) {
+                    ->formatStateUsing(function ($record) {
                         return $record->statusUpdatedBy?->name;
                     }),
 

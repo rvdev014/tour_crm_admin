@@ -68,10 +68,11 @@ class HotelResource extends JsonResource
         if (!$period) {
             return 0;
         }
-        
+
         /** @var HotelRoomType $hotelRoomType */
         $hotelRoomType = $this->roomTypes()
-            ->where('hotel_period_id', $period->id)
+            ->where('season_type', $period->season_type->value)
+            ->where('year', $period->start_date->year)
             ->first();
 
         /** @var Group $group */
@@ -86,7 +87,7 @@ class HotelResource extends JsonResource
         if ($isUsd) {
             return round($price / ($currencyUsd?->rate ?? 1), 2);
         }
-        
+
         return $price;
     }
 

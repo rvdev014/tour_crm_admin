@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $description
  * @property string $comment
  * @property bool $nds_included
+ * @property bool $is_visible
  * @property int $tour_sbor
  *
  * @property City $city
@@ -78,6 +79,7 @@ class Hotel extends Model
         'longitude',
         'nds_included',
         'tour_sbor',
+        'is_visible'
     ];
 
     protected $casts = [
@@ -103,7 +105,7 @@ class Hotel extends Model
     {
         return $this->hasMany(HotelPeriod::class)->orderBy('id');
     }
-    
+
     public function currentYearPeriods(): HasMany
     {
         return $this->hasMany(HotelPeriod::class)->whereYear('start_date', now()->year);
@@ -138,7 +140,7 @@ class Hotel extends Model
     {
         return $this->morphMany(Review::class, 'reviewable')->where('is_active', true);
     }
-    
+
     public function rules(): HasMany
     {
         return $this->hasMany(HotelRule::class);

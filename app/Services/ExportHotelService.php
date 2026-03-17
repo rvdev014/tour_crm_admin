@@ -40,12 +40,13 @@ class ExportHotelService
         if (!$period) {
             return $hotelPrices;
         }
-        
+
         foreach ($roomAmounts as $roomTypeId => $amount) {
             /** @var HotelRoomType $hotelRoomType */
             $hotelRoomType = $hotelExpense->hotel->roomTypes()
                 ->where('room_type_id', $roomTypeId)
-                ->where('hotel_period_id', $period->id)
+                ->where('season_type', $period->season_type->value)
+                ->where('year', $period->start_date->year)
                 ->first();
 
             if ($hotelRoomType) {
@@ -101,11 +102,11 @@ class ExportHotelService
                     roomAmounts: $roomAmountsById,
                     personType: $personType,
                 );
-                
+
                 if ($hotelExpense->hotel_checkin_time) {
                     $date->setTimeFromTimeString($hotelExpense->hotel_checkin_time);
                 }
-                
+
                 $hotelItem = [
                     'tour_number' => $tour->group_number,
                     'payment_method' => $tour->payment_type?->getLabel(),
@@ -134,7 +135,7 @@ class ExportHotelService
                     'contract_number' => $hotel?->contract_number ?? null,
                     'contract_date' => $hotel?->contract_date ?? null,
                 ];
-                
+
                 $result->put($hotelExpense->id, $hotelItem);
             }
         }
@@ -161,18 +162,18 @@ class ExportHotelService
                 $date = $hotelExpense->date;
                 $city = $hotelExpense->city?->name;
                 $hotel = $hotelExpense->hotel;
-                
+
                 $hotelPrices = self::getHotelPrices(
                     hotelExpense: $hotelExpense,
                     date: $date,
                     roomAmounts: $roomAmountsById,
                     personType: $personType
                 );
-                
+
                 if ($hotelExpense->hotel_checkin_time) {
                     $date->setTimeFromTimeString($hotelExpense->hotel_checkin_time);
                 }
-                
+
                 $hotelItem = [
                     'tour_number' => $tour->group_number,
                     'payment_method' => $tour->payment_type->getLabel(),
@@ -199,7 +200,7 @@ class ExportHotelService
                     'contract_number' => $hotel?->contract_number ?? null,
                     'contract_date' => $hotel?->contract_date ?? null,
                 ];
-                
+
                 $result->put($hotelExpense->id, $hotelItem);
             }
         }
@@ -298,10 +299,10 @@ class ExportHotelService
 
         $firstArrivalTime = Carbon::parse($arrivals->first())->format('H:i');
         $lastDepartureTime = Carbon::parse($departures->last())->format('H:i');
-        
+
         [$rules_1_content, $rules_2_content, $rules_3_content] = self::getHotelRulesStr($hotel);
 //        dd($rules);
-        
+
         $placeholders = [
             'name' => $hotel->name,
             'guest_name' => $passengerName,
@@ -338,25 +339,25 @@ class ExportHotelService
         $rule_1_content = '';
         $rule_2_content = '';
         $rule_3_content = '';
-        
+
         $ruleIndex = 1;
-        
+
         // Берем только первые три правила из коллекции
         // array_slice гарантирует, что мы итерируемся не более чем по 3 элементам.
         $firstThreeRules = $hotel->rules->slice(0, 3);
-        
+
         foreach ($firstThreeRules as $rule) {
-            
+
             // Переменные для текущего правила
             $title = '';
             $description = '';
-            
+
             // --- 1. Логика Формирования Правил ---
-            
+
             if ($rule->rule_type === HotelRule::TYPE_EARLY_CHECK_IN) {
                 $startTime = substr($rule->start_time, 0, 5); // 06:00
                 $endTime = substr($rule->end_time, 0, 5);     // 14:00
-                
+
                 if ($rule->impact_value == 100 && $rule->start_time === '00:00:00') {
                     $title = "Ранний заезд до {$endTime}";
                     $description = "оплачивается 100% стоимости номера\n(питание входит в стоимость)";
@@ -367,9 +368,9 @@ class ExportHotelService
             } elseif ($rule->rule_type === HotelRule::TYPE_LATE_CHECK_OUT) {
                 $startTime = substr($rule->start_time, 0, 5); // 13:00
                 $endTime = substr($rule->end_time, 0, 5);     // 23:00
-                
+
                 $title = "Поздний выезд после {$startTime} и до {$endTime}";
-                
+
                 if ($rule->price_impact_type === HotelRule::IMPACT_PERCENTAGE) {
                     // Используем значение из модели
                     $description = "почасовая оплата берется в размере {$rule->impact_value}%";
@@ -377,14 +378,14 @@ class ExportHotelService
                     $description = "почасовая оплата берется в размере {$rule->impact_value}%";
                 }
             }
-            
+
             // --- 2. Присвоение Контента Переменным ---
-            
+
             // Форматируем содержимое: Сначала Заголовок, затем Новая строка (\n), затем Описание
             // (Убедитесь, что title не пустой, хотя по логике он всегда должен быть)
             if ($title) {
                 $fullContent = "{$title}\n{$description}";
-                
+
                 switch ($ruleIndex) {
                     case 1:
                         $rule_1_content = $fullContent;
@@ -397,14 +398,14 @@ class ExportHotelService
                         break;
                 }
             }
-            
+
             $ruleIndex++;
         }
-        
+
         // Удаляем последние две новые строки, чтобы не было лишнего отступа в конце
         return [$rule_1_content, $rule_2_content, $rule_3_content];
     }
-    
+
     public static function getNumberSuffix(int $number): string
     {
         $lastDigit = $number % 10;

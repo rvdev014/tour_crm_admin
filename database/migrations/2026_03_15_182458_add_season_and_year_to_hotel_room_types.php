@@ -16,7 +16,7 @@ return new class extends Migration {
         Schema::table('hotel_room_types', function(Blueprint $table) {
             $table->integer('year')->nullable()->after('season_type');
         });
-        
+
         // 2. Populate the new fields by joining with hotel_periods
         // Using chunk() to keep memory usage low
         DB::table('hotel_room_types')
@@ -28,26 +28,25 @@ return new class extends Migration {
                     DB::table('hotel_room_types')
                         ->where('id', $rt->id)
                         ->update([
-                            'hotel_period_id' => null,
                             'season_type' => $rt->season_type,
                             'year' => Carbon::parse($rt->start_date)->year,
                         ]);
                 }
             });
-        
+
         // 3. Identify the IDs of the unique records we want to keep
         // Grouping by hotel, room type, season, and year
         $keptIds = DB::table('hotel_room_types')
             ->select(DB::raw('MIN(id) as id'))
             ->groupBy('hotel_id', 'room_type_id', 'season_type', 'year')
             ->pluck('id');
-        
+
         // 4. Delete the redundant duplicate records
         DB::table('hotel_room_types')
             ->whereNotIn('id', $keptIds)
             ->delete();
     }
-    
+
     /**
      * Reverse the migrations.
      */

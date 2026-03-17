@@ -22,12 +22,12 @@ class RoomTypeResource extends Resource
     {
         return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
     }
-    
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['name'];
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form->disabled(fn() => auth()->user()->isOperator())
@@ -54,9 +54,11 @@ class RoomTypeResource extends Resource
                     ->label('Description')
                     ->rows(4)
                     ->columnSpanFull(),
+                Forms\Components\TextInput::make('sort_order')
+                    ->required(),
             ]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
@@ -77,6 +79,7 @@ class RoomTypeResource extends Resource
                         }
                         return $state;
                     }),
+                Tables\Columns\TextColumn::make('sort_order')
             ])
             ->filters([
                 //
@@ -90,14 +93,14 @@ class RoomTypeResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [

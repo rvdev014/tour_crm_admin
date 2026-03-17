@@ -292,23 +292,23 @@ class TourService
 //        $currentYear = $startDate ? Carbon::parse($startDate)->format('y') : date('y');
 //        return "{$firstLetter}{$number}-{$currentYear}{$lastLetter}";
 //    }
-    
+
     public static function getGroupNumber(TourType $tourType, $startDate = null): string
     {
         $userName = auth()->user()->name;
         $firstLetter = strtoupper(substr($userName, 0, 1));
-        
+
         $date = $startDate ? Carbon::parse($startDate) : now();
         $year = $date->year;
         $shortYear = $date->format('y');
-        
+
         $number = DB::transaction(function () use ($year) {
             $lastNumber = Tour::query()->whereYear('start_date', $year)->count();
             return 100 + $lastNumber;
         });
-        
+
         $lastLetter = ($tourType === TourType::TPS) ? 'T' : 'C';
-        
+
         return "{$firstLetter}{$number}-{$shortYear}{$lastLetter}";
     }
 
@@ -345,10 +345,14 @@ class TourService
 
     public static function generateRoomingSchema($firstThree = false): array
     {
+        $query = RoomType::query()
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('name', 'asc');
+
         if ($firstThree) {
-            $roomTypes = RoomType::query()->limit(3)->get();
+            $roomTypes = $query->limit(3)->get();
         } else {
-            $roomTypes = RoomType::query()->skip(3)->get();
+            $roomTypes = $query->skip(3)->take(PHP_INT_MAX)->get();
         }
 
         $result = $roomTypes->map(function(RoomType $roomType) {
@@ -611,7 +615,7 @@ HTML;
 
         return $enumClass::from($value)->getLabel();
     }
-    
+
     public static function calculateHotelNights($hotelId, ?string $date, ?string $checkIn, ?string $checkOutDateTime): float
     {
         /** @var Hotel $hotel */
@@ -619,29 +623,29 @@ HTML;
         if (!$hotel || !$date || !$checkIn || !$checkOutDateTime) {
             return 0;
         }
-        
+
         $hotelCheckinDateTime = Carbon::parse($date);
         $hotelCheckinDateTime->setTimeFromTimeString($checkIn);
         $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);
         $additionalNights = 0.0;
-        
+
         if ($hotelCheckinDateTime->greaterThan($hotelCheckoutDateTime)) {
             return 0;
         }
-        
+
         // 1. Расчет базового количества дней
         $diffInDays = $hotelCheckinDateTime->clone()->startOfDay()->diffInDays(
             $hotelCheckoutDateTime->clone()->startOfDay()
         );
-        
+
         // 2. Применение правил раннего заезда (Early Check-in)
         // Стандартное время заезда (Check-in) в большинстве отелей - 14:00
         $standardCheckInTime = Carbon::createFromFormat('H:i', '14:00');
         $checkInTime = Carbon::createFromFormat('H:i', $checkIn);
-        
+
         if ($checkInTime->lessThan($standardCheckInTime)) {
             $checkInRules = $hotel->rules->where('rule_type', 'early_check_in');
-            
+
             foreach ($checkInRules as $rule) {
                 // Если время заезда попадает в интервал правила
                 if ($checkInTime->greaterThanOrEqualTo($rule->start_time) && $checkInTime->lessThan($rule->end_time)) {
@@ -654,37 +658,37 @@ HTML;
                 }
             }
         }
-        
-        
+
+
         // 3. Применение правил позднего выезда (Late Check-out)
         // Стандартное время выезда (Check-out) в большинстве отелей - 12:00
         $standardCheckOutTime = Carbon::createFromFormat('H:i', '12:00');
         $checkOutTime = Carbon::createFromFormat('H:i', $hotelCheckoutDateTime->format('H:i'));
-        
+
         if ($checkOutTime->greaterThan($standardCheckOutTime)) {
             $checkOutRules = $hotel->rules->where('rule_type', HotelRule::TYPE_LATE_CHECK_OUT);
             foreach ($checkOutRules as $rule) {
                 // Если время выезда попадает в интервал правила
                 if ($checkOutTime->greaterThan($rule->start_time) && $checkOutTime->lessThanOrEqualTo($rule->end_time)) {
-                    
+
                     if ($rule->price_impact_type === HotelRule::IMPACT_HOURLY) {
                         // Считаем часы превышения стандартного времени выезда (12:00)
                         $excessHours = $checkOutTime->diffInHours($standardCheckOutTime);
-                        
+
                         // Каждый час дает дополнительную долю дня (10% = 0.1 дня)
                         $additionalNights += $excessHours * ($rule->impact_value / 100.0);
                     }
-                    
+
                     // Если бы было "поздний выезд до 18:00 - +0.5 дня", тут был бы 'fixed_nights'
-                    
+
                     break; // Найдено подходящее правило, выходим
                 }
             }
         }
-        
+
         return $diffInDays + $additionalNights;
     }
-    
+
 //    public static function calculateHotelNights(?string $date, ?string $checkIn, ?string $checkOutDateTime): float
 //    {
 //        if (!$date || !$checkIn || !$checkOutDateTime) {
@@ -721,7 +725,7 @@ HTML;
 
         return Transfer::query()->where('tour_day_expense_id', $expense['id'])->first();
     }
-    
+
     public static function getTourSborValue(): int
     {
         $settings = Setting::query()->where('key', DefaultSettings::TOUR_SBOR->value)->first();

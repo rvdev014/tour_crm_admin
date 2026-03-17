@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $price_foreign
  *
  * @property RoomType $roomType
- * @property HotelPeriod $period
  * @property Hotel $hotel
  */
 class HotelRoomType extends Model
@@ -44,11 +43,6 @@ class HotelRoomType extends Model
     {
         return $this->belongsTo(Hotel::class);
     }
-    
-    public function period(): BelongsTo
-    {
-        return $this->belongsTo(HotelPeriod::class, 'hotel_period_id');
-    }
 
     public function roomType(): BelongsTo
     {
@@ -61,12 +55,12 @@ class HotelRoomType extends Model
         if ($this->hotel->nds_included) {
             $hotelPrice += $hotelPrice * 12 / 100;
         }
-        
+
         if (!empty($this->hotel->tour_sbor)) {
             $tourSborValue = TourService::getTourSborValue();
             $hotelPrice += $tourSborValue * $this->hotel->tour_sbor / 100;
         }
-        
+
         return $hotelPrice ?? 0;
     }
 
@@ -86,7 +80,7 @@ class HotelRoomType extends Model
         if (!$group) {
             return $price;
         }
-        
+
         $additionalPrice = $price * $group->getPercent($price) / 100;
         return $price + $additionalPrice;
     }

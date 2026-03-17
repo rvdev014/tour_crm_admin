@@ -254,11 +254,12 @@ class ExportService
                     $totals[] = ['value' => '', 'colspan' => 1];
                     continue;
                 }
-                
+
                 /** @var HotelRoomType $hotelRoomType */
                 $hotelRoomType = $hotel->roomTypes()
                     ->where('room_type_id', $roomType['id'])
-                    ->where('hotel_period_id', $period->id)
+                    ->where('season_type', $period->season_type->value)
+                    ->where('year', $period->start_date->year)
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
@@ -662,11 +663,12 @@ class ExportService
                     $totals[] = ['value' => '', 'colspan' => 1];
                     continue;
                 }
-                
+
                 /** @var HotelRoomType $hotelRoomType */
                 $hotelRoomType = $hotel->roomTypes()
                     ->where('room_type_id', $roomType['id'])
-                    ->where('hotel_period_id', $period->id)
+                    ->where('season_type', $period->season_type->value)
+                    ->where('year', $period->start_date->year)
                     ->first();
 
                 $amount = $roomType['amount'] ?? 0;
