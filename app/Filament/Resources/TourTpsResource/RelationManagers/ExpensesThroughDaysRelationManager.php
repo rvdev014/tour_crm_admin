@@ -194,7 +194,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                 // Museum
                 Components\Fieldset::make('Museum info')->schema([
 
-                    Components\Grid::make(3)->schema([
+                    Components\Grid::make(4)->schema([
                         Components\Select::make('museum_ids')
                             ->label('Museum')
                             ->native(false)
@@ -233,6 +233,15 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                                 $museums = TourService::getMuseumsByIds($get('museum_ids'));
                                 return empty($museums);
                             }),
+
+                        Components\Select::make('status')
+                            ->options(ExpenseStatus::class)
+                            ->default(ExpenseStatus::New->value)
+                            ->required()
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->label('Status'),
 
                         Components\Textarea::make('comment')->label('Comment'),
                     ]),

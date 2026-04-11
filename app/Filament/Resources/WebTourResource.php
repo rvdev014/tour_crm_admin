@@ -183,7 +183,9 @@ class WebTourResource extends Resource
                     ->relationship('prices')
                     ->columnSpanFull()
                     ->addActionAlignment('end')
-                    ->visible(fn($get) => $get('type') == WebTourPriceType::Default->value || $get('type') == null)
+                    ->visible(function($get) {
+                        return $get('type') == WebTourPriceType::Default || $get('type') == null;
+                    })
                     ->schema([
                         Forms\Components\Grid::make(3)->schema([
                             Forms\Components\DatePicker::make('from_date')
@@ -206,11 +208,16 @@ class WebTourResource extends Resource
                     ->relationship('freePrices')
                     ->columnSpanFull()
                     ->addActionAlignment('end')
-                    ->visible(fn($get) => $get('type') === WebTourPriceType::Free->value)
+                    ->visible(fn($get) => $get('type') === WebTourPriceType::Free)
                     ->schema([
-                        Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\TextInput::make('pax_count')
-                                ->label('Pax Count')
+                        Forms\Components\Grid::make(3)->schema([
+                            Forms\Components\TextInput::make('pax_from')
+                                ->label('Pax From')
+                                ->required()
+                                ->numeric()
+                                ->minValue(1),
+                            Forms\Components\TextInput::make('pax_to')
+                                ->label('Pax To')
                                 ->required()
                                 ->numeric()
                                 ->minValue(1),

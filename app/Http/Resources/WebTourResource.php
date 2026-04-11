@@ -46,7 +46,7 @@ class WebTourResource extends JsonResource
     public function getCurrentPrice()
     {
         if ($this->type == WebTourPriceType::Free->value) {
-            $freePrice = $this->freePrices()->where('pax_count', 1)->first();
+            $freePrice = $this->freePrices()->where('pax_from', 1)->first();
             return $freePrice;
         }
         

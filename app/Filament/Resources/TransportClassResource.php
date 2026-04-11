@@ -34,6 +34,10 @@ class TransportClassResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('order')
+                    ->numeric()
+                    ->default(0)
+                    ->label('Order'),
                 Forms\Components\Textarea::make('description')
                     ->rows(3),
                 Forms\Components\TextInput::make('price_per_km')
@@ -78,6 +82,9 @@ class TransportClassResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('order')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('description')
                     ->limit(50),
                 Tables\Columns\TextColumn::make('price_per_km')

@@ -192,7 +192,7 @@ class ManualController extends Controller
 
     public function getTransportClasses(): JsonResponse
     {
-        $transportClasses = TransportClass::query()->orderBy('price_per_km')->get();
+        $transportClasses = TransportClass::query()->orderBy('order')->get();
         return response()->json(['data' => TransportClassResource::collection($transportClasses)]);
     }
 

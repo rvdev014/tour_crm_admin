@@ -208,8 +208,8 @@ class HotelResource extends Resource
                                 // max-h-[500px] - ограничение высоты (можете менять число)
                                 // overflow-y-auto - вертикальный скролл при переполнении
                                 // p-1 - небольшой отступ, чтобы фокус не обрезался
-                                'class' => 'max-h-[500px] overflow-y-auto p-1 custom-scrollbar',
-                                'style' => 'max-height: 500px;!important;', // Фиксированная высота 300px
+//                                'class' => 'max-h-[500px] overflow-y-auto p-1 custom-scrollbar',
+//                                'style' => 'max-height: 500px;!important;', // Фиксированная высота 300px
                             ]),
 
                     ]),
@@ -383,8 +383,8 @@ class HotelResource extends Resource
     {
         return [
             RelationManagers\RoomTypesRelationManager::class,
-            RelationManagers\ReviewsRelationManager::class,
             RelationManagers\HotelRulesRelationManager::class,
+            RelationManagers\ReviewsRelationManager::class,
         ];
     }
 

@@ -249,7 +249,7 @@ class DaysRelationManager extends RelationManager
                         // Museum
                         Components\Fieldset::make('Museum info')->schema([
 
-                            Components\Grid::make(3)->schema([
+                            Components\Grid::make(4)->schema([
                                 Components\Select::make('museum_ids')
                                     ->label('Museum')
                                     ->native(false)
@@ -288,6 +288,15 @@ class DaysRelationManager extends RelationManager
                                         $museums = TourService::getMuseumsByIds($get('museum_ids'));
                                         return empty($museums);
                                     }),
+
+                                Components\Select::make('status')
+                                    ->options(ExpenseStatus::class)
+                                    ->default(ExpenseStatus::New->value)
+                                    ->required()
+                                    ->native(false)
+                                    ->searchable()
+                                    ->preload()
+                                    ->label('Status'),
 
                                 Components\Textarea::make('comment')->label('Comment'),
                             ]),
@@ -611,7 +620,7 @@ class DaysRelationManager extends RelationManager
                         return view('filament.columns.status-column', [
                             'name' => $trainExpense?->train?->name,
                             'status' => $trainExpense?->status,
-                            'content' => "<p>$trainExpense?->departure_time</p>"
+                            'content' => "<p>" . ($trainExpense?->arrival_time ? \Carbon\Carbon::parse($trainExpense->arrival_time)->format('d-m H:i') : '') . " - {$trainExpense?->departure_time}</p>"
                         ]);
                     }),
 

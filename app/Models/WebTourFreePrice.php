@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $web_tour_id
- * @property int $pax_count
+ * @property int $pax_from
+ * @property int $pax_to
  * @property float $price
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -34,7 +35,8 @@ class WebTourFreePrice extends Model
      */
     protected $fillable = [
         'web_tour_id',
-        'pax_count',
+        'pax_from',
+        'pax_to',
         'price',
     ];
     
@@ -44,7 +46,8 @@ class WebTourFreePrice extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'pax_count' => 'integer',
+        'pax_from' => 'integer',
+        'pax_to' => 'integer',
         'price' => 'decimal:2', // Соответствует настройке decimal в миграции
     ];
     
