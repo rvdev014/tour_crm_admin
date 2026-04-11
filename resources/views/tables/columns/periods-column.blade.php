@@ -8,6 +8,7 @@
     $group = $state['group'] ?? null;
     $currency = $state['currency'] ?? CurrencyEnum::UZS->value;
     $year = $state['year'] ?? null;
+    $seasonType = $state['season_type'] ?? null;
 
 //    if (!empty($year)) {
 //        $hotel->load(['roomTypes' => fn ($query) => $query->where('year', $year)]);
@@ -25,6 +26,7 @@
     $roomTypes = HotelRoomType::query()
         ->where('hotel_id', $hotel->id)
         ->when(!empty($year), fn ($query) => $query->where('year', $year))
+        ->when(!empty($seasonType), fn ($query) => $query->where('season_type', $seasonType))
         // PostgreSQL specific: unique per room_type_id
         // Note: The first column in orderBy MUST be the column in distinctOn
         ->selectRaw('DISTINCT ON (room_type_id) *')

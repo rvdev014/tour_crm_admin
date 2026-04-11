@@ -295,6 +295,10 @@ class HotelResource extends Resource
                                         $yearsArray
                                     );
                                 }),
+                            Forms\Components\Select::make('season_type')
+                                ->label('Season Type')
+                                ->native(false)
+                                ->options(RoomSeasonType::class),
                         ])
                     ])
                     ->query(function(Builder $query, $data) {
@@ -311,6 +315,9 @@ class HotelResource extends Resource
                         }
                         if (isset($data['year'])) {
                             $indicators[] = 'Year: ' . $data['year'];
+                        }
+                        if (isset($data['season_type'])) {
+                            $indicators[] = 'Season: ' . RoomSeasonType::tryFrom($data['season_type'])?->getLabel();
                         }
                         return $indicators;
                     })
@@ -329,6 +336,7 @@ class HotelResource extends Resource
                             'isFirst' => $record->is($livewire->getTableRecords()->first()),
                             'currency' => $filters['filters']['currency'],
                             'year' => $filters['filters']['year'],
+                            'season_type' => $filters['filters']['season_type'] ?? null,
                         ];
                     }),
 
