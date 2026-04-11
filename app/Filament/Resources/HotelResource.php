@@ -227,10 +227,10 @@ class HotelResource extends Resource
                     //                        ->columnSpanFull(),
 
                     Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\Textarea::make('description_en')
+                        Forms\Components\RichEditor::make('description_en')
                             ->label('Description (English)')
                             ->maxLength(1000),
-                        Forms\Components\Textarea::make('description_ru')
+                        Forms\Components\RichEditor::make('description_ru')
                             ->label('Description (Russian)')
                             ->maxLength(1000),
                     ]),
