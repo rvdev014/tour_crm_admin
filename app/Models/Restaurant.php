@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int $price_per_person
  * @property string $inn
  * @property string $phone
+ * @property string $telegram_chat_id
  * @property array $media
  * @property string $created_at
  * @property string $updated_at
@@ -24,6 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property City $city
  * @property Country $country
  * @property Collection<ManualPhone> $phones
+ * @property Collection<RestaurantMenu> $menus
  */
 class Restaurant extends Model
 {
@@ -38,6 +41,7 @@ class Restaurant extends Model
         'company_name',
         'inn',
         'phone',
+        'telegram_chat_id',
         'media',
     ];
 
@@ -58,5 +62,10 @@ class Restaurant extends Model
     public function phones(): MorphMany
     {
         return $this->morphMany(ManualPhone::class, 'manual');
+    }
+
+    public function menus(): HasMany
+    {
+        return $this->hasMany(RestaurantMenu::class);
     }
 }
