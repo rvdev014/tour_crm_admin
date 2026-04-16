@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property RoomSeasonType $season_type
  * @property float $price
  * @property float $price_foreign
+ * @property int $year
  *
  * @property RoomType $roomType
  * @property Hotel $hotel

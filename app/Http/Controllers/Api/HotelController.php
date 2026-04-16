@@ -156,7 +156,17 @@ class HotelController extends Controller
     public function getHotel($hotelId): JsonResponse
     {
         $hotel = Hotel::query()
-            ->with(['country', 'city', 'facilities', 'attachments', 'activeReviews', 'roomTypes.roomType'])
+            ->with([
+                'country',
+                'city',
+                'facilities',
+                'attachments',
+                'activeReviews',
+                'roomTypes' => function ($query) {
+                    $query->where('year', now()->year);
+                },
+                'roomTypes.roomType',
+            ])
             ->findOrFail($hotelId);
 
         return response()->json(['data' => HotelResource::make($hotel)]);
