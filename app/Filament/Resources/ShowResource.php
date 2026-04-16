@@ -44,6 +44,10 @@ class ShowResource extends Resource
                 Forms\Components\TextInput::make('price_per_person')
                     ->required()
                     ->numeric(),
+                Forms\Components\TextInput::make('company')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('inn')
+                    ->maxLength(255),
             ]);
     }
 
@@ -65,6 +69,10 @@ class ShowResource extends Resource
                 Tables\Columns\TextColumn::make('price_per_person')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('company')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('inn')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

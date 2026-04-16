@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $country_id
  * @property int $city_id
  * @property float $price_per_person
+ * @property string|null $company
+ * @property string|null $inn
  *
  * @property Country $country
  * @property City $city
@@ -24,6 +26,8 @@ class Show extends Model
         'country_id',
         'city_id',
         'price_per_person',
+        'company',
+        'inn',
     ];
 
     public function country(): BelongsTo

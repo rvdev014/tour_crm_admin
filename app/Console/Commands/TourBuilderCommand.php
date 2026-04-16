@@ -301,7 +301,7 @@ class TourBuilder
 
     public function pax(int $pax): self
     {
-        $this->attributes['pax'] = $pax;
+        $this->attributes['pax_uz'] = $pax;
         return $this;
     }
 

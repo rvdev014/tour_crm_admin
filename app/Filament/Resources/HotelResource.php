@@ -208,8 +208,8 @@ class HotelResource extends Resource
                                 // max-h-[500px] - ограничение высоты (можете менять число)
                                 // overflow-y-auto - вертикальный скролл при переполнении
                                 // p-1 - небольшой отступ, чтобы фокус не обрезался
-                                'class' => 'max-h-[500px] overflow-y-auto p-1 custom-scrollbar',
-                                'style' => 'max-height: 500px;!important;', // Фиксированная высота 300px
+//                                'class' => 'max-h-[500px] overflow-y-auto p-1 custom-scrollbar',
+//                                'style' => 'max-height: 500px;!important;', // Фиксированная высота 300px
                             ]),
 
                     ]),
@@ -227,10 +227,10 @@ class HotelResource extends Resource
                     //                        ->columnSpanFull(),
 
                     Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\Textarea::make('description_en')
+                        Forms\Components\RichEditor::make('description_en')
                             ->label('Description (English)')
                             ->maxLength(1000),
-                        Forms\Components\Textarea::make('description_ru')
+                        Forms\Components\RichEditor::make('description_ru')
                             ->label('Description (Russian)')
                             ->maxLength(1000),
                     ]),
@@ -295,6 +295,10 @@ class HotelResource extends Resource
                                         $yearsArray
                                     );
                                 }),
+                            Forms\Components\Select::make('season_type')
+                                ->label('Season Type')
+                                ->native(false)
+                                ->options(RoomSeasonType::class),
                         ])
                     ])
                     ->query(function(Builder $query, $data) {
@@ -311,6 +315,9 @@ class HotelResource extends Resource
                         }
                         if (isset($data['year'])) {
                             $indicators[] = 'Year: ' . $data['year'];
+                        }
+                        if (isset($data['season_type'])) {
+                            $indicators[] = 'Season: ' . RoomSeasonType::tryFrom($data['season_type'])?->getLabel();
                         }
                         return $indicators;
                     })
@@ -329,6 +336,7 @@ class HotelResource extends Resource
                             'isFirst' => $record->is($livewire->getTableRecords()->first()),
                             'currency' => $filters['filters']['currency'],
                             'year' => $filters['filters']['year'],
+                            'season_type' => $filters['filters']['season_type'] ?? null,
                         ];
                     }),
 
@@ -383,8 +391,8 @@ class HotelResource extends Resource
     {
         return [
             RelationManagers\RoomTypesRelationManager::class,
-            RelationManagers\ReviewsRelationManager::class,
             RelationManagers\HotelRulesRelationManager::class,
+            RelationManagers\ReviewsRelationManager::class,
         ];
     }
 

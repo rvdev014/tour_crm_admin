@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property string $name
+ * @property int $order
  * @property float $price_per_km
  * @property int $passenger_capacity
  * @property int $luggage_capacity
@@ -24,6 +25,7 @@ class TransportClass extends Model
 
     protected $fillable = [
         'name',
+        'order',
         'description',
         'price_per_km',
         'photo',
@@ -39,6 +41,7 @@ class TransportClass extends Model
 
     protected $casts = [
         'price_per_km' => 'decimal:2',
+        'order' => 'integer',
         'passenger_capacity' => 'integer',
         'luggage_capacity' => 'integer',
         'waiting_time_included' => 'integer',

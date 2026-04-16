@@ -25,7 +25,7 @@ class EditTour extends EditRecord
         ExpenseService::convertExpensePrice($data, 'guide_price');
         ExpenseService::convertExpensePrice($data, 'transport_price');
 
-        $totalPax = $data['pax'] + ($data['leader_pax'] ?? 0);
+        $totalPax = Tour::calcTotalPax($data);
 
         $data['price_result'] = $data['price_converted'] ?? $data['price'] ?? 0;
         $data['total_price'] = round($data['price_result'] * $totalPax, 2);

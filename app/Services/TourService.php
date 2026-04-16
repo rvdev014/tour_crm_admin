@@ -23,6 +23,7 @@ use App\Models\HotelRule;
 use App\Enums\ExpenseType;
 use App\Models\MuseumItem;
 use App\Models\Restaurant;
+use App\Models\RestaurantMenu;
 use App\Enums\ExpenseStatus;
 use App\Enums\TransportType;
 use App\Models\TourDayExpense;
@@ -381,77 +382,37 @@ class TourService
     public static function sendTelegram($tourData, $isCorporate = false, $isUpdated = false): void
     {
         $transportsData = [];
+        $restaurantsData = [];
 
         if ($isCorporate) {
             $expenses = $tourData['expenses'] ?? [];
+            $totalPax = count($tourData['passengers'] ?? []);
             foreach ($expenses as $expense) {
-                if ($expense['type'] != ExpenseType::Transport->value || $expense['status'] != ExpenseStatus::Confirmed->value) {
-                    continue;
-                }
-
-                $driverIds = $expense['transport_driver_ids'] ?? [];
-                if (empty($driverIds)) {
-                    continue;
-                }
-
-                foreach ($driverIds as $driverId) {
-                    $totalPax = count($tourData['passengers'] ?? []);
-                    $transportsData[$driverId][] = [
-                        'transfer_id' => self::getTransferByExpense($expense)?->id,
-                        'transfer_number' => self::getTransferByExpense($expense)?->getNumber(),
-                        'driver_id' => $driverId,
-                        'pax' => $totalPax,
-                        'driver_ids' => $driverIds,
-                        'to_city' => $expense['to_city_id'],
-                        'transport_place' => $expense['transport_place'],
-                        'route' => $expense['transport_route'],
-                        'date' => $expense['date'],
-                        'transport_type' => $tourData['transport_type'],
-                        'price' => $expense['price'],
-                        'comment' => $expense['comment'],
-                    ];
-                }
+                self::collectTelegramExpense(
+                    $expense,
+                    $expense['date'] ?? null,
+                    $totalPax,
+                    $tourData,
+                    $transportsData,
+                    $restaurantsData,
+                );
             }
         } else {
             $days = $tourData['days'] ?? [];
+            $totalPax = Tour::calcTotalPax($tourData);
             foreach ($days as $day) {
                 $expenses = $day['expenses'] ?? [];
                 foreach ($expenses as $expense) {
-                    if ($expense['type'] != ExpenseType::Transport->value || $expense['status'] != ExpenseStatus::Confirmed->value) {
-                        continue;
-                    }
-
-                    $driverIds = $expense['transport_driver_ids'] ?? [];
-                    if (empty($driverIds)) {
-                        continue;
-                    }
-
-                    $date = Carbon::parse($day['date'])->format('Y-m-d');
-                    $time = Carbon::parse($expense['transport_time'])->format('H:i');
-                    $totalPax = ($tourData['pax'] ?? 0) + ($tourData['leader_pax'] ?? 0);
-
-                    foreach ($driverIds as $driverId) {
-                        $transportsData[$driverId][] = [
-                            'transfer_id' => self::getTransferByExpense($expense)?->id,
-                            'transfer_number' => self::getTransferByExpense($expense)?->getNumber(),
-                            'driver_id' => $driverId,
-                            'pax' => $totalPax,
-                            'driver_ids' => $driverIds,
-                            'to_city' => $expense['to_city_id'],
-                            'transport_place' => $expense['transport_place'],
-                            'route' => $expense['transport_route'],
-                            'date' => "{$date} {$time}",
-                            'transport_type' => $tourData['transport_type'],
-                            'price' => $expense['price'],
-                            'comment' => $expense['comment'],
-                        ];
-                    }
+                    self::collectTelegramExpense(
+                        $expense,
+                        $day['date'] ?? null,
+                        $totalPax,
+                        $tourData,
+                        $transportsData,
+                        $restaurantsData,
+                    );
                 }
             }
-        }
-
-        if (empty($transportsData)) {
-            return;
         }
 
         foreach ($transportsData as $driverId => $transportItems) {
@@ -478,6 +439,119 @@ HTML;
             }
 
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
+        }
+
+        if (!empty($restaurantsData)) {
+            $groupNumber = $tourData['group_number'] ?? '-';
+            $countryName = !empty($tourData['country_id'])
+                ? (Country::query()->find($tourData['country_id'])?->name ?? '-')
+                : '-';
+            $guideName = $tourData['guide_name'] ?? '-';
+            $guidePhone = $tourData['guide_phone'] ?? '-';
+
+            foreach ($restaurantsData as $restaurantId => $restaurantItems) {
+                /** @var Restaurant|null $restaurant */
+                $restaurant = Restaurant::query()->with('menus')->find($restaurantId);
+                if (empty($restaurant?->telegram_chat_id)) {
+                    continue;
+                }
+
+                $menuLines = $restaurant->menus
+                    ->map(fn(RestaurantMenu $menu) => '- ' . $menu->name . ' — ' . self::formatMoney($menu->price))
+                    ->implode("\n");
+                $menuBlock = $menuLines !== '' ? "\n{$menuLines}" : ' -';
+
+                $header = <<<HTML
+<b>ID группа:</b> {$groupNumber}
+<b>Страна:</b> {$countryName}
+<b>Гид ФИО:</b> {$guideName}
+<b>Гид телефон номер:</b> {$guidePhone}
+<b>Меню:</b>{$menuBlock}
+HTML;
+
+                $body = '';
+                foreach ($restaurantItems as $item) {
+                    $typeLabel = ExpenseType::from($item['type'])->getLabel();
+                    $date = $item['date'] ? Carbon::parse($item['date'])->format('Y-m-d') : '-';
+
+                    $body .= <<<HTML
+
+
+<b>Дата:</b> {$date}
+<b>Время:</b> {$typeLabel}
+HTML;
+                }
+
+                $message = $header . $body;
+
+                if ($isUpdated) {
+                    $message = "<b>***Updated***</b>\n\n" . $message;
+                }
+
+                TelegramService::sendMessage($restaurant->telegram_chat_id, $message, ['parse_mode' => 'HTML']);
+            }
+        }
+    }
+
+    protected static function collectTelegramExpense(
+        array $expense,
+        ?string $dayDate,
+        int $totalPax,
+        array $tourData,
+        array &$transportsData,
+        array &$restaurantsData,
+    ): void {
+        if (($expense['status'] ?? null) != ExpenseStatus::Confirmed->value) {
+            return;
+        }
+
+        $type = (int) ($expense['type'] ?? 0);
+
+        if ($type === ExpenseType::Transport->value) {
+            $driverIds = $expense['transport_driver_ids'] ?? [];
+            if (empty($driverIds)) {
+                return;
+            }
+
+            $date = $dayDate;
+            if ($dayDate && !empty($expense['transport_time'])) {
+                $dayPart = Carbon::parse($dayDate)->format('Y-m-d');
+                $timePart = Carbon::parse($expense['transport_time'])->format('H:i');
+                $date = "{$dayPart} {$timePart}";
+            }
+
+            foreach ($driverIds as $driverId) {
+                $transportsData[$driverId][] = [
+                    'transfer_id' => self::getTransferByExpense($expense)?->id,
+                    'transfer_number' => self::getTransferByExpense($expense)?->getNumber(),
+                    'driver_id' => $driverId,
+                    'pax' => $totalPax,
+                    'driver_ids' => $driverIds,
+                    'to_city' => $expense['to_city_id'] ?? null,
+                    'transport_place' => $expense['transport_place'] ?? null,
+                    'route' => $expense['transport_route'] ?? null,
+                    'date' => $date,
+                    'transport_type' => $tourData['transport_type'] ?? null,
+                    'price' => $expense['price'] ?? null,
+                    'comment' => $expense['comment'] ?? null,
+                ];
+            }
+
+            return;
+        }
+
+        if (in_array($type, [ExpenseType::Lunch->value, ExpenseType::Dinner->value], true)) {
+            $restaurantId = $expense['restaurant_id'] ?? null;
+            if (!$restaurantId) {
+                return;
+            }
+
+            $restaurantsData[$restaurantId][] = [
+                'type' => $type,
+                'date' => $expense['date'] ?? $dayDate,
+                'pax' => $expense['pax'] ?? $totalPax,
+                'comment' => $expense['comment'] ?? '',
+            ];
         }
     }
 

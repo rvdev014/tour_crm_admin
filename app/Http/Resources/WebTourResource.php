@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Models\WebTour;
 use App\Enums\WebTourType;
 use App\Enums\WebTourPriceType;
+use App\Http\Resources\CategoryResource;
 use App\Models\WebTourAccommodation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -40,13 +41,14 @@ class WebTourResource extends JsonResource
             'packagesNotIncluded' => PackageResource::collection($this->whenLoaded('packagesNotIncluded')),
             'reviews' => ReviewResource::collection($this->whenLoaded('activeReviews')),
             'prices' => WebTourPriceResource::collection($this->whenLoaded('prices')),
+            'categories' => CategoryResource::collection($this->whenLoaded('categories')),
         ];
     }
     
     public function getCurrentPrice()
     {
         if ($this->type == WebTourPriceType::Free->value) {
-            $freePrice = $this->freePrices()->where('pax_count', 1)->first();
+            $freePrice = $this->freePrices()->where('pax_from', 1)->first();
             return $freePrice;
         }
         

@@ -8,9 +8,9 @@ use Filament\Support\Contracts\HasLabel;
 
 enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
 {
-    case Low = 1;
-    case Mid = 2;
     case High = 3;
+    case Mid = 2;
+    case Low = 1;
     case Yearly = 4;
     case Exhibition = 5;
 

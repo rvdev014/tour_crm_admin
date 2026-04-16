@@ -70,6 +70,9 @@ class RestaurantResource extends Resource
                     Forms\Components\TextInput::make('price_per_person')
                         ->required()
                         ->numeric(),
+                    Forms\Components\TextInput::make('telegram_chat_id')
+                        ->label('Telegram chat ID')
+                        ->maxLength(255),
                     Forms\Components\Repeater::make('phones')
                         ->relationship('phones')
                         ->addActionLabel('Add phone')
@@ -126,6 +129,9 @@ class RestaurantResource extends Resource
                     ->html(),
 
                 Tables\Columns\TextColumn::make('price_per_person'),
+                Tables\Columns\TextColumn::make('telegram_chat_id')
+                    ->label('Telegram chat ID')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -152,7 +158,7 @@ class RestaurantResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\MenusRelationManager::class,
         ];
     }
 
