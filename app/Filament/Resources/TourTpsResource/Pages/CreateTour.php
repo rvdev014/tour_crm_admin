@@ -7,6 +7,7 @@ use App\Enums\ExpenseStatus;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
 use App\Filament\Resources\TourTpsResource;
+use App\Models\Tour;
 use App\Models\TourRoomType;
 use App\Services\ExpenseService;
 use App\Services\TourService;
@@ -27,7 +28,7 @@ class CreateTour extends CreateRecord
         ExpenseService::convertExpensePrice($data, 'guide_price');
         ExpenseService::convertExpensePrice($data, 'transport_price');
 
-        $totalPax = $data['pax'] + ($data['leader_pax'] ?? 0);
+        $totalPax = Tour::calcTotalPax($data);
 
         $data['price_result'] = $data['price_converted'] ?? $data['price'] ?? 0;
         $data['total_price'] = round($data['price_result'] * $totalPax, 2);

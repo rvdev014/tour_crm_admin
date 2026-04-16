@@ -28,7 +28,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property Carbon $start_date
  * @property Carbon $end_date
  * @property bool $is_cancelled
- * @property int $pax
+ * @property int $pax_uz
+ * @property int|null $pax_foreign
  * @property int $leader_pax
  * @property string $comment
  * @property int $status
@@ -223,11 +224,18 @@ class Tour extends Model
             return $totalPax;
         }
 
+        $pax = ($this->pax_uz ?? 0) + ($this->pax_foreign ?? 0);
+
         if (!$withLeader) {
-            return $this->pax;
+            return $pax;
         }
 
-        return $this->pax + $this->leader_pax;
+        return $pax + ($this->leader_pax ?? 0);
+    }
+
+    public static function calcTotalPax(array $data): int
+    {
+        return ($data['pax_uz'] ?? 0) + ($data['pax_foreign'] ?? 0) + ($data['leader_pax'] ?? 0);
     }
 
     public function saveExpensesTotal($withTotalPrice = false): void

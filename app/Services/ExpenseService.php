@@ -94,7 +94,7 @@ class ExpenseService
         $expensesTotal = 0;
         $updatedData = array_merge($tour->getAttributes(), $updatedData);
 
-        $totalPax = $updatedData['pax'] + ($updatedData['leader_pax'] ?? 0);
+        $totalPax = Tour::calcTotalPax($updatedData);
         if ($withRooming) {
             $roomingAmounts = ExpenseService::getRoomingAmounts($updatedData);
         } else {

@@ -129,8 +129,12 @@ class TourTpsResource extends Resource
                         ->label('Departure reys number'),
                 ]),
                 Components\Grid::make(4)->schema([
-                    Components\TextInput::make('pax')
+                    Components\TextInput::make('pax_uz')
+                        ->label('Pax UZ')
                         ->required()
+                        ->numeric(),
+                    Components\TextInput::make('pax_foreign')
+                        ->label('Pax Foreign')
                         ->numeric(),
                     Components\TextInput::make('leader_pax')
                         ->numeric(),
@@ -180,15 +184,13 @@ class TourTpsResource extends Resource
                         ->reactive()
                         ->required(),
                     
-                    Components\TextInput::make('guide_name')
-                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
-                    
+                    Components\TextInput::make('guide_name'),
+
                     PhoneInput::make('guide_phone')
                         ->strictMode()
                         ->onlyCountries(['UZ'])
-                        ->defaultCountry('UZ')
-                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
-                    
+                        ->defaultCountry('UZ'),
+
                     Components\TextInput::make('guide_price')
                         ->label(fn($get) => 'Price (' . ($get('guide_price_currency') ?? 'UZS') . ')')
                         ->suffixAction(
@@ -199,8 +201,7 @@ class TourTpsResource extends Resource
                                     $set('guide_price_currency', $get('guide_price_currency') == 'USD' ? 'UZS' : 'USD');
                                 })
                         )
-                        ->numeric()
-                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
+                        ->numeric(),
                 ])
             ]),
             
@@ -506,7 +507,7 @@ class TourTpsResource extends Resource
                 /*Columns\TextColumn::make('status')
                     ->numeric()
                     ->sortable(),
-                Columns\TextColumn::make('pax')
+                Columns\TextColumn::make('pax_uz')
                     ->numeric()
                     ->sortable(),*/
             ])

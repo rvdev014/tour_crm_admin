@@ -99,7 +99,7 @@ class ExportService
                 ['Group', $tour->group_number],
                 ['Manager', $tour->createdBy->name],
                 ['Travel Dates', $tour->start_date->format('d') . '-' . $tour->end_date->format('d.m.y')],
-                ['Pax', $tour->pax],
+                ['Pax', $tour->getTotalPax(withLeader: false)],
                 ['FOC', $tour->leader_pax > 0 ? $tour->leader_pax : '0'],
                 ['Ex.rate', $exRate],
             ];

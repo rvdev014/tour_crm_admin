@@ -58,13 +58,19 @@ class HotelRoomType extends Model
             $hotelPrice += $hotelPrice * 12 / 100;
         }
 
-        if (!empty($this->hotel->tour_sbor)) {
-            $tourSborValue = TourService::getTourSborValue();
-            if ($isUzbek) {
-                $tourSborValue = $tourSborValue * 0.04 / 100;
-            }
-            $hotelPrice += $tourSborValue * $this->hotel->tour_sbor / 100;
+//        if (!empty($this->hotel->tour_sbor)) {
+//            $tourSborValue = TourService::getTourSborValue();
+//            if ($isUzbek) {
+//                $tourSborValue = $tourSborValue * 0.04 / 100;
+//            }
+//            $hotelPrice += $tourSborValue * $this->hotel->tour_sbor / 100;
+//        }
+        
+        $tourSborValue = TourService::getTourSborValue();
+        if ($isUzbek) {
+            $tourSborValue = $tourSborValue * 0.04 / 100;
         }
+        $hotelPrice += $tourSborValue;
 
         return $hotelPrice ?? 0;
     }

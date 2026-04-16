@@ -37,7 +37,7 @@ class ExportClientService
 
         $currencyUsd = ExpenseService::getUsdToUzsCurrency();
 
-        $pax = max(1, $tour->pax + $tour->leader_pax);
+        $pax = max(1, $tour->getTotalPax());
         $paxPriceTotal = round($tour->total_price / $currencyUsd->rate, 2);
         $paxPrice = round($paxPriceTotal / $pax, 2);
 
@@ -69,7 +69,7 @@ class ExportClientService
         $placeholders = [
             '{date}' => now()->format('d.m.Y'),
             '{groupNumber}' => $tour->group_number,
-            '{personsCount}' => $tour->pax . '+' . "$tourLeaderPax" . ' FOC',
+            '{personsCount}' => $tour->getTotalPax(withLeader: false) . '+' . "$tourLeaderPax" . ' FOC',
             '{arrivalDate}' => $tour->start_date->format('d.m.Y'),
             '{departureDate}' => $tour->end_date->format('d.m.Y'),
             '{expensesList}' => $expensesList->implode("\n"),

@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Enums\TransferRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BannerResource;
+use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ReviewResource;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\TransferRequestResource;
 use App\Http\Resources\TransportClassResource;
 use App\Http\Resources\WebTourResource;
 use App\Models\Banner;
+use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Facility;
@@ -41,6 +43,7 @@ class ManualController extends Controller
             ->with([
                 'days' => fn($query) => $query->with(['facilities']),
                 'currentPrice',
+                'categories',
             ])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -58,6 +61,13 @@ class ManualController extends Controller
         if (!empty($cityId)) {
             $query->whereHas('days', function ($subQ) use ($cityId) {
                 $subQ->where('city_id', $cityId);
+            });
+        }
+
+        $categoryIds = $request->get('categories', []);
+        if (!empty($categoryIds)) {
+            $query->whereHas('categories', function ($subQ) use ($categoryIds) {
+                $subQ->whereIn('categories.id', (array) $categoryIds);
             });
         }
 
@@ -109,6 +119,7 @@ class ManualController extends Controller
                 'currentPrice',
                 'activeReviews',
                 'prices',
+                'categories',
             ])
             ->findOrFail($tourId);
 
@@ -194,6 +205,12 @@ class ManualController extends Controller
     {
         $transportClasses = TransportClass::query()->orderBy('order')->get();
         return response()->json(['data' => TransportClassResource::collection($transportClasses)]);
+    }
+
+    public function getCategories(): JsonResponse
+    {
+        $categories = Category::query()->get();
+        return response()->json(['data' => CategoryResource::collection($categories)]);
     }
 
     public function storeTransferRequest(Request $request): JsonResponse

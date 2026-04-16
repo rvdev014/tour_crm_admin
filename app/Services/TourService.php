@@ -399,7 +399,7 @@ class TourService
             }
         } else {
             $days = $tourData['days'] ?? [];
-            $totalPax = ($tourData['pax'] ?? 0) + ($tourData['leader_pax'] ?? 0);
+            $totalPax = Tour::calcTotalPax($tourData);
             foreach ($days as $day) {
                 $expenses = $day['expenses'] ?? [];
                 foreach ($expenses as $expense) {
