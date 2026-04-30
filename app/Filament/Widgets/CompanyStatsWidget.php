@@ -160,7 +160,7 @@ class CompanyStatsWidget extends BaseWidget
                             -- Если мы фильтруем по городу, мы должны считать людей,
                             -- только если тур вообще заезжал в этот город.
                             WHEN tours.type = 1 THEN (
-                                SELECT COALESCE(SUM(trt.amount), 0)
+                                SELECT COALESCE(SUM(COALESCE(trt.amount_uz, 0) + COALESCE(trt.amount_foreign, 0)), 0)
                                 FROM tour_room_types trt
                                 WHERE trt.tour_id = tours.id
                                 AND EXISTS (

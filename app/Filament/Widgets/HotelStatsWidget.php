@@ -57,7 +57,7 @@ class HotelStatsWidget extends BaseWidget
         
         // 1. Предварительный подсчет людей для TPS туров (global pax per tour)
         $tpsPax = DB::table('tour_room_types')
-            ->select('tour_id', DB::raw('SUM(amount) as val'))
+            ->select('tour_id', DB::raw('SUM(COALESCE(amount_uz, 0) + COALESCE(amount_foreign, 0)) as val'))
             ->groupBy('tour_id');
         
         // 2. Агрегация по (Отель + Тур).

@@ -28,11 +28,18 @@ class ExportHotelService
         return self::getHotelsDataTps($tour);
     }
 
+    /**
+     * Builds a collection of per-roomType price totals using the structured
+     * roomAmounts shape [roomTypeId => ['uz' => int, 'foreign' => int]].
+     * The returned value per room-type is the combined cost
+     * (priceUz*amountUz + priceForeign*amountForeign), so ->sum() gives the
+     * correct overall total.
+     */
     protected static function getHotelPrices(
         TourDayExpense $hotelExpense,
                        $date,
                        $roomAmounts,
-                       $personType,
+                       $personType = null,
                        $companyId = null
     ): Collection {
         $hotelPrices = collect();
@@ -41,22 +48,38 @@ class ExportHotelService
             return $hotelPrices;
         }
 
-        foreach ($roomAmounts as $roomTypeId => $amount) {
+        foreach ($roomAmounts as $roomTypeId => $amounts) {
+            $amountUz = (int)($amounts['uz'] ?? 0);
+            $amountForeign = (int)($amounts['foreign'] ?? 0);
+            if ($amountUz === 0 && $amountForeign === 0) {
+                continue;
+            }
+
             /** @var HotelRoomType $hotelRoomType */
             $hotelRoomType = $hotelExpense->hotel->roomTypes()
                 ->where('room_type_id', $roomTypeId)
                 ->where('season_type', $period->season_type->value)
                 ->where('year', $period->start_date->year)
                 ->first();
-
-            if ($hotelRoomType) {
-                if ($companyId) {
-                    $price = $hotelRoomType->getPriceWithPercent($companyId, $personType);
-                } else {
-                    $price = $hotelRoomType->getPrice($personType);
-                }
-                $hotelPrices->put($hotelRoomType->roomType->name, $price);
+            if (!$hotelRoomType) {
+                continue;
             }
+
+            $total = 0;
+            if ($amountUz > 0) {
+                $priceUz = $companyId
+                    ? $hotelRoomType->getPriceWithPercent($companyId, RoomPersonType::Uzbek)
+                    : $hotelRoomType->getPrice(RoomPersonType::Uzbek);
+                $total += $priceUz * $amountUz;
+            }
+            if ($amountForeign > 0) {
+                $priceForeign = $companyId
+                    ? $hotelRoomType->getPriceWithPercent($companyId, RoomPersonType::Foreign)
+                    : $hotelRoomType->getPrice(RoomPersonType::Foreign);
+                $total += $priceForeign * $amountForeign;
+            }
+
+            $hotelPrices->put($hotelRoomType->roomType->name, $total);
         }
 
         return $hotelPrices;
@@ -84,8 +107,15 @@ class ExportHotelService
         $personType = ExpenseService::getPersonType($tour->country->id);
         $addPercent = 0;
 
-        $roomAmounts = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->name => $rt->amount]);
-        $roomAmountsById = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->id => $rt->amount]);
+        $roomAmounts = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [
+            $rt->roomType->name => ($rt->amount_uz ?? 0) + ($rt->amount_foreign ?? 0),
+        ]);
+        $roomAmountsById = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [
+            $rt->roomType->id => [
+                'uz' => (int)($rt->amount_uz ?? 0),
+                'foreign' => (int)($rt->amount_foreign ?? 0),
+            ],
+        ]);
 
         /** @var Collection<TourDay> $tourDays */
         $tourDays = $tour->days()->orderBy('date')->get();
@@ -152,8 +182,15 @@ class ExportHotelService
         $countryName = '-';
         $personType = RoomPersonType::Uzbek;
 
-        $roomAmounts = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->name => $rt->amount]);
-        $roomAmountsById = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [$rt->roomType->id => $rt->amount]);
+        $roomAmounts = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [
+            $rt->roomType->name => ($rt->amount_uz ?? 0) + ($rt->amount_foreign ?? 0),
+        ]);
+        $roomAmountsById = $tour->roomTypes->mapWithKeys(fn(TourRoomType $rt) => [
+            $rt->roomType->id => [
+                'uz' => (int)($rt->amount_uz ?? 0),
+                'foreign' => (int)($rt->amount_foreign ?? 0),
+            ],
+        ]);
 
         foreach ($tour->groups as $group) {
             /** @var TourDayExpense $hotelExpense */

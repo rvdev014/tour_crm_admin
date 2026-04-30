@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $tour_id
  * @property int $room_type_id
- * @property int $amount
+ * @property int $amount_uz
+ * @property int $amount_foreign
  * @property RoomPersonType $person_type
 // * @property RoomSeasonType $season_type
  *
@@ -25,7 +26,8 @@ class TourRoomType extends Model
     protected $fillable = [
         'tour_id',
         'room_type_id',
-        'amount',
+        'amount_uz',
+        'amount_foreign',
         'person_type',
 //        'season_type'
     ];

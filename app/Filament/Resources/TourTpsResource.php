@@ -7,6 +7,7 @@ use App\Models\Tour;
 use App\Models\User;
 use Filament\Tables;
 use App\Enums\TourType;
+use App\Enums\RoomPersonType;
 use App\Models\Company;
 use App\Models\Country;
 use App\Enums\GuideType;
@@ -230,13 +231,28 @@ class TourTpsResource extends Resource
             ]),
             
             Components\Fieldset::make('Rooming info')->schema([
-                
-                ...TourService::generateRoomingSchema(true),
-                
-                Section::make("Other rooming")
-                    ->schema(TourService::generateRoomingSchema())
-                    ->collapsible()
-                    ->collapsed(),
+                Components\Tabs::make('rooming_tabs')
+                    ->columnSpanFull()
+                    ->tabs([
+                        Components\Tabs\Tab::make('UZ')
+                            ->schema([
+                                ...TourService::generateRoomingSchema(RoomPersonType::Uzbek, true),
+
+                                Section::make('Other rooming')
+                                    ->schema(TourService::generateRoomingSchema(RoomPersonType::Uzbek))
+                                    ->collapsible()
+                                    ->collapsed(),
+                            ]),
+                        Components\Tabs\Tab::make('Foreign')
+                            ->schema([
+                                ...TourService::generateRoomingSchema(RoomPersonType::Foreign, true),
+
+                                Section::make('Other rooming')
+                                    ->schema(TourService::generateRoomingSchema(RoomPersonType::Foreign))
+                                    ->collapsible()
+                                    ->collapsed(),
+                            ]),
+                    ]),
             ])
         ])->disabled(function($record) {
             if (!$record) {

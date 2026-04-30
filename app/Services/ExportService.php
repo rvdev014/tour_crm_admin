@@ -173,7 +173,9 @@ class ExportService
         $tourRoomTypes = $tour->roomTypes->map(fn(TourRoomType $roomType) => [
             'id' => $roomType->roomType->id,
             'name' => $roomType->roomType->name,
-            'amount' => $roomType->amount,
+            'amount' => ($roomType->amount_uz ?? 0) + ($roomType->amount_foreign ?? 0),
+            'amount_uz' => (int)($roomType->amount_uz ?? 0),
+            'amount_foreign' => (int)($roomType->amount_foreign ?? 0),
         ]);
         $tourRoomTypesCount = max($tourRoomTypes->count(), 1);
 
@@ -262,9 +264,14 @@ class ExportService
                     ->where('year', $period->start_date->year)
                     ->first();
 
-                $amount = $roomType['amount'] ?? 0;
+                $amountUz = (int)($roomType['amount_uz'] ?? 0);
+                $amountForeign = (int)($roomType['amount_foreign'] ?? 0);
+                $amount = $amountUz + $amountForeign;
+
+                $priceUz = $hotelRoomType?->getPrice(\App\Enums\RoomPersonType::Uzbek) ?? 0;
+                $priceForeign = $hotelRoomType?->getPrice(\App\Enums\RoomPersonType::Foreign) ?? 0;
+                $hotelTotal = ($priceUz * $amountUz) + ($priceForeign * $amountForeign);
                 $price = $hotelRoomType?->getPrice($personType) ?? 0;
-                $hotelTotal = $amount * $price;
 
                 $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];
                 $amounts[] = ['value' => $amount, 'colspan' => 1];
@@ -542,7 +549,9 @@ class ExportService
         $tourRoomTypes = $tour->roomTypes->map(fn(TourRoomType $roomType) => [
             'id' => $roomType->roomType->id,
             'name' => $roomType->roomType->name,
-            'amount' => $roomType->amount,
+            'amount' => ($roomType->amount_uz ?? 0) + ($roomType->amount_foreign ?? 0),
+            'amount_uz' => (int)($roomType->amount_uz ?? 0),
+            'amount_foreign' => (int)($roomType->amount_foreign ?? 0),
         ]);
         $tourRoomTypesCount = max($tourRoomTypes->count(), 1);
 
@@ -671,9 +680,14 @@ class ExportService
                     ->where('year', $period->start_date->year)
                     ->first();
 
-                $amount = $roomType['amount'] ?? 0;
+                $amountUz = (int)($roomType['amount_uz'] ?? 0);
+                $amountForeign = (int)($roomType['amount_foreign'] ?? 0);
+                $amount = $amountUz + $amountForeign;
+
+                $priceUz = $hotelRoomType?->getPriceWithPercent($tour->company_id, \App\Enums\RoomPersonType::Uzbek) ?? 0;
+                $priceForeign = $hotelRoomType?->getPriceWithPercent($tour->company_id, \App\Enums\RoomPersonType::Foreign) ?? 0;
+                $hotelTotal = ($priceUz * $amountUz) + ($priceForeign * $amountForeign);
                 $price = $hotelRoomType?->getPriceWithPercent($tour->company_id, $personType) ?? 0;
-                $hotelTotal = $amount * $price;
 
                 $roomTypes[] = ['value' => $roomType['name'], 'colspan' => 1];
                 $amounts[] = ['value' => $amount, 'colspan' => 1];

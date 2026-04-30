@@ -79,12 +79,27 @@ class ExpenseService
         return $allExpenses;
     }
 
+    /**
+     * Returns rooming amounts for a corporate expense keyed by room_type_id:
+     * [roomTypeId => ['uz' => int, 'foreign' => int]]
+     *
+     * The corporate TourDayExpenseRoomType carries a per-row person_type;
+     * when missing we treat the row as Uzbek.
+     */
     public static function getRoomingAmountsForExpense($expense): array
     {
         $roomTypes = collect(Arr::get($expense, 'roomTypes', []));
         $roomingAmounts = [];
         foreach ($roomTypes as $roomType) {
-            $roomingAmounts[$roomType['room_type_id']] = $roomType['amount'];
+            $roomTypeId = $roomType['room_type_id'];
+            $amount = (int)($roomType['amount'] ?? 0);
+            $personType = $roomType['person_type'] ?? null;
+            $isForeign = $personType == RoomPersonType::Foreign->value;
+
+            if (!isset($roomingAmounts[$roomTypeId])) {
+                $roomingAmounts[$roomTypeId] = ['uz' => 0, 'foreign' => 0];
+            }
+            $roomingAmounts[$roomTypeId][$isForeign ? 'foreign' : 'uz'] += $amount;
         }
         return $roomingAmounts;
     }
@@ -98,9 +113,7 @@ class ExpenseService
         if ($withRooming) {
             $roomingAmounts = ExpenseService::getRoomingAmounts($updatedData);
         } else {
-            $roomingAmounts = $tour->roomTypes->mapWithKeys(fn($roomType) => [
-                $roomType->room_type_id => $roomType->amount
-            ]);
+            $roomingAmounts = ExpenseService::getRoomingAmountsFromTour($tour);
         }
 
         foreach ($tour->days as $day) {
@@ -134,9 +147,7 @@ class ExpenseService
         if ($withRooming) {
             $roomingAmounts = ExpenseService::getRoomingAmounts($updatedData);
         } else {
-            $roomingAmounts = $tour->roomTypes->mapWithKeys(fn($roomType) => [
-                $roomType->room_type_id => $roomType->amount
-            ]);
+            $roomingAmounts = ExpenseService::getRoomingAmountsFromTour($tour);
         }
 
         foreach ($tour->groups as $group) {
@@ -158,6 +169,20 @@ class ExpenseService
         }
 
         return $expensesTotal;
+    }
+
+    /**
+     * Builds rooming-amounts structure directly from a Tour's persisted roomTypes.
+     * Shape: [roomTypeId => ['uz' => int, 'foreign' => int]]
+     */
+    public static function getRoomingAmountsFromTour(Tour $tour): Collection
+    {
+        return $tour->roomTypes->mapWithKeys(fn($roomType) => [
+            $roomType->room_type_id => [
+                'uz' => (int)($roomType->amount_uz ?? 0),
+                'foreign' => (int)($roomType->amount_foreign ?? 0),
+            ],
+        ]);
     }
 
 
@@ -195,27 +220,16 @@ class ExpenseService
                     return $data;
                 }
 
-                $personType = ExpenseService::getPersonType($countryId);
-
                 $hotelTotal = 0;
                 $roomAmounts = $roomAmounts ?: ExpenseService::getRoomingAmounts($data);
+                $totalNights = $data['hotel_total_nights'] ?? 1;
 
-                foreach ($roomAmounts as $roomTypeId => $amount) {
-                    if (empty($amount)) {
+                foreach ($roomAmounts as $roomTypeId => $amounts) {
+                    $amountUz = (int)($amounts['uz'] ?? 0);
+                    $amountForeign = (int)($amounts['foreign'] ?? 0);
+                    if ($amountUz === 0 && $amountForeign === 0) {
                         continue;
                     }
-
-                    $totalNights = $data['hotel_total_nights'] ?? 1;
-
-                    // For TPS tours: if check-in time is before 14:00, calculate as 1.5 days instead of 1
-                    //                        if ($isTps && $totalNights == 1 && !empty($data['hotel_checkin_time'])) {
-                    //                            $checkinTime = \Carbon\Carbon::parse($data['hotel_checkin_time']);
-                    //                            if ($checkinTime->format('H:i') < '14:00') {
-                    //                                $totalNights = 1.5;
-                    //                            }
-                    //                        }
-
-                    //                        $totalNights += 1;
 
                     /** @var HotelRoomType $hotelRoomType */
                     $hotelRoomType = $hotel->roomTypes()
@@ -228,12 +242,19 @@ class ExpenseService
                         continue;
                     }
 
-                    if ($isTps) {
-                        $hotelPrice = $hotelRoomType->getPrice($personType);
-                    } else {
-                        $hotelPrice = $hotelRoomType->getPriceWithPercent($companyId, $personType);
+                    if ($amountUz > 0) {
+                        $priceUz = $isTps
+                            ? $hotelRoomType->getPrice(RoomPersonType::Uzbek)
+                            : $hotelRoomType->getPriceWithPercent($companyId, RoomPersonType::Uzbek);
+                        $hotelTotal += $priceUz * $amountUz * $totalNights;
                     }
-                    $hotelTotal += $hotelPrice * $amount * $totalNights;
+
+                    if ($amountForeign > 0) {
+                        $priceForeign = $isTps
+                            ? $hotelRoomType->getPrice(RoomPersonType::Foreign)
+                            : $hotelRoomType->getPriceWithPercent($companyId, RoomPersonType::Foreign);
+                        $hotelTotal += $priceForeign * $amountForeign * $totalNights;
+                    }
                 }
 
                 $data['price'] = $hotelTotal;
@@ -457,18 +478,21 @@ class ExpenseService
     public static function createTourRoomTypes($tourId, $formState): void
     {
         $roomAmounts = ExpenseService::getRoomingAmounts($formState);
-        foreach ($roomAmounts as $roomTypeId => $amount) {
-            if (empty($amount)) {
+        foreach ($roomAmounts as $roomTypeId => $amounts) {
+            $amountUz = (int)($amounts['uz'] ?? 0);
+            $amountForeign = (int)($amounts['foreign'] ?? 0);
+            if ($amountUz === 0 && $amountForeign === 0) {
                 continue;
             }
 
             TourRoomType::query()->updateOrCreate(
                 [
                     'tour_id' => $tourId,
-                    'room_type_id' => $roomTypeId
+                    'room_type_id' => $roomTypeId,
                 ],
                 [
-                    'amount' => $amount,
+                    'amount_uz' => $amountUz,
+                    'amount_foreign' => $amountForeign,
                 ]
             );
         }
@@ -477,24 +501,31 @@ class ExpenseService
     public static function updateTourRoomTypes($tourId, $tourData): void
     {
         $roomAmounts = ExpenseService::getRoomingAmounts($tourData);
-        foreach ($roomAmounts as $roomTypeId => $amount) {
+        foreach ($roomAmounts as $roomTypeId => $amounts) {
+            $amountUz = (int)($amounts['uz'] ?? 0);
+            $amountForeign = (int)($amounts['foreign'] ?? 0);
+
             $tourHotelRoomType = TourRoomType::query()
                 ->where('tour_id', $tourId)
                 ->where('room_type_id', $roomTypeId)
                 ->first();
 
             if ($tourHotelRoomType) {
-                if (empty($amount)) {
+                if ($amountUz === 0 && $amountForeign === 0) {
                     $tourHotelRoomType->delete();
                 } else {
-                    $tourHotelRoomType->update(['amount' => $amount]);
+                    $tourHotelRoomType->update([
+                        'amount_uz' => $amountUz,
+                        'amount_foreign' => $amountForeign,
+                    ]);
                 }
             } else {
-                if (!empty($amount)) {
+                if ($amountUz > 0 || $amountForeign > 0) {
                     TourRoomType::query()->create([
                         'tour_id' => $tourId,
                         'room_type_id' => $roomTypeId,
-                        'amount' => $amount,
+                        'amount_uz' => $amountUz,
+                        'amount_foreign' => $amountForeign,
                     ]);
                 }
             }
@@ -515,11 +546,30 @@ class ExpenseService
         return $tourStatus;
     }
 
+    /**
+     * Parses form state keys like room_type_uz_{id} and room_type_foreign_{id}
+     * into a collection keyed by room_type_id:
+     *   [roomTypeId => ['uz' => int, 'foreign' => int]]
+     */
     public static function getRoomingAmounts($data): Collection
     {
-        return collect($data)
-            ->filter(fn($value, $key) => str_starts_with($key, 'room_type_'))
-            ->mapWithKeys(fn($value, $key) => [str_replace('room_type_', '', $key) => $value]);
+        $result = [];
+        foreach ($data as $key => $value) {
+            if (str_starts_with($key, 'room_type_uz_')) {
+                $id = substr($key, strlen('room_type_uz_'));
+                $result[$id]['uz'] = (int)$value;
+            } elseif (str_starts_with($key, 'room_type_foreign_')) {
+                $id = substr($key, strlen('room_type_foreign_'));
+                $result[$id]['foreign'] = (int)$value;
+            }
+        }
+        foreach ($result as $id => $amounts) {
+            $result[$id] = [
+                'uz' => $amounts['uz'] ?? 0,
+                'foreign' => $amounts['foreign'] ?? 0,
+            ];
+        }
+        return collect($result);
     }
 
     public static function getTrainPrices($data): Collection

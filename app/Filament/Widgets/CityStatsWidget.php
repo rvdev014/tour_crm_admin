@@ -57,7 +57,7 @@ class CityStatsWidget extends BaseWidget
         // 1. Подзапрос: Считаем Pax (людей) для каждого TPS тура отдельно.
         // Это нужно, так как люди в TPS хранятся не в расходах, а глобально в туре.
         $tpsPaxQuery = DB::table('tour_room_types')
-            ->select('tour_id', DB::raw('SUM(amount) as total_pax'))
+            ->select('tour_id', DB::raw('SUM(COALESCE(amount_uz, 0) + COALESCE(amount_foreign, 0)) as total_pax'))
             ->groupBy('tour_id');
         
         // 2. Основной агрегирующий запрос (Derived Table)
@@ -143,7 +143,7 @@ class CityStatsWidget extends BaseWidget
     {
         // 1. Subquery для TPS Pax (кол-во людей в туре)
         $tpsPax = DB::table('tour_room_types')
-            ->select('tour_id', DB::raw('SUM(amount) as val'))
+            ->select('tour_id', DB::raw('SUM(COALESCE(amount_uz, 0) + COALESCE(amount_foreign, 0)) as val'))
             ->groupBy('tour_id');
         
         // 2. Subquery агрегации по (City, Tour).

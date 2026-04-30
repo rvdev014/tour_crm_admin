@@ -32,6 +32,7 @@ use Illuminate\Support\Number;
 use App\Enums\DefaultSettings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Enums\RoomPersonType;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 
@@ -344,8 +345,10 @@ class TourService
         return Number::format($money) . ($currency ? " $currency" : '');
     }
 
-    public static function generateRoomingSchema($firstThree = false): array
-    {
+    public static function generateRoomingSchema(
+        RoomPersonType $personType,
+        $firstThree = false
+    ): array {
         $query = RoomType::query()
             ->orderBy('sort_order', 'asc')
             ->orderBy('name', 'asc');
@@ -356,15 +359,18 @@ class TourService
             $roomTypes = $query->skip(3)->take(PHP_INT_MAX)->get();
         }
 
-        $result = $roomTypes->map(function(RoomType $roomType) {
-            return TextInput::make("room_type_$roomType->id")
+        $suffix = $personType === RoomPersonType::Uzbek ? 'uz' : 'foreign';
+        $amountField = $personType === RoomPersonType::Uzbek ? 'amount_uz' : 'amount_foreign';
+
+        $result = $roomTypes->map(function(RoomType $roomType) use ($suffix, $amountField) {
+            return TextInput::make("room_type_{$suffix}_{$roomType->id}")
                 ->label($roomType->name)
-                ->formatStateUsing(function($record) use ($roomType) {
+                ->formatStateUsing(function($record) use ($roomType, $amountField) {
                     if (!$record) {
                         return 0;
                     }
                     $tourRoomType = $record->roomTypes->first(fn($item) => $item->room_type_id == $roomType->id);
-                    return $tourRoomType?->amount ?? 0;
+                    return $tourRoomType?->{$amountField} ?? 0;
                 })
                 ->numeric();
         });

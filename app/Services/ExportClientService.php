@@ -63,7 +63,9 @@ class ExportClientService
         }
 
         $roomTypes = $tour->roomTypes->mapWithKeys(
-            fn(TourRoomType $roomType) => [$roomType->roomType->name => $roomType->amount]
+            fn(TourRoomType $roomType) => [
+                $roomType->roomType->name => ($roomType->amount_uz ?? 0) + ($roomType->amount_foreign ?? 0),
+            ]
         );
 
         $placeholders = [

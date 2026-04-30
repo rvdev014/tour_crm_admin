@@ -506,9 +506,7 @@ class DaysRelationManager extends RelationManager
                             data: $data,
                             totalPax: $tour->getTotalPax(),
                             countryId: $tour->country_id,
-                            roomAmounts: $tour->roomTypes->mapWithKeys(
-                                fn($roomType) => [$roomType->room_type_id => $roomType->amount]
-                            ),
+                            roomAmounts: ExpenseService::getRoomingAmountsFromTour($tour),
                             day: $get(),
                             isTps: true
                         );
@@ -527,9 +525,7 @@ class DaysRelationManager extends RelationManager
                             data: $data,
                             totalPax: $tour->getTotalPax(),
                             countryId: $tour->country_id,
-                            roomAmounts: $tour->roomTypes->mapWithKeys(
-                                fn($roomType) => [$roomType->room_type_id => $roomType->amount]
-                            ),
+                            roomAmounts: ExpenseService::getRoomingAmountsFromTour($tour),
                             day: $get(),
                             isTps: true
                         );
