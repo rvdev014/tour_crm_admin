@@ -132,10 +132,10 @@ class TourTpsResource extends Resource
                 Components\Grid::make(4)->schema([
                     Components\TextInput::make('pax_uz')
                         ->label('Pax UZ')
-                        ->required()
                         ->numeric(),
                     Components\TextInput::make('pax_foreign')
                         ->label('Pax Foreign')
+                        ->required()
                         ->numeric(),
                     Components\TextInput::make('leader_pax')
                         ->numeric(),
