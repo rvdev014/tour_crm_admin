@@ -28,8 +28,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property Carbon $start_date
  * @property Carbon $end_date
  * @property bool $is_cancelled
- * @property int $pax_uz
- * @property int|null $pax_foreign
+ * @property int|null $pax_uz
+ * @property int $pax_foreign
  * @property int $leader_pax
  * @property string $comment
  * @property int $status
