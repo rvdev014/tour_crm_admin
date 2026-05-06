@@ -235,7 +235,7 @@ class Tour extends Model
 
     public static function calcTotalPax(array $data): int
     {
-        return ($data['pax_uz'] ?? 0) + ($data['pax_foreign'] ?? 0) + ($data['leader_pax'] ?? 0);
+        return (int)($data['pax_uz'] ?? 0) + (int)($data['pax_foreign'] ?? 0) + (int)($data['leader_pax'] ?? 0);
     }
 
     public function saveExpensesTotal($withTotalPrice = false): void
