@@ -1,7 +1,24 @@
+/* 1. INTER FONT ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @import '/vendor/filament/filament/resources/css/theme.css';
 
 @config 'tailwind.config.js';
 
+/* Apply Inter globally */
+body,
+.fi-body,
+.fi-sidebar,
+.fi-topbar,
+.fi-main,
+input,
+select,
+textarea,
+button {
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* 2. TABLE density tweaks ────────────────────────────────────────────────── */
 .fi-ta-table > tbody {
     @apply divide-none
 }
@@ -57,9 +74,16 @@ select {
 .fi-fieldset {
     @apply px-3 py-3
 }
+
+/* 6. BUTTON polish ───────────────────────────────────────────────────────── */
 .fi-btn {
-    @apply py-1
+    @apply py-1;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em;
+    transition: background 0.15s ease, box-shadow 0.15s ease !important;
 }
+
 .fi-section-header {
     @apply py-1.5
 }
