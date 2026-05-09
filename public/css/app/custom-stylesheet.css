@@ -1,34 +1,50 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR — Light
+   ═══════════════════════════════════════════════════════════════════════════ */
 .fi-sidebar-nav {
-    background: #1e4e6e;
+    background: #1E3A5F;
 }
 
 .fi-sidebar-nav .fi-sidebar-item-label,
-.fi-sidebar-group-label, .fi-sidebar-item-icon,
+.fi-sidebar-group-label,
+.fi-sidebar-item-icon,
 .fi-sidebar-nav .fi-icon-btn-icon,
-.fi-fo-repeater .fi-icon-btn-icon {
+.fi-fo-repeater-item .fi-icon-btn-icon {
     color: #fff !important;
 }
 
-.fi-fo-repeater .delete-btn > svg {
-    color: #f87171 !important;
-}
-
 .fi-fo-repeater-item.simple .fi-icon-btn-icon {
-    color: rgba(var(--c-500),var(--tw-text-opacity,1)) !important;
+    color: rgba(var(--c-500), var(--tw-text-opacity, 1)) !important;
 }
-
 
 .fi-sidebar-item .fi-sidebar-item-button:hover {
-    background-color: #447ca1 !important;
+    background-color: #2563EB !important;
 }
 
 .fi-sidebar-item.fi-active .fi-sidebar-item-button {
-    background-color: #447ca1 !important;
+    background-color: #2563EB !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR — Dark
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dark .fi-sidebar-nav {
+    background: #0C1A2E;
+}
 
+.dark .fi-sidebar-item .fi-sidebar-item-button:hover {
+    background-color: #1D4ED8 !important;
+}
+
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background-color: #1D4ED8 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REPEATER: Days — Light
+   ═══════════════════════════════════════════════════════════════════════════ */
 .repeater-days .fi-fo-repeater-item-header {
-    background: #447ca1;
+    background: #2563EB;
     border-radius: 10px 10px 0 0;
 }
 
@@ -41,48 +57,139 @@
 }
 
 .repeater-days .fi-fo-repeater-item {
-    border: 2px solid #447ca1 !important;
+    border: 2px solid #2563EB !important;
 }
 
 .repeater-days .fi-btn {
-    background: #447ca1 !important;
+    background: #2563EB !important;
     color: #fff !important;
-    transition: 0.2s ease-in-out;
+    transition: background 0.2s ease-in-out;
 }
 
 .repeater-days .fi-btn:hover {
-    background: #1e4e6e !important;
-    transition: 0.2s ease-in-out;
+    background: #1D4ED8 !important;
 }
 
+/* REPEATER: Days — Dark */
+.dark .repeater-days .fi-fo-repeater-item-header {
+    background: #1D4ED8;
+}
+
+.dark .repeater-days .fi-fo-repeater-item {
+    border-color: #3B82F6 !important;
+}
+
+.dark .repeater-days .fi-btn {
+    background: #1D4ED8 !important;
+}
+
+.dark .repeater-days .fi-btn:hover {
+    background: #1E40AF !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REPEATER: Expenses — Light
+   ═══════════════════════════════════════════════════════════════════════════ */
 .repeater-expenses .fi-fo-repeater-item-header {
-    background: #d97706;
+    background: #059669;
+    border-radius: 10px 10px 0 0;
 }
 
 .repeater-expenses .fi-fo-repeater-item {
-    border: 2px solid #d97706 !important;
+    border: 2px solid #059669 !important;
 }
 
 .repeater-expenses .fi-btn {
-    background: #d97706 !important;
+    background: #059669 !important;
     color: #fff !important;
-    transition: 0.2s ease-in-out;
+    transition: background 0.2s ease-in-out;
 }
 
 .repeater-expenses .fi-btn:hover {
-    background: #a85b00 !important;
-    transition: 0.2s ease-in-out;
+    background: #047857 !important;
 }
 
+/* REPEATER: Expenses — Dark */
+.dark .repeater-expenses .fi-fo-repeater-item-header {
+    background: #047857;
+}
+
+.dark .repeater-expenses .fi-fo-repeater-item {
+    border-color: #10B981 !important;
+}
+
+.dark .repeater-expenses .fi-btn {
+    background: #047857 !important;
+}
+
+.dark .repeater-expenses .fi-btn:hover {
+    background: #065F46 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REPEATER: Guides — Light
+   ═══════════════════════════════════════════════════════════════════════════ */
+.repeater-guides .fi-fo-repeater-item-header h4 {
+    color: #fff !important;
+}
+
+.repeater-guides .fi-fo-repeater-item-header {
+    background: #2563EB !important;
+    border-radius: 10px 10px 0 0;
+}
+
+.repeater-guides .fi-fo-repeater-item {
+    border: 2px solid #2563EB !important;
+}
+
+.repeater-guides .fi-btn {
+    background: #2563EB !important;
+    color: #fff !important;
+    transition: background 0.2s ease-in-out;
+}
+
+.repeater-guides .fi-btn:hover {
+    background: #1D4ED8 !important;
+}
+
+/* REPEATER: Guides — Dark */
+.dark .repeater-guides .fi-fo-repeater-item-header {
+    background: #1D4ED8 !important;
+}
+
+.dark .repeater-guides .fi-fo-repeater-item {
+    border-color: #3B82F6 !important;
+}
+
+.dark .repeater-guides .fi-btn {
+    background: #1D4ED8 !important;
+}
+
+.dark .repeater-guides .fi-btn:hover {
+    background: #1E40AF !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUT SUFFIX ICON — Light & Dark
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-input-wrp-suffix .fi-icon-btn-icon {
+    color: #2563EB !important;
+}
+
+.dark .fi-input-wrp-suffix .fi-icon-btn-icon {
+    color: #60A5FA !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUSTOM TABLE — Light & Dark
+   ═══════════════════════════════════════════════════════════════════════════ */
 .custom-table-wrapper {
     width: 100%;
     border: 1px solid rgba(var(--gray-200), 1);
     border-radius: 10px;
 }
 .dark .custom-table-wrapper {
-    width: 100%;
-    border: 1px solid hsla(0,0%,100%,.05);
-    border-radius: 10px;
+    border: 1px solid hsla(0, 0%, 100%, 0.05);
 }
 
 .custom-table {
@@ -95,20 +202,19 @@
     border-bottom: 1px solid rgba(var(--gray-200), 1);
 }
 .dark .custom-table th {
-    border-bottom: 1px solid hsla(0,0%,100%,.05);
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.05);
 }
+
 .custom-table td {
     border-top: 1px solid rgba(var(--gray-200), 1);
 }
 .dark .custom-table td {
-    border-top: 1px solid hsla(0,0%,100%,.05);
+    border-top: 1px solid hsla(0, 0%, 100%, 0.05);
 }
-
 
 .custom-table td,
 .custom-table th {
-    border-collapse: collapse;
-    font-size: .875rem;
+    font-size: 0.875rem;
     text-align: center;
     padding: 6px;
 }
@@ -120,8 +226,8 @@
     background-color: rgba(var(--gray-200), 0.3);
 }
 .custom-table tr:hover {
-    transition: 0.2s ease;
-    background-color: rgba(var(--gray-200), 0.3);
+    background-color: rgba(var(--gray-200), 0.5);
+    transition: background 0.2s ease;
 }
 
 .dark .custom-table th {
@@ -131,8 +237,8 @@
     background-color: hsl(240deg 4% 14.71%);
 }
 .dark .custom-table tr:hover {
-    transition: 0.2s ease;
-    background-color: hsl(240deg 4% 14.71%);
+    background-color: hsl(240deg 4% 17%);
+    transition: background 0.2s ease;
 }
 
 .custom-table .flex-td {
@@ -146,71 +252,46 @@
     margin-bottom: 5px;
 }
 
-
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS BADGE COLORS
+   ═══════════════════════════════════════════════════════════════════════════ */
 .color-green {
-    background: #72e172!important;
+    background: #34d399 !important;
 }
 .color-red {
-    background: #ff7b7b!important;
+    background: #f87171 !important;
 }
 .color-light-orange {
-    background: #c0c0c0!important;
+    background: #c0c0c0 !important;
 }
 
-
-@media  (min-width: 768px) {
-    /* make the header sticky*/
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLE STICKY HEADER
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
     .fi-ta-table thead {
         position: sticky !important;
         top: 0;
         z-index: 9;
     }
 
-    /* opacity does not looks good in dark mode, so insert the corresponding bg color here */
-    .fi-ta-table :is(:where(.dark) .dark\:bg-white\/5){
+    .fi-ta-table :is(:where(.dark) .dark\:bg-white\/5) {
         background-color: rgb(36 36 39);
     }
 
-    /* sset the height of content (table) */
     .fi-ta-content {
         height: calc(100vh - 20rem);
         position: relative;
     }
 
-    /* fix filters and columns modal */
-    .fi-dropdown-panel{
+    .fi-dropdown-panel {
         z-index: 40 !important;
     }
 }
-/* Table sticky header end */
 
-.fi-input-wrp-suffix .fi-icon-btn-icon {
-    color: #f59e0b !important;
-}
-
+/* ═══════════════════════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════ */
 .fi-main {
-    max-width: 100%!important;
-}
-
-.repeater-guides .fi-fo-repeater-item-header h4 {
-    color: #fff !important;
-}
-
-.repeater-guides .fi-fo-repeater-item-header {
-    background: #447ca1 !important;
-}
-
-.repeater-guides .fi-fo-repeater-item {
-    border: 2px solid #447ca1 !important;
-}
-
-.repeater-guides .fi-btn {
-    background: #447ca1 !important;
-    color: #fff !important;
-    transition: 0.2s ease-in-out;
-}
-
-.repeater-guides .fi-btn:hover {
-    background: #1e4e6e !important;
-    transition: 0.2s ease-in-out;
+    max-width: 100% !important;
 }
