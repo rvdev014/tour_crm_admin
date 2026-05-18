@@ -28,8 +28,9 @@ class CompanyExpenseResource extends Resource
     protected static ?string $label = 'Company Expenses';
     
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationGroup = 'Finance';
     protected static ?int $navigationSort = 5;
-    
+
     public static function form(Form $form): Form
     {
         return $form->disabled(fn() => auth()->user()->isOperator())

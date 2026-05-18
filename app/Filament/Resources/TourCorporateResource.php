@@ -37,6 +37,7 @@ class TourCorporateResource extends Resource
     protected static ?string $model = Tour::class;
     
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationGroup = 'Tours';
     protected static ?string $navigationLabel = 'Corporate';
     protected static ?string $slug = 'tour-corporate';
     protected static ?int $navigationSort = 2;

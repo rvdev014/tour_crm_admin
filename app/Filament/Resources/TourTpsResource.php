@@ -42,6 +42,7 @@ class TourTpsResource extends Resource
     protected static ?string $model = Tour::class;
     
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationGroup = 'Tours';
     protected static ?string $navigationLabel = 'TPS';
     protected static ?string $slug = 'tour-tps';
     protected static ?int $navigationSort = 1;

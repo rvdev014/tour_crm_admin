@@ -27,6 +27,7 @@ class CompanyIncomeResource extends Resource
     protected static ?string $label = 'Company Incomes';
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationGroup = 'Finance';
     protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
