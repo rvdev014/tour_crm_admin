@@ -14,10 +14,14 @@ class ExportTablichkaService
         $phpWord = new PhpWord();
         $phpWord->setDefaultFontName('Aptos');
 
-        // Landscape A4, matching exact margins from the example file (in twips)
+        // Landscape A4: explicitly set pageSizeW/pageSizeH in twips so PhpWord
+        // outputs the correct w:w/w:h/w:orient in the XML (array 'orientation' key
+        // alone does not reliably swap dimensions in all PhpWord versions).
+        // Values from the example file: w:w="16838" w:h="11906" (twips)
         $section = $phpWord->addSection([
+            'pageSizeW'    => 16838,  // 29.7 cm (landscape width)
+            'pageSizeH'    => 11906,  // 21 cm   (landscape height)
             'orientation'  => 'landscape',
-            'paperSize'    => 'A4',
             'marginTop'    => 1701,
             'marginRight'  => 1134,
             'marginBottom' => 850,
