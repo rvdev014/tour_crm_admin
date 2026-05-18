@@ -34,20 +34,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->sidebarFullyCollapsibleOnDesktop()
             ->navigationGroups([
-                NavigationGroup::make('Tours')
-                    ->icon('heroicon-o-document-text'),
-                NavigationGroup::make('Operations')
-                    ->icon('heroicon-o-map-pin'),
-                NavigationGroup::make('Finance')
-                    ->icon('heroicon-o-currency-dollar'),
+                NavigationGroup::make('Tours'),
+                NavigationGroup::make('Operations'),
+                NavigationGroup::make('Finance'),
                 NavigationGroup::make('Manual')
-                    ->icon('heroicon-o-clipboard-document-list')
                     ->collapsed(),
                 NavigationGroup::make('Website Management')
-                    ->icon('heroicon-o-globe-alt')
                     ->collapsed(),
                 NavigationGroup::make('Settings')
-                    ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
