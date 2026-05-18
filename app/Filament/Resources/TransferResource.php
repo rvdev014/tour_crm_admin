@@ -106,12 +106,22 @@ class TransferResource extends Resource
                     Forms\Components\TextInput::make('requested_by'),
 
                     Forms\Components\Select::make('driver_ids')
-                        ->label('Drivers')
+                        ->label('Driver supplier')
                         ->options(TourService::getDrivers())
                         ->native(false)
                         ->multiple()
                         ->searchable()
                         ->preload(),
+                ]),
+
+                Forms\Components\Grid::make(4)->schema([
+                    Forms\Components\TextInput::make('driver_name')
+                        ->label('Driver name')
+                        ->columnSpan(2),
+                    Forms\Components\TextInput::make('driver_phone')
+                        ->label('Driver phone number')
+                        ->tel()
+                        ->columnSpan(2),
                 ]),
 
                 Forms\Components\Grid::make(4)->schema([

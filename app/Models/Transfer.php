@@ -39,6 +39,8 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  *
  * @property int $created_by
  * @property array $driver_ids
+ * @property string $driver_name
+ * @property string $driver_phone
  * @property string $place_of_submission
  * @property string $route
  * @property string $passenger
