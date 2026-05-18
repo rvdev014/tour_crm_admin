@@ -453,7 +453,8 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('company.name')
                     ->numeric()
                     ->sortable(),
-                Columns\TextColumn::make('fit'),
+                Columns\TextColumn::make('fit')
+                    ->searchable(),
                 Columns\TextColumn::make('start_date')
                     ->date()
                     ->sortable(),
