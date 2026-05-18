@@ -158,6 +158,7 @@ class WebTourResource extends Resource
                 Forms\Components\Repeater::make('accommodations')
                     ->relationship('accommodations')
                     ->columnSpanFull()
+                    ->minItems(0)
                     ->addActionAlignment('end')
                     ->schema([
                         Forms\Components\Grid::make()->schema([
