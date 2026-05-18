@@ -11,6 +11,7 @@ use App\Services\ExportClientService;
 use App\Services\ExportHotelService;
 use App\Services\ExportMuseumService;
 use App\Services\ExportService;
+use App\Services\ExportTablichkaService;
 use App\Services\ExportTransferService;
 use Illuminate\Support\Facades\File;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -202,5 +203,18 @@ class ExportController extends Controller
         register_shutdown_function(fn() => File::deleteDirectory($tempDir));
 
         return response()->download($fileName, 'Transfer_' . $transfer->id . '.docx')->deleteFileAfterSend(true);
+    }
+
+    public function exportTablichka(Transfer $transfer): BinaryFileResponse
+    {
+        $tempDir = ExportService::getTempDir("tablichka_reports");
+
+        $fileName = $tempDir . '/Tablichka_' . $transfer->id . '.docx';
+        $phpWord = ExportTablichkaService::generate($transfer);
+        ExportTablichkaService::save($phpWord, $fileName);
+
+        register_shutdown_function(fn() => File::deleteDirectory($tempDir));
+
+        return response()->download($fileName, 'Tablichka_' . $transfer->id . '.docx')->deleteFileAfterSend(true);
     }
 }

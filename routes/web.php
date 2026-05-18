@@ -48,4 +48,7 @@ Route::get('export-all/{tour}', [\App\Http\Controllers\ExportController::class, 
 Route::get('export-transfer/{transfer}', [\App\Http\Controllers\ExportController::class, 'exportTransfer'])->name(
     'export-transfer'
 );
+Route::get('export-tablichka/{transfer}', [\App\Http\Controllers\ExportController::class, 'exportTablichka'])->name(
+    'export-tablichka'
+);
 

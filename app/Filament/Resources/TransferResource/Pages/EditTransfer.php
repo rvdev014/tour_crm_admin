@@ -76,6 +76,12 @@ class EditTransfer extends EditRecord
                 ->icon('heroicon-o-document-text')
                 ->visible($this->record->status == ExpenseStatus::Confirmed)
                 ->url(route('export-transfer', $this->record)),
+
+            Actions\Action::make('export_tablichka')
+                ->label('Табличка')
+                ->icon('heroicon-o-identification')
+                ->color('info')
+                ->url(route('export-tablichka', $this->record)),
 //            Actions\DeleteAction::make(),
         ];
     }
