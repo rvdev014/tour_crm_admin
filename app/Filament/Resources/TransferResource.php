@@ -419,17 +419,15 @@ HTML;
                     return $state . ' - ' . $record->toCity?->name;
                 })*/,
 
-                Tables\Columns\TextColumn::make('driver_ids')
-                    ->label('Drivers')
+                Tables\Columns\TextColumn::make('driver_name')
+                    ->label('Driver')
                     ->formatStateUsing(function ($record) {
-                        if (empty($record->driver_ids)) {
-                            return '';
-                        }
-
-                        $drivers = Driver::query()->find($record->driver_ids);
-                        return $drivers->map(fn($driver) => "$driver->name ($driver->phone)")->join(', ');
-                    })
-                    ->sortable(),
+                        $parts = array_filter([
+                            $record->driver_name,
+                            $record->driver_phone,
+                        ]);
+                        return implode(' / ', $parts);
+                    }),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
