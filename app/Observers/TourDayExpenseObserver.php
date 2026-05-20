@@ -88,7 +88,7 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             'sell_price' => $tourDayExpense->price,
             'status' => $tourDayExpense->status,
             'pax' => $tour->getTotalPax(),
-            'nameplate' => $tourDayExpense->nameplate,
+            'nameplate' => $tour->fit ?? $tourDayExpense->nameplate,
             'requested_by' => $tour->requested_by,
 
             'driver_ids' => $tourDayExpense->transport_driver_ids,
