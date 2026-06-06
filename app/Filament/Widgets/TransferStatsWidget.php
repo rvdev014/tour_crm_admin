@@ -14,24 +14,31 @@ class TransferStatsWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $startDate = Carbon::parse($this->filters['start_date']) ?? now()->startOfMonth();
-        $endDate = Carbon::parse($this->filters['end_date']) ?? now()->endOfMonth();
+        $startDate = filled($this->filters['start_date'] ?? null)
+            ? Carbon::parse($this->filters['start_date'])->startOfDay()
+            : now()->startOfMonth()->startOfDay();
 
-        $current = $this->getTransferStats($startDate, $endDate);
+        $endDate = filled($this->filters['end_date'] ?? null)
+            ? Carbon::parse($this->filters['end_date'])->endOfDay()
+            : now()->endOfMonth()->endOfDay();
 
-        $prevStart = $startDate->copy()->subMonth();
-        $prevEnd = $prevStart->copy()->endOfMonth();
-        $previous = $this->getTransferStats($prevStart, $prevEnd);
+        $current  = $this->getTransferStats($startDate, $endDate);
+
+        $prevStart = $startDate->copy()->subMonth()->startOfDay();
+        $prevEnd   = $prevStart->copy()->endOfMonth()->endOfDay();
+        $previous  = $this->getTransferStats($prevStart, $prevEnd);
 
         $countDiff = $current['count'] - $previous['count'];
         $valueDiff = $current['total'] - $previous['total'];
 
         return [
             Stat::make('Transfers (period)', $current['count'])
+                ->description($countDiff >= 0 ? "+{$countDiff} vs prev month" : "{$countDiff} vs prev month")
                 ->icon($countDiff >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($countDiff >= 0 ? 'success' : 'danger'),
 
             Stat::make('Transfers total (USD)', '$' . DashboardStats::format($current['total']))
+                ->description($valueDiff >= 0 ? '+$' . DashboardStats::format($valueDiff) . ' vs prev month' : '-$' . DashboardStats::format(abs($valueDiff)) . ' vs prev month')
                 ->icon($valueDiff >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($valueDiff >= 0 ? 'success' : 'danger'),
         ];
@@ -39,8 +46,7 @@ class TransferStatsWidget extends BaseWidget
 
     private function getTransferStats(Carbon $startDate, Carbon $endDate): array
     {
-        $query = Transfer::query()
-            ->whereBetween('date_time', [$startDate->startOfDay(), $endDate->endOfDay()]);
+        $query = Transfer::query()->whereBetween('created_at', [$startDate, $endDate]);
 
         return [
             'count' => $query->count(),

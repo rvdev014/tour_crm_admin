@@ -439,7 +439,10 @@ HTML;
 
                 //                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
 
-                //                Tables\Columns\TextColumn::make('group_number')->sortable(),
+                Tables\Columns\TextColumn::make('group_number')
+                    ->label('Tour')
+                    ->searchable()
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('sell_price')
                     ->money()
