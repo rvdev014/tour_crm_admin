@@ -23,6 +23,11 @@ class TransportResource extends Resource
     protected static ?int $navigationSort = 8;
     protected static ?string $navigationGroup = 'Manual';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form->disabled(fn() => auth()->user()->isOperator())
