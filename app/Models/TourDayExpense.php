@@ -70,6 +70,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $send_username
  * @property string $plane_route
  * @property int $route_id
+ * @property int $transport_class_id
  *
  * Train
  * @property string $train_name
@@ -234,6 +235,11 @@ class TourDayExpense extends Model
     public function route(): BelongsTo
     {
         return $this->belongsTo(Route::class);
+    }
+
+    public function transportClass(): BelongsTo
+    {
+        return $this->belongsTo(TransportClass::class);
     }
 
     public function getTrainStatusAttribute(): ExpenseStatus

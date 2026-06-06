@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\TransportType;
 use App\Filament\Resources\RouteResource\Pages;
 use App\Models\Route;
-use App\Models\Transport;
+use App\Models\TransportClass;
 use App\Services\TourService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -46,17 +45,17 @@ class RouteResource extends Resource
                         ->columns(1),
                 ]),
 
-            Forms\Components\Section::make('Prices by transport type')
-                ->description('Set the price in USD for each transport type.')
+            Forms\Components\Section::make('Prices by transport class')
+                ->description('Set the flat price in USD for each transport class.')
                 ->schema([
                     Forms\Components\Repeater::make('prices')
                         ->relationship('prices')
                         ->addActionLabel('Add price')
                         ->deletable(true)
                         ->schema([
-                            Forms\Components\Select::make('transport_type')
-                                ->label('Transport type')
-                                ->options(fn() => self::getAvailableTransportTypes())
+                            Forms\Components\Select::make('transport_class_id')
+                                ->label('Transport class')
+                                ->options(fn() => TransportClass::query()->orderBy('order')->pluck('name', 'id')->toArray())
                                 ->native(false)
                                 ->searchable()
                                 ->required(),
@@ -73,7 +72,7 @@ class RouteResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['waypoints.city', 'prices']);
+        return parent::getEloquentQuery()->with(['waypoints.city', 'prices.transportClass']);
     }
 
     public static function table(Table $table): Table
@@ -94,10 +93,8 @@ class RouteResource extends Resource
                     ->label('Prices (USD)')
                     ->getStateUsing(function(Route $record) {
                         return $record->prices->map(function($p) {
-                            $enum = $p->transport_type instanceof TransportType
-                                ? $p->transport_type
-                                : TransportType::from((int)$p->transport_type);
-                            return $enum->getLabel() . ': $' . number_format($p->price, 0);
+                            $name = $p->transportClass?->name ?? "#{$p->transport_class_id}";
+                            return $name . ': $' . number_format($p->price, 0);
                         })->join(', ');
                     }),
                 Tables\Columns\TextColumn::make('created_at')
@@ -122,23 +119,5 @@ class RouteResource extends Resource
             'create' => Pages\CreateRoute::route('/create'),
             'edit'   => Pages\EditRoute::route('/{record}/edit'),
         ];
-    }
-
-    public static function getAvailableTransportTypes(): array
-    {
-        // pluck with cast returns TransportType enums; extract value for option keys
-        $types = Transport::query()
-            ->distinct()
-            ->pluck('type')
-            ->map(fn($t) => $t instanceof TransportType ? $t->value : (int)$t)
-            ->unique()
-            ->toArray();
-
-        $options = [];
-        foreach ($types as $typeValue) {
-            $enum = TransportType::from($typeValue);
-            $options[$typeValue] = $enum->getLabel();
-        }
-        return $options;
     }
 }

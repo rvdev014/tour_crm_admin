@@ -332,11 +332,12 @@ class TourCorporateResource extends Resource
                                 Components\Grid::make(4)->schema([
                                     Components\TimePicker::make('transport_time')
                                         ->seconds(false),
-                                    Components\Select::make('transport_type')
+                                    Components\Select::make('transport_class_id')
+                                        ->label('Transport class')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->options(TransportType::class)
+                                        ->options(fn() => TourService::getTransportClasses())
                                         ->reactive()
                                         ->afterStateUpdated(function($state, $set) {
                                             $set('route_id', null);
@@ -347,16 +348,16 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->options(fn($get) => $get('transport_type')
-                                            ? TourService::getRoutesForTransportType((int)$get('transport_type'))
+                                        ->options(fn($get) => $get('transport_class_id')
+                                            ? TourService::getRoutesForTransportClass((int)$get('transport_class_id'))
                                             : []
                                         )
                                         ->reactive()
                                         ->afterStateUpdated(function($state, $get, $set) {
-                                            if ($state && $get('transport_type')) {
-                                                $price = TourService::getRoutePriceForTransportType(
+                                            if ($state && $get('transport_class_id')) {
+                                                $price = TourService::getRoutePriceForTransportClass(
                                                     (int)$state,
-                                                    (int)$get('transport_type')
+                                                    (int)$get('transport_class_id')
                                                 );
                                                 if ($price !== null) {
                                                     $set('price', $price);

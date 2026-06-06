@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\TransportType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
  * @property int $route_id
- * @property int $transport_type
+ * @property int $transport_class_id
  * @property float $price
  *
  * @property Route $route
- * @property TransportType $transportTypeEnum
+ * @property TransportClass $transportClass
  */
 class RoutePrice extends Model
 {
@@ -21,12 +20,13 @@ class RoutePrice extends Model
 
     protected $guarded = ['id'];
 
-    protected $casts = [
-        'transport_type' => TransportType::class,
-    ];
-
     public function route(): BelongsTo
     {
         return $this->belongsTo(Route::class);
+    }
+
+    public function transportClass(): BelongsTo
+    {
+        return $this->belongsTo(TransportClass::class);
     }
 }

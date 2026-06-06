@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\TourTpsResource\RelationManagers;
 
 use App\Enums\PlaneType;
-use App\Enums\TransportType;
 use App\Models\Route;
 use App\Models\Tour;
 use App\Models\TourDay;
@@ -156,12 +155,12 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                     Components\Grid::make(3)->schema([
                         Components\TimePicker::make('transport_time')
                             ->seconds(false),
-                        Components\Select::make('transport_type')
-                            ->label('Transport type')
+                        Components\Select::make('transport_class_id')
+                            ->label('Transport class')
                             ->native(false)
                             ->searchable()
                             ->preload()
-                            ->options(TransportType::class)
+                            ->options(fn() => TourService::getTransportClasses())
                             ->reactive()
                             ->afterStateUpdated(function($state, $set) {
                                 $set('route_id', null);
@@ -172,16 +171,16 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->native(false)
                             ->searchable()
                             ->preload()
-                            ->options(fn($get) => $get('transport_type')
-                                ? TourService::getRoutesForTransportType((int)$get('transport_type'))
+                            ->options(fn($get) => $get('transport_class_id')
+                                ? TourService::getRoutesForTransportClass((int)$get('transport_class_id'))
                                 : []
                             )
                             ->reactive()
                             ->afterStateUpdated(function($state, $get, $set) {
-                                if ($state && $get('transport_type')) {
-                                    $price = TourService::getRoutePriceForTransportType(
+                                if ($state && $get('transport_class_id')) {
+                                    $price = TourService::getRoutePriceForTransportClass(
                                         (int)$state,
-                                        (int)$get('transport_type')
+                                        (int)$get('transport_class_id')
                                     );
                                     if ($price !== null) {
                                         $set('price', $price);

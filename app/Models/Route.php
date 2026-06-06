@@ -35,8 +35,8 @@ class Route extends Model
         return $this->waypoints->map(fn($w) => $w->city?->name ?? '?')->join(' → ');
     }
 
-    public function getPriceForTransportType(int $transportType): ?float
+    public function getPriceForTransportClass(int $transportClassId): ?float
     {
-        return $this->prices->first(fn($p) => $p->transport_type === $transportType)?->price;
+        return $this->prices->first(fn($p) => (int)$p->transport_class_id === $transportClassId)?->price;
     }
 }

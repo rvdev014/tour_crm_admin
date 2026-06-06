@@ -812,21 +812,29 @@ HTML;
         return (int)$settings?->value;
     }
 
-    public static function getRoutesForTransportType(int $transportType): array
+    public static function getRoutesForTransportClass(int $transportClassId): array
     {
         return \App\Models\Route::query()
-            ->with(['waypoints.city', 'prices'])
-            ->whereHas('prices', fn($q) => $q->where('transport_type', $transportType))
+            ->with(['waypoints.city'])
+            ->whereHas('prices', fn($q) => $q->where('transport_class_id', $transportClassId))
             ->get()
             ->mapWithKeys(fn($route) => [$route->id => $route->display_name])
             ->toArray();
     }
 
-    public static function getRoutePriceForTransportType(int $routeId, int $transportType): ?float
+    public static function getRoutePriceForTransportClass(int $routeId, int $transportClassId): ?float
     {
         return \App\Models\RoutePrice::query()
             ->where('route_id', $routeId)
-            ->where('transport_type', $transportType)
+            ->where('transport_class_id', $transportClassId)
             ->value('price');
+    }
+
+    public static function getTransportClasses(): array
+    {
+        return \App\Models\TransportClass::query()
+            ->orderBy('order')
+            ->pluck('name', 'id')
+            ->toArray();
     }
 }
