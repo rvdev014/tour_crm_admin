@@ -213,7 +213,10 @@ class TourCorporateResource extends Resource
                                     })
                                     ->displayFormat('d.m.Y')
                                     ->native(false)
-                                    ->hidden(fn($get) => $get('type') == ExpenseType::Transport->value)
+                                    ->hidden(fn($get) => in_array($get('type'), [
+                                        ExpenseType::Transport->value,
+                                        ExpenseType::Hotel->value,
+                                    ]))
                                     ->afterStateUpdated(function($get, $set) {
                                         $set(
                                             'hotel_total_nights',
@@ -257,21 +260,32 @@ class TourCorporateResource extends Resource
                                         ->preload()
                                         ->reactive()
                                         ->required(),
-                                    Components\TimePicker::make('hotel_checkin_time')
+                                    Components\Hidden::make('hotel_checkin_time'),
+                                    Components\DateTimePicker::make('hotel_checkin_datetime')
+                                        ->label('Check-in date & time')
+                                        ->displayFormat('d.m.Y H:i')
                                         ->seconds(false)
-                                        ->reactive()
-                                        ->afterStateUpdated(function($get, $set) {
-                                            $set(
-                                                'hotel_total_nights',
-                                                TourService::calculateHotelNights(
-                                                    $get('hotel_id'),
-                                                    $get('date'),
-                                                    $get('hotel_checkin_time'),
-                                                    $get('hotel_checkout_date_time')
-                                                )
-                                            );
+                                        ->dehydrated(false)
+                                        ->formatStateUsing(function($state, $record) {
+                                            if ($record?->date && $record?->hotel_checkin_time) {
+                                                return Carbon::parse($record->date)->setTimeFromTimeString($record->hotel_checkin_time);
+                                            }
+                                            return null;
                                         })
-                                        ->label('Check-in time'),
+                                        ->afterStateUpdated(function($state, $set, $get) {
+                                            if ($state) {
+                                                $dt = Carbon::parse($state);
+                                                $set('date', $dt->format('Y-m-d'));
+                                                $set('hotel_checkin_time', $dt->format('H:i'));
+                                                $set('hotel_total_nights', TourService::calculateHotelNights(
+                                                    $get('hotel_id'),
+                                                    $dt->format('Y-m-d'),
+                                                    $dt->format('H:i'),
+                                                    $get('hotel_checkout_date_time')
+                                                ));
+                                            }
+                                        })
+                                        ->reactive(),
                                     Components\DateTimePicker::make('hotel_checkout_date_time')
                                         ->seconds(false)
                                         ->afterStateUpdated(function($get, $set) {
