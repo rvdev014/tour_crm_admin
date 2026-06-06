@@ -97,6 +97,22 @@ class TourCorporateResource extends Resource
                 ]),
                 
                 Components\Grid::make(4)->schema([
+                    Components\DateTimePicker::make('start_date')
+                        ->displayFormat('d.m.Y H:i')
+                        ->label('Start date')
+                        ->seconds(false)
+                        ->afterStateUpdated(function($get, $set) {
+                            if (Carbon::parse($get('end_date')) < Carbon::parse($get('start_date'))) {
+                                $set('end_date', null);
+                            }
+                        })
+                        ->reactive(),
+                    Components\DateTimePicker::make('end_date')
+                        ->displayFormat('d.m.Y H:i')
+                        ->label('End date')
+                        ->seconds(false)
+                        ->minDate(fn($get) => $get('start_date') ? Carbon::parse($get('start_date'))->addDay()->format('d.m.Y H:i') : null)
+                        ->reactive(),
                     Components\TextInput::make('requested_by'),
                     Components\Textarea::make('comment')
                 ]),
@@ -752,9 +768,19 @@ class TourCorporateResource extends Resource
                     ->sortable()
                     ->searchable(),
                 
+                Columns\TextColumn::make('start_date')
+                    ->label('Start')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable(),
+
+                Columns\TextColumn::make('end_date')
+                    ->label('End')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable(),
+
                 Columns\TextColumn::make('requested_by')
                     ->searchable(),
-                
+
                 Columns\TextColumn::make('createdBy.name')
                     ->sortable()
                     ->searchable(),
