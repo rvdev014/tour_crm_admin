@@ -17,6 +17,29 @@
     color: #fff !important;
 }
 
+/* Repeater icon buttons — explicitly visible in light mode */
+.fi-fo-repeater-item .fi-icon-btn-icon {
+    color: rgb(107, 114, 128) !important;
+}
+.fi-fo-repeater-item .fi-icon-btn:hover .fi-icon-btn-icon {
+    color: rgb(239, 68, 68) !important;
+}
+
+/* Keep white icons on custom-colored repeater headers */
+.repeater-days .fi-fo-repeater-item .fi-icon-btn-icon,
+.repeater-expenses .fi-fo-repeater-item .fi-icon-btn-icon,
+.repeater-guides .fi-fo-repeater-item .fi-icon-btn-icon {
+    color: #fff !important;
+}
+
+/* Dark mode */
+.dark .fi-fo-repeater-item .fi-icon-btn-icon {
+    color: rgb(156, 163, 175) !important;
+}
+.dark .fi-fo-repeater-item .fi-icon-btn:hover .fi-icon-btn-icon {
+    color: rgb(252, 165, 165) !important;
+}
+
 /* 4. Sidebar group labels — uppercase with tracking */
 .fi-sidebar-group-label {
     font-size: 0.65rem !important;
