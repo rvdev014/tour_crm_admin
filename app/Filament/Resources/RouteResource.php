@@ -26,14 +26,14 @@ class RouteResource extends Resource
     {
         return $form->schema([
             Forms\Components\Section::make('Waypoints')
-                ->description('Add cities in order from start to destination.')
+                ->description('Add cities in order from start to destination. Minimum 2 cities required.')
                 ->schema([
                     Forms\Components\Repeater::make('waypoints')
                         ->relationship('waypoints')
                         ->orderColumn('order')
                         ->reorderable()
                         ->addActionLabel('Add waypoint')
-                        ->minItems(2)
+                        ->deletable(true)
                         ->schema([
                             Forms\Components\Select::make('city_id')
                                 ->label('City')
@@ -52,6 +52,7 @@ class RouteResource extends Resource
                     Forms\Components\Repeater::make('prices')
                         ->relationship('prices')
                         ->addActionLabel('Add price')
+                        ->deletable(true)
                         ->schema([
                             Forms\Components\Select::make('transport_type')
                                 ->label('Transport type')
