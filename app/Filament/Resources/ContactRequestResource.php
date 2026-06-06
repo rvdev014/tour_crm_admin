@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Notifications\Notification;
 
 class ContactRequestResource extends Resource
 {
@@ -75,11 +76,15 @@ class ContactRequestResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('comment')
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(80)
+                    ->tooltip(fn($record) => $record->comment)
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status_updated_by')
+                    ->label('Status by')
                     ->formatStateUsing(function($record) {
                         return $record->statusUpdatedBy?->name;
                     }),
@@ -96,7 +101,30 @@ class ContactRequestResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('update_status')
+                    ->label(fn(ContactRequest $record) => $record->status->getLabel())
+                    ->badge()
+                    ->color(fn(ContactRequest $record) => $record->status->getColor())
+                    ->icon('heroicon-o-arrow-path')
+                    ->modalHeading('Update Status')
+                    ->modalWidth('sm')
+                    ->form([
+                        Forms\Components\Select::make('status')
+                            ->label('Status')
+                            ->options(WebTourStatus::class)
+                            ->default(fn(ContactRequest $record) => $record->status->value)
+                            ->required(),
+                    ])
+                    ->action(function(ContactRequest $record, array $data) {
+                        $record->update([
+                            'status'            => $data['status'],
+                            'status_updated_by' => auth()->id(),
+                        ]);
+                        Notification::make()
+                            ->title('Status updated')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
