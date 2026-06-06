@@ -80,14 +80,26 @@ class RouteResource extends Resource
         return $table
             ->defaultSort('id', 'desc')
             ->striped()
+            ->searchable()
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('display_name')
                     ->label('Route')
                     ->searchable(query: function($query, $search) {
-                        $query->whereHas('waypoints.city', fn($q) => $q->where('name', 'like', "%$search%"));
+                        $query->where(function($q) use ($search) {
+                            $q->whereHas('waypoints', function($wq) use ($search) {
+                                $wq->whereHas('city', function($cq) use ($search) {
+                                    $cq->where('name', 'ilike', "%{$search}%");
+                                });
+                            })->orWhereHas('prices', function($pq) use ($search) {
+                                $pq->whereHas('transportClass', function($tq) use ($search) {
+                                    $tq->where('name', 'ilike', "%{$search}%");
+                                });
+                            });
+                        });
                     }),
                 Tables\Columns\TextColumn::make('prices_summary')
                     ->label('Prices (USD)')
