@@ -188,17 +188,13 @@ class ExportController extends Controller
         return response()->download($zipPath, $zipFilename)->deleteFileAfterSend();
     }
 
-    /**
-     * @throws CopyFileException
-     * @throws CreateTemporaryFileException
-     */
     public function exportTransfer(Transfer $transfer): BinaryFileResponse
     {
         $tempDir = ExportService::getTempDir("transfer_reports");
 
         $fileName = $tempDir . '/Transfer_' . $transfer->id . '.docx';
-        $templateProcessor = ExportTransferService::getReplacedTemplateForTransfer($transfer);
-        $templateProcessor->saveAs($fileName);
+        $phpWord = ExportTransferService::generate($transfer);
+        ExportTransferService::save($phpWord, $fileName);
 
         register_shutdown_function(fn() => File::deleteDirectory($tempDir));
 

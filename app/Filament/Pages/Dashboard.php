@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Widgets\DashboardStats;
 use App\Filament\Widgets\ToursCorporateChart;
 use App\Filament\Widgets\ToursTpsChart;
+use App\Filament\Widgets\TransferStatsWidget;
 use App\Models\Country;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
@@ -67,6 +68,7 @@ class Dashboard
     {
         return [
             DashboardStats::class,
+            TransferStatsWidget::class,
             ToursTpsChart::class,
             ToursCorporateChart::class,
         ];

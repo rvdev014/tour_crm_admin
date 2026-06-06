@@ -526,20 +526,22 @@ HTML;
                 $date = "{$dayPart} {$timePart}";
             }
 
+            $transferRecord = self::getTransferByExpense($expense);
             foreach ($driverIds as $driverId) {
                 $transportsData[$driverId][] = [
-                    'transfer_id' => self::getTransferByExpense($expense)?->id,
-                    'transfer_number' => self::getTransferByExpense($expense)?->getNumber(),
-                    'driver_id' => $driverId,
-                    'pax' => $totalPax,
-                    'driver_ids' => $driverIds,
-                    'to_city' => $expense['to_city_id'] ?? null,
-                    'transport_place' => $expense['transport_place'] ?? null,
-                    'route' => $expense['transport_route'] ?? null,
-                    'date' => $date,
-                    'transport_type' => $tourData['transport_type'] ?? null,
-                    'price' => $expense['price'] ?? null,
-                    'comment' => $expense['comment'] ?? null,
+                    'transfer_id'     => $transferRecord?->id,
+                    'transfer_number' => $transferRecord?->number ?? (1000 + ($transferRecord?->id ?? 0)),
+                    'driver_id'       => $driverId,
+                    'pax'             => $totalPax,
+                    'driver_ids'      => $driverIds,
+                    'to_city'         => $expense['to_city_id'] ?? null,
+                    'route'           => $expense['transport_route'] ?? null,
+                    'date'            => $date,
+                    'transport_type'  => $expense['transport_type'] ?? $tourData['transport_type'] ?? null,
+                    'price'           => $expense['price'] ?? null,
+                    'mark'            => $expense['mark'] ?? null,
+                    'nameplate'       => $expense['nameplate'] ?? null,
+                    'comment'         => $expense['comment'] ?? null,
                 ];
             }
 
@@ -612,15 +614,14 @@ HTML;
             ->map(fn(Driver $driver) => $driver->name)
             ->implode(', ');
 
-        $pax = $data['pax'] ?? 0;
-        $route = $data['route'] ?? '-';
-        $mark = $data['mark'] ?? '-';
+        $pax       = $data['pax'] ?? 0;
+        $route     = $data['route'] ?? '-';
+        $mark      = $data['mark'] ?? '-';
         $nameplate = $data['nameplate'] ?? '-';
-        $toCity = $data['to_city'] ? City::find($data['to_city'])?->name : null;
-        $place = $data['transport_place'] ?? '-';
-        $comment = $data['comment'] ?? '-';
-        $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
-        $oldDate = ($oldValues['date_time'] ?? null) ? Carbon::parse($oldValues['date_time'])->format('d-M H:i') : '-';
+        $toCity    = $data['to_city'] ? City::find($data['to_city'])?->name : null;
+        $comment   = $data['comment'] ?? '';
+        $date      = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
+        $oldDate   = ($oldValues['date_time'] ?? null) ? Carbon::parse($oldValues['date_time'])->format('d-M H:i') : '-';
 
         if ($transfer && !empty($oldValues)) {
             $oldDrivers = Driver::query()
@@ -629,47 +630,46 @@ HTML;
                 ->map(fn(Driver $driver) => $driver->name)
                 ->implode(', ');
 
-            $drivers = self::getChangedField($oldDrivers, $drivers);
-            $date = self::getChangedField($oldDate, $date);
-
-            $pax = self::getChangedField($oldValues['pax'] ?? null, $pax);
-            $route = self::getChangedField($oldValues['route'] ?? null, $route);
-            $mark = self::getChangedField($oldValues['mark'] ?? null, $mark);
+            $drivers   = self::getChangedField($oldDrivers, $drivers);
+            $date      = self::getChangedField($oldDate, $date);
+            $pax       = self::getChangedField($oldValues['pax'] ?? null, $pax);
+            $route     = self::getChangedField($oldValues['route'] ?? null, $route);
+            $mark      = self::getChangedField($oldValues['mark'] ?? null, $mark);
             $nameplate = self::getChangedField($oldValues['nameplate'] ?? null, $nameplate);
-            $toCity = self::getChangedField(City::find($oldValues['to_city_id'] ?? null)?->name, $toCity);
-            $place = self::getChangedField($oldValues['place_of_submission'] ?? null, $place);
-            $comment = self::getChangedField($oldValues['comment'] ?? null, $comment);
+            $toCity    = self::getChangedField(City::find($oldValues['to_city_id'] ?? null)?->name, $toCity);
+            $comment   = self::getChangedField($oldValues['comment'] ?? null, $comment);
         }
 
         $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
-        $price = $data['price'] ?? '';
+        $divider = '―――――――――――――――――';
 
-        $result = <<<HTML
-
-<b>ID:</b> {$data['transfer_number']}
-<b>Drivers:</b> {$drivers}
-<b>Pax:</b> {$pax}
-<b>Date and time:</b> {$date}
-<b>City:</b> {$toCity}
-<b>Pickup location:</b> {$place}
-<b>Transport:</b> {$transportType}
-<b>Route:</b> {$route}
-<b>Marka:</b> {$mark}
-<b>Табличка:</b> {$nameplate}
-<b>Comment:</b> {$comment}
-HTML;
-
-        if ($withPhone) {
-            $result .= <<<HTML
-
-
-Office phone: +998333377752
-HTML;
+        $result = "<b>Transfer #{$data['transfer_number']}</b>\n{$divider}\n";
+        $result .= "<b>Date &amp; time:</b> {$date}\n";
+        $result .= "<b>Route:</b> {$route}\n";
+        $result .= "<b>Destination:</b> " . ($toCity ?? '-') . "\n";
+        $result .= "<b>Transport:</b> {$transportType}\n";
+        $result .= "<b>Pax:</b> {$pax}";
+        if ($nameplate && $nameplate !== '-') {
+            $result .= "  |  <b>Tablet:</b> {$nameplate}";
+        }
+        $result .= "\n{$divider}\n";
+        $result .= "<b>Driver(s):</b> {$drivers}\n";
+        if ($mark && $mark !== '-') {
+            $result .= "<b>Car:</b> {$mark}\n";
+        }
+        if ($comment) {
+            $result .= "<b>Comment:</b> {$comment}\n";
         }
 
-        $oldValues = $transfer->getOriginal();
-        unset($oldValues['old_values']);
-        $transfer->update(['old_values' => $oldValues]);
+        if ($withPhone) {
+            $result .= "\nOffice phone: +998333377752";
+        }
+
+        if ($transfer) {
+            $snap = $transfer->getOriginal();
+            unset($snap['old_values']);
+            $transfer->update(['old_values' => $snap]);
+        }
 
         return $result;
     }
@@ -810,5 +810,23 @@ HTML;
     {
         $settings = Setting::query()->where('key', DefaultSettings::TOUR_SBOR->value)->first();
         return (int)$settings?->value;
+    }
+
+    public static function getRoutesForTransportType(int $transportType): array
+    {
+        return \App\Models\Route::query()
+            ->with(['waypoints.city', 'prices'])
+            ->whereHas('prices', fn($q) => $q->where('transport_type', $transportType))
+            ->get()
+            ->mapWithKeys(fn($route) => [$route->id => $route->display_name])
+            ->toArray();
+    }
+
+    public static function getRoutePriceForTransportType(int $routeId, int $transportType): ?float
+    {
+        return \App\Models\RoutePrice::query()
+            ->where('route_id', $routeId)
+            ->where('transport_type', $transportType)
+            ->value('price');
     }
 }

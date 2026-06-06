@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\TourTpsResource\RelationManagers;
 
 use App\Enums\PlaneType;
+use App\Enums\TransportType;
+use App\Models\Route;
 use App\Models\Tour;
 use App\Models\TourDay;
 use App\Services\ExpenseService;
@@ -149,23 +151,53 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                 // Transport
                 Components\Fieldset::make('Transport info')->schema([
 
+                    Components\Hidden::make('price_currency'),
+
                     Components\Grid::make(3)->schema([
-                        /*Components\Select::make('transport_driver_ids')
-                            ->label('Drivers')
-                            ->multiple()
-                            ->options(TourService::getDrivers())
-                            ->native(false)
-                            ->searchable()
-                            ->preload(),*/
                         Components\TimePicker::make('transport_time')
                             ->seconds(false),
-                        Components\TextInput::make('transport_place')
-                            ->label('Pickup location'),
-                        Components\TextInput::make('transport_route')
-                            ->label('Destination'),
+                        Components\Select::make('transport_type')
+                            ->label('Transport type')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(TransportType::class)
+                            ->reactive()
+                            ->afterStateUpdated(function($state, $set) {
+                                $set('route_id', null);
+                                $set('price', null);
+                            }),
+                        Components\Select::make('route_id')
+                            ->label('Route')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(fn($get) => $get('transport_type')
+                                ? TourService::getRoutesForTransportType((int)$get('transport_type'))
+                                : []
+                            )
+                            ->reactive()
+                            ->afterStateUpdated(function($state, $get, $set) {
+                                if ($state && $get('transport_type')) {
+                                    $price = TourService::getRoutePriceForTransportType(
+                                        (int)$state,
+                                        (int)$get('transport_type')
+                                    );
+                                    if ($price !== null) {
+                                        $set('price', $price);
+                                        $set('price_currency', 'USD');
+                                    }
+                                    $route = Route::with('waypoints.city')->find($state);
+                                    if ($route) {
+                                        $set('transport_route', $route->display_name);
+                                    }
+                                }
+                            }),
                     ]),
 
                     Components\Grid::make(3)->schema([
+                        Components\TextInput::make('transport_route')
+                            ->label('Destination'),
                         Components\Select::make('to_city_id')
                             ->native(false)
                             ->searchable()
@@ -182,9 +214,13 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                             ->default(ExpenseStatus::New->value)
                             ->required()
                             ->label('Status'),
+                    ]),
 
-                        //                        self::getExpensePriceInput('Sell price'),
-
+                    Components\Grid::make(3)->schema([
+                        Components\TextInput::make('price')
+                            ->label(fn($get) => 'Price (' . ($get('price_currency') ?? 'USD') . ')')
+                            ->numeric()
+                            ->reactive(),
                         Components\Textarea::make('comment')
                             ->label('Comment'),
                     ]),

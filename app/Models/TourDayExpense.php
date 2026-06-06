@@ -69,6 +69,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $transport_place
  * @property string $send_username
  * @property string $plane_route
+ * @property int $route_id
  *
  * Train
  * @property string $train_name
@@ -119,6 +120,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Employee $guideEmployee
  * @property Collection<ExpenseGuide> $guides
  * @property Collection<TourDayExpenseRoomType> $roomTypes
+ * @property Route $route
  */
 #[ObservedBy([TourDayExpenseObserver::class])]
 class TourDayExpense extends Model
@@ -227,6 +229,11 @@ class TourDayExpense extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function route(): BelongsTo
+    {
+        return $this->belongsTo(Route::class);
     }
 
     public function getTrainStatusAttribute(): ExpenseStatus

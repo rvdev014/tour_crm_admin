@@ -17,7 +17,10 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
     public function created(TourDayExpense $tourDayExpense): void
     {
         if ($tourDayExpense->type === ExpenseType::Transport) {
-            Transfer::create($this->changedAttributes($tourDayExpense));
+            $attrs = $this->changedAttributes($tourDayExpense);
+            if ($attrs !== null) {
+                Transfer::create($attrs);
+            }
         }
     }
 
@@ -27,11 +30,15 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
     public function updated(TourDayExpense $tourDayExpense): void
     {
         if ($tourDayExpense->type === ExpenseType::Transport) {
+            $attrs = $this->changedAttributes($tourDayExpense);
+            if ($attrs === null) {
+                return;
+            }
             $transfer = Transfer::where('tour_day_expense_id', $tourDayExpense->id)->first();
             if ($transfer) {
-                $transfer->update($this->changedAttributes($tourDayExpense));
+                $transfer->update($attrs);
             } else {
-                Transfer::create($this->changedAttributes($tourDayExpense));
+                Transfer::create($attrs);
             }
         }
     }
@@ -62,9 +69,17 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
         //
     }
 
-    public function changedAttributes(TourDayExpense $tourDayExpense): array
+    public function changedAttributes(TourDayExpense $tourDayExpense): ?array
     {
+        // Fresh-load relationships to avoid stale cached nulls
+        $tourDayExpense->load(['tourDay.tour', 'tourGroup.tour']);
+
         $tour = $tourDayExpense->tourDay?->tour ?? $tourDayExpense->tourGroup?->tour;
+
+        if (!$tour) {
+            return null;
+        }
+
         $expenseDate = $tourDayExpense->tourDay?->date ?? $tourDayExpense->date;
 
         $dateTime = null;
@@ -82,7 +97,7 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             'comment' => $tourDayExpense->comment,
             'company_id' => $tour->company_id,
             'group_number' => $tour->group_number,
-            'transport_type' => $tour->transport_type ?? $tourDayExpense->transport_type,
+            'transport_type' => $tourDayExpense->transport_type ?? $tour->transport_type,
             'transport_comfort_level' => $tour->transport_comfort_level,
             'price' => $tourDayExpense->price,
             'sell_price' => $tourDayExpense->price,

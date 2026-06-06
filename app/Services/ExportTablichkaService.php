@@ -39,15 +39,8 @@ class ExportTablichkaService
         // Vertical spacing (12 blank lines, matching the example)
         $section->addTextBreak(12);
 
-        // Pickup Location + Route line — 11pt, bold, centered
-        $parts = [];
-        if (!empty($transfer->place_of_submission)) {
-            $parts[] = 'Откуда: ' . $transfer->place_of_submission;
-        }
-        if (!empty($transfer->route)) {
-            $parts[] = 'куда: ' . $transfer->route;
-        }
-        $infoLine = implode('   ', $parts);
+        // Route line — 11pt, bold, centered
+        $infoLine = $transfer->route ?: '';
 
         $infoPara = $section->addTextRun(['alignment' => Jc::CENTER]);
         $infoPara->addText($infoLine, [

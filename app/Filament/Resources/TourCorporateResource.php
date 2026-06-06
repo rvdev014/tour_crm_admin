@@ -312,28 +312,50 @@ class TourCorporateResource extends Resource
                             
                             // Transport
                             Components\Fieldset::make('Transport info')->schema([
-                                
+
                                 Components\Grid::make(4)->schema([
-                                    /*Components\Select::make('transport_driver_ids')
-                                        ->label('Drivers')
-                                        ->multiple()
-                                        ->options(TourService::getDrivers())
-                                        ->native(false)
-                                        ->searchable()
-                                        ->preload(),*/
                                     Components\TimePicker::make('transport_time')
                                         ->seconds(false),
                                     Components\Select::make('transport_type')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->options(TransportType::class),
-                                    Components\TextInput::make('transport_place')
-                                        ->label('Pickup location'),
+                                        ->options(TransportType::class)
+                                        ->reactive()
+                                        ->afterStateUpdated(function($state, $set) {
+                                            $set('route_id', null);
+                                            $set('price', null);
+                                        }),
+                                    Components\Select::make('route_id')
+                                        ->label('Route')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->options(fn($get) => $get('transport_type')
+                                            ? TourService::getRoutesForTransportType((int)$get('transport_type'))
+                                            : []
+                                        )
+                                        ->reactive()
+                                        ->afterStateUpdated(function($state, $get, $set) {
+                                            if ($state && $get('transport_type')) {
+                                                $price = TourService::getRoutePriceForTransportType(
+                                                    (int)$state,
+                                                    (int)$get('transport_type')
+                                                );
+                                                if ($price !== null) {
+                                                    $set('price', $price);
+                                                    $set('price_currency', 'USD');
+                                                }
+                                                $route = \App\Models\Route::with('waypoints.city')->find($state);
+                                                if ($route) {
+                                                    $set('transport_route', $route->display_name);
+                                                }
+                                            }
+                                        }),
                                     Components\TextInput::make('nameplate')
                                         ->label('Табличка'),
                                 ]),
-                                
+
                                 Components\Grid::make(4)->schema([
                                     Components\TextInput::make('transport_route')
                                         ->label('Destination'),
@@ -344,7 +366,7 @@ class TourCorporateResource extends Resource
                                         ->label('City to')
                                         ->options(TourService::getCities())
                                         ->reactive(),
-                                    
+
                                     Components\Select::make('status')
                                         ->native(false)
                                         ->searchable()
@@ -353,14 +375,14 @@ class TourCorporateResource extends Resource
                                         ->default(ExpenseStatus::New->value)
                                         ->required()
                                         ->label('Status'),
-                                    
-                                    //                            self::getExpensePriceInput(),
+
+                                    self::getExpensePriceInput(),
                                 ]),
-                                
+
                                 Components\Textarea::make('comment')
                                     ->label('Comment')
                                     ->columnSpanFull(),
-                            
+
                             ])->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
                             
                             // Train

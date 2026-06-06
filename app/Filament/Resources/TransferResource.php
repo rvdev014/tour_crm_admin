@@ -35,14 +35,12 @@ class TransferResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return [
-//            'id',
             'number',
             'group_number',
             'company.name',
-            'place_of_submission',
             'route',
             'mark',
-            'nameplate'
+            'nameplate',
         ];
     }
 
@@ -54,9 +52,9 @@ class TransferResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Company' => $record->company?->name ?? 'N/A',
-            'Pickup Location' => $record->place_of_submission ?? 'N/A',
-            'Date & Time' => $record->date_time?->format('d.m.Y H:i') ?? 'N/A',
+            'Company'    => $record->company?->name ?? 'N/A',
+            'Route'      => $record->route ?? 'N/A',
+            'Date & Time'=> $record->date_time?->format('d.m.Y H:i') ?? 'N/A',
         ];
     }
 
