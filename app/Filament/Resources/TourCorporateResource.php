@@ -164,16 +164,19 @@ class TourCorporateResource extends Resource
                             $current = Arr::get($get('expenses'), $uuid);
                             $index = array_search($uuid, array_keys($get('expenses'))) ?? 0;
                             $index++;
-                            
+
                             $expenseType = $current['type'] ?? null;
                             if ($expenseType) {
                                 $expenseTypeLabel = ExpenseType::from($expenseType)->getLabel();
                                 $currentStatus = $current['status'] ?? null;
-                                $status = ($currentStatus ? " - " . ExpenseStatus::from($currentStatus)->getLabel(
-                                    ) : '');
-                                return "Expense for $expenseTypeLabel ($index)" . strtoupper($status);
+                                $status = $currentStatus ? ' - ' . strtoupper(ExpenseStatus::from($currentStatus)->getLabel()) : '';
+
+                                $date = $current['date'] ?? null;
+                                $dateLabel = $date ? ' | ' . Carbon::parse($date)->format('d.m.Y') : '';
+
+                                return "Expense for $expenseTypeLabel ($index){$dateLabel}{$status}";
                             }
-                            
+
                             return "Expense $index";
                         })
                         ->relationship('expenses')
