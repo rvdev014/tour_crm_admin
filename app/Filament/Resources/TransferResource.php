@@ -127,7 +127,8 @@ class TransferResource extends Resource
 
                     Forms\Components\TextInput::make('pax')
                         ->label('Pax')
-                        ->numeric(),
+                        ->numeric()
+                        ->readOnly(fn($record) => !empty($record?->tour_day_expense_id)),
 
                     Forms\Components\Select::make('status')
                         ->native(false)
@@ -155,7 +156,8 @@ class TransferResource extends Resource
                         ->preload()
                         ->label('Transport type')
                         ->options(TransportType::class)
-                        ->reactive(),
+                        ->reactive()
+                        ->disabled(fn($record) => !empty($record?->tour_day_expense_id)),
 
                     Forms\Components\TextInput::make('place_of_submission')
                         ->label('Pickup Location'),

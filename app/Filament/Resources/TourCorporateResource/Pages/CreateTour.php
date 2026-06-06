@@ -23,6 +23,7 @@ class CreateTour extends CreateRecord
 
         $data['type'] = TourType::Corporate;
         $data['created_by'] = auth()->id();
+        $data['group_number'] = $data['group_number'] ?? TourService::getGroupNumber(TourType::Corporate);
 
         $allExpenses = ExpenseService::getAllExpensesCorporateBasic($formState);
         $data['status'] = ExpenseService::getTourStatus($allExpenses);

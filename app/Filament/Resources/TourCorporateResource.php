@@ -362,6 +362,12 @@ class TourCorporateResource extends Resource
                                             $set('transport_time', $state ? Carbon::parse($state)->format('H:i') : null);
                                         })
                                         ->reactive(),
+                                    Components\Select::make('transport_type')
+                                        ->label('Transport type')
+                                        ->native(false)
+                                        ->searchable()
+                                        ->preload()
+                                        ->options(TransportType::class),
                                     Components\Select::make('transport_class_id')
                                         ->label('Transport class')
                                         ->native(false)
