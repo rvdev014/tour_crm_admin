@@ -672,11 +672,6 @@ class TourCorporateResource extends Resource
                                 }),
                         ]),
                         Components\Grid::make(5)->schema([
-                            Components\Select::make('city_id')
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->options(fn($get) => TourService::getCities($get('country_id'))),
                             Components\Select::make('company_id')
                                 ->native(false)
                                 ->searchable()
@@ -715,7 +710,6 @@ class TourCorporateResource extends Resource
                                     $q->whereYear('created_at', $year);
                                 });
                             })
-                            ->when($data['city_id'], fn($query, $cityId) => $query->where('city_id', $cityId))
                             ->when(
                                 $data['company_id'],
                                 fn($query, $companyId) => $query->where('company_id', $companyId)
@@ -754,9 +748,6 @@ class TourCorporateResource extends Resource
                         }
                         if ($data['country_id'] ?? null) {
                             $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
-                        }
-                        if ($data['city_id'] ?? null) {
-                            $indicators['city_id'] = 'City: ' . City::find($data['city_id'])->name;
                         }
                         if ($data['company_id'] ?? null) {
                             $indicators['company_id'] = 'Company: ' . Company::find($data['company_id'])->name;
