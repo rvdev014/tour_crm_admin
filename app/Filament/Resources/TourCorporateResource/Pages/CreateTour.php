@@ -37,9 +37,7 @@ class CreateTour extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $formState = $this->form->getRawState();
-        ExpenseService::createTourRoomTypes($this->record->id, $formState);
-        TourService::sendTelegram($formState, isCorporate: true);
+        TourService::sendTelegram($this->form->getRawState(), isCorporate: true);
     }
 
     protected function getRedirectUrl(): string

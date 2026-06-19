@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $tour_day_expense_id
  * @property int $room_type_id
  * @property int $amount
+ * @property int $amount_uz
+ * @property int $amount_foreign
  * @property RoomPersonType $person_type
  *
  * @property TourDayExpense $tourDayExpense
@@ -25,6 +27,8 @@ class TourDayExpenseRoomType extends Model
         'tour_day_expense_id',
         'room_type_id',
         'amount',
+        'amount_uz',
+        'amount_foreign',
         'person_type',
     ];
 

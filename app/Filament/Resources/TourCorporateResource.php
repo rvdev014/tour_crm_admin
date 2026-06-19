@@ -25,9 +25,7 @@ use App\Services\TourService;
 use Filament\Forms\Components;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
-use App\Enums\RoomPersonType;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Section;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\TourCorporateResource\Pages;
@@ -120,29 +118,6 @@ class TourCorporateResource extends Resource
                 ]),
             ]),
             
-            Components\Fieldset::make('Rooming info')->schema([
-                Components\Tabs::make('rooming_tabs')
-                    ->columnSpanFull()
-                    ->tabs([
-                        Components\Tabs\Tab::make('UZ')
-                            ->schema([
-                                ...TourService::generateRoomingSchema(RoomPersonType::Uzbek, true),
-                                Section::make('Other rooming')
-                                    ->schema(TourService::generateRoomingSchema(RoomPersonType::Uzbek))
-                                    ->collapsible()
-                                    ->collapsed(),
-                            ]),
-                        Components\Tabs\Tab::make('Foreign')
-                            ->schema([
-                                ...TourService::generateRoomingSchema(RoomPersonType::Foreign, true),
-                                Section::make('Other rooming')
-                                    ->schema(TourService::generateRoomingSchema(RoomPersonType::Foreign))
-                                    ->collapsible()
-                                    ->collapsed(),
-                            ]),
-                    ]),
-            ]),
-
             Components\Repeater::make('groups')
                 ->extraAttributes(['class' => 'repeater-days'])
                 ->collapsed(fn($record) => !empty($record->id))
@@ -349,7 +324,7 @@ class TourCorporateResource extends Resource
                                     ->relationship('roomTypes')
                                     ->addActionLabel('Add room type')
                                     ->schema([
-                                        Components\Grid::make()->schema([
+                                        Components\Grid::make(3)->schema([
                                             Components\Select::make('room_type_id')
                                                 ->native(false)
                                                 ->searchable()
@@ -358,11 +333,16 @@ class TourCorporateResource extends Resource
                                                 ->options(RoomType::query()->pluck('name', 'id')->toArray())
                                                 ->required()
                                                 ->reactive(),
-                                            
-                                            Components\TextInput::make('amount')
+
+                                            Components\TextInput::make('amount_uz')
                                                 ->numeric()
-                                                ->label('Amount')
-                                                ->required(),
+                                                ->default(0)
+                                                ->label('UZ'),
+
+                                            Components\TextInput::make('amount_foreign')
+                                                ->numeric()
+                                                ->default(0)
+                                                ->label('Foreign'),
                                         ])
                                     ])
                             

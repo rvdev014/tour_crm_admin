@@ -100,14 +100,24 @@ class ExpenseService
         $roomingAmounts = [];
         foreach ($roomTypes as $roomType) {
             $roomTypeId = $roomType['room_type_id'];
-            $amount = (int)($roomType['amount'] ?? 0);
-            $personType = $roomType['person_type'] ?? null;
-            $isForeign = $personType == RoomPersonType::Foreign->value;
+
+            // New format: explicit uz/foreign columns per row
+            $amountUz = (int)($roomType['amount_uz'] ?? 0);
+            $amountForeign = (int)($roomType['amount_foreign'] ?? 0);
+
+            // Backward compat: old rows used a single amount + person_type
+            if ($amountUz === 0 && $amountForeign === 0 && isset($roomType['amount'])) {
+                $isForeign = ($roomType['person_type'] ?? null) == RoomPersonType::Foreign->value;
+                $legacy = (int)$roomType['amount'];
+                $amountUz = $isForeign ? 0 : $legacy;
+                $amountForeign = $isForeign ? $legacy : 0;
+            }
 
             if (!isset($roomingAmounts[$roomTypeId])) {
                 $roomingAmounts[$roomTypeId] = ['uz' => 0, 'foreign' => 0];
             }
-            $roomingAmounts[$roomTypeId][$isForeign ? 'foreign' : 'uz'] += $amount;
+            $roomingAmounts[$roomTypeId]['uz'] += $amountUz;
+            $roomingAmounts[$roomTypeId]['foreign'] += $amountForeign;
         }
         return $roomingAmounts;
     }

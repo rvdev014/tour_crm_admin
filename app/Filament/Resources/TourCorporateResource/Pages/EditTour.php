@@ -23,8 +23,6 @@ class EditTour extends EditRecord
 
         $this->validateHotelExpensesGroupConfig($data['company_id'] ?? null, $formState);
 
-        ExpenseService::updateTourRoomTypes($this->record->id, $data);
-
         $allExpenses = ExpenseService::getAllExpensesCorporateBasic($formState);
         $data['status'] = ExpenseService::getTourStatus($allExpenses);
 
