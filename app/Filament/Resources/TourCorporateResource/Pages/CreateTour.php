@@ -2,14 +2,13 @@
 
 namespace App\Filament\Resources\TourCorporateResource\Pages;
 
-use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
-use App\Enums\TourStatus;
 use App\Enums\TourType;
 use App\Filament\Resources\TourCorporateResource;
-use App\Models\TourRoomType;
+use App\Models\Company;
 use App\Services\ExpenseService;
 use App\Services\TourService;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateTour extends CreateRecord
@@ -20,6 +19,8 @@ class CreateTour extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $formState = $this->form->getRawState();
+
+        $this->validateHotelExpensesGroupConfig($data['company_id'] ?? null, $formState);
 
         $data['type'] = TourType::Corporate;
         $data['created_by'] = auth()->id();
@@ -36,17 +37,46 @@ class CreateTour extends CreateRecord
 
     protected function afterCreate(): void
     {
-//        $formState = $this->form->getRawState();
-//        foreach ($formState['expenses'] as $expense) {
-//            if ($expense['type'] == ExpenseType::Hotel->value) {
-//                ExpenseService::createTourDayExpenseRoomTypes($expense['id'], $expense);
-//            }
-//        }
-        TourService::sendTelegram($this->form->getRawState(), isCorporate: true);
+        $formState = $this->form->getRawState();
+        ExpenseService::createTourRoomTypes($this->record->id, $formState);
+        TourService::sendTelegram($formState, isCorporate: true);
     }
 
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    private function validateHotelExpensesGroupConfig(?int $companyId, array $formState): void
+    {
+        if (!$companyId) {
+            return;
+        }
+
+        $hasHotelExpense = false;
+        foreach ($formState['groups'] ?? [] as $group) {
+            foreach ($group['expenses'] ?? [] as $expense) {
+                if (($expense['type'] ?? null) == ExpenseType::Hotel->value) {
+                    $hasHotelExpense = true;
+                    break 2;
+                }
+            }
+        }
+
+        if (!$hasHotelExpense) {
+            return;
+        }
+
+        /** @var Company $company */
+        $company = Company::find($companyId);
+        if (!$company?->group_id) {
+            Notification::make()
+                ->title('Hotel Expense Error')
+                ->body("Company \"{$company?->name}\" has no Group configured. Hotel expenses cannot be saved without a Group.")
+                ->danger()
+                ->persistent()
+                ->send();
+            $this->halt();
+        }
     }
 }

@@ -60,15 +60,23 @@ class ExpenseService
     public static function getAllExpensesCorporateBasic($formState): Collection
     {
         $allExpenses = collect();
+        $companyId = Arr::get($formState, 'company_id');
+        $tourRoomingAmounts = ExpenseService::getRoomingAmounts($formState);
 
         $groups = Arr::get($formState, 'groups', []);
         foreach ($groups as $group) {
             $totalPaxGroup = count($group['passengers'] ?? []);
-            foreach (Arr::get($group, 'expenses') as $expense) {
+            foreach (Arr::get($group, 'expenses', []) as $expense) {
+                // Use tour-level rooming when available; fall back to per-expense for old data
+                $roomAmounts = $tourRoomingAmounts->isNotEmpty()
+                    ? $tourRoomingAmounts
+                    : ExpenseService::getRoomingAmountsForExpense($expense);
+
                 $updatedExpense = ExpenseService::mutateExpense(
                     data: $expense,
                     totalPax: $totalPaxGroup,
-                    roomAmounts: ExpenseService::getRoomingAmountsForExpense($expense),
+                    roomAmounts: $roomAmounts,
+                    companyId: $companyId,
                     isTps: false
                 );
 
@@ -150,17 +158,19 @@ class ExpenseService
             $roomingAmounts = ExpenseService::getRoomingAmountsFromTour($tour);
         }
 
+        $companyId = $tour->company_id;
+
         foreach ($tour->groups as $group) {
             foreach ($group->expenses as $expense) {
                 $expenseArr = $expense->toArray();
                 $updatedExpense = ExpenseService::mutateExpense(
                     data: $expenseArr,
                     totalPax: $totalPax,
-                    countryId: $updatedData['country_id'],
+                    countryId: $updatedData['country_id'] ?? null,
                     roomAmounts: $roomingAmounts,
+                    companyId: $companyId,
                     isTps: false
                 );
-                dd($updatedExpense);
                 $expensePrice = $updatedExpense['price_converted'] ?? $updatedExpense['price'] ?? 0;
                 $expense->update(array_merge($updatedExpense, ['price_result' => $expensePrice]));
 

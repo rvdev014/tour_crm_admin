@@ -25,7 +25,9 @@ use App\Services\TourService;
 use Filament\Forms\Components;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
+use App\Enums\RoomPersonType;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\TourCorporateResource\Pages;
@@ -118,6 +120,29 @@ class TourCorporateResource extends Resource
                 ]),
             ]),
             
+            Components\Fieldset::make('Rooming info')->schema([
+                Components\Tabs::make('rooming_tabs')
+                    ->columnSpanFull()
+                    ->tabs([
+                        Components\Tabs\Tab::make('UZ')
+                            ->schema([
+                                ...TourService::generateRoomingSchema(RoomPersonType::Uzbek, true),
+                                Section::make('Other rooming')
+                                    ->schema(TourService::generateRoomingSchema(RoomPersonType::Uzbek))
+                                    ->collapsible()
+                                    ->collapsed(),
+                            ]),
+                        Components\Tabs\Tab::make('Foreign')
+                            ->schema([
+                                ...TourService::generateRoomingSchema(RoomPersonType::Foreign, true),
+                                Section::make('Other rooming')
+                                    ->schema(TourService::generateRoomingSchema(RoomPersonType::Foreign))
+                                    ->collapsible()
+                                    ->collapsed(),
+                            ]),
+                    ]),
+            ]),
+
             Components\Repeater::make('groups')
                 ->extraAttributes(['class' => 'repeater-days'])
                 ->collapsed(fn($record) => !empty($record->id))
