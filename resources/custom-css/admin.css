@@ -1,13 +1,219 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   SIDEBAR — Light
+   LOGIN PAGE — Premium Dark Redesign
    ═══════════════════════════════════════════════════════════════════════════ */
-.fi-sidebar-nav {
-    background: #1E3A5F;
+
+@keyframes blob-drift-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(40px, -30px) scale(1.06); }
+    66%       { transform: translate(-20px, 20px) scale(0.96); }
 }
 
-/* 9. Smooth sidebar collapse */
+@keyframes blob-drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(-30px, 40px) scale(0.94); }
+    66%       { transform: translate(25px, -20px) scale(1.04); }
+}
+
+@keyframes card-enter {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(37,99,235,0.35), 0 1px 3px rgba(0,0,0,0.2); }
+    50%       { box-shadow: 0 6px 28px rgba(37,99,235,0.55), 0 2px 6px rgba(0,0,0,0.3); }
+}
+
+/* Background */
+.fi-simple-layout {
+    background: #030810 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated glow orb 1 — blue top-left */
+.fi-simple-layout::before {
+    content: '';
+    position: fixed;
+    width: 720px;
+    height: 720px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, transparent 68%);
+    top: -180px;
+    left: -180px;
+    animation: blob-drift-1 12s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Animated glow orb 2 — emerald bottom-right */
+.fi-simple-layout::after {
+    content: '';
+    position: fixed;
+    width: 560px;
+    height: 560px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(5, 150, 105, 0.12) 0%, transparent 68%);
+    bottom: -120px;
+    right: -120px;
+    animation: blob-drift-2 15s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Dot grid overlay */
+.fi-simple-main-ctn {
+    position: relative;
+    z-index: 1;
+}
+
+.fi-simple-main-ctn::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Login card — glassmorphism */
+.fi-simple-main {
+    background: rgba(5, 14, 32, 0.82) !important;
+    backdrop-filter: blur(28px) saturate(1.4) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(1.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    box-shadow:
+        0 0 0 1px rgba(37, 99, 235, 0.18),
+        0 20px 60px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    border-radius: 22px !important;
+    animation: card-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    position: relative;
+    z-index: 2;
+}
+
+/* Thin top accent line on card */
+.fi-simple-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(37,99,235,0.6), transparent);
+    border-radius: 1px;
+}
+
+/* Heading */
+.fi-simple-header-heading {
+    color: #e8f0ff !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+    line-height: 1.2 !important;
+}
+
+.fi-simple-header-subheading {
+    color: rgba(148, 163, 184, 0.75) !important;
+    font-size: 0.8125rem !important;
+}
+
+/* Form labels */
+.fi-simple-main .fi-fo-field-wrp-label,
+.fi-simple-main label,
+.fi-simple-main .fi-fo-field-wrp > label {
+    color: rgba(186, 206, 240, 0.85) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em !important;
+    margin-bottom: 0.375rem !important;
+}
+
+/* Input wrapper */
+.fi-simple-main .fi-input-wrp {
+    background: rgba(255, 255, 255, 0.042) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+.fi-simple-main .fi-input-wrp:focus-within {
+    background: rgba(37, 99, 235, 0.07) !important;
+    border-color: rgba(37, 99, 235, 0.55) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14) !important;
+}
+
+.fi-simple-main .fi-input {
+    background: transparent !important;
+    color: #dce8ff !important;
+    font-size: 0.9375rem !important;
+}
+
+.fi-simple-main .fi-input::placeholder {
+    color: rgba(100, 120, 155, 0.6) !important;
+}
+
+/* Password toggle icon */
+.fi-simple-main .fi-input-wrp-suffix .fi-icon-btn-icon {
+    color: rgba(100, 140, 200, 0.7) !important;
+}
+
+/* Primary action button */
+.fi-simple-main .fi-btn-primary {
+    background: linear-gradient(135deg, #2563EB 0%, #1a4fd4 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    font-size: 0.9375rem !important;
+    letter-spacing: 0.01em !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.38), 0 1px 3px rgba(0,0,0,0.25) !important;
+    transition: all 0.2s ease !important;
+    animation: glow-pulse 3s ease-in-out infinite !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.fi-simple-main .fi-btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.fi-simple-main .fi-btn-primary:hover {
+    background: linear-gradient(135deg, #1D4ED8 0%, #1635b0 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.52), 0 2px 6px rgba(0,0,0,0.3) !important;
+    animation: none !important;
+}
+
+.fi-simple-main .fi-btn-primary:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* Footer / render hooks area in login */
+.fi-simple-layout .fi-footer {
+    color: rgba(100, 120, 150, 0.5) !important;
+    font-size: 0.75rem !important;
+    z-index: 2;
+    position: relative;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR — Light
+   ═══════════════════════════════════════════════════════════════════════════ */
 .fi-sidebar {
     transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fi-sidebar-nav {
+    background: linear-gradient(180deg, #132648 0%, #0e1e3a 60%, #0a1628 100%);
+    border-right: 1px solid rgba(255,255,255,0.04);
 }
 
 .fi-sidebar-nav .fi-sidebar-item-label,
@@ -17,87 +223,142 @@
     color: #fff !important;
 }
 
-/* Repeater icon buttons — explicitly visible in light mode */
+/* Repeater icon buttons */
 .fi-fo-repeater-item .fi-icon-btn-icon {
     color: rgb(107, 114, 128) !important;
 }
+
 .fi-fo-repeater-item .fi-icon-btn:hover .fi-icon-btn-icon {
     color: rgb(239, 68, 68) !important;
 }
 
-/* Keep white icons on custom-colored repeater headers */
+/* White icons on colored repeater headers */
 .repeater-days .fi-fo-repeater-item .fi-icon-btn-icon,
 .repeater-expenses .fi-fo-repeater-item .fi-icon-btn-icon,
 .repeater-guides .fi-fo-repeater-item .fi-icon-btn-icon {
     color: #fff !important;
 }
 
-/* Dark mode */
-.dark .fi-fo-repeater-item .fi-icon-btn-icon {
-    color: rgb(156, 163, 175) !important;
-}
-.dark .fi-fo-repeater-item .fi-icon-btn:hover .fi-icon-btn-icon {
-    color: rgb(252, 165, 165) !important;
-}
-
-/* 4. Sidebar group labels — uppercase with tracking */
+/* Sidebar group labels — uppercase */
 .fi-sidebar-group-label {
-    font-size: 0.65rem !important;
-    letter-spacing: 0.08em !important;
+    font-size: 0.625rem !important;
+    letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
-    opacity: 0.55 !important;
-    padding-top: 1rem !important;
-    font-weight: 600 !important;
+    opacity: 0.45 !important;
+    padding-top: 1.125rem !important;
+    font-weight: 700 !important;
 }
 
+/* Sidebar item hover */
 .fi-sidebar-item .fi-sidebar-item-button:hover {
-    background-color: #2563EB !important;
+    background-color: rgba(37, 99, 235, 0.25) !important;
     transition: background 0.15s ease;
 }
 
+/* Active sidebar item — left accent bar */
 .fi-sidebar-item.fi-active .fi-sidebar-item-button {
-    background-color: #2563EB !important;
+    background-color: rgba(37, 99, 235, 0.32) !important;
+    box-shadow: inset 3px 0 0 #3B82F6 !important;
+    border-radius: 8px !important;
+}
+
+/* Brand name in sidebar header */
+.fi-sidebar-header .fi-logo-text,
+.fi-sidebar-header span {
+    color: #fff !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SIDEBAR — Dark
    ═══════════════════════════════════════════════════════════════════════════ */
 .dark .fi-sidebar-nav {
-    background: #0C1A2E;
+    background: linear-gradient(180deg, #0a1828 0%, #071220 100%);
+    border-right-color: rgba(255,255,255,0.03);
 }
 
 .dark .fi-sidebar-item .fi-sidebar-item-button:hover {
-    background-color: #1D4ED8 !important;
+    background-color: rgba(59, 130, 246, 0.2) !important;
 }
 
 .dark .fi-sidebar-item.fi-active .fi-sidebar-item-button {
-    background-color: #1D4ED8 !important;
+    background-color: rgba(59, 130, 246, 0.22) !important;
+    box-shadow: inset 3px 0 0 #3B82F6 !important;
 }
 
+.dark .fi-fo-repeater-item .fi-icon-btn-icon {
+    color: rgb(156, 163, 175) !important;
+}
+
+.dark .fi-fo-repeater-item .fi-icon-btn:hover .fi-icon-btn-icon {
+    color: rgb(252, 165, 165) !important;
+}
+
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   2. CARD ELEVATION — Light & Dark
+   TOPBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-topbar-nav {
+    border-bottom: 1px solid rgba(var(--gray-200), 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.dark .fi-topbar-nav {
+    background: rgba(10, 16, 30, 0.9) !important;
+    border-bottom-color: rgba(255,255,255,0.05);
+}
+
+.dark .fi-topbar {
+    background: rgba(10, 16, 30, 0.9) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD ELEVATION
    ═══════════════════════════════════════════════════════════════════════════ */
 .fi-section {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border-radius: 12px;
+    transition: box-shadow 0.2s ease;
+}
+
+.fi-section:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .dark .fi-section {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
 }
 
-/* Widget/stats cards */
+.dark .fi-section:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* Stats cards */
 .fi-wi-stats-overview-stat {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border-radius: 12px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .dark .fi-wi-stats-overview-stat {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.45);
 }
 
+.dark .fi-wi-stats-overview-stat:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   3. TABLE ROW HOVER — Brand blue tint
+   TABLE ROW HOVER
    ═══════════════════════════════════════════════════════════════════════════ */
 .fi-ta-row:hover td {
     background-color: rgba(37, 99, 235, 0.04) !important;
@@ -108,14 +369,15 @@
     background-color: rgba(59, 130, 246, 0.08) !important;
 }
 
-/* 8. Tabular numbers in table cells */
+/* Tabular numbers */
 .fi-ta-cell,
 .custom-table td {
     font-variant-numeric: tabular-nums;
 }
 
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   5. INPUT FOCUS RING — Light & Dark
+   INPUT FOCUS RING
    ═══════════════════════════════════════════════════════════════════════════ */
 .fi-input:focus,
 .fi-select-input:focus,
@@ -131,8 +393,9 @@
     outline-color: #60A5FA !important;
 }
 
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   7. PAGE HEADER SEPARATOR — Light & Dark
+   PAGE HEADER SEPARATOR
    ═══════════════════════════════════════════════════════════════════════════ */
 .fi-header {
     border-bottom: 1px solid #E4ECFC;
@@ -141,11 +404,12 @@
 }
 
 .dark .fi-header {
-    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-bottom-color: rgba(255,255,255,0.06);
 }
 
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   INPUT SUFFIX ICON — Light & Dark
+   INPUT SUFFIX ICON
    ═══════════════════════════════════════════════════════════════════════════ */
 .fi-input-wrp-suffix .fi-icon-btn-icon {
     color: #2563EB !important;
@@ -155,8 +419,26 @@
     color: #60A5FA !important;
 }
 
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   REPEATER: Days — Light
+   BUTTONS — Global polish
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-btn-primary {
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease !important;
+}
+
+.fi-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(37,99,235,0.35) !important;
+}
+
+.fi-btn-primary:active {
+    transform: translateY(0) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REPEATER: Days
    ═══════════════════════════════════════════════════════════════════════════ */
 .repeater-days .fi-fo-repeater-item-header {
     background: #2563EB;
@@ -184,7 +466,6 @@
     background: #1D4ED8 !important;
 }
 
-/* REPEATER: Days — Dark */
 .dark .repeater-days .fi-fo-repeater-item-header {
     background: #1D4ED8;
 }
@@ -201,8 +482,9 @@
     background: #1E40AF !important;
 }
 
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   REPEATER: Expenses — Light
+   REPEATER: Expenses
    ═══════════════════════════════════════════════════════════════════════════ */
 .repeater-expenses .fi-fo-repeater-item-header {
     background: #059669;
@@ -222,7 +504,6 @@
     background: #047857 !important;
 }
 
-/* REPEATER: Expenses — Dark */
 .dark .repeater-expenses .fi-fo-repeater-item-header {
     background: #047857;
 }
@@ -239,8 +520,9 @@
     background: #065F46 !important;
 }
 
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   REPEATER: Guides — Light
+   REPEATER: Guides
    ═══════════════════════════════════════════════════════════════════════════ */
 .repeater-guides .fi-fo-repeater-item-header h4 {
     color: #fff !important;
@@ -264,7 +546,6 @@
     background: #1D4ED8 !important;
 }
 
-/* REPEATER: Guides — Dark */
 .dark .repeater-guides .fi-fo-repeater-item-header {
     background: #1D4ED8 !important;
 }
@@ -281,8 +562,9 @@
     background: #1E40AF !important;
 }
 
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   CUSTOM TABLE — Light & Dark
+   CUSTOM TABLE
    ═══════════════════════════════════════════════════════════════════════════ */
 .custom-table-wrapper {
     width: 100%;
@@ -365,20 +647,14 @@
     margin-bottom: 5px;
 }
 
+
 /* ═══════════════════════════════════════════════════════════════════════════
    STATUS BADGE COLORS
    ═══════════════════════════════════════════════════════════════════════════ */
-.color-green {
-    background: #34d399 !important;
-}
+.color-green       { background: #34d399 !important; }
+.color-red         { background: #f87171 !important; }
+.color-light-orange { background: #c0c0c0 !important; }
 
-.color-red {
-    background: #f87171 !important;
-}
-
-.color-light-orange {
-    background: #c0c0c0 !important;
-}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TABLE STICKY HEADER
@@ -403,6 +679,7 @@
         z-index: 40 !important;
     }
 }
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LAYOUT
