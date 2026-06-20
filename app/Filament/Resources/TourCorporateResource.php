@@ -113,6 +113,8 @@ class TourCorporateResource extends Resource
                         ->minDate(fn($get) => $get('start_date') ? Carbon::parse($get('start_date'))->addDay()->format('d.m.Y H:i') : null)
                         ->reactive(),
                     Components\TextInput::make('requested_by'),
+                    Components\TextInput::make('fit')
+                        ->label('Табличка'),
                     Components\Textarea::make('comment')
                 ]),
             ]),
@@ -392,8 +394,6 @@ class TourCorporateResource extends Resource
                                                 }
                                             }
                                         }),
-                                    Components\TextInput::make('nameplate')
-                                        ->label('Табличка'),
                                 ]),
 
                                 Components\Grid::make(3)->schema([
