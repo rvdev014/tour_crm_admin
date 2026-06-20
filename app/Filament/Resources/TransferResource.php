@@ -372,15 +372,24 @@ END,
                 Tables\Columns\TextColumn::make('tour_id')
                     ->label('Tour')
                     ->getStateUsing(function (Transfer $record) {
-                        $tour = $record->tourDayExpense?->tour ?? $record->tourDayExpense?->tourDay?->tour ?? null;
-                        return $tour ? $tour->group_number : '-';
+                        $tour = $record->tourDayExpense?->tourGroup?->tour
+                            ?? $record->tourDayExpense?->tour
+                            ?? $record->tourDayExpense?->tourDay?->tour
+                            ?? null;
+                        return $tour?->group_number ?? $record->group_number ?? '-';
                     })
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('tourDayExpense.tour', function (Builder $query) use ($search) {
-                            $query->where('group_number', 'like', "%{$search}%");
-                        })->orWhereHas('tourDayExpense.tourDay.tour', function (Builder $query) use ($search) {
-                            $query->where('group_number', 'like', "%{$search}%");
-                        });
+                        return $query
+                            ->where('group_number', 'like', "%{$search}%")
+                            ->orWhereHas('tourDayExpense.tourGroup.tour', function (Builder $query) use ($search) {
+                                $query->where('group_number', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('tourDayExpense.tour', function (Builder $query) use ($search) {
+                                $query->where('group_number', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('tourDayExpense.tourDay.tour', function (Builder $query) use ($search) {
+                                $query->where('group_number', 'like', "%{$search}%");
+                            });
                     }),
 
                 Tables\Columns\TextColumn::make('company.name')
