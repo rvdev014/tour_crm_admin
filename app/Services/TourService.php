@@ -667,7 +667,7 @@ HTML;
         }
         $result .= "🗺 <b>Маршрут:</b> {$route}\n";
         $result .= "🚗 <b>Класс:</b> {$transportType}\n";
-        $result .= "👥 <b>Pax:</b> {$pax}";
+        $result .= "👥 <b>Кол-во Пассажиров:</b> {$pax}";
         if ($nameplate && $nameplate !== '-') {
             $result .= "  |  🪧 <b>Табличка:</b> {$nameplate}";
         }
@@ -681,7 +681,7 @@ HTML;
         }
 
         if ($withPhone) {
-            $result .= "\n📞 Office: +998333377752";
+            $result .= "\n📞 Тел. офиса: +998333377752";
         }
 
         if ($transfer) {
