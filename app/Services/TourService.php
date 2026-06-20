@@ -437,11 +437,11 @@ class TourService
 $title
 $message
 
-Office phone: +998333377752
+📞 Тел. офиса: +998333377752
 HTML;
 
             if ($isUpdated) {
-                $message = "<b>***Updated***</b>\n\n" . $message;
+                $message = "♻️ <b>Обновлено</b>\n\n" . $message;
             }
 
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
@@ -597,11 +597,11 @@ HTML;
             ]);
 
             if ($isReminder) {
-                $message = "<b>REMINDER</b>\n" . $message;
+                $message = "⏰ <b>НАПОМИНАНИЕ</b>\n" . $message;
             }
 
             if ($isUpdated) {
-                $message = "<b>***Updated***</b>\n" . $message;
+                $message = "♻️ <b>Обновлено</b>\n" . $message;
             }
 
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);

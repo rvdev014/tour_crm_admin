@@ -30,9 +30,7 @@ class TransferObserver
      */
     public function updated(Transfer $transfer): void
     {
-//        if ($transfer->status == ExpenseStatus::Confirmed) {
-//            TourService::sendTelegramTransfer($transfer->toArray());
-//        }
+        TourService::sendTelegramTransfer($transfer->toArray(), isUpdated: true);
     }
 
     /**

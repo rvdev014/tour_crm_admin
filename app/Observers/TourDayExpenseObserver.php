@@ -36,7 +36,8 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             }
             $transfer = Transfer::where('tour_day_expense_id', $tourDayExpense->id)->first();
             if ($transfer) {
-                $transfer->update($attrs);
+                // withoutObservers prevents double Telegram send — afterSave() handles it for Tour saves
+                Transfer::withoutObservers(fn() => $transfer->update($attrs));
             } else {
                 Transfer::create($attrs);
             }
