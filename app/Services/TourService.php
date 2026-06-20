@@ -658,28 +658,30 @@ HTML;
                 $transportType = (string)$transportTypeRaw;
             }
         }
-        $divider = '―――――――――――――――――';
+        $divider = '➖➖➖➖➖➖➖➖➖➖➖➖';
 
-        $result = "<b>Transfer #{$data['transfer_number']}</b>\n{$divider}\n";
-        $result .= "<b>Date &amp; time:</b> {$date}\n";
-        $result .= "<b>Route:</b> {$route}\n";
-        $result .= "<b>Destination:</b> " . ($toCity ?? '-') . "\n";
-        $result .= "<b>Transport:</b> {$transportType}\n";
-        $result .= "<b>Pax:</b> {$pax}";
+        $result = "🚌 <b>Transfer #{$data['transfer_number']}</b>\n{$divider}\n";
+        $result .= "📅 <b>Дата и время подачи:</b> {$date}\n";
+        if ($toCity) {
+            $result .= "🌆 <b>Город:</b> {$toCity}\n";
+        }
+        $result .= "🗺 <b>Маршрут:</b> {$route}\n";
+        $result .= "🚗 <b>Класс:</b> {$transportType}\n";
+        $result .= "👥 <b>Pax:</b> {$pax}";
         if ($nameplate && $nameplate !== '-') {
-            $result .= "  |  <b>Tablet:</b> {$nameplate}";
+            $result .= "  |  🪧 <b>Табличка:</b> {$nameplate}";
         }
         $result .= "\n{$divider}\n";
-        $result .= "<b>Driver(s):</b> {$drivers}\n";
+        $result .= "👨‍✈️ <b>Водитель:</b> {$drivers}\n";
         if ($mark && $mark !== '-') {
-            $result .= "<b>Car:</b> {$mark}\n";
+            $result .= "🚘 <b>Марка:</b> {$mark}\n";
         }
         if ($comment) {
-            $result .= "<b>Comment:</b> {$comment}\n";
+            $result .= "💬 <b>Примечание:</b> {$comment}\n";
         }
 
         if ($withPhone) {
-            $result .= "\nOffice phone: +998333377752";
+            $result .= "\n📞 Office: +998333377752";
         }
 
         if ($transfer) {
