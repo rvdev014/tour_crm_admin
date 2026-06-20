@@ -534,6 +534,7 @@ HTML;
                     'driver_id'       => $driverId,
                     'pax'             => $totalPax,
                     'driver_ids'      => $driverIds,
+                    'driver_name'     => $transferRecord?->driver_name ?? null,
                     'to_city'         => $expense['to_city_id'] ?? null,
                     'route'           => $expense['transport_route'] ?? null,
                     'date'            => $date,
@@ -544,7 +545,7 @@ HTML;
                             : null),
                     'price'           => $expense['price'] ?? null,
                     'mark'            => $expense['mark'] ?? null,
-                    'nameplate'       => $expense['nameplate'] ?? null,
+                    'nameplate'       => $expense['nameplate'] ?? $tourData['fit'] ?? null,
                     'comment'         => $expense['comment'] ?? null,
                 ];
             }
@@ -583,6 +584,7 @@ HTML;
                 'driver_id' => $driverId,
                 'pax' => $data['pax'],
                 'driver_ids' => $driverIds,
+                'driver_name' => $data['driver_name'] ?? null,
                 'to_city' => $data['to_city_id'],
                 'transport_place' => $data['place_of_submission'],
                 'route' => $data['route'],
@@ -612,11 +614,14 @@ HTML;
         $transfer = Transfer::query()->find($data['transfer_id']);
         $oldValues = $transfer?->old_values ?? [];
 
-        $drivers = Driver::query()
-            ->whereIn('id', $data['driver_ids'] ?? [])
-            ->get()
-            ->map(fn(Driver $driver) => $driver->name)
-            ->implode(', ');
+        $drivers = $data['driver_name'] ?? null;
+        if (!$drivers) {
+            $drivers = Driver::query()
+                ->whereIn('id', $data['driver_ids'] ?? [])
+                ->get()
+                ->map(fn(Driver $driver) => $driver->name)
+                ->implode(', ');
+        }
 
         $pax       = $data['pax'] ?? 0;
         $route     = $data['route'] ?? '-';
@@ -628,11 +633,14 @@ HTML;
         $oldDate   = ($oldValues['date_time'] ?? null) ? Carbon::parse($oldValues['date_time'])->format('d-M H:i') : '-';
 
         if ($transfer && !empty($oldValues)) {
-            $oldDrivers = Driver::query()
-                ->whereIn('id', $oldValues['driver_ids'] ?? [])
-                ->get()
-                ->map(fn(Driver $driver) => $driver->name)
-                ->implode(', ');
+            $oldDrivers = $oldValues['driver_name'] ?? null;
+            if (!$oldDrivers) {
+                $oldDrivers = Driver::query()
+                    ->whereIn('id', $oldValues['driver_ids'] ?? [])
+                    ->get()
+                    ->map(fn(Driver $driver) => $driver->name)
+                    ->implode(', ');
+            }
 
             $drivers   = self::getChangedField($oldDrivers, $drivers);
             $date      = self::getChangedField($oldDate, $date);
