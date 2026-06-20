@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Models\User;
 use App\Enums\ExpenseStatus;
-use App\Enums\TransportType;
 use App\Filament\Resources\TransferResource\Pages;
 use App\Filament\Resources\TransferResource\RelationManagers;
 use App\Models\Company;
@@ -150,9 +149,42 @@ class TransferResource extends Resource
                         })
                         ->label('Status'),
 
-                    Forms\Components\TextInput::make('transport_type')
-                        ->label('Transport type')
-                        ->readOnly(fn($record) => !empty($record?->tour_day_expense_id)),
+                    Forms\Components\Select::make('transport_class_id')
+                        ->label('Transport class')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(fn() => TourService::getTransportClasses())
+                        ->disabled(fn($record) => !empty($record?->tour_day_expense_id))
+                        ->reactive()
+                        ->afterStateUpdated(function ($state, $set) {
+                            $set('route_id', null);
+                            $set('sell_price', null);
+                        }),
+
+                    Forms\Components\Select::make('route_id')
+                        ->label('Route')
+                        ->native(false)
+                        ->searchable()
+                        ->preload()
+                        ->options(fn($get) => $get('transport_class_id')
+                            ? TourService::getRoutesForTransportClass((int)$get('transport_class_id'))
+                            : []
+                        )
+                        ->disabled(fn($record) => !empty($record?->tour_day_expense_id))
+                        ->reactive()
+                        ->afterStateUpdated(function ($state, $get, $set) {
+                            if ($state && $get('transport_class_id')) {
+                                $price = TourService::getRoutePriceForTransportClass(
+                                    (int)$state,
+                                    (int)$get('transport_class_id')
+                                );
+                                if ($price !== null) {
+                                    $set('sell_price', $price);
+                                    $set('sell_price_currency', 'USD');
+                                }
+                            }
+                        }),
                 ]),
 
                 Forms\Components\Grid::make(4)->schema([
@@ -161,10 +193,6 @@ class TransferResource extends Resource
                         ->displayFormat('d.m.Y H:i')
 //                        ->native(false)
                         ->seconds(false),
-
-                    Forms\Components\TextInput::make('transport_route')
-                        ->label('Route')
-                        ->readOnly(fn($record) => !empty($record?->tour_day_expense_id)),
 
                     Forms\Components\TextInput::make('route')
                         ->label('Destination'),
@@ -406,10 +434,6 @@ HTML;
                     ->html()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('transport_route')
-                    ->label('Route')
-                    ->limit(50),
-
                 Tables\Columns\TextColumn::make('route')
                     ->label('Destination')
                     ->limit(50),
@@ -445,24 +469,7 @@ HTML;
 
                 Tables\Columns\TextColumn::make('createdBy.name'),
 
-                Tables\Columns\TextColumn::make('transport_type')
-                    ->label('Transport type')
-                    ->getStateUsing(function (Transfer $record) {
-                        $raw = $record->getRawOriginal('transport_type');
-                        if (!$raw) return '-';
-                        if (is_numeric($raw)) {
-                            try { return TransportType::from((int)$raw)->getLabel(); } catch (\ValueError) {}
-                        }
-                        return $raw;
-                    })
-                    ->sortable(),
-
                 //                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
-
-                Tables\Columns\TextColumn::make('group_number')
-                    ->label('Tour')
-                    ->searchable()
-                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('sell_price')
                     ->money()
