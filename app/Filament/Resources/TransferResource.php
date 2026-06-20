@@ -150,17 +150,9 @@ class TransferResource extends Resource
                         })
                         ->label('Status'),
 
-                    Forms\Components\Select::make('transport_type')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
+                    Forms\Components\TextInput::make('transport_type')
                         ->label('Transport type')
-                        ->options(TransportType::class)
-                        ->reactive()
-                        ->disabled(fn($record) => !empty($record?->tour_day_expense_id)),
-
-                    Forms\Components\TextInput::make('place_of_submission')
-                        ->label('Pickup Location'),
+                        ->readOnly(fn($record) => !empty($record?->tour_day_expense_id)),
                 ]),
 
                 Forms\Components\Grid::make(4)->schema([
@@ -170,7 +162,13 @@ class TransferResource extends Resource
 //                        ->native(false)
                         ->seconds(false),
 
-                    Forms\Components\TextInput::make('route'),
+                    Forms\Components\TextInput::make('transport_route')
+                        ->label('Route')
+                        ->readOnly(fn($record) => !empty($record?->tour_day_expense_id)),
+
+                    Forms\Components\TextInput::make('route')
+                        ->label('Destination'),
+
                     Forms\Components\TextInput::make('mark')
                         ->label('Marka'),
                     Forms\Components\TextInput::make('nameplate')
@@ -408,11 +406,12 @@ HTML;
                     ->html()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('place_of_submission')
-                    ->label('Pickup location'),
+                Tables\Columns\TextColumn::make('transport_route')
+                    ->label('Route')
+                    ->limit(50),
 
                 Tables\Columns\TextColumn::make('route')
-                    ->label('Route')
+                    ->label('Destination')
                     ->limit(50),
 
                 Tables\Columns\TextColumn::make('pax')
@@ -446,7 +445,17 @@ HTML;
 
                 Tables\Columns\TextColumn::make('createdBy.name'),
 
-                Tables\Columns\TextColumn::make('transport_type')->sortable(),
+                Tables\Columns\TextColumn::make('transport_type')
+                    ->label('Transport type')
+                    ->getStateUsing(function (Transfer $record) {
+                        $raw = $record->getRawOriginal('transport_type');
+                        if (!$raw) return '-';
+                        if (is_numeric($raw)) {
+                            try { return TransportType::from((int)$raw)->getLabel(); } catch (\ValueError) {}
+                        }
+                        return $raw;
+                    })
+                    ->sortable(),
 
                 //                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
 

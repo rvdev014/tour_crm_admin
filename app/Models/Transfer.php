@@ -43,6 +43,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property string $driver_phone
  * @property string $place_of_submission
  * @property string $route
+ * @property string $transport_route
  * @property string $passenger
  * @property numeric $sell_price
  * @property numeric $sell_price_result
@@ -74,7 +75,7 @@ class Transfer extends Model
 
     protected $casts = [
         'status' => ExpenseStatus::class,
-        'transport_type' => TransportType::class,
+        // transport_type stored as plain string — TPS uses enum int value, Corporate uses TransportClass name
         'transport_comfort_level' => TransportComfortLevel::class,
         'date_time' => 'datetime',
         'user_notified_at' => 'datetime',

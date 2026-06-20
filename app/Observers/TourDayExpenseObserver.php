@@ -103,7 +103,11 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             'comment' => $tourDayExpense->comment,
             'company_id' => $tour->company_id,
             'group_number' => $tour->group_number,
-            'transport_type' => $tourDayExpense->transport_type ?? $tour->transport_type,
+            'transport_type' => $tourDayExpense->transport_type
+                ?? $tour->transport_type
+                ?? ($tourDayExpense->transport_class_id
+                    ? \App\Models\TransportClass::find($tourDayExpense->transport_class_id)?->name
+                    : null),
             'transport_comfort_level' => $tour->transport_comfort_level,
             'price' => $tourDayExpense->price,
             'sell_price' => $tourDayExpense->price,
@@ -115,6 +119,9 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             'driver_ids' => $tourDayExpense->transport_driver_ids,
             'place_of_submission' => $tourDayExpense->transport_place,
             'route' => $tourDayExpense->transport_route,
+            'transport_route' => $tourDayExpense->route_id
+                ? \App\Models\Route::find($tourDayExpense->route_id)?->display_name
+                : null,
             'date_time' => $dateTime,
         ];
     }
