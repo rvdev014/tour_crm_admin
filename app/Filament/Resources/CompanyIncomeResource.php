@@ -8,9 +8,11 @@ use App\Enums\PaymentStatus;
 use App\Enums\TourType;
 use App\Filament\Resources\CompanyIncomeResource\Pages;
 use App\Filament\Resources\CompanyIncomeResource\RelationManagers;
+use App\Enums\ExpenseType;
 use App\Models\Company;
 use App\Models\Tour;
 use App\Models\TourDayExpense;
+use App\Models\Transfer;
 use App\Services\TourService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -150,17 +152,36 @@ class CompanyIncomeResource extends Resource
                         return $record->getTotalPax();
                     }),
 
-                Tables\Columns\TextColumn::make('price')
-                    ->formatStateUsing(function (Tour $record) {
+                Tables\Columns\TextColumn::make('sell_price')
+                    ->label('Sell price')
+                    ->getStateUsing(function (Tour $record) {
                         if ($record->isCorporate()) {
-                            $price = $record->expenses_total;
+                            // Transport: use Transfer.sell_price_result (route price charged to client)
+                            $transportExpenseIds = TourDayExpense::whereIn(
+                                'tour_group_id',
+                                $record->groups()->pluck('id')
+                            )
+                                ->where('type', ExpenseType::Transport->value)
+                                ->pluck('id');
+
+                            $transportSellTotal = Transfer::whereIn('tour_day_expense_id', $transportExpenseIds)
+                                ->get()
+                                ->sum(fn($t) => $t->sell_price_result ?? $t->sell_price ?? 0);
+
+                            // Non-transport: use TourDayExpense.price_result as before
+                            $otherTotal = TourDayExpense::whereIn(
+                                'tour_group_id',
+                                $record->groups()->pluck('id')
+                            )
+                                ->where('type', '!=', ExpenseType::Transport->value)
+                                ->sum('price_result');
+
+                            $price = $transportSellTotal + $otherTotal;
                         } else {
                             $price = $record->total_price;
                         }
                         return TourService::formatMoney($price) . ' ' . CurrencyEnum::UZS->getSymbol();
-                    })
-                    ->label('Price')
-                    ->searchable(),
+                    }),
 
                 Tables\Columns\SelectColumn::make('payment_status')
                     ->options(PaymentStatus::class),

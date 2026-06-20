@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use App\Enums\CurrencyEnum;
 use App\Enums\PaymentStatus;
 use App\Enums\InvoiceStatus;
+use App\Models\Transfer;
 use App\Services\TourService;
 use App\Models\TourDayExpense;
 use Filament\Resources\Resource;
@@ -315,13 +316,17 @@ class CompanyExpenseResource extends Resource
                         };
                     }),
                 
-                Tables\Columns\TextColumn::make('price')
-                    ->formatStateUsing(function(TourDayExpense $record) {
+                Tables\Columns\TextColumn::make('buy_price')
+                    ->label('Buy price')
+                    ->getStateUsing(function (TourDayExpense $record) {
+                        if ($record->type === ExpenseType::Transport) {
+                            $transfer = Transfer::where('tour_day_expense_id', $record->id)->first();
+                            $price = $transfer?->buy_price_result ?? $transfer?->buy_price;
+                            return TourService::formatMoney($price) . ' ' . CurrencyEnum::UZS->getSymbol();
+                        }
                         return TourService::formatMoney($record->price_result) . ' ' . CurrencyEnum::UZS->getSymbol();
-                    })
-                    ->label('Price')
-                    ->searchable(),
-                
+                    }),
+
                 Tables\Columns\SelectColumn::make('payment_status')
                     ->options(PaymentStatus::class),
             ])
