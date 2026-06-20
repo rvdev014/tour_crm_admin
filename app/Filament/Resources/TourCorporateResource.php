@@ -414,16 +414,9 @@ class TourCorporateResource extends Resource
                                         ->label('Табличка'),
                                 ]),
 
-                                Components\Grid::make(4)->schema([
+                                Components\Grid::make(3)->schema([
                                     Components\TextInput::make('transport_route')
                                         ->label('Destination'),
-                                    Components\Select::make('to_city_id')
-                                        ->native(false)
-                                        ->searchable()
-                                        ->preload()
-                                        ->label('City to')
-                                        ->options(TourService::getCities())
-                                        ->reactive(),
 
                                     Components\Select::make('status')
                                         ->native(false)
