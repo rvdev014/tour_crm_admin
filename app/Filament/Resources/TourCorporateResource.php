@@ -388,17 +388,14 @@ class TourCorporateResource extends Resource
                                                     $set('price', $price);
                                                     $set('price_currency', 'USD');
                                                 }
-                                                $route = \App\Models\Route::with('waypoints.city')->find($state);
-                                                if ($route) {
-                                                    $set('transport_route', $route->display_name);
-                                                }
                                             }
                                         }),
                                 ]),
 
                                 Components\Grid::make(3)->schema([
                                     Components\TextInput::make('transport_route')
-                                        ->label('Destination'),
+                                        ->label('Destination')
+                                        ->required(),
 
                                     Components\Select::make('status')
                                         ->native(false)
