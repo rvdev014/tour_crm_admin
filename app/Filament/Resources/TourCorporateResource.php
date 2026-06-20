@@ -351,21 +351,10 @@ class TourCorporateResource extends Resource
                             Components\Fieldset::make('Transport info')->schema([
 
                                 Components\Grid::make(4)->schema([
-                                    Components\Hidden::make('transport_time'),
                                     Components\DateTimePicker::make('date')
                                         ->label('Date & Time')
                                         ->displayFormat('d.m.Y H:i')
-                                        ->seconds(false)
-                                        ->formatStateUsing(function($state, $record) {
-                                            if ($state && $record?->transport_time) {
-                                                return Carbon::parse($state)->setTimeFromTimeString($record->transport_time);
-                                            }
-                                            return $state;
-                                        })
-                                        ->afterStateUpdated(function($state, $set) {
-                                            $set('transport_time', $state ? Carbon::parse($state)->format('H:i') : null);
-                                        })
-                                        ->reactive(),
+                                        ->seconds(false),
                                     Components\Select::make('transport_class_id')
                                         ->label('Transport class')
                                         ->native(false)

@@ -80,13 +80,18 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             return null;
         }
 
-        $expenseDate = $tourDayExpense->tourDay?->date ?? $tourDayExpense->date;
-
-        $dateTime = null;
-        if ($expenseDate) {
-            $dateTime = Carbon::parse(
-                $expenseDate->format('Y-m-d') . ' ' . ($tourDayExpense->transport_time ?? '00:00:00')
-            );
+        // Corporate: date column is now timestamp (date+time stored together)
+        // TPS: date comes from tourDay (date-only), time from transport_time
+        if ($tourDayExpense->tourGroup) {
+            $dateTime = $tourDayExpense->date;
+        } else {
+            $expenseDate = $tourDayExpense->tourDay?->date;
+            $dateTime = null;
+            if ($expenseDate) {
+                $dateTime = Carbon::parse(
+                    $expenseDate->format('Y-m-d') . ' ' . ($tourDayExpense->transport_time ?? '00:00:00')
+                );
+            }
         }
 
         return [

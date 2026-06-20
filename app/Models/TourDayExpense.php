@@ -133,7 +133,7 @@ class TourDayExpense extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'date' => 'date',
+        'date' => 'datetime',
         'arrival_time' => 'datetime',
         'type' => ExpenseType::class,
         'payment_status' => PaymentStatus::class,
