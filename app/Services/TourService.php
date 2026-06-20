@@ -537,7 +537,11 @@ HTML;
                     'to_city'         => $expense['to_city_id'] ?? null,
                     'route'           => $expense['transport_route'] ?? null,
                     'date'            => $date,
-                    'transport_type'  => $expense['transport_type'] ?? $tourData['transport_type'] ?? null,
+                    'transport_type'  => $expense['transport_type']
+                        ?? $tourData['transport_type']
+                        ?? ($expense['transport_class_id']
+                            ? \App\Models\TransportClass::find($expense['transport_class_id'])?->name
+                            : null),
                     'price'           => $expense['price'] ?? null,
                     'mark'            => $expense['mark'] ?? null,
                     'nameplate'       => $expense['nameplate'] ?? null,
@@ -640,7 +644,20 @@ HTML;
             $comment   = self::getChangedField($oldValues['comment'] ?? null, $comment);
         }
 
-        $transportType = $data['transport_type'] ? self::getEnum(TransportType::class, $data['transport_type']) : '-';
+        $transportTypeRaw = $data['transport_type'] ?? null;
+        if (!$transportTypeRaw) {
+            $transportType = '-';
+        } elseif (is_string($transportTypeRaw) && !is_numeric($transportTypeRaw)) {
+            // Corporate: TransportClass name passed as plain string
+            $transportType = $transportTypeRaw;
+        } else {
+            // TPS: TransportType enum int value
+            try {
+                $transportType = self::getEnum(TransportType::class, $transportTypeRaw);
+            } catch (\ValueError $e) {
+                $transportType = (string)$transportTypeRaw;
+            }
+        }
         $divider = '―――――――――――――――――';
 
         $result = "<b>Transfer #{$data['transfer_number']}</b>\n{$divider}\n";

@@ -19,7 +19,6 @@ use Filament\Tables\Table;
 use Illuminate\Support\Arr;
 use App\Enums\ExpenseStatus;
 use App\Enums\PaymentStatus;
-use App\Enums\TransportType;
 use Filament\Tables\Columns;
 use App\Services\TourService;
 use Filament\Forms\Components;
@@ -367,12 +366,6 @@ class TourCorporateResource extends Resource
                                             $set('transport_time', $state ? Carbon::parse($state)->format('H:i') : null);
                                         })
                                         ->reactive(),
-                                    Components\Select::make('transport_type')
-                                        ->label('Transport type')
-                                        ->native(false)
-                                        ->searchable()
-                                        ->preload()
-                                        ->options(TransportType::class),
                                     Components\Select::make('transport_class_id')
                                         ->label('Transport class')
                                         ->native(false)
