@@ -695,7 +695,7 @@ HTML;
         if ($transfer) {
             $snap = $transfer->getOriginal();
             unset($snap['old_values']);
-            Transfer::withoutObservers(fn() => $transfer->update(['old_values' => $snap]));
+            $transfer->fill(['old_values' => $snap])->saveQuietly();
         }
 
         return $result;
