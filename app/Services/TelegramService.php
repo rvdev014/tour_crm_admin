@@ -11,12 +11,16 @@ class TelegramService
     {
         // Send message to Telegram
         try {
-            $resp = Http::post('https://api.telegram.org/bot' . env('TELEGRAM_BOT_TOKEN') . '/sendMessage', array_merge([
-                'chat_id' => $username,
-                'text' => $message,
-            ], $params));
+            Http::timeout(10)->post(
+                'https://api.telegram.org/bot' . env('TELEGRAM_BOT_TOKEN') . '/sendMessage',
+                array_merge(['chat_id' => $username, 'text' => $message], $params)
+            );
         } catch (\Throwable $e) {
-            Log::channel('telegram')->error($e->getMessage());
+            try {
+                Log::error('Telegram send failed: ' . $e->getMessage());
+            } catch (\Throwable) {
+                // log channel unavailable — silently ignore
+            }
         }
     }
 }
