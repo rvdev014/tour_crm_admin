@@ -185,7 +185,8 @@ class WebTourResource extends Resource
                     ->columnSpanFull()
                     ->addActionAlignment('end')
                     ->visible(function($get) {
-                        return $get('type') == WebTourPriceType::Default || $get('type') == null;
+                        $type = $get('type');
+                        return $type === null || $type === WebTourPriceType::Default->value;
                     })
                     ->schema([
                         Forms\Components\Grid::make(3)->schema([
@@ -209,7 +210,7 @@ class WebTourResource extends Resource
                     ->relationship('freePrices')
                     ->columnSpanFull()
                     ->addActionAlignment('end')
-                    ->visible(fn($get) => $get('type') === WebTourPriceType::Free)
+                    ->visible(fn($get) => $get('type') === WebTourPriceType::Free->value)
                     ->schema([
                         Forms\Components\Grid::make(3)->schema([
                             Forms\Components\TextInput::make('pax_from')
