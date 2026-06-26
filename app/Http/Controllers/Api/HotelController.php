@@ -63,35 +63,37 @@ class HotelController extends Controller
             // 1. Получаем константы из сервисов, чтобы передать их в SQL
             $tourSborValue = \App\Services\TourService::getTourSborValue(); // Например: 34000 (сумы) или 3 (доллары)
 
-            // Получаем процент наценки группы 'website'.
-            // Предполагаем, что он фиксированный. Если он зависит от цены, это усложнит SQL.
-            $websiteGroup = \App\Models\Group::where('name', 'website')->first();
-            $groupPercent = $websiteGroup ? $websiteGroup->value : 0; // Например, 10 (процентов)
-            $groupMultiplier = 1 + ($groupPercent / 100); // Например, 1.10
+            // Build a tiered CASE expression from the 'website' group items,
+            // mirroring Group::getPercent() which picks percent by price bracket.
+            $websiteGroup = \App\Models\Group::with('groupItems')->where('name', 'website')->first();
+            $groupItems = $websiteGroup?->groupItems ?? collect();
+            $caseParts = $groupItems->map(fn($item) => sprintf(
+                'WHEN hotel_room_types.price_foreign BETWEEN %s AND %s THEN %s',
+                (float) $item->from_price,
+                (float) $item->to_price,
+                (float) $item->percent
+            ))->all();
+            $groupPercentCase = count($caseParts)
+                ? 'CASE ' . implode(' ', $caseParts) . ' ELSE 0 END'
+                : '0';
 
             $query
                 ->addSelect([
-                    'today_price' => function ($subquery) use ($now, $tourSborValue, $groupMultiplier) {
-                        // Формула из PHP:
-                        // Base = price_foreign
-                        // WithNds = Base * (nds_included ? 1.12 : 1)
-                        // WithSbor = WithNds + (TourSborValue * tour_sbor_percent / 100)
-                        // Final = WithSbor * GroupMultiplier
-
+                    'today_price' => function ($subquery) use ($now, $tourSborValue, $groupPercentCase) {
                         $subquery
-                            ->selectRaw('
+                            ->selectRaw("
                         (
                             (
-                                -- 1. Базовая цена + НДС (12%)
+                                -- 1. Base price + NDS (12%)
                                 CAST(hotel_room_types.price_foreign AS DECIMAL(15,2)) * (CASE WHEN hotels.nds_included = true THEN 1.12 ELSE 1.0 END)
                             )
                             +
                             (
-                                -- 2. Турсбор (Фикс * Процент отеля / 100)
+                                -- 2. Tour sbor (fixed * hotel percent / 100)
                                 ? * COALESCE(hotels.tour_sbor, 0) / 100
                             )
-                        ) * ? as calculated_total
-                    ', [$tourSborValue, $groupMultiplier]) // Передаем переменные в запрос
+                        ) * (1 + ({$groupPercentCase}) / 100.0) as calculated_total
+                    ", [$tourSborValue])
 
                             ->from('hotel_room_types')
                             ->join('hotel_periods', function ($join) {
