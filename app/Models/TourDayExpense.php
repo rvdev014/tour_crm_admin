@@ -58,7 +58,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * // * @property string $guide_phone
  *
  * Transport
- * @property int $transport_type
+ * @property string|null $transport_type
  * @property int $transport_comfort_level
  * @property int $from_city_id
  * @property int $to_city_id

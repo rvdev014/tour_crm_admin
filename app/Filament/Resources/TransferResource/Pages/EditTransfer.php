@@ -55,6 +55,8 @@ class EditTransfer extends EditRecord
             'to_city_id' => $transfer->to_city_id,
             'comment' => $transfer->comment,
             'transport_type' => $transfer->transport_type,
+            'transport_class_id' => $transfer->transport_class_id,
+            'route_id' => $transfer->route_id,
             'price' => $transfer->price,
             'status' => $transfer->status,
             'nameplate' => $transfer->nameplate,
