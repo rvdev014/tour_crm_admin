@@ -469,9 +469,8 @@ class TourCorporateResource extends Resource
 
                                 Components\Grid::make(4)->schema([
                                     Components\TextInput::make('train_service_fee')
-                                        ->label('Service Fee (our income)')
-                                        ->numeric()
-                                        ->prefix('$'),
+                                        ->label('Service Fee')
+                                        ->numeric(),
                                 ]),
 
                                 Components\Textarea::make('comment')
