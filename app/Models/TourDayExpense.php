@@ -97,6 +97,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $departure_number
  * @property PlaneType $plane_type
  * @property float $plane_service_fee
+ * @property float|null $train_service_fee
  *
  * Other
  * @property string $other_name

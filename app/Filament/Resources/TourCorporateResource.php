@@ -466,11 +466,18 @@ class TourCorporateResource extends Resource
                                         ->preload()
                                         ->label('Status'),
                                 ]),
-                                
+
+                                Components\Grid::make(4)->schema([
+                                    Components\TextInput::make('train_service_fee')
+                                        ->label('Service Fee (our income)')
+                                        ->numeric()
+                                        ->prefix('$'),
+                                ]),
+
                                 Components\Textarea::make('comment')
                                     ->label('Comment')
                                     ->columnSpanFull(),
-                            
+
                             ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
                             
                             // Flight
