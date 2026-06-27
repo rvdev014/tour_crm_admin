@@ -149,6 +149,7 @@ class HotelController extends Controller
         $hotel = Hotel::query()
             ->with(['country', 'city', 'facilities', 'attachments', 'roomTypes.roomType'])
             ->whereNot('id', $hotelId)
+            ->whereHas('attachments')
             ->orderByDesc('rate')
             ->limit(10)
             ->get();
