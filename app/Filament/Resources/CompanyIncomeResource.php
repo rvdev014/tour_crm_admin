@@ -137,14 +137,18 @@ class CompanyIncomeResource extends Resource
                     ->getStateUsing(function (Tour $record) {
                         return $record->company->name;
                     })
-                    ->searchable(),
+                    ->searchable(query: fn($query, $search) => $query->whereHas(
+                        'company', fn($q) => $q->whereRaw('LOWER(name::text) LIKE ?', ['%' . mb_strtolower($search) . '%'])
+                    )),
 
                 Tables\Columns\TextColumn::make('inn')
                     ->label('Company Inn')
                     ->getStateUsing(function (Tour $record) {
                         return $record->company->inn;
                     })
-                    ->searchable(),
+                    ->searchable(query: fn($query, $search) => $query->whereHas(
+                        'company', fn($q) => $q->whereRaw('LOWER(inn::text) LIKE ?', ['%' . mb_strtolower($search) . '%'])
+                    )),
 
                 Tables\Columns\TextColumn::make('tour_pax')
                     ->label('Pax')
