@@ -7,7 +7,6 @@ use App\Models\Tour;
 use App\Models\User;
 use Filament\Tables;
 use App\Enums\TourType;
-use App\Enums\RoomPersonType;
 use App\Models\Company;
 use App\Models\Country;
 use App\Enums\GuideType;
@@ -26,7 +25,6 @@ use Illuminate\Support\Carbon;
 use App\Services\ExpenseService;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Section;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -185,13 +183,17 @@ class TourTpsResource extends Resource
                         ->options(GuideType::class)
                         ->reactive()
                         ->required(),
-                    
-                    Components\TextInput::make('guide_name'),
+
+                    // Escort only: name, phone, price are tracked here.
+                    // Local guide: these come from the Guide expense in Day expenses.
+                    Components\TextInput::make('guide_name')
+                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
 
                     PhoneInput::make('guide_phone')
                         ->strictMode()
                         ->onlyCountries(['UZ'])
-                        ->defaultCountry('UZ'),
+                        ->defaultCountry('UZ')
+                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
 
                     Components\TextInput::make('guide_price')
                         ->label(fn($get) => 'Price (' . ($get('guide_price_currency') ?? 'UZS') . ')')
@@ -203,7 +205,8 @@ class TourTpsResource extends Resource
                                     $set('guide_price_currency', $get('guide_price_currency') == 'USD' ? 'UZS' : 'USD');
                                 })
                         )
-                        ->numeric(),
+                        ->numeric()
+                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
                 ])
             ]),
             
@@ -231,30 +234,6 @@ class TourTpsResource extends Resource
                 ])
             ]),
             
-            Components\Fieldset::make('Rooming info')->schema([
-                Components\Tabs::make('rooming_tabs')
-                    ->columnSpanFull()
-                    ->tabs([
-                        Components\Tabs\Tab::make('UZ')
-                            ->schema([
-                                ...TourService::generateRoomingSchema(RoomPersonType::Uzbek, true),
-
-                                Section::make('Other rooming')
-                                    ->schema(TourService::generateRoomingSchema(RoomPersonType::Uzbek))
-                                    ->collapsible()
-                                    ->collapsed(),
-                            ]),
-                        Components\Tabs\Tab::make('Foreign')
-                            ->schema([
-                                ...TourService::generateRoomingSchema(RoomPersonType::Foreign, true),
-
-                                Section::make('Other rooming')
-                                    ->schema(TourService::generateRoomingSchema(RoomPersonType::Foreign))
-                                    ->collapsible()
-                                    ->collapsed(),
-                            ]),
-                    ]),
-            ])
         ])->disabled(function($record) {
             if (!$record) {
                 return false;
