@@ -73,20 +73,6 @@ class WebTourResource extends Resource
                                         ->inline(false),
                                 ]),
 
-                            Forms\Components\Section::make('Dates')
-                                ->icon('heroicon-o-calendar-days')
-                                ->columns(3)
-                                ->schema([
-                                    Forms\Components\DateTimePicker::make('start_date')
-                                        ->label('Start Date')
-                                        ->required(),
-                                    Forms\Components\DateTimePicker::make('end_date')
-                                        ->label('End Date')
-                                        ->required(),
-                                    Forms\Components\DateTimePicker::make('deadline')
-                                        ->label('Booking Deadline'),
-                                ]),
-
                             Forms\Components\Section::make('Categories')
                                 ->icon('heroicon-o-tag')
                                 ->schema([
