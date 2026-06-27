@@ -27,6 +27,8 @@ class HotelController extends Controller
 
         $query = Hotel::query()
             ->where('is_visible', true)
+            ->whereNotNull('photo')
+            ->where('photo', '!=', '')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q
@@ -179,6 +181,8 @@ class HotelController extends Controller
         $hotels = Hotel::query()
             ->with(['country', 'city', 'facilities', 'attachments', 'roomTypes.roomType'])
             ->whereHas('recommendedHotels')
+            ->whereNotNull('photo')
+            ->where('photo', '!=', '')
             ->get();
 
         return response()->json(['data' => HotelResource::collection($hotels)]);
