@@ -162,6 +162,12 @@ class WebTourRequestResource extends Resource
                     ->sortable()
                     ->placeholder('No tour selected'),
                     
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
+                    ->getStateUsing(fn(WebTourRequest $record) => $record->email ?? $record->user?->email)
+                    ->searchable()
+                    ->copyable(),
+
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Phone')
                     ->searchable(),

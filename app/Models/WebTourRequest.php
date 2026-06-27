@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $web_tour_id
  * @property string $start_date
  * @property string|null $phone
+ * @property string|null $email
  * @property string|null $citizenship
  * @property string|null $comment
  * @property int|null $travellers_count
@@ -37,6 +38,7 @@ class WebTourRequest extends Model
         'user_id',
         'web_tour_id',
         'phone',
+        'email',
         'citizenship',
         'comment',
         'travellers_count',

@@ -210,6 +210,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'web_tour_id' => 'nullable|exists:web_tours,id',
             'phone' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
             'citizenship' => 'nullable|string|max:255',
             'comment' => 'nullable|string',
             'travellers_count' => 'nullable|integer|min:1',
@@ -220,6 +221,7 @@ class AuthController extends Controller
 
         $validated['user_id'] = $user->id;
         $validated['status'] = WebTourStatus::New;
+        $validated['email'] = $validated['email'] ?? $user->email;
 
         $webTourRequest = WebTourRequest::create($validated);
 

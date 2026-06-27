@@ -23,6 +23,7 @@ class WebTourRequestResource extends JsonResource
             'web_tour_id' => $this->web_tour_id,
             'start_date' => $this->start_date,
             'phone' => $this->phone,
+            'email' => $this->email ?? $this->user?->email,
             'citizenship' => $this->citizenship,
             'comment' => $this->comment,
             'travellers_count' => $this->travellers_count,
