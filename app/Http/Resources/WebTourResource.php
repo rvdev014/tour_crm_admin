@@ -25,6 +25,7 @@ class WebTourResource extends JsonResource
         return [
             'id' => $this->id,
             'type' => $this->type,
+            'price_type' => $this->type,
             'name' => $this->name,
             'description' => $this->description,
             'current_price' => $this->getCurrentPrice(),
@@ -41,6 +42,7 @@ class WebTourResource extends JsonResource
             'packagesNotIncluded' => PackageResource::collection($this->whenLoaded('packagesNotIncluded')),
             'reviews' => ReviewResource::collection($this->whenLoaded('activeReviews')),
             'prices' => WebTourPriceResource::collection($this->whenLoaded('prices')),
+            'free_prices' => WebTourFreePriceResource::collection($this->whenLoaded('freePrices')),
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),
         ];
     }

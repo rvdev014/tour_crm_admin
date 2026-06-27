@@ -119,6 +119,7 @@ class ManualController extends Controller
                 'currentPrice',
                 'activeReviews',
                 'prices',
+                'freePrices',
                 'categories',
             ])
             ->findOrFail($tourId);
