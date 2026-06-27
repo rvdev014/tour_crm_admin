@@ -38,224 +38,260 @@ class HotelResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Email' => $record->email,
+            'Email'   => $record->email,
             'Address' => $record->address,
         ];
     }
 
     public static function form(Form $form): Form
     {
-        return $form->disabled(fn() => auth()->user()->isOperator())
+        return $form
+            ->disabled(fn() => auth()->user()->isOperator())
             ->schema([
-                Forms\Components\Grid::make(4)->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->required()
-                        ->maxLength(255),
+                Forms\Components\Tabs::make('Hotel')
+                    ->tabs([
 
-                    Forms\Components\TextInput::make('email')
-                        ->email()
-                        ->suffixAction(function($record) {
-                            if (!$record?->email) {
-                                return [];
-                            }
-                            return [
-                                Forms\Components\Actions\Action::make('hotel_email')
-                                    ->icon('heroicon-o-paper-airplane')
-                                    ->url("mailto:{$record->email}", true)
-                            ];
-                        }),
+                        // ── Tab 1: Basic Information ─────────────────────
+                        Forms\Components\Tabs\Tab::make('Basic Info')
+                            ->icon('heroicon-o-information-circle')
+                            ->schema([
 
-                    Forms\Components\TextInput::make('inn'),
+                                Forms\Components\Section::make('Hotel Identity')
+                                    ->icon('heroicon-o-building-office')
+                                    ->columns(3)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('name')
+                                            ->label('Hotel Name')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->columnSpan(2),
+                                        Forms\Components\Select::make('rate')
+                                            ->label('Star Rating')
+                                            ->options(function () {
+                                                $options = [];
+                                                foreach (RateEnum::cases() as $rate) {
+                                                    $options[$rate->value] = $rate->getLabel();
+                                                }
+                                                return $options;
+                                            }),
+                                        Forms\Components\TextInput::make('email')
+                                            ->label('Email')
+                                            ->email()
+                                            ->suffixAction(function ($record) {
+                                                if (!$record?->email) return [];
+                                                return [
+                                                    Forms\Components\Actions\Action::make('hotel_email')
+                                                        ->icon('heroicon-o-paper-airplane')
+                                                        ->url("mailto:{$record->email}", true),
+                                                ];
+                                            }),
+                                        Forms\Components\TextInput::make('inn')
+                                            ->label('INN'),
+                                        Forms\Components\Toggle::make('is_visible')
+                                            ->label('Visible on Website')
+                                            ->default(false)
+                                            ->inline(false),
+                                    ]),
 
-                    Forms\Components\TextInput::make('booking_cancellation_days')->numeric(),
-                ]),
-                Forms\Components\Grid::make(4)->schema([
-                    Forms\Components\Select::make('country_id')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->relationship('country', 'name')
-                        ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
-                        ->reactive(),
+                                Forms\Components\Section::make('Location')
+                                    ->icon('heroicon-o-map-pin')
+                                    ->columns(2)
+                                    ->schema([
+                                        Forms\Components\Select::make('country_id')
+                                            ->label('Country')
+                                            ->native(false)
+                                            ->searchable()
+                                            ->preload()
+                                            ->relationship('country', 'name')
+                                            ->afterStateUpdated(fn($set) => $set('city_id', null))
+                                            ->reactive(),
+                                        Forms\Components\Select::make('city_id')
+                                            ->label('City')
+                                            ->native(false)
+                                            ->searchable()
+                                            ->preload()
+                                            ->relationship('city', 'name')
+                                            ->options(fn($get) => TourService::getCities($get('country_id'))),
+                                        Forms\Components\TextInput::make('address')
+                                            ->label('Address')
+                                            ->maxLength(255)
+                                            ->columnSpan(2),
+                                        Forms\Components\TextInput::make('coordinates')
+                                            ->label('Coordinates (Lat, Lng)')
+                                            ->placeholder('41.2995, 69.2401')
+                                            ->helperText('Latitude and longitude separated by a comma')
+                                            ->formatStateUsing(fn($record) => $record?->latitude && $record?->longitude
+                                                ? $record->latitude . ', ' . $record->longitude : '')
+                                            ->dehydrated(false)
+                                            ->columnSpan(2),
+                                    ]),
 
-                    Forms\Components\Select::make('city_id')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->relationship('city', 'name')
-                        ->options(fn($get) => TourService::getCities($get('country_id'))),
+                                Forms\Components\Section::make('Business Details')
+                                    ->icon('heroicon-o-briefcase')
+                                    ->columns(3)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('company_name')
+                                            ->label('Company Name')
+                                            ->maxLength(255),
+                                        Forms\Components\TextInput::make('contract_number')
+                                            ->label('Contract Number')
+                                            ->maxLength(255),
+                                        Forms\Components\DatePicker::make('contract_date')
+                                            ->label('Contract Date')
+                                            ->native(false),
+                                        Forms\Components\TextInput::make('booking_cancellation_days')
+                                            ->label('Cancellation Days')
+                                            ->numeric(),
+                                        Forms\Components\Select::make('tour_sbor')
+                                            ->label('Tour Service Fee')
+                                            ->options([
+                                                5  => '5%',
+                                                10 => '10%',
+                                                15 => '15%',
+                                            ]),
+                                        Forms\Components\Checkbox::make('nds_included')
+                                            ->label('VAT (NDS) Included')
+                                            ->inline(false),
+                                    ]),
 
-                    Forms\Components\TextInput::make('contract_number')->maxLength(255),
-                    Forms\Components\DatePicker::make('contract_date')->native(false),
-                ]),
-                Forms\Components\Grid::make(4)->schema([
-                    Forms\Components\TextInput::make('company_name')->maxLength(255),
-                    Forms\Components\TextInput::make('address')->maxLength(255),
-                    Forms\Components\TextInput::make('coordinates')
-                        ->label('Coordinates (Latitude, Longitude)')
-                        ->placeholder('40.7128, -74.0060')
-                        ->helperText('Enter latitude and longitude separated by comma')
-                        ->formatStateUsing(
-                            fn($record
-                            ) => $record && $record->latitude && $record->longitude ? $record->latitude . ', ' . $record->longitude : ''
-                        )
-                        ->dehydrated(false),
-                    Forms\Components\Repeater::make('phones')
-                        ->relationship('phones')
-                        ->addActionLabel('Add phone')
-                        ->simple(
-                            PhoneInput::make('phone_number')
-                                ->strictMode()
-                                ->onlyCountries(['UZ'])
-                                ->defaultCountry('UZ')
-                                ->suffixAction(function($record) {
-                                    if (!$record?->phone_number) {
-                                        return [];
-                                    }
-                                    return [
-                                        Forms\Components\Actions\Action::make('hotel_phone')
-                                            ->icon('heroicon-o-paper-airplane')
-                                            ->url("https://t.me/{$record->phone}", true)
-                                    ];
-                                })
-                                ->required(),
-                        ),
-
-                    Forms\Components\Checkbox::make('nds_included')
-                        ->inline(false)
-                        ->label('NDS'),
-
-                    Forms\Components\Checkbox::make('is_visible')
-                        ->inline(false)
-                        ->label('Visible?'),
-
-                    Forms\Components\Select::make('tour_sbor')
-                        ->options([
-                            5 => '5%',
-                            10 => '10%',
-                            15 => '15%',
-                        ]),
-
-                    Forms\Components\Select::make('rate')
-                        ->options(function() {
-                            $options = [];
-                            foreach (RateEnum::cases() as $rate) {
-                                $options[$rate->value] = $rate->getLabel();
-                            }
-                            return $options;
-                        }),
-
-                    /*PhoneInput::make('phone')
-                        ->suffixAction(function ($record) {
-                            if (!$record?->phone) {
-                                return [];
-                            }
-                            return [
-                                Forms\Components\Actions\Action::make('hotel_phone')
-                                    ->icon('heroicon-o-paper-airplane')
-                                    ->url("https://t.me/{$record->phone}", true)
-                            ];
-                        }),*/
-                ]),
-
-                //                Forms\Components\Grid::make(4)->schema([
-                //                    Forms\Components\TextInput::make('website_price')
-                //                        ->label('Website price')
-                //                        ->numeric()
-                //                        ->helperText('Price for the website, not for the operator'),
-                //                ]),
-
-                Forms\Components\Grid::make()->schema([
-
-                    Forms\Components\Select::make('facilities')
-                        ->relationship('facilities', 'name_ru')
-                        ->multiple()
-                        ->preload(),
-
-                    Forms\Components\Textarea::make('comment')
-                        ->columnSpan(1)
-                        ->maxLength(255),
-                ]),
-
-                Forms\Components\Grid::make()->schema([
-
-                    Forms\Components\Section::make('Галерея изображений') // 1. Обертка-аккордеон
-                    //                    ->description('Загрузите фотографии (можно скроллить список)')
-                    ->collapsible() // Делаем сворачиваемым
-                    ->collapsed(false) // Открыт по умолчанию (или true, если хотите закрыть)
-                    //                        ->badge(fn($get) => count($get('photos') ?? []) . ' фото') // Показываем счетчик
-                    ->schema([
-
-                        Forms\Components\Group::make() // 2. Обертка-скролл
-                        ->schema([
-                            Forms\Components\FileUpload::make('photos')
-                                ->multiple()
-                                ->formatStateUsing(function($record) {
-                                    if (!$record) {
-                                        return [];
-                                    }
-                                    /** @var Hotel $record */
-                                    $value = $record->attachments->map(fn($attachment) => $attachment->file_path);
-                                    return $value->toArray();
-                                })
-                                ->storeFiles(false)
-                                ->columnSpan(1)
-                                ->image()
-                                ->panelLayout('grid'),
-                        ])
-                            ->extraAttributes([
-                                // Tailwind классы для скролла:
-                                // max-h-[500px] - ограничение высоты (можете менять число)
-                                // overflow-y-auto - вертикальный скролл при переполнении
-                                // p-1 - небольшой отступ, чтобы фокус не обрезался
-//                                'class' => 'max-h-[500px] overflow-y-auto p-1 custom-scrollbar',
-//                                'style' => 'max-height: 500px;!important;', // Фиксированная высота 300px
+                                Forms\Components\Section::make('Contact Phones')
+                                    ->icon('heroicon-o-phone')
+                                    ->schema([
+                                        Forms\Components\Repeater::make('phones')
+                                            ->relationship('phones')
+                                            ->label('')
+                                            ->addActionLabel('+ Add Phone')
+                                            ->addActionAlignment('end')
+                                            ->simple(
+                                                PhoneInput::make('phone_number')
+                                                    ->strictMode()
+                                                    ->onlyCountries(['UZ'])
+                                                    ->defaultCountry('UZ')
+                                                    ->required(),
+                                            ),
+                                    ]),
                             ]),
 
-                    ]),
-                    //
-                    //                    Forms\Components\Group::make()
-                    //                        ->schema([
-                    //
-                    //                        ])
-                    //                        ->extraAttributes([
-                    //                            // max-h-60 (240px) или max-h-96 (384px)
-                    //                            // overflow-y-auto добавляет скролл, если контент не влезает
-                    //                            'class' => 'max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-xl p-2',
-                    //                            'style' => 'height: 300px;!important;', // Фиксированная высота 300px
-                    //                        ])
-                    //                        ->columnSpanFull(),
+                        // ── Tab 2: Media & Description ────────────────────
+                        Forms\Components\Tabs\Tab::make('Media & Description')
+                            ->icon('heroicon-o-photo')
+                            ->schema([
 
-                    Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\RichEditor::make('description_en')
-                            ->label('Description (English)')
-                            ->maxLength(1000),
-                        Forms\Components\RichEditor::make('description_ru')
-                            ->label('Description (Russian)')
-                            ->maxLength(1000),
-                    ]),
-                ]),
+                                Forms\Components\Section::make('Photo Gallery')
+                                    ->description('Upload hotel photos shown on the website. First photo will be used as the cover.')
+                                    ->icon('heroicon-o-rectangle-stack')
+                                    ->schema([
+                                        Forms\Components\FileUpload::make('photos')
+                                            ->label('')
+                                            ->multiple()
+                                            ->image()
+                                            ->reorderable()
+                                            ->panelLayout('grid')
+                                            ->imagePreviewHeight('130')
+                                            ->maxFiles(30)
+                                            ->maxSize(8192)
+                                            ->directory('hotels')
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                            ->formatStateUsing(function ($record) {
+                                                if (!$record) return [];
+                                                /** @var Hotel $record */
+                                                return $record->attachments
+                                                    ->map(fn($a) => $a->file_path)
+                                                    ->toArray();
+                                            })
+                                            ->storeFiles(false),
+                                    ]),
 
-                Forms\Components\Repeater::make('periods')
-                    ->grid(2)
-                    ->extraAttributes(['class' => 'repeater-guides'])
-                    ->relationship('currentYearPeriods')
-                    ->columnSpanFull()
-                    ->addActionAlignment('end')
-                    ->schema([
-                        Forms\Components\Grid::make(3)->schema([
-                            Forms\Components\DatePicker::make('start_date')
-                                ->native(false)
-                                ->required(),
-                            Forms\Components\DatePicker::make('end_date')
-                                ->native(false)
-                                ->minDate(fn($get) => $get('start_date'))
-                                ->required(),
-                            Forms\Components\Select::make('season_type')
-                                ->options(RoomSeasonType::class)
-                                ->required(),
-                        ]),
-                    ]),
+                                Forms\Components\Section::make('Descriptions')
+                                    ->icon('heroicon-o-document-text')
+                                    ->columns(2)
+                                    ->schema([
+                                        Forms\Components\RichEditor::make('description_en')
+                                            ->label('Description (English)')
+                                            ->toolbarButtons([
+                                                'bold', 'italic', 'underline', 'strike',
+                                                'bulletList', 'orderedList', 'link', 'undo', 'redo',
+                                            ]),
+                                        Forms\Components\RichEditor::make('description_ru')
+                                            ->label('Description (Russian)')
+                                            ->toolbarButtons([
+                                                'bold', 'italic', 'underline', 'strike',
+                                                'bulletList', 'orderedList', 'link', 'undo', 'redo',
+                                            ]),
+                                    ]),
+                            ]),
+
+                        // ── Tab 3: Facilities & Notes ─────────────────────
+                        Forms\Components\Tabs\Tab::make('Facilities & Notes')
+                            ->icon('heroicon-o-star')
+                            ->schema([
+
+                                Forms\Components\Section::make('Facilities')
+                                    ->description('Select all amenities and services available at this hotel.')
+                                    ->icon('heroicon-o-check-circle')
+                                    ->schema([
+                                        Forms\Components\Select::make('facilities')
+                                            ->label('')
+                                            ->relationship('facilities', 'name_ru')
+                                            ->multiple()
+                                            ->preload()
+                                            ->searchable(),
+                                    ]),
+
+                                Forms\Components\Section::make('Internal Notes')
+                                    ->icon('heroicon-o-chat-bubble-left-ellipsis')
+                                    ->schema([
+                                        Forms\Components\Textarea::make('comment')
+                                            ->label('Notes / Comments')
+                                            ->rows(4)
+                                            ->maxLength(1000),
+                                    ]),
+                            ]),
+
+                        // ── Tab 4: Seasons & Periods ──────────────────────
+                        Forms\Components\Tabs\Tab::make('Seasons')
+                            ->icon('heroicon-o-calendar-days')
+                            ->schema([
+
+                                Forms\Components\Section::make('Pricing Periods')
+                                    ->description('Define high / low season date ranges for this year. Room prices are set per period in the Rooms tab below.')
+                                    ->icon('heroicon-o-calendar')
+                                    ->schema([
+                                        Forms\Components\Repeater::make('periods')
+                                            ->relationship('currentYearPeriods')
+                                            ->label('')
+                                            ->grid(2)
+                                            ->addActionLabel('+ Add Period')
+                                            ->addActionAlignment('end')
+                                            ->collapsible()
+                                            ->itemLabel(function ($get, $uuid) {
+                                                $item = $get("periods.$uuid") ?? [];
+                                                $from = $item['start_date'] ?? '—';
+                                                $to   = $item['end_date']   ?? '—';
+                                                $type = $item['season_type'] ?? '';
+                                                return "$from → $to" . ($type ? "  ($type)" : '');
+                                            })
+                                            ->schema([
+                                                Forms\Components\Grid::make(3)->schema([
+                                                    Forms\Components\DatePicker::make('start_date')
+                                                        ->label('From')
+                                                        ->native(false)
+                                                        ->required(),
+                                                    Forms\Components\DatePicker::make('end_date')
+                                                        ->label('To')
+                                                        ->native(false)
+                                                        ->minDate(fn($get) => $get('start_date'))
+                                                        ->required(),
+                                                    Forms\Components\Select::make('season_type')
+                                                        ->label('Season Type')
+                                                        ->options(RoomSeasonType::class)
+                                                        ->required(),
+                                                ]),
+                                            ]),
+                                    ]),
+                            ]),
+
+                    ])->columnSpanFull()->persistTabInQueryString(),
             ]);
     }
 
@@ -276,7 +312,7 @@ class HotelResource extends Resource
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
-                                ->options(fn($get) => TourService::getCities()),
+                                ->options(fn() => TourService::getCities()),
                             Forms\Components\Select::make('currency')
                                 ->label('Currency')
                                 ->native(false)
@@ -286,41 +322,35 @@ class HotelResource extends Resource
                                 ->label('Year')
                                 ->default(date('Y'))
                                 ->native(false)
-                                ->options(function() {
-                                    $currentYear = (int)date('Y');
-                                    $startYear = $currentYear - 5;
-                                    $endYear = $currentYear + 3;
-                                    return array_combine(
-                                        $yearsArray = range($startYear, $endYear),
-                                        $yearsArray
-                                    );
+                                ->options(function () {
+                                    $current = (int) date('Y');
+                                    $years = range($current - 5, $current + 3);
+                                    return array_combine($years, $years);
                                 }),
                             Forms\Components\Select::make('season_type')
                                 ->label('Season Type')
                                 ->native(false)
                                 ->options(RoomSeasonType::class),
-                        ])
+                        ]),
                     ])
-                    ->query(function(Builder $query, $data) {
-                        return $query
-                            ->when($data['city_id'], fn($query, $cityId) => $query->where('city_id', $cityId));
-                    })
-                    ->indicateUsing(function(array $data): array {
+                    ->query(fn(Builder $query, $data) => $query
+                        ->when($data['city_id'], fn($q, $v) => $q->where('city_id', $v)))
+                    ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                        if (isset($data['city_id'])) {
+                        if (!empty($data['city_id'])) {
                             $indicators[] = 'City: ' . City::find($data['city_id'])->name;
                         }
-                        if (isset($data['currency'])) {
+                        if (!empty($data['currency'])) {
                             $indicators[] = 'Currency: ' . CurrencyEnum::tryFrom($data['currency'])?->getLabel();
                         }
-                        if (isset($data['year'])) {
+                        if (!empty($data['year'])) {
                             $indicators[] = 'Year: ' . $data['year'];
                         }
-                        if (isset($data['season_type'])) {
+                        if (!empty($data['season_type'])) {
                             $indicators[] = 'Season: ' . RoomSeasonType::tryFrom($data['season_type'])?->getLabel();
                         }
                         return $indicators;
-                    })
+                    }),
             ], layout: FiltersLayout::AboveContent)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
@@ -328,14 +358,13 @@ class HotelResource extends Resource
 
                 PeriodsColumn::make('room_prices')
                     ->label('Room prices')
-                    ->getStateUsing(function($record, $livewire) {
+                    ->getStateUsing(function ($record, $livewire) {
                         $filters = $livewire->tableFilters;
-
                         return [
-                            'hotel' => $record,
-                            'isFirst' => $record->is($livewire->getTableRecords()->first()),
-                            'currency' => $filters['filters']['currency'],
-                            'year' => $filters['filters']['year'],
+                            'hotel'       => $record,
+                            'isFirst'     => $record->is($livewire->getTableRecords()->first()),
+                            'currency'    => $filters['filters']['currency'],
+                            'year'        => $filters['filters']['year'],
                             'season_type' => $filters['filters']['season_type'] ?? null,
                         ];
                     }),
@@ -345,23 +374,25 @@ class HotelResource extends Resource
                     ->color('info')
                     ->searchable()
                     ->html(),
+
                 Tables\Columns\TextColumn::make('inn')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('country.name')
                     ->label('Country')
                     ->searchable()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('city.name')
                     ->label('City')
                     ->searchable()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('phone_list')
                     ->label('Phones')
-                    ->getStateUsing(function($record) {
-                        return $record->phones->map(function($phone) {
-                            return "<a href='https://t.me/{$phone->phone_number}' target='_blank'>{$phone->phone_number}</a>";
-                        })->implode('<br/>');
-                    })
+                    ->getStateUsing(fn($record) => $record->phones
+                        ->map(fn($p) => "<a href='https://t.me/{$p->phone_number}' target='_blank'>{$p->phone_number}</a>")
+                        ->implode('<br/>'))
                     ->color('info')
                     ->html(),
 
@@ -375,10 +406,8 @@ class HotelResource extends Resource
                     ->sortable(),
             ])
             ->recordUrl(null)
-            //            ->recordAction(HotelPeriodsAction::class)
             ->actions([
                 Tables\Actions\EditAction::make(),
-                //                HotelPeriodsAction::make()->label('')->icon(''),
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -399,9 +428,9 @@ class HotelResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHotels::route('/'),
+            'index'  => Pages\ListHotels::route('/'),
             'create' => Pages\CreateHotel::route('/create'),
-            'edit' => Pages\EditHotel::route('/{record}/edit'),
+            'edit'   => Pages\EditHotel::route('/{record}/edit'),
         ];
     }
 }
