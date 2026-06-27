@@ -32,6 +32,7 @@ class WebTourResource extends JsonResource
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'photo' => $this->photo ? asset('storage/' . $this->photo) : null,
+            'photos' => collect($this->photos ?? [])->map(fn($p) => asset('storage/' . $p))->values()->all(),
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

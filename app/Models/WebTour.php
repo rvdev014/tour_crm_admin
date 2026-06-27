@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string|null $description_ru
  * @property string|null $description_en
  * @property string|null $photo
+ * @property array|null $photos
  * @property bool $is_popular
  * @property WebTourPriceType $type
  * @property Carbon|null $created_at
@@ -61,6 +62,7 @@ class WebTour extends Model
         'deadline' => 'datetime',
         'status' => WebTourStatus::class,
         'is_popular' => 'boolean',
+        'photos' => 'array',
         //        'type' => WebTourPriceType::class,
     ];
     
