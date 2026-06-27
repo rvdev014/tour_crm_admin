@@ -181,7 +181,6 @@ class HotelController extends Controller
         $hotels = Hotel::query()
             ->with(['country', 'city', 'facilities', 'attachments', 'roomTypes.roomType'])
             ->whereHas('recommendedHotels')
-            ->whereHas('attachments')
             ->get();
 
         return response()->json(['data' => HotelResource::collection($hotels)]);
