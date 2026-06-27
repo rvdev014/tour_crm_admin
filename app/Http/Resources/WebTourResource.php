@@ -50,10 +50,17 @@ class WebTourResource extends JsonResource
     public function getCurrentPrice()
     {
         if ($this->type == WebTourPriceType::Free->value) {
-            $freePrice = $this->freePrices()->where('pax_from', 1)->first();
+            $freePrice = $this->freePrices()->orderBy('price')->first();
             return $freePrice;
         }
-        
-        return $this->currentPrice;
+
+        // currentPrice filters by active date range; fall back to the cheapest upcoming price
+        if ($this->currentPrice) {
+            return $this->currentPrice;
+        }
+
+        return $this->relationLoaded('prices')
+            ? $this->prices->sortBy('price')->first()
+            : $this->prices()->orderBy('price')->first();
     }
 }
