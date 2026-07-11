@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\HotelResource\Pages;
+use App\Filament\Resources\HotelResource\Actions\HotelPeriodsAction;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Filament\Resources\HotelResource\RelationManagers;
 
@@ -354,7 +355,9 @@ class HotelResource extends Resource
             ], layout: FiltersLayout::AboveContent)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->color('primary')
+                    ->action(HotelPeriodsAction::make()),
 
                 PeriodsColumn::make('room_prices')
                     ->label('Room prices')

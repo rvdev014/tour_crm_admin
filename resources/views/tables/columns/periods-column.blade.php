@@ -73,7 +73,7 @@
                             <x-filament::badge
                                     :color="$roomType->season_type->getColor()"
                                     size="sm"
-                                    title="{{ $periodTooltip }}"
+                                    :tooltip="$periodTooltip"
                             >
                                 {{ $roomType->season_type->getLabel() }}
                             </x-filament::badge>
