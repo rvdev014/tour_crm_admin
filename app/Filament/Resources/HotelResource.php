@@ -6,6 +6,7 @@ use Filament\Forms;
 use Filament\Tables;
 use App\Models\City;
 use App\Models\Hotel;
+use App\Models\HotelPeriod;
 use App\Enums\RateEnum;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -355,6 +356,23 @@ class HotelResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+
+                Tables\Columns\TextColumn::make('season_type')
+                    ->label('Season type')
+                    ->placeholder('—')
+                    ->getStateUsing(function ($record, $livewire) {
+                        $year = (int) ($livewire->tableFilters['filters']['year'] ?? now()->year);
+
+                        return HotelPeriod::highestPriorityFor($record->id, $year)?->season_type;
+                    })
+                    ->tooltip(function ($record, $livewire) {
+                        $year = (int) ($livewire->tableFilters['filters']['year'] ?? now()->year);
+                        $period = HotelPeriod::highestPriorityFor($record->id, $year);
+
+                        return $period
+                            ? $period->start_date->format('d.m.Y') . ' — ' . $period->end_date->format('d.m.Y')
+                            : null;
+                    }),
 
                 PeriodsColumn::make('room_prices')
                     ->label('Room prices')

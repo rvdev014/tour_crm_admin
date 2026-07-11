@@ -37,6 +37,36 @@ class HotelPeriod extends Model
         return $this->belongsTo(Hotel::class);
     }
 
+    /**
+     * All periods defined for a hotel in a given year, memoized per request
+     * since it's looked up once per row/tooltip on the same page load.
+     *
+     * @return \Illuminate\Support\Collection<int, self>
+     */
+    public static function periodsForYear(int $hotelId, int $year): \Illuminate\Support\Collection
+    {
+        static $cache = [];
+        $key = "{$hotelId}:{$year}";
+
+        return $cache[$key] ??= static::query()
+            ->where('hotel_id', $hotelId)
+            ->whereYear('start_date', $year)
+            ->get();
+    }
+
+    /**
+     * The highest-priority season (High > Mid > Low, then Yearly/Exhibition)
+     * defined for the hotel in the given year, or null if none exist.
+     */
+    public static function highestPriorityFor(int $hotelId, int $year): ?self
+    {
+        $order = RoomSeasonType::priorityOrder();
+
+        return static::periodsForYear($hotelId, $year)
+            ->sortBy(fn (self $period) => array_search($period->season_type, $order, true))
+            ->first();
+    }
+
     // app/Models/HotelPeriod.php
 
     public function getExtendedLabelAttribute(): string

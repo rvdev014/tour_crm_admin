@@ -19,12 +19,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 class RoomTypesRelationManager extends RelationManager
 {
     protected static string $relationship = 'roomTypes';
-    
-    //    public function filterTableQuery(Builder $query): Builder
-    //    {
-    //        return $query->whereHas('period', fn($q) => $q->whereYear('start_date', now()->year));
-    //    }
-    
+
     public function form(Form $form): Form
     {
         return $form->disabled(fn() => auth()->user()->isOperator())
@@ -96,6 +91,25 @@ class RoomTypesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                $priorityCase = 'CASE season_type'
+                    . ' WHEN ' . RoomSeasonType::High->value . ' THEN 1'
+                    . ' WHEN ' . RoomSeasonType::Mid->value . ' THEN 2'
+                    . ' WHEN ' . RoomSeasonType::Low->value . ' THEN 3'
+                    . ' WHEN ' . RoomSeasonType::Yearly->value . ' THEN 4'
+                    . ' WHEN ' . RoomSeasonType::Exhibition->value . ' THEN 5'
+                    . ' ELSE 6 END';
+
+                // Collapse to one row per room type: the highest-priority
+                // season (High > Mid > Low, then Yearly/Exhibition) wins.
+                // reorder() clears the relation's default `orderBy('price_foreign')`,
+                // which would otherwise violate Postgres's DISTINCT ON requirement
+                // that the leading ORDER BY expressions match the DISTINCT ON columns.
+                return $query
+                    ->selectRaw('DISTINCT ON (room_type_id) hotel_room_types.*')
+                    ->reorder('room_type_id')
+                    ->orderByRaw($priorityCase);
+            })
             ->striped()
             ->defaultPaginationPageOption(25)
             ->recordTitleAttribute('roomType.name')
@@ -117,7 +131,15 @@ class RoomTypesRelationManager extends RelationManager
             ->filtersLayout(FiltersLayout::AboveContent)
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),
-                Tables\Columns\TextColumn::make('season_type'),
+                Tables\Columns\TextColumn::make('season_type')
+                    ->tooltip(function ($record) {
+                        $period = HotelPeriod::periodsForYear($record->hotel_id, $record->year)
+                            ->firstWhere('season_type', $record->season_type);
+
+                        return $period
+                            ? $period->start_date->format('d.m.Y') . ' — ' . $period->end_date->format('d.m.Y')
+                            : null;
+                    }),
 //                Tables\Columns\TextColumn::make('period.season_type')
 //                    ->label('Period')
 //                    ->badge() // Превращает текст в цветной бадж

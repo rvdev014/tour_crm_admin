@@ -25,6 +25,21 @@ enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
         ];
     }
 
+    /**
+     * Display priority, highest first. High > Mid > Low, with Yearly/Exhibition
+     * as a lower-priority fallback when no High/Mid/Low pricing exists.
+     */
+    public static function priorityOrder(): array
+    {
+        return [
+            self::High,
+            self::Mid,
+            self::Low,
+            self::Yearly,
+            self::Exhibition,
+        ];
+    }
+
     public function getColor(): string|array|null
     {
         return match ($this) {
