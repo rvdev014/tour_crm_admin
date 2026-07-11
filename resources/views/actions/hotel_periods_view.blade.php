@@ -8,8 +8,9 @@
 
     $roomTypes = $record->roomTypes()
         ->where('year', $year)
-        ->reorder('room_type_id')
+        ->reorder()
         ->orderByRaw(RoomSeasonType::priorityCaseSql())
+        ->orderBy('room_type_id')
         ->get();
 @endphp
 

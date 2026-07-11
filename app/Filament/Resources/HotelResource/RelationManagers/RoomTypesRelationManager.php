@@ -92,13 +92,14 @@ class RoomTypesRelationManager extends RelationManager
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                // Show every season row, grouped by room type and ordered
-                // within each group by priority (High > Mid > Low, then
-                // Yearly/Exhibition). reorder() clears the relation's default
+                // Show every season row, ordered by priority first (High >
+                // Mid > Low, then Yearly/Exhibition) and by room type as a
+                // tiebreaker. reorder() clears the relation's default
                 // `orderBy('price_foreign')` so it doesn't take precedence.
                 return $query
-                    ->reorder('room_type_id')
-                    ->orderByRaw(RoomSeasonType::priorityCaseSql());
+                    ->reorder()
+                    ->orderByRaw(RoomSeasonType::priorityCaseSql())
+                    ->orderBy('room_type_id');
             })
             ->striped()
             ->defaultPaginationPageOption(25)
