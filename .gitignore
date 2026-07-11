@@ -26,3 +26,4 @@ storage/debugbar
 
 *.sql
 CLAUDE.md
+.DS_Store
