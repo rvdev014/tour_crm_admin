@@ -29,6 +29,7 @@ class SettingResource extends Resource
                 Select::make('key')
                     ->options([
                         DefaultSettings::TOUR_SBOR->value => DefaultSettings::TOUR_SBOR->getLabel(),
+                        DefaultSettings::VAT_PERCENT->value => DefaultSettings::VAT_PERCENT->getLabel(),
                     ])
                     ->disabled()
                     ->required(),

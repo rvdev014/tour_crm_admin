@@ -843,6 +843,20 @@ HTML;
         return (int)$settings?->value;
     }
 
+    public static function getVatPercent(): float
+    {
+        $settings = Setting::query()->where('key', DefaultSettings::VAT_PERCENT->value)->first();
+
+        // Falls back to the rate that used to be hardcoded (12%) if the setting
+        // is ever missing/blank, so it can't silently zero out VAT for hotels
+        // with nds_included enabled.
+        if ($settings?->value === null || $settings->value === '') {
+            return 12.0;
+        }
+
+        return (float)$settings->value;
+    }
+
     public static function getRoutesForTransportClass(int $transportClassId): array
     {
         return \App\Models\Route::query()

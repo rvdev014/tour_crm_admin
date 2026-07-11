@@ -152,6 +152,9 @@ class HotelResource extends Resource
                                             ]),
                                         Forms\Components\Checkbox::make('nds_included')
                                             ->label('VAT (NDS) Included')
+                                            ->helperText(fn() => 'Checked: this hotel\'s room prices will have VAT/NDS added automatically (currently '
+                                                . rtrim(rtrim(number_format(TourService::getVatPercent(), 2), '0'), '.')
+                                                . '%, set in Settings). Unchecked: prices are charged exactly as entered, with no VAT added.')
                                             ->inline(false),
                                     ]),
 

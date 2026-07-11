@@ -56,7 +56,7 @@ class HotelRoomType extends Model
         
         $hotelPrice = $isUzbek ? $this->price : $this->price_foreign;
         if ($this->hotel->nds_included) {
-            $hotelPrice += $hotelPrice * 12 / 100;
+            $hotelPrice += $hotelPrice * TourService::getVatPercent() / 100;
         }
 
 //        if (!empty($this->hotel->tour_sbor)) {

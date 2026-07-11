@@ -63,6 +63,7 @@ class HotelController extends Controller
 
             // 1. Получаем константы из сервисов, чтобы передать их в SQL
             $tourSborValue = \App\Services\TourService::getTourSborValue(); // Например: 34000 (сумы) или 3 (доллары)
+            $vatMultiplier = 1 + (\App\Services\TourService::getVatPercent() / 100); // Например: 1.12
 
             // Build a tiered CASE expression from the 'website' group items,
             // mirroring Group::getPercent() which picks percent by price bracket.
@@ -80,13 +81,13 @@ class HotelController extends Controller
 
             $query
                 ->addSelect([
-                    'today_price' => function ($subquery) use ($now, $tourSborValue, $groupPercentCase) {
+                    'today_price' => function ($subquery) use ($now, $tourSborValue, $vatMultiplier, $groupPercentCase) {
                         $subquery
                             ->selectRaw("
                         (
                             (
-                                -- 1. Base price + NDS (12%)
-                                CAST(hotel_room_types.price_foreign AS DECIMAL(15,2)) * (CASE WHEN hotels.nds_included = true THEN 1.12 ELSE 1.0 END)
+                                -- 1. Base price + NDS (rate from Settings)
+                                CAST(hotel_room_types.price_foreign AS DECIMAL(15,2)) * (CASE WHEN hotels.nds_included = true THEN ? ELSE 1.0 END)
                             )
                             +
                             (
@@ -94,7 +95,7 @@ class HotelController extends Controller
                                 ? * COALESCE(hotels.tour_sbor, 0) / 100
                             )
                         ) * (1 + ({$groupPercentCase}) / 100.0) as calculated_total
-                    ", [$tourSborValue])
+                    ", [$vatMultiplier, $tourSborValue])
 
                             ->from('hotel_room_types')
                             ->join('hotel_periods', function ($join) {
