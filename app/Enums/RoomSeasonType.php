@@ -40,6 +40,20 @@ enum RoomSeasonType: int implements HasLabel, HasColor, HasIcon
         ];
     }
 
+    /**
+     * SQL CASE expression ranking $column by priorityOrder() (1 = highest),
+     * for use in orderByRaw()/orderBy() when picking or sorting by season priority.
+     */
+    public static function priorityCaseSql(string $column = 'season_type'): string
+    {
+        $whens = '';
+        foreach (self::priorityOrder() as $rank => $case) {
+            $whens .= " WHEN {$case->value} THEN " . ($rank + 1);
+        }
+
+        return "CASE {$column}{$whens} ELSE 99 END";
+    }
+
     public function getColor(): string|array|null
     {
         return match ($this) {

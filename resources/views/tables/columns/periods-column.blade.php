@@ -1,5 +1,5 @@
 @php
-    use App\Models\Hotel;use App\Enums\CurrencyEnum;use App\Enums\RoomPersonType;use App\Models\HotelRoomType;use App\Services\ExpenseService;use Illuminate\Database\Eloquent\Collection;
+    use App\Models\Hotel;use App\Enums\CurrencyEnum;use App\Enums\RoomPersonType;use App\Enums\RoomSeasonType;use App\Models\HotelPeriod;use App\Models\HotelRoomType;use App\Services\ExpenseService;use Illuminate\Database\Eloquent\Collection;
 
     /** @var Hotel $hotel */
     $state = $getState();
@@ -31,7 +31,7 @@
         // Note: The first column in orderBy MUST be the column in distinctOn
         ->selectRaw('DISTINCT ON (room_type_id) *')
         ->orderBy('room_type_id')
-        ->orderBy('price_foreign') // This ensures you get the cheapest one for each type
+        ->orderByRaw(RoomSeasonType::priorityCaseSql()) // Highest-priority season per type: High > Mid > Low > Yearly/Exhibition
         ->limit(2)
         ->get();
 
@@ -63,9 +63,17 @@
                 <td style="min-width: 100px; text-align: left;">
                     <div class="flex-td">
                         @if ($roomType?->season_type)
+                            @php
+                                $period = HotelPeriod::periodsForYear($hotel->id, $roomType->year)
+                                    ->firstWhere('season_type', $roomType->season_type);
+                                $periodTooltip = $period
+                                    ? $period->start_date->format('d.m.Y') . ' — ' . $period->end_date->format('d.m.Y')
+                                    : null;
+                            @endphp
                             <x-filament::badge
                                     :color="$roomType->season_type->getColor()"
                                     size="sm"
+                                    title="{{ $periodTooltip }}"
                             >
                                 {{ $roomType->season_type->getLabel() }}
                             </x-filament::badge>

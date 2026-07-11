@@ -54,19 +54,6 @@ class HotelPeriod extends Model
             ->get();
     }
 
-    /**
-     * The highest-priority season (High > Mid > Low, then Yearly/Exhibition)
-     * defined for the hotel in the given year, or null if none exist.
-     */
-    public static function highestPriorityFor(int $hotelId, int $year): ?self
-    {
-        $order = RoomSeasonType::priorityOrder();
-
-        return static::periodsForYear($hotelId, $year)
-            ->sortBy(fn (self $period) => array_search($period->season_type, $order, true))
-            ->first();
-    }
-
     // app/Models/HotelPeriod.php
 
     public function getExtendedLabelAttribute(): string

@@ -92,23 +92,13 @@ class RoomTypesRelationManager extends RelationManager
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                $priorityCase = 'CASE season_type'
-                    . ' WHEN ' . RoomSeasonType::High->value . ' THEN 1'
-                    . ' WHEN ' . RoomSeasonType::Mid->value . ' THEN 2'
-                    . ' WHEN ' . RoomSeasonType::Low->value . ' THEN 3'
-                    . ' WHEN ' . RoomSeasonType::Yearly->value . ' THEN 4'
-                    . ' WHEN ' . RoomSeasonType::Exhibition->value . ' THEN 5'
-                    . ' ELSE 6 END';
-
-                // Collapse to one row per room type: the highest-priority
-                // season (High > Mid > Low, then Yearly/Exhibition) wins.
-                // reorder() clears the relation's default `orderBy('price_foreign')`,
-                // which would otherwise violate Postgres's DISTINCT ON requirement
-                // that the leading ORDER BY expressions match the DISTINCT ON columns.
+                // Show every season row, grouped by room type and ordered
+                // within each group by priority (High > Mid > Low, then
+                // Yearly/Exhibition). reorder() clears the relation's default
+                // `orderBy('price_foreign')` so it doesn't take precedence.
                 return $query
-                    ->selectRaw('DISTINCT ON (room_type_id) hotel_room_types.*')
                     ->reorder('room_type_id')
-                    ->orderByRaw($priorityCase);
+                    ->orderByRaw(RoomSeasonType::priorityCaseSql());
             })
             ->striped()
             ->defaultPaginationPageOption(25)
