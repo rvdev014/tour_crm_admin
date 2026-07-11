@@ -46,6 +46,7 @@ class TourService
             /** @var \Illuminate\Database\Eloquent\Collection<Transfer> $transfers */
             $transfers = Transfer::query()
                 ->whereBetween('date_time', [$now, $now->clone()->addMinutes(60)])
+                ->where('status', ExpenseStatus::Confirmed)
                 ->where('notified_times', '<', 2)
                 ->get();
 
@@ -55,15 +56,18 @@ class TourService
                     false
                 );
 
+                // updateQuietly() so this bookkeeping write doesn't re-trigger
+                // TransferObserver::updated(), which would send a second,
+                // unwanted "Обновлено" message for every reminder sent here.
                 $notifiedTimes = $transfer->notified_times ?? 0;
                 if ($notifiedTimes == 0 && $diffInMinutes <= 60 && $diffInMinutes > 30) {
                     TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
-                    $transfer->update(['notified_times' => 1]);
+                    $transfer->updateQuietly(['notified_times' => 1]);
                 }
 
                 if ($transfer->notified_times < 2 && $diffInMinutes <= 30) {
                     TourService::sendTelegramTransfer($transfer->toArray(), isReminder: true);
-                    $transfer->update(['notified_times' => 2]);
+                    $transfer->updateQuietly(['notified_times' => 2]);
                 }
             }
         } catch (Throwable $e) {
@@ -675,11 +679,11 @@ HTML;
         }
         $result .= "🗺 <b>Маршрут:</b> {$route}\n";
         $result .= "🚗 <b>Класс:</b> {$transportType}\n";
-        $result .= "👥 <b>Кол-во Пассажиров:</b> {$pax}";
+        $result .= "👥 <b>Кол-во Пассажиров:</b> {$pax}\n";
         if ($nameplate && $nameplate !== '-') {
-            $result .= "  |  🪧 <b>Табличка:</b> {$nameplate}";
+            $result .= "🪧 <b>Табличка:</b> {$nameplate}\n";
         }
-        $result .= "\n{$divider}\n";
+        $result .= "{$divider}\n";
         $result .= "👨‍✈️ <b>Водитель:</b> {$drivers}\n";
         if ($mark && $mark !== '-') {
             $result .= "🚘 <b>Марка:</b> {$mark}\n";

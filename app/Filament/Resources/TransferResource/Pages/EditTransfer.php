@@ -9,7 +9,6 @@ use Filament\Notifications\Notification;
 use App\Filament\Resources\TransferResource;
 use App\Models\Transfer;
 use App\Services\ExpenseService;
-use App\Services\TourService;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Validation\ValidationException;
@@ -65,9 +64,9 @@ class EditTransfer extends EditRecord
             'transport_route' => $transfer->route,
         ]);
 
-        if ($transfer->status == ExpenseStatus::Confirmed) {
-            TourService::sendTelegramTransfer($transfer->toArray(), true);
-        }
+        // TransferObserver::updated() already sends the "Обновлено" Telegram
+        // message for Confirmed transfers whenever $this->record is saved;
+        // sending it again here would duplicate it.
     }
 
     protected function getHeaderActions(): array
