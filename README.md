@@ -1,77 +1,128 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Tour CRM Admin
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 10 CRM/backend for a tour operator company. It powers an internal admin panel (Filament) for operators and a public REST API consumed by the [`tour_landing`](../tour_landing) customer-facing website.
 
-## About Laravel
+## What It Does
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and
-creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in
-many web projects, such as:
+1. **Internal CRM** — Filament admin panel at `/admin` where operators manage tours, hotels, transfers, restaurants, museums, drivers, and expenses, and generate Word/Excel export documents (invoices, vouchers, booking letters).
+2. **Public API** — `/api` serves the customer-facing site with hotels, tours, banners, services, transfer requests, and user auth (Sanctum + Google OAuth).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache)
-  storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Framework:** Laravel 10, PHP ^8.1
+- **Admin panel:** Filament 3
+- **Database:** PostgreSQL (despite `.env.example` defaulting to MySQL — see Environment below)
+- **Auth:** Laravel Sanctum, Google OAuth
+- **Exports:** phpoffice/phpword, phpoffice/phpspreadsheet, pxlrbt/filament-excel
+- **Infra:** Docker Compose (nginx + PHP-FPM + Postgres + Mailhog)
+- **Notifications:** Telegram (driver alerts), email (client transfer reminders)
 
-## Learning Laravel
+## Getting Started
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all
-modern web application frameworks, making it a breeze to get started with the framework.
+### Prerequisites
+- Docker & Docker Compose
+- PHP ^8.1, Composer (for local/non-Docker workflows)
+- Node.js (for Vite asset builds)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a
-modern Laravel application from scratch.
+### Setup (Docker)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video
-tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging
-into our comprehensive video library.
+```bash
+cp .env.example .env
+# set DB_CONNECTION=pgsql and other DB_* values to match docker-compose.yml
+docker compose up -d
+docker compose exec php composer install
+docker compose exec php php artisan key:generate
+docker compose exec php php artisan migrate
+docker compose exec php php artisan db:seed
+```
 
-## Laravel Sponsors
+App: `http://localhost:${APP_PORT}` · Admin panel: `/admin` · Vite dev server: port `5173` · Mailhog UI: `${MAILHOG_PORT}`.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in
-becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Restore DB from backup
 
-### Premium Partners
+```bash
+make restore-db
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Common Commands
 
-## Contributing
+```bash
+# Tests
+php artisan test
+php artisan test tests/Feature/TourGroupNumberTest.php   # single file
+php artisan test --filter=testMethodName                  # single test
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in
-the [Laravel documentation](https://laravel.com/docs/contributions).
+# Assets
+npm run dev      # Vite dev server
+npm run build    # Production build
 
-## Code of Conduct
+# Code style
+./vendor/bin/pint          # Laravel Pint (PSR-12 fixer)
+./vendor/bin/pint --test   # Lint without fixing
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by
-the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Artisan
+php artisan optimize:clear   # Clear all caches
+php artisan queue:work       # Process queued jobs
+```
 
-## Security Vulnerabilities
+A cron-driven scheduler (runs every minute) notifies drivers via Telegram and sends transfer reminder emails to clients.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell
-via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Architecture Overview
+
+### Tour Types: TPS vs Corporate
+
+Tours are either `TPS` or `Corporate` (`TourType` enum), and this distinction runs through the whole codebase:
+
+- **TPS** tours track `pax_uz` / `pax_foreign` / `leader_pax` counts with a day-based expense structure (`TourDay` → `TourDayExpense`). `price_result × total_pax = total_price`; `income = total_price - expenses_total`.
+- **Corporate** tours use `TourGroup` → `TourPassenger` passenger lists with separate expense calculations (`ExpenseService::getAllExpensesCorporate`).
+
+Filament resources are split accordingly: `TourTpsResource` and `TourCorporateResource`.
+
+### Expense Pipeline
+
+`TourDayExpense` is the central expense record (`ExpenseType`: Hotel, Guide, Transport, Museum, Lunch, Dinner, Train, Flight, Show, Conference, Extra). Transport-type expenses are automatically mirrored into the `Transfer` model via `TourDayExpenseObserver`. `ExpenseService` recalculates and writes totals back to the `Tour` model. Expenses support multi-currency, with `_result`-suffixed columns storing converted values.
+
+### Transfers & Notifications
+
+Transfers are auto-created from Transport expenses, plus standalone ones from public API customer requests. `TourService::notifyDrivers()` sends Telegram alerts 60/30 minutes before a transfer (via the scheduler); `TransferService::notifyClientsForTransfer()` emails clients. `TransferObserver` snapshots prior values into `old_values` on update.
+
+### Roles & Access
+
+Filament panel access is gated by `User::canAccessPanel()`. Roles: `Admin(0)`, `Operator(1)`, `Accountant(2)`, `SeniorOperator(3)`, `User(10)`. `TourPolicy` uses `TourService::isVisible()` for edit/delete checks.
+
+### Public API
+
+Sanctum-authenticated endpoints, notably:
+- `AuthController` — login, register, Google OAuth, profile, web-tour/contact requests
+- `ManualController` — tour catalog, banners, services, countries/cities, transfer requests
+- `HotelController` — hotel listing/detail/reviews/recommendations/booking requests
+
+### Exports
+
+`ExportController` generates `.docx`/`.xlsx` documents via dedicated services: `ExportService` (client invoice), `ExportClientService` (voucher), `ExportHotelService` (booking letter), `ExportMuseumService`, `ExportTransferService`. Templates live in `app/Services/Templates/`.
+
+### Multilingual Fields
+
+The `HasLocaleFields` trait exposes `getLocaleValue(string $attribute, Lang $lang)` for models with `_en` / `_ru` / `_uz` column suffixes.
+
+## Environment
+
+Key variables beyond Laravel defaults (see `.env.example`):
+
+| Variable | Description |
+|---|---|
+| `DB_CONNECTION` | Must be `pgsql` — project runs on PostgreSQL |
+| `APP_SCHEME` | Set to `https` to force HTTPS redirects (`AppServiceProvider`) |
+| `TELEGRAM_BOT_TOKEN` | Used by `TelegramService` for driver notifications |
+
+More context in [`CLAUDE.md`](./CLAUDE.md).
+
+## Deployment
+
+```bash
+make deploy   # git pull, composer install --no-dev, migrate --force, optimize:clear
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT
