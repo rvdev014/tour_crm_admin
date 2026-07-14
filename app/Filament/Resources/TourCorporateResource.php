@@ -11,6 +11,7 @@ use App\Models\Company;
 use App\Models\Country;
 use App\Enums\PlaneType;
 use App\Models\RoomType;
+use App\Models\HotelRoomType;
 use Filament\Forms\Form;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
@@ -331,7 +332,20 @@ class TourCorporateResource extends Resource
                                                 ->searchable()
                                                 ->preload()
                                                 ->label('Room type')
-                                                ->options(RoomType::query()->pluck('name', 'id')->toArray())
+                                                ->options(function($get) {
+                                                    $hotelId = $get('../../hotel_id');
+                                                    if (!$hotelId) {
+                                                        return [];
+                                                    }
+                                                    return RoomType::query()
+                                                        ->whereIn('id', HotelRoomType::query()
+                                                            ->where('hotel_id', $hotelId)
+                                                            ->pluck('room_type_id'))
+                                                        ->pluck('name', 'id');
+                                                })
+                                                ->helperText(fn($get) => $get('../../hotel_id')
+                                                    ? null
+                                                    : 'Select a hotel first')
                                                 ->required()
                                                 ->reactive(),
 

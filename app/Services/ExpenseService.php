@@ -22,8 +22,10 @@ use App\Models\TourRoomType;
 use App\Enums\RoomPersonType;
 use App\Enums\RoomSeasonType;
 use App\Models\HotelRoomType;
+use App\Models\RoomType;
 use App\Models\TourDayExpense;
 use Illuminate\Support\Collection;
+use Filament\Notifications\Notification;
 
 class ExpenseService
 {
@@ -237,12 +239,16 @@ class ExpenseService
 
                 $period = ExpenseService::getHotelPeriod($hotel, $day ? $day['date'] : $data['date']);
                 if (!$period) {
+                    ExpenseService::warnMissingHotelPrice(
+                        "Hotel \"{$hotel->name}\" has no pricing period configured for the selected date. Price was set to 0."
+                    );
                     return $data;
                 }
 
                 $hotelTotal = 0;
                 $roomAmounts = $roomAmounts ?: ExpenseService::getRoomingAmounts($data);
                 $totalNights = $data['hotel_total_nights'] ?? 1;
+                $missingRoomTypeNames = [];
 
                 foreach ($roomAmounts as $roomTypeId => $amounts) {
                     $amountUz = (int)($amounts['uz'] ?? 0);
@@ -259,6 +265,7 @@ class ExpenseService
                         ->first();
 
                     if (!$hotelRoomType) {
+                        $missingRoomTypeNames[] = RoomType::query()->find($roomTypeId)?->name ?? "#{$roomTypeId}";
                         continue;
                     }
 
@@ -275,6 +282,15 @@ class ExpenseService
                             : $hotelRoomType->getPriceWithPercent($companyId, RoomPersonType::Foreign);
                         $hotelTotal += $priceForeign * $amountForeign * $totalNights;
                     }
+                }
+
+                if (!empty($missingRoomTypeNames)) {
+                    $roomTypeList = implode(', ', array_unique($missingRoomTypeNames));
+                    ExpenseService::warnMissingHotelPrice(
+                        "Hotel \"{$hotel->name}\" has no price for room type(s) [{$roomTypeList}] in the "
+                        . "{$period->season_type->getLabel()} {$period->start_date->year} period. "
+                        . "Those rooms were not added to the cost."
+                    );
                 }
 
                 $data['price'] = $hotelTotal;
@@ -341,6 +357,23 @@ class ExpenseService
 
             default:
                 return $data;
+        }
+    }
+
+    /**
+     * Surfaces a Filament toast when hotel pricing data is missing, instead of silently
+     * pricing the expense at 0. Safe to call outside an HTTP/Livewire context (e.g. console
+     * commands) — Notification::send() is a no-op there.
+     */
+    public static function warnMissingHotelPrice(string $message): void
+    {
+        if (!app()->runningInConsole()) {
+            Notification::make()
+                ->title('Hotel price missing')
+                ->body($message)
+                ->warning()
+                ->persistent()
+                ->send();
         }
     }
 
