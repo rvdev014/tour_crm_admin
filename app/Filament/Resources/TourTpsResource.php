@@ -2,282 +2,365 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\City;
-use App\Models\Tour;
-use App\Models\User;
-use Filament\Tables;
-use App\Enums\TourType;
-use App\Models\Company;
-use App\Models\Country;
-use App\Enums\GuideType;
-use Filament\Forms\Form;
-use App\Enums\PaymentType;
 use App\Enums\CompanyType;
 use App\Enums\ExpenseType;
-use Filament\Tables\Table;
-use Illuminate\Support\Arr;
+use App\Enums\GuideType;
 use App\Enums\PaymentStatus;
+use App\Enums\PaymentType;
+use App\Enums\RoomPersonType;
+use App\Enums\TourType;
 use App\Enums\TransportType;
-use Filament\Tables\Columns;
-use App\Services\TourService;
-use Filament\Forms\Components;
-use Illuminate\Support\Carbon;
-use App\Services\ExpenseService;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\Hidden;
-use Filament\Tables\Enums\FiltersLayout;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
 use App\Filament\Resources\TourTpsResource\Pages;
 use App\Filament\Resources\TourTpsResource\RelationManagers;
-use App\Filament\Resources\TourTpsResource\Actions\StatusAction;
+use App\Models\City;
+use App\Models\Company;
+use App\Models\Country;
+use App\Models\Tour;
+use App\Models\User;
+use App\Services\ExpenseService;
+use App\Services\TourService;
+use Filament\Forms\Components;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class TourTpsResource extends Resource
 {
     use InteractsWithForms;
-    
+
     protected static ?string $model = Tour::class;
-    
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $navigationGroup = 'Tours';
+
     protected static ?string $navigationLabel = 'TPS';
+
     protected static ?string $slug = 'tour-tps';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $recordTitleAttribute = 'group_number';
-    
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with('days.expenses')
             ->where('type', TourType::TPS->value);
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Components\Fieldset::make('Tour details')->schema([
-                Hidden::make('price_currency'),
-                Hidden::make('guide_price_currency'),
-                Hidden::make('transport_price_currency'),
-                Components\Grid::make(4)->schema([
-                    Components\TextInput::make('group_number')
-                        ->formatStateUsing(function($record, $get) {
-                            if (!empty($record)) {
-                                return $record->group_number;
-                            }
-                            return TourService::getGroupNumber(TourType::TPS, $get('start_date'));
-                        })
-                        ->readOnly(),
-                    Components\Select::make('company_id')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->options(TourService::getCompanies([CompanyType::TPS, CompanyType::Private]))
-                        ->reactive()
-                        ->required(),
-                    Components\Select::make('country_id')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->relationship('country', 'name')
-                        ->afterStateUpdated(fn($get, $set) => $set('city_id', null))
-                        ->reactive()
-                        ->required(),
-                    Components\Select::make('city_id')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->options(fn($get) => TourService::getCities($get('country_id')))
-                        ->preload()
-                        ->reactive(),
-                ]),
-                Components\Grid::make(4)->schema([
-                    Components\DateTimePicker::make('start_date')
-                        ->displayFormat('d.m.Y H:i')
-                        ->label('Arrival time')
-                        //                        ->native(false)
-                        ->seconds(false)
-                        ->minDate(fn($record) => $record ? $record->start_date : null)
-                        ->afterStateUpdated(function($get, $set) {
-                            $startDate = $get('start_date');
-                            $firstDay = $get('days') ? Arr::first($get('days')) : null;
-                            $firstDayUuid = $firstDay ? Arr::first(array_keys($get('days'))) : null;
-                            
-                            if (empty($firstDay['id'])) {
-                                $set("days.$firstDayUuid.date", $startDate);
-                            }
-                            
-                            if (Carbon::parse($get('end_date')) < Carbon::parse($startDate)) {
-                                $set('end_date', null);
-                            }
-                        })
-                        ->reactive()
-                        ->required(),
-                    Components\TextInput::make('arrival_number')
-                        ->label('Arrival reys number'),
-                    
-                    Components\DateTimePicker::make('end_date')
-                        ->displayFormat('d.m.Y H:i')
-                        ->label('Departure time')
-                        //                        ->native(false)
-                        ->seconds(false)
-                        ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay()->format('d.m.Y H:i'))
-                        ->reactive()
-                        ->required(),
-                    Components\TextInput::make('departure_number')
-                        ->label('Departure reys number'),
-                ]),
-                Components\Grid::make(4)->schema([
-                    Components\TextInput::make('pax_uz')
-                        ->label('Pax UZ')
-                        ->numeric(),
-                    Components\TextInput::make('pax_foreign')
-                        ->label('Pax Foreign')
-                        ->required()
-                        ->numeric(),
-                    Components\TextInput::make('leader_pax')
-                        ->numeric(),
-                    Components\TextInput::make('price')
-                        ->label(fn($get) => 'Price (' . ($get('price_currency') ?? 'UZS') . ')')
-                        ->suffixAction(
-                            Components\Actions\Action::make('toggle-currency')
-                                ->icon('heroicon-o-banknotes')
-                                ->iconSize('md')
-                                ->action(function($get, $set) {
-                                    $set('price_currency', $get('price_currency') != 'USD' ? 'USD' : 'UZS');
-                                })
-                        )
-                        ->numeric(),
-                    Components\TextInput::make('single_supplement_price')
-                        ->numeric(),
-                ]),
-                Components\Grid::make(4)->schema([
-                    Components\Select::make('payment_type')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->options(PaymentType::class)
-                        ->reactive(),
-                    Components\Select::make('payment_status')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->options(PaymentStatus::class)
-                        ->reactive(),
-                    Components\TextInput::make('package_name'),
-                    Components\Textarea::make('comment'),
-                ]),
-                Components\Grid::make(4)->schema([
-                    Components\TextInput::make('fit')
-                        ->label('FIT'),
-                ]),
-            ]),
-            
-            Components\Fieldset::make('Guide info')->schema([
-                Components\Grid::make(4)->schema([
-                    Components\Select::make('guide_type')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->options(GuideType::class)
-                        ->reactive()
-                        ->required(),
+            Hidden::make('price_currency'),
+            Hidden::make('guide_price_currency'),
+            Hidden::make('transport_price_currency'),
 
-                    // Escort only: name, phone, price are tracked here.
-                    // Local guide: these come from the Guide expense in Day expenses.
-                    Components\TextInput::make('guide_name')
-                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
+            Section::make('Route & company')
+                ->description('Which company is running the tour, and where it goes.')
+                ->icon('heroicon-o-map')
+                ->collapsible()
+                ->schema([
+                    Components\Grid::make(4)->schema([
+                        Components\TextInput::make('group_number')
+                            ->label('Group number')
+                            ->helperText('Generated automatically')
+                            ->formatStateUsing(function ($record, $get) {
+                                if (! empty($record)) {
+                                    return $record->group_number;
+                                }
 
-                    PhoneInput::make('guide_phone')
-                        ->strictMode()
-                        ->onlyCountries(['UZ'])
-                        ->defaultCountry('UZ')
-                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
+                                return TourService::getGroupNumber(TourType::TPS, $get('start_date'));
+                            })
+                            ->readOnly(),
+                        Components\Select::make('company_id')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(TourService::getCompanies([CompanyType::TPS, CompanyType::Private]))
+                            ->reactive()
+                            ->required(),
+                        Components\Select::make('country_id')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->relationship('country', 'name')
+                            ->afterStateUpdated(fn ($get, $set) => $set('city_id', null))
+                            ->reactive()
+                            ->required(),
+                        Components\Select::make('city_id')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(fn ($get) => TourService::getCities($get('country_id')))
+                            ->preload()
+                            ->reactive(),
+                    ]),
+                ]),
 
-                    Components\TextInput::make('guide_price')
-                        ->label(fn($get) => 'Price (' . ($get('guide_price_currency') ?? 'UZS') . ')')
-                        ->suffixAction(
-                            Components\Actions\Action::make('toggle-currency')
-                                ->icon('heroicon-o-banknotes')
-                                ->iconSize('md')
-                                ->action(function($get, $set) {
-                                    $set('guide_price_currency', $get('guide_price_currency') == 'USD' ? 'UZS' : 'USD');
-                                })
-                        )
-                        ->numeric()
-                        ->visible(fn($get) => $get('guide_type') == GuideType::Escort->value),
-                ])
-            ]),
-            
-            Components\Fieldset::make('Transport info')->schema([
-                Components\Grid::make(4)->schema([
-                    Components\Select::make('transport_type')
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->options(TransportType::class),
-                    Components\TextInput::make('transport_price')
-                        ->label(fn($get) => 'Transfer Price (' . ($get('transport_price_currency') ?? 'UZS') . ')')
-                        ->suffixAction(
-                            Components\Actions\Action::make('toggle-currency')
-                                ->icon('heroicon-o-banknotes')
-                                ->iconSize('md')
-                                ->action(function($get, $set) {
-                                    $set(
-                                        'transport_price_currency',
-                                        $get('transport_price_currency') == 'USD' ? 'UZS' : 'USD'
-                                    );
-                                })
-                        )
-                        ->numeric(),
-                ])
-            ]),
-            
-        ])->disabled(function($record) {
-            if (!$record) {
+            Section::make('Schedule')
+                ->description('Arrival and departure dates for the group.')
+                ->icon('heroicon-o-calendar-days')
+                ->collapsible()
+                ->schema([
+                    Components\Grid::make(4)->schema([
+                        Components\DateTimePicker::make('start_date')
+                            ->displayFormat('d.m.Y H:i')
+                            ->label('Arrival time')
+                            //                        ->native(false)
+                            ->seconds(false)
+                            ->minDate(fn ($record) => $record ? $record->start_date : null)
+                            ->afterStateUpdated(function ($get, $set) {
+                                $startDate = $get('start_date');
+                                $firstDay = $get('days') ? Arr::first($get('days')) : null;
+                                $firstDayUuid = $firstDay ? Arr::first(array_keys($get('days'))) : null;
+
+                                if (empty($firstDay['id'])) {
+                                    $set("days.$firstDayUuid.date", $startDate);
+                                }
+
+                                if (Carbon::parse($get('end_date')) < Carbon::parse($startDate)) {
+                                    $set('end_date', null);
+                                }
+                            })
+                            ->reactive()
+                            ->required(),
+                        Components\TextInput::make('arrival_number')
+                            ->label('Arrival reys number'),
+
+                        Components\DateTimePicker::make('end_date')
+                            ->displayFormat('d.m.Y H:i')
+                            ->label('Departure time')
+                            //                        ->native(false)
+                            ->seconds(false)
+                            ->minDate(fn ($get) => Carbon::parse($get('start_date'))->addDay()->format('d.m.Y H:i'))
+                            ->reactive()
+                            ->required(),
+                        Components\TextInput::make('departure_number')
+                            ->label('Departure reys number'),
+                    ]),
+                ]),
+
+            Section::make('Passengers & pricing')
+                ->description('Group size and per-person price. These determine the tour\'s total price.')
+                ->icon('heroicon-o-users')
+                ->collapsible()
+                ->schema([
+                    Components\Grid::make(4)->schema([
+                        Components\TextInput::make('pax_uz')
+                            ->label('Pax UZ')
+                            ->helperText('Uzbek citizens')
+                            ->placeholder('0')
+                            ->numeric(),
+                        Components\TextInput::make('pax_foreign')
+                            ->label('Pax Foreign')
+                            ->helperText('Foreign citizens')
+                            ->placeholder('0')
+                            ->required()
+                            ->numeric(),
+                        Components\TextInput::make('leader_pax')
+                            ->helperText('Group leaders / escorts')
+                            ->placeholder('0')
+                            ->numeric(),
+                        Components\TextInput::make('price')
+                            ->label(fn ($get) => 'Price ('.($get('price_currency') ?? 'UZS').')')
+                            ->helperText('Per person')
+                            ->placeholder('0')
+                            ->suffixAction(
+                                Components\Actions\Action::make('toggle-currency')
+                                    ->icon('heroicon-o-banknotes')
+                                    ->iconSize('md')
+                                    ->action(function ($get, $set) {
+                                        $set('price_currency', $get('price_currency') != 'USD' ? 'USD' : 'UZS');
+                                    })
+                            )
+                            ->numeric(),
+                        Components\TextInput::make('single_supplement_price')
+                            ->label('Single supplement price')
+                            ->placeholder('0')
+                            ->numeric(),
+                    ]),
+                ]),
+
+            Section::make('Payment & notes')
+                ->icon('heroicon-o-credit-card')
+                ->collapsible()
+                ->schema([
+                    Components\Grid::make(4)->schema([
+                        Components\Select::make('payment_type')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(PaymentType::class)
+                            ->reactive(),
+                        Components\Select::make('payment_status')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(PaymentStatus::class)
+                            ->reactive(),
+                        Components\TextInput::make('package_name'),
+                        Components\Textarea::make('comment'),
+                    ]),
+                    Components\Grid::make(4)->schema([
+                        Components\TextInput::make('fit')
+                            ->label('FIT'),
+                    ]),
+                ]),
+
+            Section::make('Guide info')
+                ->description('Local guide fee is entered via the Guide expense in Day expenses. Escort guide contact details and fee are entered here.')
+                ->icon('heroicon-o-identification')
+                ->collapsible()
+                ->schema([
+                    Components\Grid::make(4)->schema([
+                        Components\Select::make('guide_type')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(GuideType::class)
+                            ->reactive()
+                            ->required(),
+
+                        // Escort only: name, phone, price are tracked here.
+                        // Local guide: these come from the Guide expense in Day expenses.
+                        Components\TextInput::make('guide_name')
+                            ->visible(fn ($get) => $get('guide_type') == GuideType::Escort->value),
+
+                        PhoneInput::make('guide_phone')
+                            ->strictMode()
+                            ->onlyCountries(['UZ'])
+                            ->defaultCountry('UZ')
+                            ->visible(fn ($get) => $get('guide_type') == GuideType::Escort->value),
+
+                        Components\TextInput::make('guide_price')
+                            ->label(fn ($get) => 'Price ('.($get('guide_price_currency') ?? 'UZS').')')
+                            ->placeholder('0')
+                            ->suffixAction(
+                                Components\Actions\Action::make('toggle-currency')
+                                    ->icon('heroicon-o-banknotes')
+                                    ->iconSize('md')
+                                    ->action(function ($get, $set) {
+                                        $set('guide_price_currency', $get('guide_price_currency') == 'USD' ? 'UZS' : 'USD');
+                                    })
+                            )
+                            ->numeric()
+                            ->visible(fn ($get) => $get('guide_type') == GuideType::Escort->value),
+                    ]),
+                ]),
+
+            Section::make('Transport info')
+                ->icon('heroicon-o-truck')
+                ->collapsible()
+                ->schema([
+                    Components\Grid::make(4)->schema([
+                        Components\Select::make('transport_type')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->options(TransportType::class),
+                        Components\TextInput::make('transport_price')
+                            ->label(fn ($get) => 'Transfer Price ('.($get('transport_price_currency') ?? 'UZS').')')
+                            ->placeholder('0')
+                            ->suffixAction(
+                                Components\Actions\Action::make('toggle-currency')
+                                    ->icon('heroicon-o-banknotes')
+                                    ->iconSize('md')
+                                    ->action(function ($get, $set) {
+                                        $set(
+                                            'transport_price_currency',
+                                            $get('transport_price_currency') == 'USD' ? 'UZS' : 'USD'
+                                        );
+                                    })
+                            )
+                            ->numeric(),
+                    ]),
+                ]),
+
+            Section::make('Rooming info')
+                ->description('Room counts by type, split for Uzbek and foreign guests. This drives Hotel expense pricing for this tour — fill it in before adding Hotel expenses in Day expenses.')
+                ->icon('heroicon-o-building-office-2')
+                ->collapsible()
+                ->schema([
+                    Components\Tabs::make('rooming_tabs')
+                        ->columnSpanFull()
+                        ->tabs([
+                            Components\Tabs\Tab::make('UZ')
+                                ->schema([
+                                    ...TourService::generateRoomingSchema(RoomPersonType::Uzbek, true),
+
+                                    Section::make('Other rooming')
+                                        ->schema(TourService::generateRoomingSchema(RoomPersonType::Uzbek))
+                                        ->collapsible()
+                                        ->collapsed(),
+                                ]),
+                            Components\Tabs\Tab::make('Foreign')
+                                ->schema([
+                                    ...TourService::generateRoomingSchema(RoomPersonType::Foreign, true),
+
+                                    Section::make('Other rooming')
+                                        ->schema(TourService::generateRoomingSchema(RoomPersonType::Foreign))
+                                        ->collapsible()
+                                        ->collapsed(),
+                                ]),
+                        ]),
+                ]),
+
+        ])->disabled(function ($record) {
+            if (! $record) {
                 return false;
             }
-            
+
             if (auth()->user()->isOperator()) {
                 return $record->created_by != auth()->id();
             }
+
             return false;
         });
     }
-    
+
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput
     {
         return Components\TextInput::make('price')
-            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'UZS') . ")")
+            ->label(fn ($get) => "$label (".($get('price_currency') ?? 'UZS').')')
             ->suffixAction(
                 Components\Actions\Action::make('toggle-currency')
                     ->icon('heroicon-o-banknotes')
                     ->iconSize('md')
-                    ->action(function($get, $set) {
+                    ->action(function ($get, $set) {
                         $set('price_currency', $get('price_currency') != 'USD' ? 'USD' : 'UZS');
                     })
             )
             ->numeric();
     }
-    
+
     public static function isLunch($expenseType): bool
     {
         return in_array($expenseType, [ExpenseType::Lunch->value, ExpenseType::Dinner->value]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function($query) {
+            ->modifyQueryUsing(function ($query) {
                 return $query
                     ->without('days', 'days.expenses')
                     ->with('company', 'createdBy', 'country')
-                    ->orderByRaw("CASE WHEN start_date >= NOW() THEN 0 ELSE 1 END ASC")
-                    ->orderByRaw("CASE WHEN start_date >= NOW() THEN start_date END ASC")
-                    ->orderByRaw("CASE WHEN start_date < NOW() THEN start_date END DESC")
-//                    ->orderBy('start_date', 'desc')
-                    ;
+                    ->orderByRaw('CASE WHEN start_date >= NOW() THEN 0 ELSE 1 END ASC')
+                    ->orderByRaw('CASE WHEN start_date >= NOW() THEN start_date END ASC')
+                    ->orderByRaw('CASE WHEN start_date < NOW() THEN start_date END DESC');
+                //                    ->orderBy('start_date', 'desc')
             })
             ->striped()
             ->paginationPageOptions([30, 50, 100])
@@ -298,11 +381,12 @@ class TourTpsResource extends Resource
                             Components\Select::make('year')
                                 ->label('Year')
                                 ->native(false)
-                                ->default((int)date('Y'))
-                                ->options(function() {
-                                    $currentYear = (int)date('Y');
+                                ->default((int) date('Y'))
+                                ->options(function () {
+                                    $currentYear = (int) date('Y');
                                     $startYear = $currentYear - 5;
                                     $endYear = $currentYear + 3;
+
                                     return array_combine(
                                         $yearsArray = range($startYear, $endYear),
                                         $yearsArray
@@ -319,7 +403,7 @@ class TourTpsResource extends Resource
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
-                                ->options(fn($get) => TourService::getCities($get('country_id'))),
+                                ->options(fn ($get) => TourService::getCities($get('country_id'))),
                             Components\Select::make('company_id')
                                 ->native(false)
                                 ->searchable()
@@ -331,18 +415,18 @@ class TourTpsResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->options(User::query()->pluck('name', 'id')->toArray()),
-                            
+
                             Components\DatePicker::make('created_from')
                                 ->displayFormat('d.m.Y')
                                 ->native(false),
                             Components\DatePicker::make('created_until')
                                 ->displayFormat('d.m.Y')
                                 ->native(false),
-                        ])
+                        ]),
                     ])
-                    ->query(function(Builder $query, $data) {
+                    ->query(function (Builder $query, $data) {
                         if ($data['active'] && $data['archive']) {
-                            $query->where(function($query) use ($data) {
+                            $query->where(function ($query) {
                                 $query->where('end_date', '>=', Carbon::now())
                                     ->orWhere('end_date', '<', Carbon::now());
                             });
@@ -351,39 +435,39 @@ class TourTpsResource extends Resource
                         } elseif ($data['archive']) {
                             $query->where('end_date', '<', Carbon::now());
                         }
-                        
+
                         return $query
-                            ->when($data['year'], function($query, $year) {
-                                return $query->where(function($q) use ($year) {
+                            ->when($data['year'], function ($query, $year) {
+                                return $query->where(function ($q) use ($year) {
                                     $q->whereYear('start_date', $year)
                                         ->orWhereYear('end_date', $year);
                                 });
                             })
                             ->when(
                                 $data['country_id'],
-                                fn($query, $countryId) => $query->where('country_id', $countryId)
+                                fn ($query, $countryId) => $query->where('country_id', $countryId)
                             )
-                            ->when($data['city_id'], fn($query, $cityId) => $query->where('city_id', $cityId))
+                            ->when($data['city_id'], fn ($query, $cityId) => $query->where('city_id', $cityId))
                             ->when(
                                 $data['company_id'],
-                                fn($query, $companyId) => $query->where('company_id', $companyId)
+                                fn ($query, $companyId) => $query->where('company_id', $companyId)
                             )
                             ->when(
                                 $data['created_by'],
-                                fn($query, $createdBy) => $query->where('created_by', $createdBy)
+                                fn ($query, $createdBy) => $query->where('created_by', $createdBy)
                             )
                             ->when(
                                 $data['created_from'],
-                                fn($query, $createdFrom) => $query->whereDate('start_date', '>=', $createdFrom)
+                                fn ($query, $createdFrom) => $query->whereDate('start_date', '>=', $createdFrom)
                             )
                             ->when(
                                 $data['created_until'],
-                                fn($query, $createdUntil) => $query->whereDate('start_date', '<=', $createdUntil)
+                                fn ($query, $createdUntil) => $query->whereDate('start_date', '<=', $createdUntil)
                             );
                     })
-                    ->indicateUsing(function(array $data): array {
+                    ->indicateUsing(function (array $data): array {
                         $query = Tour::query()->where('type', TourType::TPS->value);
-                        
+
                         $indicators = [];
                         if ($data['active'] && $data['archive']) {
                             $query = $query
@@ -391,7 +475,7 @@ class TourTpsResource extends Resource
                                 ->orWhere('start_date', '<', Carbon::now());
                             $indicators['active'] = "Active & Archive ({$query->count()})";
                         }
-                        
+
                         if ($data['active']) {
                             $query = $query->where('start_date', '>=', Carbon::now());
                             $indicators['active'] = "Active ({$query->count()})";
@@ -401,30 +485,30 @@ class TourTpsResource extends Resource
                             $indicators['archive'] = "Archive ({$query->count()})";
                         }
                         if ($data['country_id'] ?? null) {
-                            $indicators['country_id'] = 'Country: ' . Country::find($data['country_id'])->name;
+                            $indicators['country_id'] = 'Country: '.Country::find($data['country_id'])->name;
                         }
                         if ($data['city_id'] ?? null) {
-                            $indicators['city_id'] = 'City: ' . City::find($data['city_id'])->name;
+                            $indicators['city_id'] = 'City: '.City::find($data['city_id'])->name;
                         }
                         if ($data['company_id'] ?? null) {
-                            $indicators['company_id'] = 'Company: ' . Company::find($data['company_id'])->name;
+                            $indicators['company_id'] = 'Company: '.Company::find($data['company_id'])->name;
                         }
                         if ($data['created_by'] ?? null) {
-                            $indicators['created_by'] = 'Admin creator: ' . User::find($data['created_by'])->name;
+                            $indicators['created_by'] = 'Admin creator: '.User::find($data['created_by'])->name;
                         }
                         if ($data['created_from'] ?? null) {
-                            $indicators['created_from'] = 'Order from ' . Carbon::parse(
-                                    $data['created_from']
-                                )->toFormattedDateString();
+                            $indicators['created_from'] = 'Order from '.Carbon::parse(
+                                $data['created_from']
+                            )->toFormattedDateString();
                         }
                         if ($data['created_until'] ?? null) {
-                            $indicators['created_until'] = 'Order until ' . Carbon::parse(
-                                    $data['created_until']
-                                )->toFormattedDateString();
+                            $indicators['created_until'] = 'Order until '.Carbon::parse(
+                                $data['created_until']
+                            )->toFormattedDateString();
                         }
-                        
+
                         return $indicators;
-                    })
+                    }),
             ], layout: FiltersLayout::AboveContent)
             ->columns([
                 Columns\TextColumn::make('group_number')
@@ -442,49 +526,50 @@ class TourTpsResource extends Resource
                     ->date()
                     ->sortable(),
                 Columns\TextColumn::make('guide_name')
-                    ->formatStateUsing(function(Tour $tour) {
+                    ->formatStateUsing(function (Tour $tour) {
                         if ($tour->guide_type == GuideType::Escort) {
-                            return $tour->guide_name . ($tour->guide_phone ? " ($tour->guide_phone)" : "");
+                            return $tour->guide_name.($tour->guide_phone ? " ($tour->guide_phone)" : '');
                         }
+
                         return 'LOCAL GUIDE';
                     }),
                 Columns\TextColumn::make('status')
                     ->badge(),
                 Columns\TextColumn::make('total_price')
-                    ->formatStateUsing(function($record, $state) {
+                    ->formatStateUsing(function ($record, $state) {
                         /** @var Tour $record */
                         if (TourService::isVisible($record)) {
                             return TourService::formatMoney(
-                                    $record->total_price
-                                ) . ' ' . ExpenseService::getMainCurrency()?->from?->getSymbol();
+                                $record->total_price
+                            ).' '.ExpenseService::getMainCurrency()?->from?->getSymbol();
                         }
-                        
+
                         return '-';
                     })
                     ->sortable(),
                 Columns\TextColumn::make('expenses_total')
-                    ->badge(fn(Tour $record) => TourService::isVisible($record))
+                    ->badge(fn (Tour $record) => TourService::isVisible($record))
                     ->color('danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(function($record, $state) {
+                    ->formatStateUsing(function ($record, $state) {
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency(
-                                )?->from?->getSymbol();
+                            return TourService::formatMoney($state).' '.ExpenseService::getMainCurrency(
+                            )?->from?->getSymbol();
                         }
-                        
+
                         return '-';
                     })
                     ->sortable(),
                 Columns\TextColumn::make('income')
-                    ->badge(fn(Tour $record) => TourService::isVisible($record))
-                    ->color(fn(Tour $record) => $record->income > 0 ? 'success' : 'danger')
+                    ->badge(fn (Tour $record) => TourService::isVisible($record))
+                    ->color(fn (Tour $record) => $record->income > 0 ? 'success' : 'danger')
                     ->size(Columns\TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(function($record, $state) {
+                    ->formatStateUsing(function ($record, $state) {
                         if (TourService::isVisible($record)) {
-                            return TourService::formatMoney($state) . ' ' . ExpenseService::getMainCurrency(
-                                )?->from?->getSymbol();
+                            return TourService::formatMoney($state).' '.ExpenseService::getMainCurrency(
+                            )?->from?->getSymbol();
                         }
-                        
+
                         return '-';
                     })
                     ->sortable(),
@@ -495,12 +580,12 @@ class TourTpsResource extends Resource
                     ->suffix('%')
                     ->sortable(),
                 Columns\TextColumn::make('country.name'),
-                
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                
+
                 /*Columns\TextColumn::make('status')
                     ->numeric()
                     ->sortable(),
@@ -532,20 +617,20 @@ class TourTpsResource extends Resource
                 Tables\Actions\Action::make('export_all')
                     ->label('Reports')
                     ->icon('heroicon-o-document-text')
-                    ->url(fn(Tour $record) => route('export-all', $record)),
+                    ->url(fn (Tour $record) => route('export-all', $record)),
                 Tables\Actions\EditAction::make(),
                 StatusAction::make()->label('')->icon(''),
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->headerActions([
-            
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin())
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn () => auth()->user()->isAdmin()),
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
@@ -553,13 +638,13 @@ class TourTpsResource extends Resource
             RelationManagers\ExpensesThroughDaysRelationManager::class,
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListTours::route('/'),
             'create' => Pages\CreateTour::route('/create'),
-            'edit' => Pages\EditTour::route('/{record}/edit')
+            'edit' => Pages\EditTour::route('/{record}/edit'),
         ];
     }
 }
