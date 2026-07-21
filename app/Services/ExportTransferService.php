@@ -2,94 +2,63 @@
 
 namespace App\Services;
 
+use App\Enums\TransportType;
 use App\Models\Transfer;
 use Carbon\Carbon;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\SimpleType\Jc;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class ExportTransferService
 {
-    public static function generate(Transfer $transfer): PhpWord
+    public static function generate(Transfer $transfer): TemplateProcessor
     {
-        $phpWord = new PhpWord();
-        $phpWord->setDefaultFontName('Calibri');
+        $templateProcessor = new TemplateProcessor(self::getTemplatePath());
 
-        $phpWord->addTableStyle('VoucherTable', [
-            'borderSize'  => 6,
-            'borderColor' => 'CCCCCC',
-            'cellMargin'  => 100,
-        ]);
-
-        $section = $phpWord->addSection([
-            'pageSizeW'    => 11906,
-            'pageSizeH'    => 16838,
-            'marginTop'    => 1134,
-            'marginRight'  => 1134,
-            'marginBottom' => 1134,
-            'marginLeft'   => 1134,
-        ]);
-
-        // Header
-        $section->addTextRun(['alignment' => Jc::CENTER])
-            ->addText('TRANSFER VOUCHER', ['name' => 'Calibri', 'size' => 20, 'bold' => true, 'color' => '1F3864']);
-
-        $section->addTextBreak(1);
-
-        $section->addTextRun(['alignment' => Jc::CENTER])
-            ->addText('No ' . (1000 + $transfer->id), ['name' => 'Calibri', 'size' => 14, 'bold' => true, 'color' => '2E75B6']);
-
-        $section->addTextBreak(1);
-
-        // Table
-        $labelFont = ['name' => 'Calibri', 'size' => 11, 'bold' => true, 'color' => '2E75B6'];
-        $valueFont = ['name' => 'Calibri', 'size' => 11];
-        $labelCell = ['bgColor' => 'EBF3FB'];
-        $valueCell = ['bgColor' => 'FFFFFF'];
-
-        $table = $section->addTable('VoucherTable');
-
-        $dateTime  = $transfer->date_time ? Carbon::parse($transfer->date_time)->format('d M Y  H:i') : '-';
-        $route     = $transfer->route ?: '-';
-        $company   = $transfer->company?->name ?? '-';
-        $transport = $transfer->transport_type?->getLabel() ?? '-';
-        $pax       = (string)($transfer->pax ?? '-');
-        $nameplate = $transfer->nameplate ?: '-';
-        $driver    = $transfer->driver_name ?: '-';
-        $driverPh  = $transfer->driver_phone ?: '-';
-        $mark      = $transfer->mark ?: '-';
-        $comment   = $transfer->comment ?: '-';
-
-        $rows = [
-            ['Date & Time',        $dateTime],
-            ['Route',              $route],
-            ['Company',            $company],
-            ['Transport',          $transport],
-            ['PAX',                $pax],
-            ['Passenger / Tablet', $nameplate],
-            ['Driver',             $driver],
-            ['Driver Phone',       $driverPh],
-            ['Car (Mark)',         $mark],
-            ['Comment',            $comment],
-        ];
-
-        foreach ($rows as [$label, $value]) {
-            $table->addRow(400);
-            $table->addCell(3000, $labelCell)->addText($label, $labelFont);
-            $table->addCell(6500, $valueCell)->addText($value, $valueFont);
+        foreach (self::getPlaceholders($transfer) as $placeholder => $value) {
+            $templateProcessor->setValue($placeholder, $value);
         }
 
-        $section->addTextBreak(2);
-
-        $section->addTextRun(['alignment' => Jc::CENTER])
-            ->addText('Thank you for choosing our service', ['name' => 'Calibri', 'size' => 9, 'italic' => true, 'color' => '888888']);
-
-        return $phpWord;
+        return $templateProcessor;
     }
 
-    public static function save(PhpWord $phpWord, string $filePath): void
+    public static function getTemplatePath(): string
     {
-        $writer = IOFactory::createWriter($phpWord, 'Word2007');
-        $writer->save($filePath);
+        return __DIR__.'/Templates/Transfer_voucher.docx';
+    }
+
+    public static function getPlaceholders(Transfer $transfer): array
+    {
+        return [
+            'transfer_number' => (string) (1000 + $transfer->id),
+            'date_time' => $transfer->date_time ? Carbon::parse($transfer->date_time)->format('d M Y  H:i') : '-',
+            'route' => $transfer->route ?: '-',
+            'driver' => $transfer->driver_name ?: '-',
+            'driver_phone' => $transfer->driver_phone ?: '-',
+            'passenger' => $transfer->nameplate ?: '-',
+            'company' => $transfer->company?->name ?? '-',
+            'pax' => (string) ($transfer->pax ?? '-'),
+            'mark' => $transfer->mark ?: '-',
+            'transport_type' => self::getTransportTypeLabel($transfer->transport_type),
+            'pickup_location' => $transfer->place_of_submission ?: '-',
+            'comment' => $transfer->comment ?: '-',
+        ];
+    }
+
+    /**
+     * transport_type is a plain string column: TPS stores a TransportType enum
+     * value (e.g. "1"), Corporate stores a free-form TransportClass name. Try
+     * the enum first, fall back to the raw string.
+     */
+    public static function getTransportTypeLabel(?string $transportType): string
+    {
+        if (! $transportType) {
+            return '-';
+        }
+
+        return TransportType::tryFrom((int) $transportType)?->getLabel() ?? $transportType;
+    }
+
+    public static function save(TemplateProcessor $templateProcessor, string $filePath): void
+    {
+        $templateProcessor->saveAs($filePath);
     }
 }
