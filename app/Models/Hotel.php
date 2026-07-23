@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
-use App\Enums\RoomSeasonType;
+use App\Enums\AttachmentType;
 use App\Traits\HasLocaleFields;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property int $id
@@ -37,7 +36,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property bool $nds_included
  * @property bool $is_visible
  * @property int $tour_sbor
- *
  * @property City $city
  * @property Country $country
  * @property Collection<HotelRoomType> $roomTypes
@@ -79,7 +77,7 @@ class Hotel extends Model
         'longitude',
         'nds_included',
         'tour_sbor',
-        'is_visible'
+        'is_visible',
     ];
 
     protected $casts = [
@@ -124,6 +122,16 @@ class Hotel extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'attachable')->orderBy('id');
+    }
+
+    public function photos(): MorphMany
+    {
+        return $this->attachments()->where('category', AttachmentType::Photo);
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->attachments()->where('category', AttachmentType::Document);
     }
 
     public function recommendedHotels(): HasMany

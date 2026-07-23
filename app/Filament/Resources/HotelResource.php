@@ -2,33 +2,36 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
+use App\Enums\CurrencyEnum;
+use App\Enums\RateEnum;
+use App\Enums\RoomSeasonType;
+use App\Filament\Resources\HotelResource\Actions\HotelPeriodsAction;
+use App\Filament\Resources\HotelResource\Pages;
+use App\Filament\Resources\HotelResource\RelationManagers;
 use App\Models\City;
 use App\Models\Hotel;
-use App\Enums\RateEnum;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Enums\CurrencyEnum;
-use App\Enums\RoomSeasonType;
 use App\Services\TourService;
-use Filament\Resources\Resource;
 use App\Tables\Columns\PeriodsColumn;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\HotelResource\Pages;
-use App\Filament\Resources\HotelResource\Actions\HotelPeriodsAction;
+use Illuminate\Database\Eloquent\Model;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
-use App\Filament\Resources\HotelResource\RelationManagers;
 
 class HotelResource extends Resource
 {
     protected static ?string $model = Hotel::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+
     protected static ?int $navigationSort = 4;
+
     protected static ?string $navigationGroup = 'Manual';
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getGloballySearchableAttributes(): array
@@ -39,7 +42,7 @@ class HotelResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Email'   => $record->email,
+            'Email' => $record->email,
             'Address' => $record->address,
         ];
     }
@@ -47,7 +50,7 @@ class HotelResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->disabled(fn() => auth()->user()->isOperator())
+            ->disabled(fn () => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\Tabs::make('Hotel')
                     ->tabs([
@@ -73,13 +76,17 @@ class HotelResource extends Resource
                                                 foreach (RateEnum::cases() as $rate) {
                                                     $options[$rate->value] = $rate->getLabel();
                                                 }
+
                                                 return $options;
                                             }),
                                         Forms\Components\TextInput::make('email')
                                             ->label('Email')
                                             ->email()
                                             ->suffixAction(function ($record) {
-                                                if (!$record?->email) return [];
+                                                if (! $record?->email) {
+                                                    return [];
+                                                }
+
                                                 return [
                                                     Forms\Components\Actions\Action::make('hotel_email')
                                                         ->icon('heroicon-o-paper-airplane')
@@ -104,7 +111,7 @@ class HotelResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->relationship('country', 'name')
-                                            ->afterStateUpdated(fn($set) => $set('city_id', null))
+                                            ->afterStateUpdated(fn ($set) => $set('city_id', null))
                                             ->reactive(),
                                         Forms\Components\Select::make('city_id')
                                             ->label('City')
@@ -112,7 +119,7 @@ class HotelResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->relationship('city', 'name')
-                                            ->options(fn($get) => TourService::getCities($get('country_id'))),
+                                            ->options(fn ($get) => TourService::getCities($get('country_id'))),
                                         Forms\Components\TextInput::make('address')
                                             ->label('Address')
                                             ->maxLength(255)
@@ -121,8 +128,8 @@ class HotelResource extends Resource
                                             ->label('Coordinates (Lat, Lng)')
                                             ->placeholder('41.2995, 69.2401')
                                             ->helperText('Latitude and longitude separated by a comma')
-                                            ->formatStateUsing(fn($record) => $record?->latitude && $record?->longitude
-                                                ? $record->latitude . ', ' . $record->longitude : '')
+                                            ->formatStateUsing(fn ($record) => $record?->latitude && $record?->longitude
+                                                ? $record->latitude.', '.$record->longitude : '')
                                             ->dehydrated(false)
                                             ->columnSpan(2),
                                     ]),
@@ -146,15 +153,15 @@ class HotelResource extends Resource
                                         Forms\Components\Select::make('tour_sbor')
                                             ->label('Tour Service Fee')
                                             ->options([
-                                                5  => '5%',
+                                                5 => '5%',
                                                 10 => '10%',
                                                 15 => '15%',
                                             ]),
                                         Forms\Components\Checkbox::make('nds_included')
                                             ->label('VAT (NDS) Included')
-                                            ->helperText(fn() => 'Checked: this hotel\'s room prices will have VAT/NDS added automatically (currently '
-                                                . rtrim(rtrim(number_format(TourService::getVatPercent(), 2), '0'), '.')
-                                                . '%, set in Settings). Unchecked: prices are charged exactly as entered, with no VAT added.')
+                                            ->helperText(fn () => 'Checked: this hotel\'s room prices will have VAT/NDS added automatically (currently '
+                                                .rtrim(rtrim(number_format(TourService::getVatPercent(), 2), '0'), '.')
+                                                .'%, set in Settings). Unchecked: prices are charged exactly as entered, with no VAT added.')
                                             ->inline(false),
                                     ]),
 
@@ -197,10 +204,13 @@ class HotelResource extends Resource
                                             ->directory('hotels')
                                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                             ->formatStateUsing(function ($record) {
-                                                if (!$record) return [];
+                                                if (! $record) {
+                                                    return [];
+                                                }
+
                                                 /** @var Hotel $record */
-                                                return $record->attachments
-                                                    ->map(fn($a) => $a->file_path)
+                                                return $record->photos
+                                                    ->map(fn ($a) => $a->file_path)
                                                     ->toArray();
                                             })
                                             ->storeFiles(false),
@@ -271,9 +281,10 @@ class HotelResource extends Resource
                                             ->itemLabel(function ($get, $uuid) {
                                                 $item = $get("periods.$uuid") ?? [];
                                                 $from = $item['start_date'] ?? '—';
-                                                $to   = $item['end_date']   ?? '—';
+                                                $to = $item['end_date'] ?? '—';
                                                 $type = $item['season_type'] ?? '';
-                                                return "$from → $to" . ($type ? "  ($type)" : '');
+
+                                                return "$from → $to".($type ? "  ($type)" : '');
                                             })
                                             ->schema([
                                                 Forms\Components\Grid::make(3)->schema([
@@ -284,7 +295,7 @@ class HotelResource extends Resource
                                                     Forms\Components\DatePicker::make('end_date')
                                                         ->label('To')
                                                         ->native(false)
-                                                        ->minDate(fn($get) => $get('start_date'))
+                                                        ->minDate(fn ($get) => $get('start_date'))
                                                         ->required(),
                                                     Forms\Components\Select::make('season_type')
                                                         ->label('Season Type')
@@ -316,7 +327,7 @@ class HotelResource extends Resource
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
-                                ->options(fn() => TourService::getCities()),
+                                ->options(fn () => TourService::getCities()),
                             Forms\Components\Select::make('currency')
                                 ->label('Currency')
                                 ->native(false)
@@ -329,6 +340,7 @@ class HotelResource extends Resource
                                 ->options(function () {
                                     $current = (int) date('Y');
                                     $years = range($current - 5, $current + 3);
+
                                     return array_combine($years, $years);
                                 }),
                             Forms\Components\Select::make('season_type')
@@ -337,22 +349,23 @@ class HotelResource extends Resource
                                 ->options(RoomSeasonType::class),
                         ]),
                     ])
-                    ->query(fn(Builder $query, $data) => $query
-                        ->when($data['city_id'], fn($q, $v) => $q->where('city_id', $v)))
+                    ->query(fn (Builder $query, $data) => $query
+                        ->when($data['city_id'], fn ($q, $v) => $q->where('city_id', $v)))
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                        if (!empty($data['city_id'])) {
-                            $indicators[] = 'City: ' . City::find($data['city_id'])->name;
+                        if (! empty($data['city_id'])) {
+                            $indicators[] = 'City: '.City::find($data['city_id'])->name;
                         }
-                        if (!empty($data['currency'])) {
-                            $indicators[] = 'Currency: ' . CurrencyEnum::tryFrom($data['currency'])?->getLabel();
+                        if (! empty($data['currency'])) {
+                            $indicators[] = 'Currency: '.CurrencyEnum::tryFrom($data['currency'])?->getLabel();
                         }
-                        if (!empty($data['year'])) {
-                            $indicators[] = 'Year: ' . $data['year'];
+                        if (! empty($data['year'])) {
+                            $indicators[] = 'Year: '.$data['year'];
                         }
-                        if (!empty($data['season_type'])) {
-                            $indicators[] = 'Season: ' . RoomSeasonType::tryFrom($data['season_type'])?->getLabel();
+                        if (! empty($data['season_type'])) {
+                            $indicators[] = 'Season: '.RoomSeasonType::tryFrom($data['season_type'])?->getLabel();
                         }
+
                         return $indicators;
                     }),
             ], layout: FiltersLayout::AboveContent)
@@ -366,17 +379,18 @@ class HotelResource extends Resource
                     ->label('Room prices')
                     ->getStateUsing(function ($record, $livewire) {
                         $filters = $livewire->tableFilters;
+
                         return [
-                            'hotel'       => $record,
-                            'isFirst'     => $record->is($livewire->getTableRecords()->first()),
-                            'currency'    => $filters['filters']['currency'],
-                            'year'        => $filters['filters']['year'],
+                            'hotel' => $record,
+                            'isFirst' => $record->is($livewire->getTableRecords()->first()),
+                            'currency' => $filters['filters']['currency'],
+                            'year' => $filters['filters']['year'],
                             'season_type' => $filters['filters']['season_type'] ?? null,
                         ];
                     }),
 
                 Tables\Columns\TextColumn::make('email')
-                    ->url(fn($record) => $record->email ? "mailto:{$record->email}" : null, true)
+                    ->url(fn ($record) => $record->email ? "mailto:{$record->email}" : null, true)
                     ->color('info')
                     ->searchable()
                     ->html(),
@@ -396,15 +410,15 @@ class HotelResource extends Resource
 
                 Tables\Columns\TextColumn::make('phone_list')
                     ->label('Phones')
-                    ->getStateUsing(fn($record) => $record->phones
-                        ->map(fn($p) => "<a href='https://t.me/{$p->phone_number}' target='_blank'>{$p->phone_number}</a>")
+                    ->getStateUsing(fn ($record) => $record->phones
+                        ->map(fn ($p) => "<a href='https://t.me/{$p->phone_number}' target='_blank'>{$p->phone_number}</a>")
                         ->implode('<br/>'))
                     ->color('info')
                     ->html(),
 
                 Tables\Columns\TextColumn::make('rate')
                     ->label('Rate')
-                    ->getStateUsing(fn($record) => RateEnum::tryFrom($record->rate)?->getLabel())
+                    ->getStateUsing(fn ($record) => RateEnum::tryFrom($record->rate)?->getLabel())
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('booking_cancellation_days')
@@ -417,7 +431,7 @@ class HotelResource extends Resource
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn () => auth()->user()->isAdmin()),
                 ]),
             ]);
     }
@@ -428,15 +442,16 @@ class HotelResource extends Resource
             RelationManagers\RoomTypesRelationManager::class,
             RelationManagers\HotelRulesRelationManager::class,
             RelationManagers\ReviewsRelationManager::class,
+            RelationManagers\DocumentsRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListHotels::route('/'),
+            'index' => Pages\ListHotels::route('/'),
             'create' => Pages\CreateHotel::route('/create'),
-            'edit'   => Pages\EditHotel::route('/{record}/edit'),
+            'edit' => Pages\EditHotel::route('/{record}/edit'),
         ];
     }
 }

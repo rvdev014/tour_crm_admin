@@ -17,7 +17,7 @@ class EditHotel extends EditRecord
     {
         $formState = $this->form->getRawState();
         // Process coordinates field
-        if (!empty($formState['coordinates'])) {
+        if (! empty($formState['coordinates'])) {
             $coordinates = explode(',', $formState['coordinates']);
             if (count($coordinates) === 2) {
                 $data['latitude'] = trim($coordinates[0]);
@@ -36,16 +36,18 @@ class EditHotel extends EditRecord
 
         /** @var (TemporaryUploadedFile|string)[] $photos */
         $photos = $formState['photos'] ?? [];
-        foreach ($hotel->attachments as $oldAttachment) {
-            if (!in_array($oldAttachment->file_path, $photos)) {
+        foreach ($hotel->photos as $oldAttachment) {
+            if (! in_array($oldAttachment->file_path, $photos)) {
                 $oldAttachment->delete();
             }
         }
 
         foreach ($photos as $photo) {
-            if (is_string($photo)) continue;
+            if (is_string($photo)) {
+                continue;
+            }
             $attachmentData = FileService::createAttachmentFromFile($photo);
-            $hotel->attachments()->create($attachmentData);
+            $hotel->photos()->create($attachmentData);
         }
     }
 
@@ -54,11 +56,10 @@ class EditHotel extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
-
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\DeleteAction::make(),
+            //            Actions\DeleteAction::make(),
         ];
     }
 }

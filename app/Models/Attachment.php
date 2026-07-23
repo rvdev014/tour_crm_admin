@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\AttachmentType;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -17,9 +16,9 @@ use Illuminate\Support\Facades\Storage;
  * @property string $file_path
  * @property string $file_type
  * @property string $file_size
- * @property integer $attachable_id
+ * @property AttachmentType $category
+ * @property int $attachable_id
  * @property string $attachable_type
- *
  * @property-read Model $attachable
  */
 class Attachment extends Model
@@ -35,6 +34,11 @@ class Attachment extends Model
         'file_path',
         'file_type',
         'file_size',
+        'category',
+    ];
+
+    protected $casts = [
+        'category' => AttachmentType::class,
     ];
 
     public function attachable(): MorphTo
@@ -54,7 +58,7 @@ class Attachment extends Model
     public function getUrl(): ?string
     {
         if (Storage::disk('public')->exists($this->file_path)) {
-            return asset('storage/' . $this->file_path);
+            return asset('storage/'.$this->file_path);
         }
 
         return null;

@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Hotel;
 use App\Models\Group;
-use Illuminate\Http\Request;
+use App\Models\Hotel;
 use App\Models\HotelRoomType;
 use App\Services\ExpenseService;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -52,20 +52,20 @@ class HotelResource extends JsonResource
 
     private function getPhotos(): array
     {
-        return $this->attachments->map(function($attachment) {
+        return $this->photos->map(function ($attachment) {
             return $attachment->getUrl();
         })->filter()->values()->all();
     }
 
     private function getPhoto(): ?string
     {
-        return $this->attachments->first()?->getUrl();
+        return $this->photos->first()?->getUrl();
     }
 
     private function getPrice($isUsd = true): ?float
     {
         $period = ExpenseService::getHotelPeriod($this->resource, now());
-        if (!$period) {
+        if (! $period) {
             return 0;
         }
 
@@ -77,7 +77,7 @@ class HotelResource extends JsonResource
 
         /** @var Group $group */
         $group = Group::query()->where('name', 'website')->first();
-        if (!$group) {
+        if (! $group) {
             throw new \Exception('Group "website" not found');
         }
 
@@ -99,7 +99,7 @@ class HotelResource extends JsonResource
     private function getPosition(): ?array
     {
         if ($this->latitude && $this->longitude) {
-            return [(float)$this->latitude, (float)$this->longitude];
+            return [(float) $this->latitude, (float) $this->longitude];
         }
 
         return null;
@@ -107,7 +107,7 @@ class HotelResource extends JsonResource
 
     private function getRooms(): array
     {
-        if (!$this->relationLoaded('roomTypes')) {
+        if (! $this->relationLoaded('roomTypes')) {
             return [];
         }
 
@@ -115,7 +115,7 @@ class HotelResource extends JsonResource
         $groupedRoomTypes = $this->roomTypes
             ->load('roomType')
             ->groupBy('roomType.name')
-            ->map(function($hotelRoomTypes, $roomTypeName) {
+            ->map(function ($hotelRoomTypes, $roomTypeName) {
                 // Get the first room type for basic info
                 /** @var HotelRoomType $firstRoomType */
                 $firstRoomType = $hotelRoomTypes->first();
@@ -130,10 +130,10 @@ class HotelResource extends JsonResource
                     'id' => $firstRoomType->id,
                     'room_type_id' => $roomType->id,
                     'name' => $roomTypeName,
-                    'picture' => $roomType?->picture ? asset('storage/' . $roomType->picture) : null,
+                    'picture' => $roomType?->picture ? asset('storage/'.$roomType->picture) : null,
                     'description' => $roomType?->description,
                     'price' => $price,
-                    'price_usd' => round($price / ($currencyUsd?->rate ?? 1), 2)
+                    'price_usd' => round($price / ($currencyUsd?->rate ?? 1), 2),
                 ];
             })
             ->values()

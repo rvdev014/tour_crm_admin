@@ -5,7 +5,6 @@ namespace App\Filament\Resources\HotelResource\Pages;
 use App\Filament\Resources\HotelResource;
 use App\Models\Hotel;
 use App\Services\FileService;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -16,7 +15,7 @@ class CreateHotel extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Process coordinates field
-        if (!empty($data['coordinates'])) {
+        if (! empty($data['coordinates'])) {
             $coordinates = explode(',', $data['coordinates']);
             if (count($coordinates) === 2) {
                 $data['latitude'] = trim($coordinates[0]);
@@ -38,7 +37,7 @@ class CreateHotel extends CreateRecord
         $photos = $formState['photos'] ?? [];
         foreach ($photos as $photo) {
             $attachmentData = FileService::createAttachmentFromFile($photo);
-            $hotel->attachments()->create($attachmentData);
+            $hotel->photos()->create($attachmentData);
         }
     }
 
