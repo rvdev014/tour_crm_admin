@@ -21,12 +21,14 @@ class WebTourResource extends Resource
     protected static ?string $model = WebTour::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
+
     protected static ?string $navigationGroup = 'Website Management';
+
     protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {
-        return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
+        return ! auth()->user()->isOperator() && ! auth()->user()->isAccountant();
     }
 
     public static function form(Form $form): Form
@@ -71,6 +73,21 @@ class WebTourResource extends Resource
                                         ->label('Mark as Popular')
                                         ->default(false)
                                         ->inline(false),
+                                ]),
+
+                            Forms\Components\Section::make('Tour Dates')
+                                ->description('The advertised departure window for this tour, shown on the website. Not applicable to pax-based (Free) pricing, which has no fixed dates.')
+                                ->icon('heroicon-o-calendar')
+                                ->columns(2)
+                                ->visible(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value)
+                                ->schema([
+                                    Forms\Components\DatePicker::make('start_date')
+                                        ->label('Start Date')
+                                        ->required(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value),
+                                    Forms\Components\DatePicker::make('end_date')
+                                        ->label('End Date')
+                                        ->minDate(fn ($get) => $get('start_date'))
+                                        ->required(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value),
                                 ]),
 
                             Forms\Components\Section::make('Categories')
@@ -154,13 +171,14 @@ class WebTourResource extends Resource
                                             'style' => '--c-500: 239, 68, 68; --c-600: 220, 38, 38;',
                                         ])
                                         ->deleteAction(
-                                            fn(Forms\Components\Actions\Action $action) => $action
+                                            fn (Forms\Components\Actions\Action $action) => $action
                                                 ->color('danger')
                                                 ->extraAttributes(['class' => 'delete-btn'])
                                         )
                                         ->itemLabel(function ($get, $uuid) {
                                             $index = array_search($uuid, array_keys($get('days'))) ?? 0;
-                                            return 'Day ' . ($index + 1);
+
+                                            return 'Day '.($index + 1);
                                         })
                                         ->addActionLabel('+ Add Day')
                                         ->addActionAlignment('end')
@@ -181,7 +199,7 @@ class WebTourResource extends Resource
                                                     ->searchable()
                                                     ->preload()
                                                     ->relationship('city', 'name')
-                                                    ->options(fn($get) => TourService::getCities()),
+                                                    ->options(fn ($get) => TourService::getCities()),
                                             ]),
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\FileUpload::make('photo')
@@ -301,7 +319,7 @@ class WebTourResource extends Resource
                             Forms\Components\Section::make('Date & Price Entries')
                                 ->description('Set price per person (USD) for specific date ranges.')
                                 ->icon('heroicon-o-calendar')
-                                ->visible(fn($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value)
+                                ->visible(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value)
                                 ->schema([
                                     Forms\Components\Repeater::make('prices')
                                         ->relationship('prices')
@@ -312,9 +330,10 @@ class WebTourResource extends Resource
                                         ->itemLabel(function ($get, $uuid) {
                                             $item = $get("prices.$uuid") ?? [];
                                             $from = $item['from_date'] ?? '—';
-                                            $to   = $item['to_date']   ?? '—';
-                                            $price = $item['price']    ?? '';
-                                            return "$from → $to" . ($price ? "  |  \${$price}" : '');
+                                            $to = $item['to_date'] ?? '—';
+                                            $price = $item['price'] ?? '';
+
+                                            return "$from → $to".($price ? "  |  \${$price}" : '');
                                         })
                                         ->schema([
                                             Forms\Components\Grid::make(3)->schema([
@@ -344,7 +363,7 @@ class WebTourResource extends Resource
                             Forms\Components\Section::make('Pax-Based Pricing')
                                 ->description('Set price per person (USD) depending on group size.')
                                 ->icon('heroicon-o-users')
-                                ->visible(fn($get) => $get('type') === WebTourPriceType::Free->value)
+                                ->visible(fn ($get) => $get('type') === WebTourPriceType::Free->value)
                                 ->schema([
                                     Forms\Components\Repeater::make('freePrices')
                                         ->relationship('freePrices')
@@ -353,11 +372,12 @@ class WebTourResource extends Resource
                                         ->addActionAlignment('end')
                                         ->collapsible()
                                         ->itemLabel(function ($get, $uuid) {
-                                            $item  = $get("freePrices.$uuid") ?? [];
-                                            $from  = $item['pax_from'] ?? '—';
-                                            $to    = $item['pax_to']   ?? '—';
-                                            $price = $item['price']    ?? '';
-                                            return "Pax {$from}–{$to}" . ($price ? "  |  \${$price}/person" : '');
+                                            $item = $get("freePrices.$uuid") ?? [];
+                                            $from = $item['pax_from'] ?? '—';
+                                            $to = $item['pax_to'] ?? '—';
+                                            $price = $item['price'] ?? '';
+
+                                            return "Pax {$from}–{$to}".($price ? "  |  \${$price}/person" : '');
                                         })
                                         ->schema([
                                             Forms\Components\Grid::make(3)->schema([
@@ -400,6 +420,7 @@ class WebTourResource extends Resource
                                             if ($record) {
                                                 $ignoreIds[] = $record->id;
                                             }
+
                                             return WebTour::query()
                                                 ->whereNotIn('id', $ignoreIds)
                                                 ->pluck('name_ru', 'id');
@@ -444,7 +465,7 @@ class WebTourResource extends Resource
 
                 Tables\Columns\TextColumn::make('prices')
                     ->label('Prices')
-                    ->formatStateUsing(fn() => 'View prices')
+                    ->formatStateUsing(fn () => 'View prices')
                     ->html()
                     ->action(WebTourResource\Actions\PricesAction::make()),
 
@@ -467,7 +488,7 @@ class WebTourResource extends Resource
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn () => auth()->user()->isAdmin()),
                 ]),
             ]);
     }
@@ -482,9 +503,9 @@ class WebTourResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListWebTours::route('/'),
+            'index' => Pages\ListWebTours::route('/'),
             'create' => Pages\CreateWebTour::route('/create'),
-            'edit'   => Pages\EditWebTour::route('/{record}/edit'),
+            'edit' => Pages\EditWebTour::route('/{record}/edit'),
         ];
     }
 }
