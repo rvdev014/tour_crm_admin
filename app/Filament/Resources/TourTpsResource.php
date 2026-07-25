@@ -289,32 +289,16 @@ class TourTpsResource extends Resource
                 ]),
 
             Section::make('Rooming info')
-                ->description('Room counts by type, split for Uzbek and foreign guests. This drives Hotel expense pricing for this tour — fill it in before adding Hotel expenses in Day expenses.')
+                ->description('Room counts by type for foreign guests. This drives Hotel expense pricing for this tour — fill it in before adding Hotel expenses in Day expenses.')
                 ->icon('heroicon-o-building-office-2')
                 ->collapsible()
                 ->schema([
-                    Components\Tabs::make('rooming_tabs')
-                        ->columnSpanFull()
-                        ->tabs([
-                            Components\Tabs\Tab::make('UZ')
-                                ->schema([
-                                    ...TourService::generateRoomingSchema(RoomPersonType::Uzbek, true),
+                    ...TourService::generateRoomingSchema(RoomPersonType::Foreign, true),
 
-                                    Section::make('Other rooming')
-                                        ->schema(TourService::generateRoomingSchema(RoomPersonType::Uzbek))
-                                        ->collapsible()
-                                        ->collapsed(),
-                                ]),
-                            Components\Tabs\Tab::make('Foreign')
-                                ->schema([
-                                    ...TourService::generateRoomingSchema(RoomPersonType::Foreign, true),
-
-                                    Section::make('Other rooming')
-                                        ->schema(TourService::generateRoomingSchema(RoomPersonType::Foreign))
-                                        ->collapsible()
-                                        ->collapsed(),
-                                ]),
-                        ]),
+                    Section::make('Other rooming')
+                        ->schema(TourService::generateRoomingSchema(RoomPersonType::Foreign))
+                        ->collapsible()
+                        ->collapsed(),
                 ]),
 
         ])->disabled(function ($record) {
