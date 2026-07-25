@@ -2,39 +2,38 @@
 
 namespace App\Services;
 
-use Throwable;
-use App\Models\City;
-use App\Models\Show;
-use App\Models\Tour;
-use App\Models\User;
-use App\Models\Hotel;
-use App\Models\Train;
-use App\Models\Driver;
-use App\Models\Museum;
+use App\Enums\DefaultSettings;
+use App\Enums\ExpenseStatus;
+use App\Enums\ExpenseType;
+use App\Enums\RoomPersonType;
 use App\Enums\TourType;
+use App\Enums\TransportType;
+use App\Models\City;
 use App\Models\Company;
 use App\Models\Country;
-use App\Models\Setting;
-use App\Models\RoomType;
-use App\Models\Transfer;
-use App\Models\GroupItem;
-use App\Models\TourHotel;
+use App\Models\Driver;
+use App\Models\Hotel;
 use App\Models\HotelRule;
-use App\Enums\ExpenseType;
+use App\Models\Museum;
 use App\Models\MuseumItem;
 use App\Models\Restaurant;
 use App\Models\RestaurantMenu;
-use App\Enums\ExpenseStatus;
-use App\Enums\TransportType;
+use App\Models\RoomType;
+use App\Models\Setting;
+use App\Models\Show;
+use App\Models\Tour;
 use App\Models\TourDayExpense;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Number;
-use App\Enums\DefaultSettings;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use App\Enums\RoomPersonType;
+use App\Models\TourHotel;
+use App\Models\Train;
+use App\Models\Transfer;
+use App\Models\User;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Number;
+use Throwable;
 
 class TourService
 {
@@ -77,30 +76,33 @@ class TourService
 
     public static function getCities($countryId = null, bool $isPluck = true, $isAll = false): array|Collection
     {
-        if (!$countryId) {
+        if (! $countryId) {
             $countryId = CacheService::remember(
                 'uzbekistan_country_id',
-                fn() => Country::query()->where('name', 'Uzbekistan')->first()?->id
+                fn () => Country::query()->where('name', 'Uzbekistan')->first()?->id
             );
-            if (!$countryId) {
+            if (! $countryId) {
                 throw new \Exception('Country \'Uzbekistan\' not found');
             }
         }
 
-        if (!empty($countryId)) {
+        if (! empty($countryId)) {
             $result = CacheService::remember(
                 "cities_{$countryId}",
-                fn() => City::query()
+                fn () => City::query()
                     ->select('name', 'id')
                     ->where('country_id', $countryId)
                     ->get()
             );
+
             return $isPluck ? $result->pluck('name', 'id') : $result;
         }
         if ($isAll) {
-            $result = CacheService::remember('cities', fn() => City::query()->select('name', 'id')->get());
+            $result = CacheService::remember('cities', fn () => City::query()->select('name', 'id')->get());
+
             return $isPluck ? $result->pluck('name', 'id') : $result;
         }
+
         return [];
     }
 
@@ -108,7 +110,7 @@ class TourService
     {
         return CacheService::remember(
             'drivers',
-            fn() => Driver::query()
+            fn () => Driver::query()
                 ->select('name', 'id')
                 ->get()
                 ->pluck('name', 'id')
@@ -118,8 +120,8 @@ class TourService
     public static function getTrains(): array|Collection
     {
         return CacheService::remember(
-            "trains",
-            fn() => Train::query()
+            'trains',
+            fn () => Train::query()
                 ->select('name', 'id')
                 ->get()
                 ->pluck('name', 'id')
@@ -130,7 +132,7 @@ class TourService
     {
         return CacheService::remember(
             "restaurants_{$localCityId}",
-            fn() => Restaurant::query()
+            fn () => Restaurant::query()
                 ->select('name', 'id')
                 ->where('city_id', $localCityId)
                 ->get()
@@ -142,7 +144,7 @@ class TourService
     {
         return CacheService::remember(
             "hotels_{$localCityId}",
-            fn() => Hotel::query()
+            fn () => Hotel::query()
                 ->select('name', 'id')
                 ->where('city_id', $localCityId)
                 ->get()
@@ -154,7 +156,7 @@ class TourService
     {
         return CacheService::remember(
             "museums_{$localCityId}",
-            fn() => Museum::query()
+            fn () => Museum::query()
                 ->select('name', 'id')
                 ->where('city_id', $localCityId)
                 ->get()
@@ -165,8 +167,8 @@ class TourService
     public static function getMuseumsByIds($ids): array|Collection
     {
         return CacheService::remember(
-            "museums_ids_" . implode(',', $ids),
-            fn() => Museum::query()
+            'museums_ids_'.implode(',', $ids),
+            fn () => Museum::query()
                 ->select('name', 'id')
                 ->whereIn('id', $ids)
                 ->get()
@@ -177,8 +179,8 @@ class TourService
     public static function getMuseumItems($museumIds): array|Collection
     {
         return CacheService::remember(
-            "museum_items_" . implode(',', $museumIds),
-            fn() => MuseumItem::query()
+            'museum_items_'.implode(',', $museumIds),
+            fn () => MuseumItem::query()
                 ->select('name', 'id')
                 ->whereIn('museum_id', $museumIds)
                 ->get()
@@ -190,7 +192,7 @@ class TourService
     {
         return CacheService::remember(
             "shows_{$localCityId}",
-            fn() => Show::query()
+            fn () => Show::query()
                 ->select('name', 'id')
                 ->where('city_id', $localCityId)
                 ->get()
@@ -208,6 +210,7 @@ class TourService
         if ($tour->created_by == $user->id) {
             return true;
         }
+
         return false;
     }
 
@@ -216,7 +219,7 @@ class TourService
         return Tour::query()
             ->where('type', $tourType)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->when($countryId, fn($query, $countryId) => $query->where('country_id', $countryId))
+            ->when($countryId, fn ($query, $countryId) => $query->where('country_id', $countryId))
             ->count();
     }
 
@@ -225,10 +228,10 @@ class TourService
         $totalExpense = TourDayExpense::query()
             ->whereHas(
                 'tourDay',
-                fn($query) => $query->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
+                fn ($query) => $query->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
                     $q->whereBetween('created_at', [$startDate, $endDate])
                         ->where('type', TourType::TPS)
-                        ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
+                        ->when($countryId, fn ($q, $countryId) => $q->where('country_id', $countryId));
                 })
             )->sum('price');
 
@@ -240,10 +243,10 @@ class TourService
     public static function getCorporateTotalIncome($startDate, $endDate, $countryId): float|int
     {
         $totalExpense = TourHotel::query()
-            ->whereHas('tour', function($q) use ($countryId, $startDate, $endDate) {
+            ->whereHas('tour', function ($q) use ($countryId, $startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate])
                     ->where('type', TourType::Corporate)
-                    ->when($countryId, fn($q, $countryId) => $q->where('country_id', $countryId));
+                    ->when($countryId, fn ($q, $countryId) => $q->where('country_id', $countryId));
             })->sum('price');
 
         $totalPrice = TourService::getTotalPrice(TourType::Corporate, $startDate, $endDate, $countryId);
@@ -256,7 +259,7 @@ class TourService
         return Tour::query()
             ->where('type', $tourType)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->when($countryId, fn($query, $countryId) => $query->where('country_id', $countryId))
+            ->when($countryId, fn ($query, $countryId) => $query->where('country_id', $countryId))
             ->sum('price');
     }
 
@@ -266,8 +269,9 @@ class TourService
             return 1;
         }
 
-        $toursTableSequence = DB::selectOne("SELECT last_value + 1 AS next_id FROM tours_id_seq;");
-        return ($toursTableSequence?->next_id ?? 1);
+        $toursTableSequence = DB::selectOne('SELECT last_value + 1 AS next_id FROM tours_id_seq;');
+
+        return $toursTableSequence?->next_id ?? 1;
     }
 
     public static function transferNextId(): int
@@ -276,28 +280,29 @@ class TourService
             return 1;
         }
 
-        $transfersTableSequence = DB::selectOne("SELECT last_value + 1 AS next_id FROM transfers_id_seq;");
-        return ($transfersTableSequence?->next_id ?? 1);
+        $transfersTableSequence = DB::selectOne('SELECT last_value + 1 AS next_id FROM transfers_id_seq;');
+
+        return $transfersTableSequence?->next_id ?? 1;
     }
 
-//    public static function getGroupNumber(TourType $tourType, $startDate = null): string
-//    {
-//        $userName = auth()->user()->name;
-//        $firstLetter = substr($userName, 0, 1);
-//        //        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
-//
-//        if ($tourType == TourType::TPS) {
-//            //            $number = self::threeDigit(self::tourNextId());
-//            $lastLetter = 'T';
-//        } else {
-//            $lastLetter = 'C';
-//        }
-//
-//        $number = self::addHundred(self::tourNextId());
-//
-//        $currentYear = $startDate ? Carbon::parse($startDate)->format('y') : date('y');
-//        return "{$firstLetter}{$number}-{$currentYear}{$lastLetter}";
-//    }
+    //    public static function getGroupNumber(TourType $tourType, $startDate = null): string
+    //    {
+    //        $userName = auth()->user()->name;
+    //        $firstLetter = substr($userName, 0, 1);
+    //        //        $corporateToursCount = Tour::where('type', $tourType)->count() + 1;
+    //
+    //        if ($tourType == TourType::TPS) {
+    //            //            $number = self::threeDigit(self::tourNextId());
+    //            $lastLetter = 'T';
+    //        } else {
+    //            $lastLetter = 'C';
+    //        }
+    //
+    //        $number = self::addHundred(self::tourNextId());
+    //
+    //        $currentYear = $startDate ? Carbon::parse($startDate)->format('y') : date('y');
+    //        return "{$firstLetter}{$number}-{$currentYear}{$lastLetter}";
+    //    }
 
     public static function getGroupNumber(TourType $tourType, $startDate = null): string
     {
@@ -310,6 +315,7 @@ class TourService
 
         $number = DB::transaction(function () use ($year) {
             $lastNumber = Tour::query()->whereYear('start_date', $year)->count();
+
             return 100 + $lastNumber;
         });
 
@@ -340,13 +346,14 @@ class TourService
         if (blank($money)) {
             return null;
         }
-        if (!is_numeric($money)) {
+        if (! is_numeric($money)) {
             return $money;
         }
         if ($divideBy) {
             $money /= $divideBy;
         }
-        return Number::format($money) . ($currency ? " $currency" : '');
+
+        return Number::format($money).($currency ? " $currency" : '');
     }
 
     public static function generateRoomingSchema(
@@ -366,21 +373,22 @@ class TourService
         $suffix = $personType === RoomPersonType::Uzbek ? 'uz' : 'foreign';
         $amountField = $personType === RoomPersonType::Uzbek ? 'amount_uz' : 'amount_foreign';
 
-        $result = $roomTypes->map(function(RoomType $roomType) use ($suffix, $amountField) {
+        $result = $roomTypes->map(function (RoomType $roomType) use ($suffix, $amountField) {
             return TextInput::make("room_type_{$suffix}_{$roomType->id}")
                 ->label($roomType->name)
-                ->formatStateUsing(function($record) use ($roomType, $amountField) {
-                    if (!$record) {
+                ->formatStateUsing(function ($record) use ($roomType, $amountField) {
+                    if (! $record) {
                         return 0;
                     }
-                    $tourRoomType = $record->roomTypes->first(fn($item) => $item->room_type_id == $roomType->id);
+                    $tourRoomType = $record->roomTypes->first(fn ($item) => $item->room_type_id == $roomType->id);
+
                     return $tourRoomType?->{$amountField} ?? 0;
                 })
                 ->numeric();
         });
 
         return [
-            Grid::make(4)->schema($result->toArray())
+            Grid::make(4)->schema($result->toArray()),
         ];
     }
 
@@ -434,7 +442,7 @@ class TourService
             $title = "Tour {$tourData['group_number']}\n";
             $message = '';
             foreach ($transportItems as $transportItem) {
-                $message .= TourService::getOneMessage($transportItem, false) . "\n";
+                $message .= TourService::getOneMessage($transportItem, false)."\n";
             }
 
             $message = <<<HTML
@@ -445,15 +453,15 @@ $message
 HTML;
 
             if ($isUpdated) {
-                $message = "♻️ <b>Обновлено</b>\n\n" . $message;
+                $message = "♻️ <b>Обновлено</b>\n\n".$message;
             }
 
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
         }
 
-        if (!empty($restaurantsData)) {
+        if (! empty($restaurantsData)) {
             $groupNumber = $tourData['group_number'] ?? '-';
-            $countryName = !empty($tourData['country_id'])
+            $countryName = ! empty($tourData['country_id'])
                 ? (Country::query()->find($tourData['country_id'])?->name ?? '-')
                 : '-';
             $guideName = $tourData['guide_name'] ?? '-';
@@ -467,7 +475,7 @@ HTML;
                 }
 
                 $menuLines = $restaurant->menus
-                    ->map(fn(RestaurantMenu $menu) => '- ' . $menu->name . ' — ' . self::formatMoney($menu->price))
+                    ->map(fn (RestaurantMenu $menu) => '- '.$menu->name.' — '.self::formatMoney($menu->price))
                     ->implode("\n");
                 $menuBlock = $menuLines !== '' ? "\n{$menuLines}" : ' -';
 
@@ -492,10 +500,10 @@ HTML;
 HTML;
                 }
 
-                $message = $header . $body;
+                $message = $header.$body;
 
                 if ($isUpdated) {
-                    $message = "<b>***Updated***</b>\n\n" . $message;
+                    $message = "<b>***Updated***</b>\n\n".$message;
                 }
 
                 TelegramService::sendMessage($restaurant->telegram_chat_id, $message, ['parse_mode' => 'HTML']);
@@ -524,7 +532,7 @@ HTML;
             }
 
             $date = $dayDate;
-            if ($dayDate && !empty($expense['transport_time'])) {
+            if ($dayDate && ! empty($expense['transport_time'])) {
                 $dayPart = Carbon::parse($dayDate)->format('Y-m-d');
                 $timePart = Carbon::parse($expense['transport_time'])->format('H:i');
                 $date = "{$dayPart} {$timePart}";
@@ -533,24 +541,24 @@ HTML;
             $transferRecord = self::getTransferByExpense($expense);
             foreach ($driverIds as $driverId) {
                 $transportsData[$driverId][] = [
-                    'transfer_id'     => $transferRecord?->id,
+                    'transfer_id' => $transferRecord?->id,
                     'transfer_number' => $transferRecord?->number ?? (1000 + ($transferRecord?->id ?? 0)),
-                    'driver_id'       => $driverId,
-                    'pax'             => $totalPax,
-                    'driver_ids'      => $driverIds,
-                    'driver_name'     => $transferRecord?->driver_name ?? null,
-                    'to_city'         => $expense['to_city_id'] ?? null,
-                    'route'           => $expense['transport_route'] ?? null,
-                    'date'            => $date,
-                    'transport_type'  => $expense['transport_type']
+                    'driver_id' => $driverId,
+                    'pax' => $totalPax,
+                    'driver_ids' => $driverIds,
+                    'driver_name' => $transferRecord?->driver_name ?? null,
+                    'to_city' => $expense['to_city_id'] ?? null,
+                    'route' => $expense['transport_route'] ?? null,
+                    'date' => $date,
+                    'transport_type' => $expense['transport_type']
                         ?? $tourData['transport_type']
                         ?? ($expense['transport_class_id']
                             ? \App\Models\TransportClass::find($expense['transport_class_id'])?->name
                             : null),
-                    'price'           => $expense['price'] ?? null,
-                    'mark'            => $expense['mark'] ?? null,
-                    'nameplate'       => $expense['nameplate'] ?? $tourData['fit'] ?? null,
-                    'comment'         => $expense['comment'] ?? null,
+                    'price' => $expense['price'] ?? null,
+                    'mark' => $expense['mark'] ?? null,
+                    'nameplate' => $expense['nameplate'] ?? $tourData['fit'] ?? null,
+                    'comment' => $expense['comment'] ?? null,
                 ];
             }
 
@@ -559,7 +567,7 @@ HTML;
 
         if (in_array($type, [ExpenseType::Lunch->value, ExpenseType::Dinner->value], true)) {
             $restaurantId = $expense['restaurant_id'] ?? null;
-            if (!$restaurantId) {
+            if (! $restaurantId) {
                 return;
             }
 
@@ -601,11 +609,11 @@ HTML;
             ]);
 
             if ($isReminder) {
-                $message = "⏰ <b>НАПОМИНАНИЕ</b>\n" . $message;
+                $message = "⏰ <b>НАПОМИНАНИЕ</b>\n".$message;
             }
 
             if ($isUpdated) {
-                $message = "♻️ <b>Обновлено</b>\n" . $message;
+                $message = "♻️ <b>Обновлено</b>\n".$message;
             }
 
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
@@ -619,47 +627,47 @@ HTML;
         $oldValues = $transfer?->old_values ?? [];
 
         $drivers = $data['driver_name'] ?? null;
-        if (!$drivers) {
+        if (! $drivers) {
             $drivers = Driver::query()
                 ->whereIn('id', $data['driver_ids'] ?? [])
                 ->get()
-                ->map(fn(Driver $driver) => $driver->name)
+                ->map(fn (Driver $driver) => $driver->name)
                 ->implode(', ');
         }
 
-        $pax       = $data['pax'] ?? 0;
-        $route     = $data['route'] ?? '-';
-        $mark      = $data['mark'] ?? '-';
+        $pax = $data['pax'] ?? 0;
+        $route = $data['route'] ?? '-';
+        $mark = $data['mark'] ?? '-';
         $nameplate = $data['nameplate'] ?? '-';
-        $toCity    = $data['to_city'] ? City::find($data['to_city'])?->name : null;
-        $comment   = $data['comment'] ?? '';
-        $date      = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
-        $oldDate   = ($oldValues['date_time'] ?? null) ? Carbon::parse($oldValues['date_time'])->format('d-M H:i') : '-';
+        $toCity = $data['to_city'] ? City::find($data['to_city'])?->name : null;
+        $comment = $data['comment'] ?? '';
+        $date = $data['date'] ? Carbon::parse($data['date'])->format('d-M H:i') : '-';
+        $oldDate = ($oldValues['date_time'] ?? null) ? Carbon::parse($oldValues['date_time'])->format('d-M H:i') : '-';
 
-        if ($transfer && !empty($oldValues)) {
+        if ($transfer && ! empty($oldValues)) {
             $oldDrivers = $oldValues['driver_name'] ?? null;
-            if (!$oldDrivers) {
+            if (! $oldDrivers) {
                 $oldDrivers = Driver::query()
                     ->whereIn('id', $oldValues['driver_ids'] ?? [])
                     ->get()
-                    ->map(fn(Driver $driver) => $driver->name)
+                    ->map(fn (Driver $driver) => $driver->name)
                     ->implode(', ');
             }
 
-            $drivers   = self::getChangedField($oldDrivers, $drivers);
-            $date      = self::getChangedField($oldDate, $date);
-            $pax       = self::getChangedField($oldValues['pax'] ?? null, $pax);
-            $route     = self::getChangedField($oldValues['route'] ?? null, $route);
-            $mark      = self::getChangedField($oldValues['mark'] ?? null, $mark);
+            $drivers = self::getChangedField($oldDrivers, $drivers);
+            $date = self::getChangedField($oldDate, $date);
+            $pax = self::getChangedField($oldValues['pax'] ?? null, $pax);
+            $route = self::getChangedField($oldValues['route'] ?? null, $route);
+            $mark = self::getChangedField($oldValues['mark'] ?? null, $mark);
             $nameplate = self::getChangedField($oldValues['nameplate'] ?? null, $nameplate);
-            $toCity    = self::getChangedField(City::find($oldValues['to_city_id'] ?? null)?->name, $toCity);
-            $comment   = self::getChangedField($oldValues['comment'] ?? null, $comment);
+            $toCity = self::getChangedField(City::find($oldValues['to_city_id'] ?? null)?->name, $toCity);
+            $comment = self::getChangedField($oldValues['comment'] ?? null, $comment);
         }
 
         $transportTypeRaw = $data['transport_type'] ?? null;
-        if (!$transportTypeRaw) {
+        if (! $transportTypeRaw) {
             $transportType = '-';
-        } elseif (is_string($transportTypeRaw) && !is_numeric($transportTypeRaw)) {
+        } elseif (is_string($transportTypeRaw) && ! is_numeric($transportTypeRaw)) {
             // Corporate: TransportClass name passed as plain string
             $transportType = $transportTypeRaw;
         } else {
@@ -667,7 +675,7 @@ HTML;
             try {
                 $transportType = self::getEnum(TransportType::class, $transportTypeRaw);
             } catch (\ValueError $e) {
-                $transportType = (string)$transportTypeRaw;
+                $transportType = (string) $transportTypeRaw;
             }
         }
         $divider = '➖➖➖➖➖➖➖➖➖➖➖➖';
@@ -711,11 +719,11 @@ HTML;
             return $value2;
         }
 
-        if (!$value2) {
+        if (! $value2) {
             return $value1;
         }
 
-        return $value2 . ' <strike>' . $value1 . '</strike>';
+        return $value2.' <strike>'.$value1.'</strike>';
     }
 
     public static function getEnum($enumClass, $value): string
@@ -731,7 +739,7 @@ HTML;
     {
         /** @var Hotel $hotel */
         $hotel = Hotel::query()->find($hotelId);
-        if (!$hotel || !$date || !$checkIn || !$checkOutDateTime) {
+        if (! $hotel || ! $date || ! $checkIn || ! $checkOutDateTime) {
             return 0;
         }
 
@@ -770,7 +778,6 @@ HTML;
             }
         }
 
-
         // 3. Применение правил позднего выезда (Late Check-out)
         // Стандартное время выезда (Check-out) в большинстве отелей - 12:00
         $standardCheckOutTime = Carbon::createFromFormat('H:i', '12:00');
@@ -800,37 +807,62 @@ HTML;
         return $diffInDays + $additionalNights;
     }
 
-//    public static function calculateHotelNights(?string $date, ?string $checkIn, ?string $checkOutDateTime): float
-//    {
-//        if (!$date || !$checkIn || !$checkOutDateTime) {
-//            return 0;
-//        }
-//
-//        $date = Carbon::parse($date);
-//        $hotelCheckinDateTime = Carbon::parse($date->format('Y-m-d') . ' ' . $checkIn);
-//        $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);
-//
-//        if ($hotelCheckinDateTime->greaterThan($hotelCheckoutDateTime)) {
-//            return 0;
-//        }
-//
-//        $diffInDays = $hotelCheckinDateTime->clone()->startOfDay()->diffInDays(
-//            $hotelCheckoutDateTime->clone()->startOfDay()
-//        );
-//
-//        if ($hotelCheckinDateTime->format('H:i') < '14:00') {
-//            $diffInDays += 0.5;
-//        }
-//        if ($hotelCheckoutDateTime->format('H:i') > '12:00') {
-//            $diffInDays += 0.5;
-//        }
-//
-//        return $diffInDays;
-//    }
+    /**
+     * Ensures a TourDay exists for every night of a multi-night hotel stay,
+     * starting the day after check-in. The check-in day itself already
+     * exists (that's where the Hotel expense is being added); this only
+     * fills in the following days, skipping any date that already has one.
+     */
+    public static function ensureFollowingDaysExist(
+        Tour $tour,
+        Carbon $checkinDate,
+        float $totalNights,
+        ?int $cityId
+    ): void {
+        $nights = (int) floor($totalNights);
+        for ($i = 1; $i < $nights; $i++) {
+            $date = $checkinDate->clone()->addDays($i);
+            $exists = $tour->daysNormal()->whereDate('date', $date)->exists();
+            if (! $exists) {
+                $tour->days()->create([
+                    'date' => $date,
+                    'city_id' => $cityId,
+                ]);
+            }
+        }
+    }
+
+    //    public static function calculateHotelNights(?string $date, ?string $checkIn, ?string $checkOutDateTime): float
+    //    {
+    //        if (!$date || !$checkIn || !$checkOutDateTime) {
+    //            return 0;
+    //        }
+    //
+    //        $date = Carbon::parse($date);
+    //        $hotelCheckinDateTime = Carbon::parse($date->format('Y-m-d') . ' ' . $checkIn);
+    //        $hotelCheckoutDateTime = Carbon::parse($checkOutDateTime);
+    //
+    //        if ($hotelCheckinDateTime->greaterThan($hotelCheckoutDateTime)) {
+    //            return 0;
+    //        }
+    //
+    //        $diffInDays = $hotelCheckinDateTime->clone()->startOfDay()->diffInDays(
+    //            $hotelCheckoutDateTime->clone()->startOfDay()
+    //        );
+    //
+    //        if ($hotelCheckinDateTime->format('H:i') < '14:00') {
+    //            $diffInDays += 0.5;
+    //        }
+    //        if ($hotelCheckoutDateTime->format('H:i') > '12:00') {
+    //            $diffInDays += 0.5;
+    //        }
+    //
+    //        return $diffInDays;
+    //    }
 
     public static function getTransferByExpense($expense)
     {
-        if (!isset($expense['id'])) {
+        if (! isset($expense['id'])) {
             return null;
         }
 
@@ -840,7 +872,8 @@ HTML;
     public static function getTourSborValue(): int
     {
         $settings = Setting::query()->where('key', DefaultSettings::TOUR_SBOR->value)->first();
-        return (int)$settings?->value;
+
+        return (int) $settings?->value;
     }
 
     public static function getVatPercent(): float
@@ -854,16 +887,16 @@ HTML;
             return 12.0;
         }
 
-        return (float)$settings->value;
+        return (float) $settings->value;
     }
 
     public static function getRoutesForTransportClass(int $transportClassId): array
     {
         return \App\Models\Route::query()
             ->with(['waypoints.city'])
-            ->whereHas('prices', fn($q) => $q->where('transport_class_id', $transportClassId))
+            ->whereHas('prices', fn ($q) => $q->where('transport_class_id', $transportClassId))
             ->get()
-            ->mapWithKeys(fn($route) => [$route->id => $route->display_name])
+            ->mapWithKeys(fn ($route) => [$route->id => $route->display_name])
             ->toArray();
     }
 
