@@ -158,11 +158,6 @@ class TourTpsResource extends Resource
                 ->collapsible()
                 ->schema([
                     Components\Grid::make(4)->schema([
-                        Components\TextInput::make('pax_uz')
-                            ->label('Pax UZ')
-                            ->helperText('Uzbek citizens')
-                            ->placeholder('0')
-                            ->numeric(),
                         Components\TextInput::make('pax_foreign')
                             ->label('Pax Foreign')
                             ->helperText('Foreign citizens')
