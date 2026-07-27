@@ -41,7 +41,7 @@ class ManualController extends Controller
 
         $query = WebTour::query()
             ->with([
-                'days' => fn($query) => $query->with(['facilities']),
+                'days' => fn ($query) => $query->with(['facilities']),
                 'currentPrice',
                 'categories',
             ])
@@ -58,20 +58,20 @@ class ManualController extends Controller
                 $query->where('is_popular', filter_var($isPopular, FILTER_VALIDATE_BOOLEAN));
             });
 
-        if (!empty($cityId)) {
+        if (! empty($cityId)) {
             $query->whereHas('days', function ($subQ) use ($cityId) {
                 $subQ->where('city_id', $cityId);
             });
         }
 
         $categoryIds = $request->get('categories', []);
-        if (!empty($categoryIds)) {
+        if (! empty($categoryIds)) {
             $query->whereHas('categories', function ($subQ) use ($categoryIds) {
                 $subQ->whereIn('categories.id', (array) $categoryIds);
             });
         }
 
-        if (!empty($sort)) {
+        if (! empty($sort)) {
             $now = now()->format('Y-m-d');
             $sortDirection = $sort === 'cheap' ? 'asc' : 'desc';
             $query
@@ -84,7 +84,7 @@ class ManualController extends Controller
                             ->where('to_date', '>=', $now)             // Конец периода
                             ->orderBy('price', 'asc')                  // Если на одну дату есть 2 цены, берем минимальную
                             ->limit(1);
-                    }
+                    },
                 ])
                 ->orderByRaw("today_price $sortDirection NULLS LAST");
         }
@@ -102,7 +102,7 @@ class ManualController extends Controller
                 'to' => $webTours->lastItem(),
                 'has_next_page' => $webTours->hasMorePages(),
                 'has_previous_page' => $webTours->currentPage() > 1,
-            ]
+            ],
         ]);
     }
 
@@ -110,9 +110,9 @@ class ManualController extends Controller
     {
         $webTour = WebTour::query()
             ->with([
-                'days' => fn($query) => $query->with(['facilities']),
-                'accommodations' => fn($query) => $query->with([
-                    'hotels' => fn($query) => $query->with(['facilities'])
+                'days' => fn ($query) => $query->with(['facilities']),
+                'accommodations' => fn ($query) => $query->with([
+                    'hotels' => fn ($query) => $query->with(['facilities']),
                 ]),
                 'packagesIncluded',
                 'packagesNotIncluded',
@@ -120,6 +120,7 @@ class ManualController extends Controller
                 'activeReviews',
                 'prices',
                 'freePrices',
+                'perPersonPrices',
                 'categories',
             ])
             ->findOrFail($tourId);
@@ -134,7 +135,7 @@ class ManualController extends Controller
 
         $similarTours = $webTour->similarTours()
             ->with([
-                'days' => fn($query) => $query->with(['facilities']),
+                'days' => fn ($query) => $query->with(['facilities']),
                 'currentPrice',
             ])
             ->get();
@@ -169,48 +170,56 @@ class ManualController extends Controller
     public function getBanners(): JsonResponse
     {
         $banners = Banner::query()->get();
+
         return response()->json(['data' => BannerResource::collection($banners)]);
     }
 
     public function getServices(): JsonResponse
     {
         $banners = Service::query()->get();
+
         return response()->json(['data' => ServiceResource::collection($banners)]);
     }
 
     public function getCountries(): JsonResponse
     {
         $countries = Country::query()->get();
+
         return response()->json(['data' => $countries]);
     }
 
     public function getCities(): JsonResponse
     {
         $cities = City::query()->get();
+
         return response()->json(['data' => $cities]);
     }
 
     public function getFacilities(): JsonResponse
     {
         $facilities = Facility::query()->get();
+
         return response()->json(['data' => $facilities]);
     }
 
     public function getRoomTypes(): JsonResponse
     {
         $roomTypes = RoomType::query()->select('id', 'name')->get();
+
         return response()->json(['data' => $roomTypes]);
     }
 
     public function getTransportClasses(): JsonResponse
     {
         $transportClasses = TransportClass::query()->orderBy('order')->get();
+
         return response()->json(['data' => TransportClassResource::collection($transportClasses)]);
     }
 
     public function getCategories(): JsonResponse
     {
         $categories = Category::query()->get();
+
         return response()->json(['data' => CategoryResource::collection($categories)]);
     }
 
@@ -234,7 +243,7 @@ class ManualController extends Controller
         ]);
 
         // Combine date and time into datetime
-        $dateTime = $validated['date'] . ' ' . $validated['time'];
+        $dateTime = $validated['date'].' '.$validated['time'];
         $dateTime = Carbon::parse($dateTime, $user->timezone)->utc();
 
         $attributes = [
@@ -264,7 +273,7 @@ class ManualController extends Controller
 
         return response()->json([
             'message' => 'Transfer request created successfully',
-            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
+            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity'])),
         ], 201);
     }
 
@@ -288,21 +297,23 @@ class ManualController extends Controller
         // If client forces multi creation
         if ($isForce && $total > $capacity) {
             TransferService::storeMultipleRequests($transferRequest, $transportClass);
+
             return response()->json([
                 'message' => 'Transfer request updated successfully',
-                'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
+                'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity'])),
             ]);
         }
 
         // Warning: If client set passengers more than capacity of transport
         if ($total > $capacity) {
             $transfersCount = ceil($total / $capacity);
+
             return response()->json([
                 'capacity_limit' => true,
                 'data' => [
                     'transport_class' => $transportClass,
-                    'transfers_count' => $transfersCount
-                ]
+                    'transfers_count' => $transfersCount,
+                ],
             ]);
         }
 
@@ -318,24 +329,24 @@ class ManualController extends Controller
 
         return response()->json([
             'message' => 'Transfer request updated successfully',
-            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
+            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity'])),
         ]);
     }
 
     public function getUnbookedTransferRequest(Request $request): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['data' => false]);
         }
 
         $unbookedRequest = TransferService::getUnbookedRequest($user);
-        if (!$unbookedRequest) {
+        if (! $unbookedRequest) {
             return response()->json(['data' => false]);
         }
 
         return response()->json([
-            'data' => new TransferRequestResource($unbookedRequest)
+            'data' => new TransferRequestResource($unbookedRequest),
         ]);
     }
 
@@ -375,7 +386,7 @@ class ManualController extends Controller
 
         return response()->json([
             'message' => 'Transfer request booked successfully',
-            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity']))
+            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity'])),
         ]);
     }
 }

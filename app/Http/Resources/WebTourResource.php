@@ -2,11 +2,8 @@
 
 namespace App\Http\Resources;
 
-use App\Models\WebTour;
-use App\Enums\WebTourType;
 use App\Enums\WebTourPriceType;
-use App\Http\Resources\CategoryResource;
-use App\Models\WebTourAccommodation;
+use App\Models\WebTour;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,8 +28,8 @@ class WebTourResource extends JsonResource
             'current_price' => $this->getCurrentPrice(),
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
-            'photo' => $this->photo ? asset('storage/' . $this->photo) : null,
-            'photos' => collect($this->photos ?? [])->map(fn($p) => asset('storage/' . $p))->values()->all(),
+            'photo' => $this->photo ? asset('storage/'.$this->photo) : null,
+            'photos' => collect($this->photos ?? [])->map(fn ($p) => asset('storage/'.$p))->values()->all(),
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -44,15 +41,21 @@ class WebTourResource extends JsonResource
             'reviews' => ReviewResource::collection($this->whenLoaded('activeReviews')),
             'prices' => WebTourPriceResource::collection($this->whenLoaded('prices')),
             'free_prices' => WebTourFreePriceResource::collection($this->whenLoaded('freePrices')),
+            'per_person_prices' => WebTourPerPersonPriceResource::collection($this->whenLoaded('perPersonPrices')),
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),
         ];
     }
-    
+
     public function getCurrentPrice()
     {
         if ($this->type == WebTourPriceType::Free->value) {
             $freePrice = $this->freePrices()->orderBy('price')->first();
+
             return $freePrice;
+        }
+
+        if ($this->type == WebTourPriceType::PerPerson->value) {
+            return $this->perPersonPrices()->orderBy('price')->first();
         }
 
         // currentPrice filters by active date range; fall back to the cheapest upcoming price

@@ -3,21 +3,19 @@
 namespace App\Models;
 
 use App\Enums\TourStatus;
-use App\Enums\WebTourStatus;
-use Illuminate\Support\Carbon;
-use App\Traits\HasLocaleFields;
 use App\Enums\WebTourPriceType;
-use Illuminate\Database\Eloquent\Model;
+use App\Enums\WebTourStatus;
+use App\Traits\HasLocaleFields;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
 
 /**
- *
- *
  * @property int $id
  * @property string $name
  * @property string $name_ru
@@ -35,7 +33,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property WebTourPriceType $type
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
  * @property-read Collection<WebTourAccommodation> $accommodations
  * @property-read Collection<WebTourDay> $days
  * @property-read Collection<WebTourPackage> $packages
@@ -43,6 +40,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property-read Collection<WebTourPackage> $packagesNotIncluded
  * @property-read Collection<WebTourPrice> $prices
  * @property-read Collection<WebTourFreePrice> $freePrices
+ * @property-read Collection<WebTourPerPersonPrice> $perPersonPrices
  * @property-read WebTourPrice $currentPrice
  * @property-read Collection<WebTour> $similarTours
  * @property-read Collection<SimilarTour> $similarToursRel
@@ -53,9 +51,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class WebTour extends Model
 {
     use HasFactory, HasLocaleFields;
-    
+
     protected $guarded = ['id'];
-    
+
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
@@ -65,49 +63,54 @@ class WebTour extends Model
         'photos' => 'array',
         //        'type' => WebTourPriceType::class,
     ];
-    
+
     public function getNameAttribute(): string
     {
         return $this->getLocaleValue('name');
     }
-    
+
     public function getDescriptionAttribute(): ?string
     {
         return $this->getLocaleValue('description');
     }
-    
+
     public function packages(): BelongsToMany
     {
         return $this->belongsToMany(Package::class, 'web_tour_packages');
     }
-    
+
     public function packagesIncluded(): BelongsToMany
     {
         return $this->belongsToMany(Package::class, 'web_tour_packages')
             ->wherePivot('is_include', true);
     }
-    
+
     public function packagesNotIncluded(): BelongsToMany
     {
         return $this->belongsToMany(Package::class, 'web_tour_packages')
             ->wherePivot('is_include', false);
     }
-    
+
     public function days(): HasMany
     {
         return $this->hasMany(WebTourDay::class)->orderBy('created_at')->orderBy('id');
     }
-    
+
     public function prices(): HasMany
     {
         return $this->hasMany(WebTourPrice::class);
     }
-    
+
     public function freePrices(): HasMany
     {
         return $this->hasMany(WebTourFreePrice::class);
     }
-    
+
+    public function perPersonPrices(): HasMany
+    {
+        return $this->hasMany(WebTourPerPersonPrice::class);
+    }
+
     public function currentPrice(): HasOne
     {
         return $this->hasOne(WebTourPrice::class)
@@ -116,32 +119,32 @@ class WebTour extends Model
             ->where('deadline', '>=', now())
             ->orderBy('price');
     }
-    
+
     public function accommodations(): HasMany
     {
         return $this->hasMany(WebTourAccommodation::class);
     }
-    
+
     public function similarToursRel(): HasMany
     {
         return $this->hasMany(SimilarTour::class, 'web_tour_id');
     }
-    
+
     public function similarTours(): BelongsToMany
     {
         return $this->belongsToMany(WebTour::class, 'similar_tours', 'web_tour_id', 'similar_web_tour_id');
     }
-    
+
     public function reviews(): MorphMany
     {
         return $this->morphMany(Review::class, 'reviewable');
     }
-    
+
     public function activeReviews(): MorphMany
     {
         return $this->morphMany(Review::class, 'reviewable')->where('is_active', true);
     }
-    
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'web_tour_categories');

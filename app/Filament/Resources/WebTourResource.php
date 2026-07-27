@@ -399,6 +399,41 @@ class WebTourResource extends Resource
                                             ]),
                                         ]),
                                 ]),
+
+                            // Per-person exact-count prices
+                            Forms\Components\Section::make('Per-Person Pricing')
+                                ->description('Set price per person (USD) for an exact number of people (e.g. 1 person, 2 people, ...).')
+                                ->icon('heroicon-o-user')
+                                ->visible(fn ($get) => $get('type') === WebTourPriceType::PerPerson->value)
+                                ->schema([
+                                    Forms\Components\Repeater::make('perPersonPrices')
+                                        ->relationship('perPersonPrices')
+                                        ->label('')
+                                        ->addActionLabel('+ Add Price Row')
+                                        ->addActionAlignment('end')
+                                        ->collapsible()
+                                        ->itemLabel(function ($get, $uuid) {
+                                            $item = $get("perPersonPrices.$uuid") ?? [];
+                                            $pax = $item['pax_count'] ?? '—';
+                                            $price = $item['price'] ?? '';
+
+                                            return "{$pax} pax".($price ? "  |  \${$price}/person" : '');
+                                        })
+                                        ->schema([
+                                            Forms\Components\Grid::make(2)->schema([
+                                                Forms\Components\TextInput::make('pax_count')
+                                                    ->label('Number of People')
+                                                    ->required()
+                                                    ->numeric()
+                                                    ->minValue(1),
+                                                Forms\Components\TextInput::make('price')
+                                                    ->label('Price per Person (USD)')
+                                                    ->required()
+                                                    ->numeric()
+                                                    ->prefix('$'),
+                                            ]),
+                                        ]),
+                                ]),
                         ]),
 
                     // ── Tab 6: Similar Tours ──────────────────────────────
