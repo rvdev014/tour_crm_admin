@@ -197,6 +197,12 @@ class ExportHotelService
             $hotelExpenses = $group->getExpenses(ExpenseType::Hotel);
             foreach ($hotelExpenses as $hotelExpense) {
                 $date = $hotelExpense->date;
+                if (!$date) {
+                    throw new \RuntimeException(
+                        "Hotel expense #{$hotelExpense->id} ({$hotelExpense->hotel?->name}) is missing a check-in date. " .
+                        'Please set the "Check-in date & time" field for this hotel expense before sending hotel mail.'
+                    );
+                }
                 $city = $hotelExpense->city?->name;
                 $hotel = $hotelExpense->hotel;
 

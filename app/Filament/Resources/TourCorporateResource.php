@@ -267,6 +267,7 @@ class TourCorporateResource extends Resource
                                         ->label('Check-in date & time')
                                         ->displayFormat('d.m.Y H:i')
                                         ->seconds(false)
+                                        ->required()
                                         ->dehydrated(false)
                                         ->formatStateUsing(function($state, $record) {
                                             if ($record?->date && $record?->hotel_checkin_time) {
