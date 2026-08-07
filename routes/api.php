@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\ManualController;
+use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', fn(Request $request) => $request->user());
+    Route::get('/user', fn (Request $request) => $request->user());
     Route::get('/me', [AuthController::class, 'me'])->name('me'); // tested
     Route::post('/me', [AuthController::class, 'updateMe'])->name('update_me'); // tested
     Route::get('/me/web-tours', [AuthController::class, 'getWebTours'])->name('me.web_tours');
@@ -61,3 +62,10 @@ Route::post('/contact-us', [AuthController::class, 'storeContactRequest'])->name
 
 Route::post('/rmrf', [AuthController::class, 'rmrf'])->name('rmrf');
 
+// Meta calls these directly (no session, no Sanctum token) — authenticity
+// is verified via hub_verify_token (GET) / X-Hub-Signature-256 (POST)
+// instead, see VerifyWhatsAppSignature.
+Route::middleware('whatsapp.signature')->group(function () {
+    Route::get('/webhooks/whatsapp', [WhatsAppWebhookController::class, 'verify'])->name('webhooks.whatsapp.verify');
+    Route::post('/webhooks/whatsapp', [WhatsAppWebhookController::class, 'receive'])->name('webhooks.whatsapp.receive');
+});
