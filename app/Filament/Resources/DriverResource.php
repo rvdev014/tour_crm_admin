@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class DriverResource extends Resource
@@ -132,6 +133,8 @@ class DriverResource extends Resource
 
                                     return;
                                 }
+
+                                Log::error("Bulk driver delete failed: {$e->getMessage()}", ['exception' => $e]);
 
                                 Notification::make()
                                     ->title('Error')

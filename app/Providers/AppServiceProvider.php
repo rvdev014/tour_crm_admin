@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Livewire\Hooks\TranslatesDatabaseErrors;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
@@ -9,6 +10,7 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use PhpOffice\PhpWord\Settings as PhpWordSettings;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
         if (env('APP_SCHEME') === 'https') {
             URL::forceScheme('https');
         }
+
+        // Converts raw DB errors (duplicate name, FK-restricted delete, ...) from
+        // any Filament form save or table action into an inline field error or a
+        // friendly notification, instead of a raw Symfony/Ignition 500 page.
+        Livewire::componentHook(TranslatesDatabaseErrors::class);
 
         FilamentAsset::register([
             Css::make('custom-stylesheet', __DIR__.'/../../resources/custom-css/admin.css'),

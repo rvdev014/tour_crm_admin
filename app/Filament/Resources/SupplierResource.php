@@ -36,7 +36,11 @@ class SupplierResource extends Resource
                         ->required()
                         ->maxLength(255),
                     Forms\Components\TextInput::make('inn')
-                        ->maxLength(255),
+                        ->maxLength(255)
+                        ->unique(ignoreRecord: true)
+                        ->validationMessages([
+                            'unique' => 'A supplier with this INN already exists.',
+                        ]),
                     Forms\Components\TextInput::make('company_name')
                         ->maxLength(255),
                 ])

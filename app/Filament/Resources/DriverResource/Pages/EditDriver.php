@@ -10,6 +10,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class EditDriver extends EditRecord
 {
@@ -45,9 +46,11 @@ class EditDriver extends EditRecord
                     } catch (QueryException $e) {
                         if ($e->getCode() === '23503') { // Foreign key violation
 
-                            $driver = Driver::query()->whereIn('id', $e->getBindings())
-                                ->first()
-                                ->pluck('name')
+                            // NOTE: was previously ->first()->pluck('name'), which
+                            // calls a collection method on a single Model instance
+                            // and would throw — matches the working pattern in
+                            // DriverResource.php's bulk-delete action instead.
+                            $driver = Driver::query()->whereIn('id', $e->getBindings())->pluck('name')
                                 ->filter()
                                 ->map(fn ($name) => "'$name'")
                                 ->join(', ');
@@ -60,6 +63,8 @@ class EditDriver extends EditRecord
 
                             return;
                         }
+
+                        Log::error("Driver delete failed: {$e->getMessage()}", ['exception' => $e]);
 
                         Notification::make()
                             ->title('Error')

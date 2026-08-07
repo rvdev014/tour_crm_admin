@@ -2,16 +2,15 @@
 
 namespace App\Filament\Resources\TransferResource\Pages;
 
-use Carbon\Carbon;
 use App\Enums\ExpenseStatus;
-use App\Enums\TourStatus;
-use Filament\Notifications\Notification;
 use App\Filament\Resources\TransferResource;
 use App\Models\Transfer;
 use App\Services\ExpenseService;
+use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Validation\ValidationException;
+use Filament\Support\Exceptions\Halt;
 
 class EditTransfer extends EditRecord
 {
@@ -25,17 +24,22 @@ class EditTransfer extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $dateTime = $data['date_time'] ? Carbon::parse($data['date_time']) : null;
-        if (!$dateTime?->isPast() && $data['status'] == ExpenseStatus::Done->value) {
+        if (! $dateTime?->isPast() && $data['status'] == ExpenseStatus::Done->value) {
             Notification::make()
                 ->title('Validation Failed')
                 ->body('Cannot set status to Done. DateTime is actual.')
                 ->danger()
                 ->persistent() // Optional: keep the notification visible
                 ->send();
-            
-            throw ValidationException::withMessages([]);
+
+            // Halt (not ValidationException) is the correct tool here: the
+            // notification above already told the user why, we just need to
+            // stop the save. An empty ValidationException::withMessages([])
+            // "worked" only by accident — it carries no validation errors, so
+            // Filament had nothing to attach to a field.
+            throw new Halt;
         }
-        
+
         ExpenseService::convertExpensePrice($data, 'sell_price');
         ExpenseService::convertExpensePrice($data, 'buy_price');
 
@@ -83,7 +87,7 @@ class EditTransfer extends EditRecord
                 ->icon('heroicon-o-identification')
                 ->color('info')
                 ->url(route('export-tablichka', $this->record)),
-//            Actions\DeleteAction::make(),
+            //            Actions\DeleteAction::make(),
         ];
     }
 }

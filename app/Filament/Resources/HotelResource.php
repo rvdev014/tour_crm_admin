@@ -10,15 +10,19 @@ use App\Filament\Resources\HotelResource\Pages;
 use App\Filament\Resources\HotelResource\RelationManagers;
 use App\Models\City;
 use App\Models\Hotel;
+use App\Models\HotelRequest;
+use App\Models\TourDayExpense;
 use App\Services\TourService;
 use App\Tables\Columns\PeriodsColumn;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -68,6 +72,10 @@ class HotelResource extends Resource
                                             ->label('Hotel Name')
                                             ->required()
                                             ->maxLength(255)
+                                            ->unique(ignoreRecord: true)
+                                            ->validationMessages([
+                                                'unique' => 'A hotel with this name already exists. Check the hotel list before creating a new one.',
+                                            ])
                                             ->columnSpan(2),
                                         Forms\Components\Select::make('rate')
                                             ->label('Star Rating')
@@ -431,7 +439,51 @@ class HotelResource extends Resource
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->authorize(fn () => auth()->user()->isAdmin()),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->authorize(fn () => auth()->user()->isAdmin())
+                        // Hotels referenced by tours, hotel requests, or reviews
+                        // block a plain delete at the DB level (foreign key). A
+                        // raw SQLSTATE 23503 is still caught globally if one
+                        // slips through, but checking first lets us delete the
+                        // hotels that *are* safe and name the ones that aren't,
+                        // instead of aborting the whole bulk action.
+                        ->action(function (Collection $records) {
+                            $blocked = [];
+                            $deletable = collect();
+
+                            foreach ($records as $hotel) {
+                                $inUse = TourDayExpense::where('hotel_id', $hotel->id)->exists()
+                                    || HotelRequest::where('hotel_id', $hotel->id)->exists()
+                                    || $hotel->reviews()->exists();
+
+                                if ($inUse) {
+                                    $blocked[] = $hotel->name;
+                                } else {
+                                    $deletable->push($hotel);
+                                }
+                            }
+
+                            $deletable->each->delete();
+
+                            if (! empty($blocked)) {
+                                Notification::make()
+                                    ->title('Some hotels were not deleted')
+                                    ->body(count($blocked)." hotel(s) are still used in tours, requests, or reviews and were skipped: {$blocked[0]}"
+                                        .(count($blocked) > 1 ? ' and '.(count($blocked) - 1).' more.' : '.'))
+                                    ->warning()
+                                    ->persistent()
+                                    ->send();
+                            }
+
+                            if ($deletable->isNotEmpty()) {
+                                Notification::make()
+                                    ->title('Hotels deleted')
+                                    ->body($deletable->count().' hotel(s) deleted.')
+                                    ->success()
+                                    ->send();
+                            }
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

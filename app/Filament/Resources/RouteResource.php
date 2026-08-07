@@ -58,7 +58,11 @@ class RouteResource extends Resource
                                 ->options(fn() => TransportClass::query()->orderBy('order')->pluck('name', 'id')->toArray())
                                 ->native(false)
                                 ->searchable()
-                                ->required(),
+                                ->required()
+                                ->distinct()
+                                ->validationMessages([
+                                    'distinct' => 'Each transport class can only have one price on this route.',
+                                ]),
                             Forms\Components\TextInput::make('price')
                                 ->label('Price (USD)')
                                 ->numeric()

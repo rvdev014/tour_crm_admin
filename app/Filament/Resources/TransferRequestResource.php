@@ -11,8 +11,12 @@ use App\Models\TransferRequest;
 use Filament\Resources\Resource;
 use App\Services\TransferService;
 use App\Enums\TransferRequestStatus;
+use App\Exceptions\DatabaseErrorTranslator;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Filament\Resources\TransferRequestResource\Pages;
 
 class TransferRequestResource extends Resource
@@ -254,9 +258,18 @@ class TransferRequestResource extends Resource
                                 ->success()
                                 ->send();
                         } catch (Throwable $exception) {
+                            $errorId = (string) Str::uuid();
+                            Log::error("[{$errorId}] Failed to accept transfer request #{$record->id}: {$exception->getMessage()}", [
+                                'exception' => $exception,
+                            ]);
+
+                            $message = $exception instanceof QueryException
+                                ? DatabaseErrorTranslator::translate($exception)['message']
+                                : 'Please try again or contact support.';
+
                             Notification::make()
-                                ->title('Error occurred')
-                                ->body("Error accepting request: {$exception->getMessage()}")
+                                ->title('Could not accept request')
+                                ->body("{$message} (Error ID: {$errorId})")
                                 ->danger()
                                 ->send();
                         }

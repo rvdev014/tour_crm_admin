@@ -15,6 +15,8 @@ use App\Http\Resources\WebTourRequestResource;
 use App\Models\WebTourRequest;
 use App\Models\ContactRequest;
 use Google\Client as GoogleClient;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
 class AuthController extends Controller
@@ -173,7 +175,13 @@ class AuthController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Authentication failed: ' . $e->getMessage()], 401);
+            $errorId = (string) Str::uuid();
+            Log::error("[{$errorId}] Google authentication failed: {$e->getMessage()}", ['exception' => $e]);
+
+            return response()->json([
+                'message' => 'Authentication failed. Please try again.',
+                'error_id' => $errorId,
+            ], 401);
         }
     }
 

@@ -9,10 +9,10 @@ use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
 use App\Enums\TourStatus;
 use App\Enums\TourType;
-use App\Services\ExpenseService;
-use App\Services\TourService;
 use App\Enums\TransportComfortLevel;
 use App\Enums\TransportType;
+use App\Services\ExpenseService;
+use App\Services\TourService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * @property int $id
@@ -48,7 +51,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property TransportType $transport_type
  * @property PaymentType $payment_type
  * @property PaymentStatus $payment_status
- *
  * @property float $expenses_total
  * @property float $income
  * @property float $price
@@ -58,15 +60,12 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property CurrencyEnum $price_currency
  * @property CurrencyEnum $guide_price_currency
  * @property CurrencyEnum $transport_price_currency
- *
  * @property TransportComfortLevel $transport_comfort_level
  * @property int $single_supplement_price
- *
  * @property float $price_result
  * @property float $guide_price_result
  * @property float $transport_price_result
  * @property string $fit
- *
  * @property Company $company
  * @property User $createdBy
  * @property City $city
@@ -112,6 +111,38 @@ class Tour extends Model
                 $tour->group_number = static::ensureUniqueGroupNumber($tour);
             }
         });
+    }
+
+    /**
+     * generateUniqueGroupNumber() only checks group_number against what's been
+     * committed so far — two operators saving at the same moment can both pass
+     * that check with the same number and then collide on the actual INSERT
+     * ("tours_group_number_unique"). Retrying the whole save regenerates the
+     * number (creating() fires again on each attempt, since $this->exists stays
+     * false until the insert actually succeeds) against the now-updated count,
+     * so the collision self-heals instead of surfacing as a 500. If it's still
+     * colliding after 5 attempts something else is wrong, so let it surface —
+     * the Livewire error hook (App\Livewire\Hooks\TranslatesDatabaseErrors)
+     * turns that into a friendly notification rather than a stack trace.
+     *
+     * Each attempt is wrapped in its own DB::transaction() so a failed insert
+     * (which Postgres flags as "current transaction aborted") is cleanly
+     * rolled back — via a SAVEPOINT if this is called from inside an already-
+     * open transaction — before the next attempt runs. Without that, a retry
+     * after a real constraint violation would just fail again with a
+     * "transaction is aborted" error instead of getting a clean shot at a new
+     * group number.
+     */
+    public static function create(array $attributes = [])
+    {
+        $instance = new static($attributes);
+
+        retry(5, fn () => DB::transaction(fn () => $instance->save()), 0, function (Throwable $e) {
+            return $e instanceof QueryException
+                && str_contains($e->getMessage(), 'tours_group_number_unique');
+        });
+
+        return $instance;
     }
 
     public function company(): BelongsTo
@@ -163,22 +194,22 @@ class Tour extends Model
 
     public function getExpense(ExpenseType $expenseType): ?TourDayExpense
     {
-        return $this->expenses->first(fn($expense) => $expense->type == $expenseType);
+        return $this->expenses->first(fn ($expense) => $expense->type == $expenseType);
     }
 
     public function getExpenseByDate($date, ExpenseType $expenseType): ?TourDayExpense
     {
-        return $this->expenses->first(fn($expense) => $expense->type == $expenseType && $expense->date == $date);
+        return $this->expenses->first(fn ($expense) => $expense->type == $expenseType && $expense->date == $date);
     }
 
     public function getExpenses(ExpenseType $expenseType): Collection
     {
-        return $this->expenses->filter(fn($expense) => $expense->type == $expenseType);
+        return $this->expenses->filter(fn ($expense) => $expense->type == $expenseType);
     }
 
     public function getExpensesByDate($date, ExpenseType $expenseType): Collection
     {
-        return $this->expenses->filter(fn($expense) => $expense->type == $expenseType && $expense->date == $date);
+        return $this->expenses->filter(fn ($expense) => $expense->type == $expenseType && $expense->date == $date);
     }
 
     public function roomTypes(): HasMany
@@ -221,12 +252,13 @@ class Tour extends Model
             foreach ($groups as $group) {
                 $totalPax += $group->passengers()->count();
             }
+
             return $totalPax;
         }
 
         $pax = ($this->pax_uz ?? 0) + ($this->pax_foreign ?? 0);
 
-        if (!$withLeader) {
+        if (! $withLeader) {
             return $pax;
         }
 
@@ -235,7 +267,7 @@ class Tour extends Model
 
     public static function calcTotalPax(array $data): int
     {
-        return (int)($data['pax_uz'] ?? 0) + (int)($data['pax_foreign'] ?? 0) + (int)($data['leader_pax'] ?? 0);
+        return (int) ($data['pax_uz'] ?? 0) + (int) ($data['pax_foreign'] ?? 0) + (int) ($data['leader_pax'] ?? 0);
     }
 
     public function saveExpensesTotal($withTotalPrice = false): void
@@ -267,12 +299,19 @@ class Tour extends Model
      */
     protected static function generateUniqueGroupNumber(TourType $tourType, $startDate): string
     {
-        do {
+        // Bounded: getGroupNumber() is deterministic from the current row count,
+        // so if nothing new gets inserted between attempts it would return the
+        // same value forever — this cap turns that into a clear exception
+        // instead of hanging the request.
+        for ($attempt = 0; $attempt < 20; $attempt++) {
             $groupNumber = TourService::getGroupNumber($tourType, $startDate);
-            $exists = static::where('group_number', $groupNumber)->exists();
-        } while ($exists);
 
-        return $groupNumber;
+            if (! static::where('group_number', $groupNumber)->exists()) {
+                return $groupNumber;
+            }
+        }
+
+        throw new \RuntimeException('Could not generate a unique tour group number after 20 attempts.');
     }
 
     /**
