@@ -25,6 +25,41 @@ use Illuminate\Database\Eloquent\Model;
 
 class CompanyIncomeResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = Tour::class;
     protected static ?string $label = 'Company Incomes';
 
@@ -55,10 +90,10 @@ class CompanyIncomeResource extends Resource
                 Tables\Filters\Filter::make('company')
                     ->columnSpanFull()
                     ->form([
-                        Forms\Components\Grid::make(6)->schema([
+                        Forms\Components\Grid::make(['sm' => 2, 'md' => 3, 'xl' => 5])->schema([
                             Forms\Components\Select::make('tour_type')
                                 ->native(false)
-                                ->label('Tour Type')
+                                ->label(__('Tour Type'))
                                 ->options([
                                     TourType::TPS->value => TourType::TPS->getLabel(),
                                     TourType::Corporate->value => TourType::Corporate->getLabel(),
@@ -69,7 +104,7 @@ class CompanyIncomeResource extends Resource
                                 ->multiple()
                                 ->searchable()
                                 ->preload()
-                                ->label('Company')
+                                ->label(__('Company'))
                                 ->options(fn() => Company::all()->pluck('name', 'id')),
 
                             Forms\Components\Select::make('payment_status')
@@ -118,10 +153,10 @@ class CompanyIncomeResource extends Resource
 
                         return $indicators;
                     })
-            ], layout: FiltersLayout::AboveContent)
+            ], layout: FiltersLayout::AboveContentCollapsible)
             ->columns([
                 Tables\Columns\TextColumn::make('group_number')
-                    ->label('Group number')
+                    ->label(__('Group number'))
                     ->getStateUsing(function (Tour $record) {
                         if ($record->isCorporate()) {
                             $link = "/admin/tour-corporate/$record->id/edit";
@@ -142,7 +177,7 @@ class CompanyIncomeResource extends Resource
                     )),
 
                 Tables\Columns\TextColumn::make('inn')
-                    ->label('Company Inn')
+                    ->label(__('Company Inn'))
                     ->getStateUsing(function (Tour $record) {
                         return $record->company->inn;
                     })
@@ -151,13 +186,13 @@ class CompanyIncomeResource extends Resource
                     )),
 
                 Tables\Columns\TextColumn::make('tour_pax')
-                    ->label('Pax')
+                    ->label(__('Pax'))
                     ->getStateUsing(function (Tour $record) {
                         return $record->getTotalPax();
                     }),
 
                 Tables\Columns\TextColumn::make('sell_price')
-                    ->label('Sell price')
+                    ->label(__('Sell price'))
                     ->getStateUsing(function (Tour $record) {
                         if ($record->isCorporate()) {
                             // Transport: use Transfer.sell_price_result (route price charged to client)

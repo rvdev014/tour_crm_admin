@@ -18,6 +18,41 @@ use Filament\Tables\Table;
 
 class WebTourResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = WebTour::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
@@ -38,24 +73,24 @@ class WebTourResource extends Resource
                 ->tabs([
 
                     // ── Tab 1: Basic Info ────────────────────────────────
-                    Forms\Components\Tabs\Tab::make('Basic Info')
+                    Forms\Components\Tabs\Tab::make(__('Basic Info'))
                         ->icon('heroicon-o-information-circle')
                         ->schema([
-                            Forms\Components\Section::make('Tour Names')
-                                ->description('Enter the tour name in both languages.')
+                            Forms\Components\Section::make(__('Tour Names'))
+                                ->description(__('Enter the tour name in both languages.'))
                                 ->icon('heroicon-o-language')
                                 ->columns(2)
                                 ->schema([
                                     Forms\Components\TextInput::make('name_ru')
-                                        ->label('Name (RU)')
+                                        ->label(__('Name (RU)'))
                                         ->required()
                                         ->maxLength(255),
                                     Forms\Components\TextInput::make('name_en')
-                                        ->label('Name (EN)')
+                                        ->label(__('Name (EN)'))
                                         ->maxLength(255),
                                 ]),
 
-                            Forms\Components\Section::make('Status & Type')
+                            Forms\Components\Section::make(__('Status & Type'))
                                 ->icon('heroicon-o-adjustments-horizontal')
                                 ->columns(3)
                                 ->schema([
@@ -64,33 +99,33 @@ class WebTourResource extends Resource
                                         ->default(WebTourStatus::New)
                                         ->required(),
                                     Forms\Components\Select::make('type')
-                                        ->label('Price Type')
+                                        ->label(__('Price Type'))
                                         ->options(WebTourPriceType::class)
                                         ->default(WebTourPriceType::Default)
                                         ->live()
                                         ->required(),
                                     Forms\Components\Toggle::make('is_popular')
-                                        ->label('Mark as Popular')
+                                        ->label(__('Mark as Popular'))
                                         ->default(false)
                                         ->inline(false),
                                 ]),
 
-                            Forms\Components\Section::make('Tour Dates')
-                                ->description('The advertised departure window for this tour, shown on the website. Not applicable to pax-based (Free) pricing, which has no fixed dates.')
+                            Forms\Components\Section::make(__('Tour Dates'))
+                                ->description(__('The advertised departure window for this tour, shown on the website. Not applicable to pax-based (Free) pricing, which has no fixed dates.'))
                                 ->icon('heroicon-o-calendar')
                                 ->columns(2)
                                 ->visible(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value)
                                 ->schema([
                                     Forms\Components\DatePicker::make('start_date')
-                                        ->label('Start Date')
+                                        ->label(__('Start Date'))
                                         ->required(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value),
                                     Forms\Components\DatePicker::make('end_date')
-                                        ->label('End Date')
+                                        ->label(__('End Date'))
                                         ->minDate(fn ($get) => $get('start_date'))
                                         ->required(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value),
                                 ]),
 
-                            Forms\Components\Section::make('Categories')
+                            Forms\Components\Section::make(__('Categories'))
                                 ->icon('heroicon-o-tag')
                                 ->schema([
                                     Forms\Components\Select::make('categories')
@@ -98,20 +133,20 @@ class WebTourResource extends Resource
                                         ->multiple()
                                         ->preload()
                                         ->searchable()
-                                        ->label('Tour Categories'),
+                                        ->label(__('Tour Categories')),
                                 ]),
                         ]),
 
                     // ── Tab 2: Media & Description ───────────────────────
-                    Forms\Components\Tabs\Tab::make('Media & Description')
+                    Forms\Components\Tabs\Tab::make(__('Media & Description'))
                         ->icon('heroicon-o-photo')
                         ->schema([
-                            Forms\Components\Section::make('Cover Photo')
-                                ->description('This will be the main thumbnail shown in tour listings.')
+                            Forms\Components\Section::make(__('Cover Photo'))
+                                ->description(__('This will be the main thumbnail shown in tour listings.'))
                                 ->icon('heroicon-o-camera')
                                 ->schema([
                                     Forms\Components\FileUpload::make('photo')
-                                        ->label('Cover Photo')
+                                        ->label(__('Cover Photo'))
                                         ->image()
                                         ->imagePreviewHeight('200')
                                         ->directory('web-tours')
@@ -119,12 +154,12 @@ class WebTourResource extends Resource
                                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                                 ]),
 
-                            Forms\Components\Section::make('Photo Gallery')
-                                ->description('Upload additional photos shown in the tour gallery (up to 20 images).')
+                            Forms\Components\Section::make(__('Photo Gallery'))
+                                ->description(__('Upload additional photos shown in the tour gallery (up to 20 images).'))
                                 ->icon('heroicon-o-rectangle-stack')
                                 ->schema([
                                     Forms\Components\FileUpload::make('photos')
-                                        ->label('Gallery Photos')
+                                        ->label(__('Gallery Photos'))
                                         ->image()
                                         ->multiple()
                                         ->reorderable()
@@ -136,18 +171,18 @@ class WebTourResource extends Resource
                                         ->imagePreviewHeight('120'),
                                 ]),
 
-                            Forms\Components\Section::make('Descriptions')
+                            Forms\Components\Section::make(__('Descriptions'))
                                 ->icon('heroicon-o-document-text')
                                 ->columns(2)
                                 ->schema([
                                     Forms\Components\RichEditor::make('description_ru')
-                                        ->label('Description (RU)')
+                                        ->label(__('Description (RU)'))
                                         ->toolbarButtons([
                                             'bold', 'italic', 'underline', 'strike',
                                             'bulletList', 'orderedList', 'link', 'undo', 'redo',
                                         ]),
                                     Forms\Components\RichEditor::make('description_en')
-                                        ->label('Description (EN)')
+                                        ->label(__('Description (EN)'))
                                         ->toolbarButtons([
                                             'bold', 'italic', 'underline', 'strike',
                                             'bulletList', 'orderedList', 'link', 'undo', 'redo',
@@ -156,24 +191,25 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 3: Itinerary ─────────────────────────────────
-                    Forms\Components\Tabs\Tab::make('Itinerary')
+                    Forms\Components\Tabs\Tab::make(__('Itinerary'))
                         ->icon('heroicon-o-map-pin')
                         ->schema([
-                            Forms\Components\Section::make('Daily Program')
-                                ->description('Add each day of the tour with its location, photos and activities.')
+                            Forms\Components\Section::make(__('Daily Program'))
+                                ->description(__('Add each day of the tour with its location, photos and activities.'))
                                 ->icon('heroicon-o-list-bullet')
                                 ->schema([
                                     Forms\Components\Repeater::make('days')
                                         ->relationship('days')
-                                        ->label('')
-                                        ->extraAttributes([
-                                            'class' => 'red-delete-repeater',
-                                            'style' => '--c-500: 239, 68, 68; --c-600: 220, 38, 38;',
-                                        ])
+                                        ->label(__(''))
+                                        // ->color('danger') below already gives the delete button
+                                        // its red styling (with proper hover/active/disabled states)
+                                        // through Filament's own button system. The 'red-delete-
+                                        // repeater'/'delete-btn' classes and --c-500/--c-600 inline
+                                        // style that used to sit here had no matching CSS anywhere
+                                        // in the app — dead, and removed rather than reinstated.
                                         ->deleteAction(
                                             fn (Forms\Components\Actions\Action $action) => $action
                                                 ->color('danger')
-                                                ->extraAttributes(['class' => 'delete-btn'])
                                         )
                                         ->itemLabel(function ($get, $uuid) {
                                             $index = array_search($uuid, array_keys($get('days'))) ?? 0;
@@ -187,14 +223,14 @@ class WebTourResource extends Resource
                                         ->schema([
                                             Forms\Components\Grid::make(3)->schema([
                                                 Forms\Components\TextInput::make('place_name_ru')
-                                                    ->label('Place Name (RU)')
+                                                    ->label(__('Place Name (RU)'))
                                                     ->required()
                                                     ->maxLength(255),
                                                 Forms\Components\TextInput::make('place_name_en')
-                                                    ->label('Place Name (EN)')
+                                                    ->label(__('Place Name (EN)'))
                                                     ->maxLength(255),
                                                 Forms\Components\Select::make('city_id')
-                                                    ->label('City')
+                                                    ->label(__('City'))
                                                     ->native(false)
                                                     ->searchable()
                                                     ->preload()
@@ -203,13 +239,13 @@ class WebTourResource extends Resource
                                             ]),
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\FileUpload::make('photo')
-                                                    ->label('Day Photo')
+                                                    ->label(__('Day Photo'))
                                                     ->image()
                                                     ->imagePreviewHeight('120')
                                                     ->directory('web-tours/days')
                                                     ->maxSize(5120),
                                                 Forms\Components\Select::make('facilities')
-                                                    ->label('Facilities / Activities')
+                                                    ->label(__('Facilities / Activities'))
                                                     ->relationship('facilities', 'name_ru')
                                                     ->multiple()
                                                     ->preload()
@@ -217,13 +253,13 @@ class WebTourResource extends Resource
                                             ]),
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\RichEditor::make('description_ru')
-                                                    ->label('Description (RU)')
+                                                    ->label(__('Description (RU)'))
                                                     ->required()
                                                     ->toolbarButtons([
                                                         'bold', 'italic', 'bulletList', 'orderedList', 'undo', 'redo',
                                                     ]),
                                                 Forms\Components\RichEditor::make('description_en')
-                                                    ->label('Description (EN)')
+                                                    ->label(__('Description (EN)'))
                                                     ->toolbarButtons([
                                                         'bold', 'italic', 'bulletList', 'orderedList', 'undo', 'redo',
                                                     ]),
@@ -233,14 +269,14 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 4: Packages & Accommodation ──────────────────
-                    Forms\Components\Tabs\Tab::make('Packages & Accommodation')
+                    Forms\Components\Tabs\Tab::make(__('Packages & Accommodation'))
                         ->icon('heroicon-o-check-badge')
                         ->schema([
-                            Forms\Components\Section::make('What\'s Included')
+                            Forms\Components\Section::make(__('What\'s Included'))
                                 ->icon('heroicon-o-check-circle')
                                 ->schema([
                                     Forms\Components\Select::make('packagesIncluded')
-                                        ->label('Included in Price')
+                                        ->label(__('Included in Price'))
                                         ->relationship('packagesIncluded', 'name_ru')
                                         ->multiple()
                                         ->preload()
@@ -254,11 +290,11 @@ class WebTourResource extends Resource
                                         }),
                                 ]),
 
-                            Forms\Components\Section::make('What\'s Not Included')
+                            Forms\Components\Section::make(__('What\'s Not Included'))
                                 ->icon('heroicon-o-x-circle')
                                 ->schema([
                                     Forms\Components\Select::make('packagesNotIncluded')
-                                        ->label('Not Included in Price')
+                                        ->label(__('Not Included in Price'))
                                         ->relationship('packagesNotIncluded', 'name_ru')
                                         ->multiple()
                                         ->preload()
@@ -272,13 +308,13 @@ class WebTourResource extends Resource
                                         }),
                                 ]),
 
-                            Forms\Components\Section::make('Accommodation')
-                                ->description('Add hotel accommodation options for this tour.')
+                            Forms\Components\Section::make(__('Accommodation'))
+                                ->description(__('Add hotel accommodation options for this tour.'))
                                 ->icon('heroicon-o-building-office')
                                 ->schema([
                                     Forms\Components\Repeater::make('accommodations')
                                         ->relationship('accommodations')
-                                        ->label('')
+                                        ->label(__(''))
                                         ->minItems(0)
                                         ->addActionLabel('+ Add Accommodation')
                                         ->addActionAlignment('end')
@@ -286,23 +322,23 @@ class WebTourResource extends Resource
                                         ->schema([
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\TextInput::make('header_ru')
-                                                    ->label('Header (RU)')
+                                                    ->label(__('Header (RU)'))
                                                     ->required()
                                                     ->maxLength(255),
                                                 Forms\Components\TextInput::make('header_en')
-                                                    ->label('Header (EN)')
+                                                    ->label(__('Header (EN)'))
                                                     ->maxLength(255),
                                             ]),
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\RichEditor::make('description_ru')
-                                                    ->label('Description (RU)')
+                                                    ->label(__('Description (RU)'))
                                                     ->toolbarButtons(['bold', 'italic', 'bulletList', 'undo', 'redo']),
                                                 Forms\Components\RichEditor::make('description_en')
-                                                    ->label('Description (EN)')
+                                                    ->label(__('Description (EN)'))
                                                     ->toolbarButtons(['bold', 'italic', 'bulletList', 'undo', 'redo']),
                                             ]),
                                             Forms\Components\Select::make('hotels')
-                                                ->label('Hotels')
+                                                ->label(__('Hotels'))
                                                 ->relationship('hotels', 'name')
                                                 ->multiple()
                                                 ->preload()
@@ -312,18 +348,18 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 5: Pricing ────────────────────────────────────
-                    Forms\Components\Tabs\Tab::make('Pricing')
+                    Forms\Components\Tabs\Tab::make(__('Pricing'))
                         ->icon('heroicon-o-banknotes')
                         ->schema([
                             // Default date-based prices
-                            Forms\Components\Section::make('Date & Price Entries')
-                                ->description('Set price per person (USD) for specific date ranges.')
+                            Forms\Components\Section::make(__('Date & Price Entries'))
+                                ->description(__('Set price per person (USD) for specific date ranges.'))
                                 ->icon('heroicon-o-calendar')
                                 ->visible(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value)
                                 ->schema([
                                     Forms\Components\Repeater::make('prices')
                                         ->relationship('prices')
-                                        ->label('')
+                                        ->label(__(''))
                                         ->addActionLabel('+ Add Date Range')
                                         ->addActionAlignment('end')
                                         ->collapsible()
@@ -338,36 +374,36 @@ class WebTourResource extends Resource
                                         ->schema([
                                             Forms\Components\Grid::make(3)->schema([
                                                 Forms\Components\DatePicker::make('from_date')
-                                                    ->label('From')
+                                                    ->label(__('From'))
                                                     ->required(),
                                                 Forms\Components\DatePicker::make('to_date')
-                                                    ->label('To')
+                                                    ->label(__('To'))
                                                     ->required(),
                                                 Forms\Components\DateTimePicker::make('deadline')
-                                                    ->label('Booking Deadline'),
+                                                    ->label(__('Booking Deadline')),
                                             ]),
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\TextInput::make('price')
-                                                    ->label('Price per Person (USD)')
+                                                    ->label(__('Price per Person (USD)'))
                                                     ->required()
                                                     ->numeric()
                                                     ->prefix('$'),
                                                 Forms\Components\Select::make('status')
-                                                    ->label('Availability')
+                                                    ->label(__('Availability'))
                                                     ->options(WebTourPriceStatus::class),
                                             ]),
                                         ]),
                                 ]),
 
                             // Free / pax-based prices
-                            Forms\Components\Section::make('Pax-Based Pricing')
-                                ->description('Set price per person (USD) depending on group size.')
+                            Forms\Components\Section::make(__('Pax-Based Pricing'))
+                                ->description(__('Set price per person (USD) depending on group size.'))
                                 ->icon('heroicon-o-users')
                                 ->visible(fn ($get) => $get('type') === WebTourPriceType::Free->value)
                                 ->schema([
                                     Forms\Components\Repeater::make('freePrices')
                                         ->relationship('freePrices')
-                                        ->label('')
+                                        ->label(__(''))
                                         ->addActionLabel('+ Add Price Tier')
                                         ->addActionAlignment('end')
                                         ->collapsible()
@@ -382,17 +418,17 @@ class WebTourResource extends Resource
                                         ->schema([
                                             Forms\Components\Grid::make(3)->schema([
                                                 Forms\Components\TextInput::make('pax_from')
-                                                    ->label('Min Pax')
+                                                    ->label(__('Min Pax'))
                                                     ->required()
                                                     ->numeric()
                                                     ->minValue(1),
                                                 Forms\Components\TextInput::make('pax_to')
-                                                    ->label('Max Pax')
+                                                    ->label(__('Max Pax'))
                                                     ->required()
                                                     ->numeric()
                                                     ->minValue(1),
                                                 Forms\Components\TextInput::make('price')
-                                                    ->label('Price per Person (USD)')
+                                                    ->label(__('Price per Person (USD)'))
                                                     ->required()
                                                     ->numeric()
                                                     ->prefix('$'),
@@ -401,14 +437,14 @@ class WebTourResource extends Resource
                                 ]),
 
                             // Per-person exact-count prices
-                            Forms\Components\Section::make('Per-Person Pricing')
-                                ->description('Set price per person (USD) for an exact number of people (e.g. 1 person, 2 people, ...).')
+                            Forms\Components\Section::make(__('Per-Person Pricing'))
+                                ->description(__('Set price per person (USD) for an exact number of people (e.g. 1 person, 2 people, ...).'))
                                 ->icon('heroicon-o-user')
                                 ->visible(fn ($get) => $get('type') === WebTourPriceType::PerPerson->value)
                                 ->schema([
                                     Forms\Components\Repeater::make('perPersonPrices')
                                         ->relationship('perPersonPrices')
-                                        ->label('')
+                                        ->label(__(''))
                                         ->addActionLabel('+ Add Price Row')
                                         ->addActionAlignment('end')
                                         ->collapsible()
@@ -422,12 +458,12 @@ class WebTourResource extends Resource
                                         ->schema([
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\TextInput::make('pax_count')
-                                                    ->label('Number of People')
+                                                    ->label(__('Number of People'))
                                                     ->required()
                                                     ->numeric()
                                                     ->minValue(1),
                                                 Forms\Components\TextInput::make('price')
-                                                    ->label('Price per Person (USD)')
+                                                    ->label(__('Price per Person (USD)'))
                                                     ->required()
                                                     ->numeric()
                                                     ->prefix('$'),
@@ -437,15 +473,15 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 6: Similar Tours ──────────────────────────────
-                    Forms\Components\Tabs\Tab::make('Similar Tours')
+                    Forms\Components\Tabs\Tab::make(__('Similar Tours'))
                         ->icon('heroicon-o-arrows-right-left')
                         ->schema([
-                            Forms\Components\Section::make('Related Tours')
-                                ->description('Select tours to show in the "More similar tours" section on this tour\'s page.')
+                            Forms\Components\Section::make(__('Related Tours'))
+                                ->description(__('Select tours to show in the "More similar tours" section on this tour\'s page.'))
                                 ->icon('heroicon-o-link')
                                 ->schema([
                                     Forms\Components\Select::make('similarTours')
-                                        ->label('Similar Tours')
+                                        ->label(__('Similar Tours'))
                                         ->relationship('similarTours', 'name_ru')
                                         ->multiple()
                                         ->preload()
@@ -479,27 +515,27 @@ class WebTourResource extends Resource
                     ->defaultImageUrl(asset('images/placeholder.png')),
 
                 Tables\Columns\TextColumn::make('name_ru')
-                    ->label('Name (RU)')
+                    ->label(__('Name (RU)'))
                     ->searchable()
                     ->wrap(),
 
                 Tables\Columns\TextColumn::make('name_en')
-                    ->label('Name (EN)')
+                    ->label(__('Name (EN)'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('start_date')
-                    ->label('Start')
+                    ->label(__('Start'))
                     ->date()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('end_date')
-                    ->label('End')
+                    ->label(__('End'))
                     ->date()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('prices')
-                    ->label('Prices')
+                    ->label(__('Prices'))
                     ->formatStateUsing(fn () => 'View prices')
                     ->html()
                     ->action(WebTourResource\Actions\PricesAction::make()),
@@ -509,7 +545,7 @@ class WebTourResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\ToggleColumn::make('is_popular')
-                    ->label('Popular')
+                    ->label(__('Popular'))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')

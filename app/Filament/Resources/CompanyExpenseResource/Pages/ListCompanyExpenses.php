@@ -30,7 +30,7 @@ class ListCompanyExpenses extends ListRecords
     {
         return [
             Actions\Action::make('export_all')
-                ->label('Export All')
+                ->label(__('Export All'))
                 ->icon('heroicon-o-document-text')
                 ->requiresConfirmation(true)
                 ->action(fn () => $this->exportExpenses()),
@@ -42,47 +42,47 @@ class ListCompanyExpenses extends ListRecords
                         ->fromTable()
                         ->withColumns([
                             Column::make('group_number')
-                                ->heading('Group number')
+                                ->heading(__('Group number'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                                     return $tour->group_number;
                                 }),
                             Column::make('company')
-                                ->heading('Company')
+                                ->heading(__('Company'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                                     return $tour->company->name;
                                 }),
                             Column::make('inn')
-                                ->heading('Company Inn')
+                                ->heading(__('Company Inn'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                                     return $tour->company->inn;
                                 }),
                             Column::make('start_date')
-                                ->heading('Start Date')
+                                ->heading(__('Start Date'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                                     return $tour->start_date?->format('d.m.Y H:i');
                                 }),
                             Column::make('expense_date')
-                                ->heading('Expense Date')
+                                ->heading(__('Expense Date'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     $date = $record->tourDay->date ?? $record->date;
                                     return $date?->format('d.m.Y');
                                 }),
                             Column::make('passengers')
-                                ->heading('Passengers FIO')
+                                ->heading(__('Passengers FIO'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     return $record->tourGroup?->passengers?->first()?->name ?? '-';
                                 }),
                             Column::make('expense_type')
-                                ->heading('Expense Type')
+                                ->heading(__('Expense Type'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     return $record->type->getLabel();
                                 }),
                             Column::make('expense_name')
-                                ->heading('Expense Name')
+                                ->heading(__('Expense Name'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     return match ($record->type) {
                                         ExpenseType::Hotel => $record->hotel?->name,
@@ -94,7 +94,7 @@ class ListCompanyExpenses extends ListRecords
                                     };
                                 }),
                             Column::make('tour_pax')
-                                ->heading('Pax')
+                                ->heading(__('Pax'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                                     if ($record->tourGroup) {
@@ -103,7 +103,7 @@ class ListCompanyExpenses extends ListRecords
                                     return $tour->getTotalPax();
                                 }),
                             Column::make('route')
-                                ->heading('Route')
+                                ->heading(__('Route'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     $fromCity = $record->tourDay?->city?->name ?? $record->city?->name;
                                     return match ($record->type) {
@@ -114,17 +114,17 @@ class ListCompanyExpenses extends ListRecords
                                     };
                                 }),
                             Column::make('price')
-                                ->heading('Price')
+                                ->heading(__('Price'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     return TourService::formatMoney($record->price_result) . ' ' . CurrencyEnum::UZS->getSymbol();
                                 }),
                             Column::make('payment_status')
-                                ->heading('Payment Status')
+                                ->heading(__('Payment Status'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     return $record->payment_status?->getLabel();
                                 }),
                             Column::make('invoice_status')
-                                ->heading('Invoice Status')
+                                ->heading(__('Invoice Status'))
                                 ->getStateUsing(function (TourDayExpense $record) {
                                     return $record->invoice_status?->getLabel();
                                 }),

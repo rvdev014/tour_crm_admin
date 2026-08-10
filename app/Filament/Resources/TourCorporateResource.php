@@ -34,6 +34,41 @@ use App\Filament\Resources\TourCorporateResource\Actions\StatusAction;
 
 class TourCorporateResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = Tour::class;
     
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
@@ -50,8 +85,11 @@ class TourCorporateResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Components\Fieldset::make('Tour details')->schema([
-                
+            Components\Section::make(__('Tour details'))
+                ->icon('heroicon-o-document-text')
+                ->description(__('Company, payment status, and the dates the group travels.'))
+                ->schema([
+
                 Components\Grid::make(4)->schema([
                     Components\TextInput::make('group_number')
                         ->formatStateUsing(function($record) {
@@ -99,7 +137,7 @@ class TourCorporateResource extends Resource
                 Components\Grid::make(4)->schema([
                     Components\DateTimePicker::make('start_date')
                         ->displayFormat('d.m.Y H:i')
-                        ->label('Start date')
+                        ->label(__('Start date'))
                         ->seconds(false)
                         ->afterStateUpdated(function($get, $set) {
                             if (Carbon::parse($get('end_date')) < Carbon::parse($get('start_date'))) {
@@ -109,13 +147,13 @@ class TourCorporateResource extends Resource
                         ->reactive(),
                     Components\DateTimePicker::make('end_date')
                         ->displayFormat('d.m.Y H:i')
-                        ->label('End date')
+                        ->label(__('End date'))
                         ->seconds(false)
                         ->minDate(fn($get) => $get('start_date') ? Carbon::parse($get('start_date'))->addDay()->format('d.m.Y H:i') : null)
                         ->reactive(),
                     Components\TextInput::make('requested_by'),
                     Components\TextInput::make('fit')
-                        ->label('Табличка'),
+                        ->label(__('Табличка')),
                     Components\Textarea::make('comment')
                 ]),
             ]),
@@ -138,20 +176,26 @@ class TourCorporateResource extends Resource
                     
                     $index = array_search($uuid, array_keys($get('groups'))) ?? 0;
                     $index++;
-                    return 'Expenses: ' . (!empty($expenseTypes) ? implode(', ', $expenseTypes) : '');
+
+                    $passengerCount = count($current['passengers'] ?? []);
+                    $summary = $expenseTypes
+                        ? __('Expenses: :types', ['types' => implode(', ', $expenseTypes)])
+                        : __('No expenses yet');
+
+                    return __('Group :index', ['index' => $index]).' · '.trans_choice('{1} 1 passenger|[2,*] :count passengers', $passengerCount, ['count' => $passengerCount]).' · '.$summary;
                 })
                 ->relationship('groups')
-                ->addActionLabel('Add group')
+                ->addActionLabel(__('Add group'))
                 ->addActionAlignment('end')
                 ->schema([
                     Components\Grid::make(3)->schema([
                         Components\Repeater::make('passengers')
                             ->relationship('passengers')
-                            ->addActionLabel('Add passenger')
+                            ->addActionLabel(__('Add passenger'))
                             ->minItems(1)
                             ->simple(
                                 Components\TextInput::make('name')
-                                    ->label('Passenger name')
+                                    ->label(__('Passenger name'))
                                     ->required(),
                             ),
                     ]),
@@ -176,23 +220,32 @@ class TourCorporateResource extends Resource
                                 $date = $current['date'] ?? null;
                                 $dateLabel = $date ? ' | ' . Carbon::parse($date)->format('d.m.Y') : '';
 
-                                return "Expense for $expenseTypeLabel ($index){$dateLabel}{$status}";
+                                return __('Expense for :type (:index):date:status', [
+                                    'type' => $expenseTypeLabel,
+                                    'index' => $index,
+                                    'date' => $dateLabel,
+                                    'status' => $status,
+                                ]);
                             }
 
-                            return "Expense $index";
+                            return __('Expense :index', ['index' => $index]);
                         })
                         ->relationship('expenses')
-                        ->addActionLabel('Add expense')
+                        ->addActionLabel(__('Add expense'))
                         ->addActionAlignment('end')
                         ->schema([
-                            Components\Grid::make(3)->schema([
+                            Components\Section::make(__('Expense details'))
+                                ->icon('heroicon-o-tag')
+                                ->description(__('What kind of expense this is, and when/where it applies.'))
+                                ->schema([
+                                Components\Grid::make(3)->schema([
                                 Hidden::make('index'),
                                 Hidden::make('price_currency'),
                                 Components\Select::make('type')
                                     ->native(false)
                                     ->searchable()
                                     ->preload()
-                                    ->label('Expense Type')
+                                    ->label(__('Expense Type'))
                                     ->options(function() {
                                         $options = ExpenseType::casesOptions();
                                         return collect($options)->filter(fn($value) => in_array($value, [
@@ -209,9 +262,9 @@ class TourCorporateResource extends Resource
                                 Components\DatePicker::make('date')
                                     ->label(function($get) {
                                         if ($get('type') == ExpenseType::Flight->value) {
-                                            return 'Flight date';
+                                            return __('Flight date');
                                         }
-                                        return 'Date';
+                                        return __('Date');
                                     })
                                     ->displayFormat('d.m.Y')
                                     ->native(false)
@@ -224,9 +277,9 @@ class TourCorporateResource extends Resource
                                     ->native(false)
                                     ->label(function($get) {
                                         if ($get('type') == ExpenseType::Train->value) {
-                                            return 'City from';
+                                            return __('City from');
                                         }
-                                        return 'City';
+                                        return __('City');
                                     })
                                     ->searchable()
                                     ->preload()
@@ -237,22 +290,25 @@ class TourCorporateResource extends Resource
                                     ->hidden(fn($get) => in_array($get('type'), [
                                         ExpenseType::Flight->value,
                                     ])),
+                                ]),
                             ]),
-                            
+
                             // Hotel
-                            Components\Fieldset::make('Hotel info')->schema([
+                            Components\Section::make(__('Hotel info'))
+                                ->icon('heroicon-o-building-office-2')
+                                ->schema([
                                 Components\Grid::make(3)->schema([
                                     Components\Select::make('hotel_id')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Hotel')
+                                        ->label(__('Hotel'))
                                         ->options(fn($get) => TourService::getHotels($get('city_id')))
                                         ->preload()
                                         ->reactive()
                                         ->required(),
                                     Components\DateTimePicker::make('date')
-                                        ->label('Check-in date & time')
+                                        ->label(__('Check-in date & time'))
                                         ->native(false)
                                         ->displayFormat('d.m.Y H:i')
                                         ->seconds(false)
@@ -287,7 +343,7 @@ class TourCorporateResource extends Resource
                                                 )
                                             );
                                         })
-                                        ->label('Check-out date & time'),
+                                        ->label(__('Check-out date & time')),
                                 ]),
                                 
                                 Components\Grid::make(3)->schema([
@@ -298,25 +354,25 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
                                     Components\TextInput::make('hotel_total_nights')
                                         ->numeric()
-                                        ->label('Total nights'),
-                                    Components\Textarea::make('comment')->label('Comment'),
+                                        ->label(__('Total nights')),
+                                    Components\Textarea::make('comment')->label(__('Comment')),
                                 ]),
                                 
                                 Components\Repeater::make('roomTypes')
                                     ->grid(2)
                                     ->columnSpanFull()
                                     ->relationship('roomTypes')
-                                    ->addActionLabel('Add room type')
+                                    ->addActionLabel(__('Add room type'))
                                     ->schema([
                                         Components\Grid::make(3)->schema([
                                             Components\Select::make('room_type_id')
                                                 ->native(false)
                                                 ->searchable()
                                                 ->preload()
-                                                ->label('Room type')
+                                                ->label(__('Room type'))
                                                 ->options(function($get) {
                                                     $hotelId = $get('../../hotel_id');
                                                     if (!$hotelId) {
@@ -330,34 +386,36 @@ class TourCorporateResource extends Resource
                                                 })
                                                 ->helperText(fn($get) => $get('../../hotel_id')
                                                     ? null
-                                                    : 'Select a hotel first')
+                                                    : __('Select a hotel first'))
                                                 ->required()
                                                 ->reactive(),
 
                                             Components\TextInput::make('amount_uz')
                                                 ->numeric()
                                                 ->default(0)
-                                                ->label('UZ'),
+                                                ->label(__('UZ')),
 
                                             Components\TextInput::make('amount_foreign')
                                                 ->numeric()
                                                 ->default(0)
-                                                ->label('Foreign'),
+                                                ->label(__('Foreign')),
                                         ])
                                     ])
                             
                             ])->visible(fn($get) => $get('type') == ExpenseType::Hotel->value),
                             
                             // Transport
-                            Components\Fieldset::make('Transport info')->schema([
+                            Components\Section::make(__('Transport info'))
+                                ->icon('heroicon-o-truck')
+                                ->schema([
 
                                 Components\Grid::make(4)->schema([
                                     Components\DateTimePicker::make('date')
-                                        ->label('Date & Time')
+                                        ->label(__('Date & Time'))
                                         ->displayFormat('d.m.Y H:i')
                                         ->seconds(false),
                                     Components\Select::make('transport_class_id')
-                                        ->label('Transport class')
+                                        ->label(__('Transport class'))
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -368,7 +426,7 @@ class TourCorporateResource extends Resource
                                             $set('price', null);
                                         }),
                                     Components\Select::make('route_id')
-                                        ->label('Route')
+                                        ->label(__('Route'))
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -393,7 +451,7 @@ class TourCorporateResource extends Resource
 
                                 Components\Grid::make(3)->schema([
                                     Components\TextInput::make('transport_route')
-                                        ->label('Destination')
+                                        ->label(__('Destination'))
                                         ->required(),
 
                                     Components\Select::make('status')
@@ -403,54 +461,56 @@ class TourCorporateResource extends Resource
                                         ->options(ExpenseStatus::class)
                                         ->default(ExpenseStatus::New->value)
                                         ->required()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
 
                                     self::getExpensePriceInput(),
                                 ]),
 
                                 Components\Textarea::make('comment')
-                                    ->label('Comment')
+                                    ->label(__('Comment'))
                                     ->columnSpanFull(),
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Transport->value),
                             
                             // Train
-                            Components\Fieldset::make('Train info')->schema([
-                                
+                            Components\Section::make(__('Train info'))
+                                ->icon('heroicon-o-ticket')
+                                ->schema([
+
                                 Components\Grid::make(4)->schema([
                                     Components\Select::make('train_id')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Train')
+                                        ->label(__('Train'))
                                         ->options(TourService::getTrains()),
                                     
                                     Components\Select::make('to_city_id')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('City to')
+                                        ->label(__('City to'))
                                         ->options(TourService::getCities())
                                         ->reactive(),
                                     
                                     Components\TimePicker::make('departure_time')
                                         ->seconds(false)
-                                        ->label('Departure time'),
+                                        ->label(__('Departure time')),
                                     
                                     Components\DateTimePicker::make('arrival_time')
                                         ->seconds(false)
-                                        ->label('Arrival time'),
+                                        ->label(__('Arrival time')),
                                 ]),
                                 
                                 Components\Grid::make(4)->schema([
                                     Components\TextInput::make('train_class_second')
-                                        ->label('Second')
+                                        ->label(__('Second'))
                                         ->numeric(),
                                     Components\TextInput::make('train_class_business')
-                                        ->label('Business')
+                                        ->label(__('Business'))
                                         ->numeric(),
                                     Components\TextInput::make('train_class_vip')
-                                        ->label('VIP')
+                                        ->label(__('VIP'))
                                         ->numeric(),
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
@@ -463,24 +523,26 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
                                 ]),
 
                                 Components\Grid::make(4)->schema([
                                     Components\TextInput::make('train_service_fee')
-                                        ->label('Service Fee')
+                                        ->label(__('Service Fee'))
                                         ->numeric(),
                                 ]),
 
                                 Components\Textarea::make('comment')
-                                    ->label('Comment')
+                                    ->label(__('Comment'))
                                     ->columnSpanFull(),
 
                             ])->visible(fn($get) => $get('type') == ExpenseType::Train->value),
                             
                             // Flight
-                            Components\Fieldset::make('Flight info')->schema([
-                                
+                            Components\Section::make(__('Flight info'))
+                                ->icon('heroicon-o-paper-airplane')
+                                ->schema([
+
                                 Components\Grid::make(4)->schema([
                                     self::getExpensePriceInput(),
                                     
@@ -493,63 +555,67 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
                                     
                                     Components\Textarea::make('comment')
-                                        ->label('Comment'),
+                                        ->label(__('Comment')),
                                 ]),
                                 
                                 Components\Grid::make(4)->schema([
                                     Components\TimePicker::make('departure_time')
                                         ->seconds(false)
-                                        ->label('Departure time'),
+                                        ->label(__('Departure time')),
                                     
                                     Components\TextInput::make('departure_number')
-                                        ->label('Departure reys number'),
+                                        ->label(__('Departure reys number')),
                                     
                                     Components\DateTimePicker::make('arrival_time')
                                         ->seconds(false)
-                                        ->label('Arrival time'),
+                                        ->label(__('Arrival time')),
                                     
                                     Components\TextInput::make('arrival_number')
-                                        ->label('Arrival reys number'),
+                                        ->label(__('Arrival reys number')),
                                 ]),
                                 
                                 Components\Grid::make(4)->schema([
                                     Components\Select::make('plane_type')
                                         ->options(PlaneType::class)
-                                        ->label('Plane type'),
+                                        ->label(__('Plane type')),
                                     
                                     Components\TextInput::make('plane_service_fee')
-                                        ->label('Service fee'),
+                                        ->label(__('Service fee')),
                                 ]),
                             
                             ])->visible(fn($get) => $get('type') == ExpenseType::Flight->value),
                             
                             // Extra
-                            Components\Fieldset::make('Extra info')->schema([
+                            Components\Section::make(__('Extra info'))
+                                ->icon('heroicon-o-plus-circle')
+                                ->schema([
                                 Components\Grid::make(3)->schema([
                                     Components\TextInput::make('other_name')
-                                        ->label('Name'),
+                                        ->label(__('Name')),
                                     
                                     self::getExpensePriceInput(),
                                     
-                                    Components\Textarea::make('comment')->label('Comment'),
+                                    Components\Textarea::make('comment')->label(__('Comment')),
                                 ]),
                             ])->visible(fn($get) => $get('type') == ExpenseType::Extra->value),
                             
                             // Conference
-                            Components\Fieldset::make('Conference info')->schema([
-                                
+                            Components\Section::make(__('Conference info'))
+                                ->icon('heroicon-o-user-group')
+                                ->schema([
+
                                 Components\Grid::make(4)->schema([
                                     Components\TextInput::make('conference_name')
-                                        ->label('Conference name'),
+                                        ->label(__('Conference name')),
                                     
                                     self::getExpensePriceInput(),
                                     
                                     Components\TextInput::make('coffee_break')
                                         ->suffix('%')
-                                        ->label('Coffee break'),
+                                        ->label(__('Coffee break')),
                                     
                                     Components\Select::make('status')
                                         ->options(ExpenseStatus::class)
@@ -558,11 +624,11 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
                                 ]),
                                 
                                 Components\Textarea::make('comment')
-                                    ->label('Comment')
+                                    ->label(__('Comment'))
                                     ->columnSpanFull(),
                             
                             ])->visible(fn($get) => $get('type') == ExpenseType::Conference->value),
@@ -609,7 +675,7 @@ class TourCorporateResource extends Resource
     public static function getExpensePriceInput(string $label = 'Price'): Components\TextInput
     {
         return Components\TextInput::make('price')
-            ->label(fn($get) => "$label (" . ($get('price_currency') ?? 'UZS') . ")")
+            ->label(fn($get) => __($label) . ' (' . ($get('price_currency') ?? 'UZS') . ')')
             ->suffixAction(
                 Components\Actions\Action::make('toggle-currency')
                     ->icon('heroicon-o-banknotes')
@@ -654,17 +720,17 @@ class TourCorporateResource extends Resource
                 Tables\Filters\Filter::make('country_id')
                     ->columnSpanFull()
                     ->form([
-                        Components\Grid::make(5)->schema([
+                        Components\Grid::make(['sm' => 2, 'md' => 3])->schema([
                             Components\Checkbox::make('active')
-                                ->label('Active')
+                                ->label(__('Active'))
                                 ->default(false)
                                 ->inline(false),
                             Components\Checkbox::make('archive')
-                                ->label('Archive')
+                                ->label(__('Archive'))
                                 ->default(false)
                                 ->inline(false),
                             Components\Select::make('year')
-                                ->label('Year')
+                                ->label(__('Year'))
                                 ->native(false)
                                 ->default((int)date('Y'))
                                 ->options(function() {
@@ -677,14 +743,14 @@ class TourCorporateResource extends Resource
                                     );
                                 }),
                         ]),
-                        Components\Grid::make(5)->schema([
+                        Components\Grid::make(['sm' => 2, 'md' => 4])->schema([
                             Components\Select::make('company_id')
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
                                 ->options(Company::query()->pluck('name', 'id')->toArray()),
                             Components\Select::make('created_by')
-                                ->label('Admin creator')
+                                ->label(__('Admin creator'))
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
@@ -774,7 +840,7 @@ class TourCorporateResource extends Resource
                         
                         return $indicators;
                     })
-            ], layout: FiltersLayout::AboveContent)
+            ], layout: FiltersLayout::AboveContentCollapsible)
             ->columns([
                 Columns\TextColumn::make('group_number')
                     ->searchable(),
@@ -803,12 +869,12 @@ class TourCorporateResource extends Resource
                     ->searchable(),
                 
                 Columns\TextColumn::make('start_date')
-                    ->label('Start')
+                    ->label(__('Start'))
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
 
                 Columns\TextColumn::make('end_date')
-                    ->label('End')
+                    ->label(__('End'))
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
 
@@ -828,11 +894,11 @@ class TourCorporateResource extends Resource
             ->recordAction(StatusAction::class)
             ->actions([
                 Tables\Actions\Action::make('export_all')
-                    ->label('Reports')
+                    ->label(__('Reports'))
                     ->icon('heroicon-o-document-text')
                     ->url(fn(Tour $record) => route('export-all', $record)),
                 Tables\Actions\EditAction::make(),
-                StatusAction::make()->label('')->icon(''),
+                StatusAction::make()->label(__(''))->icon(''),
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->headerActions([
             

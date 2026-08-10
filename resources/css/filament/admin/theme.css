@@ -1,132 +1,697 @@
-/* 1. FONTS ──────────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap');
+/* ═══════════════════════════════════════════════════════════════════════════
+   FONTS — Inter, self-hosted via @fontsource (no external request, works offline)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
 
 @import '/vendor/filament/filament/resources/css/theme.css';
 
 @config 'tailwind.config.js';
 
-/* Apply Inter globally */
-body,
-.fi-body,
-.fi-sidebar,
-.fi-topbar,
-.fi-main,
-input,
-select,
-textarea,
-button {
-    font-family: 'Inter', sans-serif !important;
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   Single source of truth for surfaces, spacing and type — every component rule
+   below reads from these instead of hand-picking its own value per selector.
+   Semantic colors (primary, success, danger, warning, info, gray) are NOT
+   redefined here: they come from Filament's own --primary-500 etc. variables,
+   generated from the ->colors() palette in AdminPanelProvider.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer base {
+    :root {
+        /* Surfaces */
+        --surface-page: #F8FAFC;              /* slate-50 */
+        --surface-card: #FFFFFF;
+        --surface-border: #E2E8F0;            /* slate-200 */
+        --surface-border-strong: #CBD5E1;     /* slate-300 */
+
+        /* Density scale — consumed explicitly by component rules (buttons,
+           section/table/modal padding, sidebar nav). Deliberately NOT wired into
+           Tailwind's numeric spacing theme: that scale also drives icon/avatar/
+           badge sizing (w-4 h-4, gap-x-2, …) across every vendored Filament
+           template, and remapping it would resize those globally as a side
+           effect. This scale only ever appears inside our own selectors below. */
+        --space-1: 4px;
+        --space-2: 6px;
+        --space-3: 8px;
+        --space-4: 12px;
+        --space-5: 16px;
+        --space-6: 24px;
+
+        /* Type scale — role-based, applied at the point of use in the
+           components layer (table headers/cells, badges, labels, buttons,
+           section/page headings), not as a blanket override of Tailwind's
+           text-* utilities used throughout vendor markup. */
+        --text-xs: 0.6875rem;   --leading-xs: 1.4;    /* captions, sidebar group labels */
+        --text-sm: 0.75rem;     --leading-sm: 1.5;    /* table headers, badges */
+        --text-base: 0.8125rem; --leading-base: 1.5;  /* body text, table cells, inputs */
+        --text-md: 0.875rem;    --leading-md: 1.5;    /* field labels, buttons */
+        --text-lg: 1rem;        --leading-lg: 1.4;    /* section headings */
+        --text-xl: 1.25rem;     --leading-xl: 1.3;    /* page headings */
+    }
+
+    :root.dark {
+        --surface-page: #020617;              /* slate-950 */
+        --surface-card: #0F172A;              /* slate-900 */
+        --surface-border: rgba(255, 255, 255, 0.08);
+        --surface-border-strong: rgba(255, 255, 255, 0.14);
+    }
+
+    body,
+    .fi-body {
+        background-color: var(--surface-page);
+    }
+
+    /* One focus-visible ring, applied to every interactive element instead of
+       being hand-repeated (or missing) per component. Keyboard-only, so mouse
+       clicks don't leave a ring behind. */
+    :focus-visible {
+        outline: 2px solid rgb(var(--primary-500));
+        outline-offset: 2px;
+    }
 }
 
-/* 2. TABLE density tweaks ────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENTS
+   Replaces the old resources/custom-css/admin.css (deleted — it was a raw,
+   un-themed asset registered via FilamentAsset::register, bypassing Tailwind
+   entirely). Badges and inputs aren't styled here: <x-filament::badge> and
+   .fi-input already theme themselves from the same --primary-500 and friends
+   everything else in this file reads, so there's nothing to override — see
+   the BUTTONS section below for why the same is true there.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* App-wide footer + login tagline (resources/views/filament/hooks/*.blade.php) */
+.ep-footer {
+    position: relative;
+    z-index: 2;
+    padding: var(--space-3) 0 var(--space-6);
+    text-align: center;
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    color: rgb(var(--gray-400));
+}
+
+.dark .ep-footer {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.ep-auth-tagline {
+    margin-top: var(--space-5);
+    text-align: center;
+    text-transform: uppercase;
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    color: rgb(var(--gray-400));
+}
+
+/* Generic inline-flex row (filament/columns/status-column.blade.php) — that
+   view's content sits inside a plain Filament table cell, not our
+   .custom-table, so it can't reach the .custom-table .flex-td layout below. */
+.ep-inline-flex {
+    display: flex;
+    align-items: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DENSITY
+   Compact spacing, expressed on Filament's own component classes instead of
+   redefining Tailwind utility class names (the previous `.gap-6 { @apply
+   gap-4 }` / `.h-16 { @apply h-12 }` approach): those utilities are used
+   throughout vendor markup for things unrelated to our density choices, so
+   redefining them changed spacing app-wide as a side effect. This file is
+   loaded unlayered (no @layer wrapper), same as the rest of this stylesheet,
+   so a plain selector here already beats Tailwind's own utilities — which
+   Tailwind emits inside @layer utilities — without needing !important.
+   ═══════════════════════════════════════════════════════════════════════════ */
 .fi-ta-table > tbody {
-    @apply divide-none
+    @apply divide-none;
 }
-
-.fi-ta-text {
-    @apply py-1
-}
-.fi-ta-table > .whitespace-nowrap {
-    @apply py-1
-}
+.fi-ta-text,
+.fi-ta-table > .whitespace-nowrap,
 .fi-ta-cell > div:has(.flex) {
-    @apply py-1
+    @apply py-1;
 }
-input {
-    @apply py-1
-}
+input,
 select {
-    @apply py-1
+    @apply py-1;
 }
-.fi-input {
-    @apply py-0.5
-}
-.fi-select-input {
-    @apply py-0.5
-}
-.fi-fo-date-time-picker-display-text-input {
-    @apply py-0.5
-}
+.fi-input,
+.fi-select-input,
+.fi-fo-date-time-picker-display-text-input,
 .choices__inner {
-    @apply py-0.5
-}
-
-.fi-ta-filters {
-    @apply px-4 py-3
+    @apply py-0.5;
 }
 .fi-section-content {
-    @apply px-4 py-3
+    @apply px-4 py-3;
 }
-
-.gap-6 {
-    @apply gap-4
-}
-.gap-y-8 {
-    @apply gap-6
-}
-.gap-y-2 {
-    @apply gap-1
-}
-.gap-y-4 {
-    @apply gap-2
-}
-
 .fi-fieldset {
-    @apply px-3 py-3
+    @apply px-3 py-3;
 }
-
-/* 6. BUTTON polish ───────────────────────────────────────────────────────── */
-.fi-btn {
-    @apply py-1;
-    border-radius: 8px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.01em;
-    transition: background 0.15s ease, box-shadow 0.15s ease !important;
-}
-
-.fi-section-header {
-    @apply py-1.5
-}
+.fi-section-header,
 .fi-fo-repeater-item-header {
-    @apply py-1.5
+    @apply py-1.5;
 }
 .fi-fo-repeater-item-content {
-    @apply py-2 px-4
+    @apply py-2 px-4;
 }
 .fi-icon-btn {
-    @apply w-7 h-7
+    @apply w-7 h-7;
 }
-
 .fi-ta-header-cell {
-    @apply px-2 py-2
+    @apply px-2 py-2;
 }
-
-.fi-modal-content {
-    @apply px-4 py-3
-}
-.fi-modal-header {
-    @apply px-4 py-3
-}
+.fi-modal-content,
+.fi-modal-header,
 .fi-modal-footer {
-    @apply px-4 py-3
-}
-
-.h-16 {
-    @apply h-12
+    @apply px-4 py-3;
 }
 .fi-main {
-    @apply px-6
+    @apply px-6;
+    max-width: 100% !important; /* full-width working area instead of the vendor 7xl cap */
 }
 .fi-pagination {
-    @apply px-3 py-3
+    @apply px-3 py-3;
 }
-.fi-ta-filters-above-content-ctn {
-    @apply px-2 py-2
-}
-.fi-ta-filters {
-    @apply gap-y-2
+.fi-sidebar-nav {
+    @apply px-4 py-3;
 }
 
-.fi-sidebar-nav {
-    @apply px-4 py-3
+/* Form field grid (Section/Grid/Fieldset/top-level form) — carries a literal
+   gap-6 class from every Filament layout component. */
+.fi-fo-component-ctn {
+    gap: var(--space-4);
+}
+/* Label + input + hint stack inside a single field. */
+.fi-fo-field-wrp > .grid {
+    row-gap: var(--space-2);
+}
+/* Page-level rhythm between header / widgets / content. */
+.fi-page > section {
+    row-gap: var(--space-6);
+    padding-block: var(--space-6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTONS
+   Filament's own <x-filament::button> already implements hover, active,
+   focus-visible, disabled (pointer-events-none + reduced opacity) and a
+   loading spinner (wire:loading-driven) per color, from the --primary-500
+   and friends generated by AdminPanelProvider's color config.
+   The only thing this app adds on top is radius (rounded-lg is shared with
+   cards, so buttons need their own value) and label polish — no color logic,
+   no hover lift (a translateY on a button sitting inside a table row/repeater
+   makes the row jitter, which is why the old primary-only lift is gone).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-btn {
+    @apply py-1;
+    border-radius: theme('borderRadius.md');
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-input-wrp-suffix .fi-icon-btn-icon {
+    color: rgb(var(--primary-600));
+}
+.dark .fi-input-wrp-suffix .fi-icon-btn-icon {
+    color: rgb(var(--primary-400));
+}
+
+/* ysfkaya/filament-phone-input (intl-tel-input) — the text field itself
+   already renders through <x-filament::input>, so it's themed for free; only
+   the country-dropdown popover (the .iti classes intl-tel-input injects) has
+   its own package CSS, which hardcodes stock Tailwind gray for its border/
+   hover/dropdown colors instead of our slate-based --gray-*. That package
+   CSS loads lazily (x-load-css, added to <head> after this stylesheet), so
+   it would win a same-specificity, same-selector tie — !important here is
+   load-order insurance, not decoration. */
+.fi-fo-phone-input .iti {
+    --iti-border-color: var(--surface-border-strong) !important;
+    --iti-dropdown-bg: var(--surface-card) !important;
+    --iti-hover-color: rgba(var(--primary-500), 0.08) !important;
+    --iti-dialcode-color: rgb(var(--gray-500)) !important;
+    --iti-arrow-color: rgb(var(--gray-400)) !important;
+}
+.dark .fi-fo-phone-input .iti {
+    --iti-border-color: var(--surface-border-strong) !important;
+    --iti-dropdown-bg: var(--surface-card) !important;
+    --iti-hover-color: rgba(var(--primary-400), 0.12) !important;
+    --iti-dialcode-color: rgb(var(--gray-400)) !important;
+    --iti-arrow-color: rgb(var(--gray-500)) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECTIONS / CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-section {
+    box-shadow: theme('boxShadow.sm');
+    border-radius: theme('borderRadius.lg');
+    transition: box-shadow 0.2s ease;
+}
+.fi-section:hover {
+    box-shadow: theme('boxShadow.DEFAULT');
+}
+.dark .fi-section {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.dark .fi-section:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.fi-wi-stats-overview-stat {
+    box-shadow: theme('boxShadow.sm');
+    border-radius: theme('borderRadius.lg');
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: theme('boxShadow.md');
+}
+.dark .fi-wi-stats-overview-stat {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+.dark .fi-wi-stats-overview-stat:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Separator under page/section headings. */
+.fi-header {
+    border-bottom: 1px solid var(--surface-border);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-ta-row:hover td {
+    background-color: rgba(var(--primary-500), 0.04);
+    transition: background 0.15s ease;
+}
+.dark .fi-ta-row:hover td {
+    background-color: rgba(var(--primary-400), 0.08);
+}
+
+.fi-ta-cell,
+.custom-table td {
+    font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 768px) {
+    .fi-ta-table thead {
+        position: sticky !important;
+        top: 0;
+        z-index: 9;
+    }
+    /* Keeps the sticky header's background solid over scrolled-under rows —
+       without this the semi-transparent dark:bg-white/5 header lets table
+       content show through while stuck to the top. */
+    .fi-ta-table :is(:where(.dark) .dark\:bg-white\/5) {
+        background-color: rgb(30 41 59); /* slate-800 */
+    }
+    .fi-ta-content {
+        height: calc(100vh - 20rem);
+        position: relative;
+    }
+    .fi-dropdown-panel {
+        z-index: 40 !important;
+    }
+}
+
+/* Hand-written report tables (resources/views/components/data-table.blade.php,
+   used by the day/room-period/status views). */
+.custom-table-wrapper {
+    width: 100%;
+    border: 1px solid var(--surface-border);
+    border-radius: theme('borderRadius.sm');
+}
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-width: 0;
+}
+.custom-table th {
+    border-bottom: 1px solid var(--surface-border);
+    background-color: rgb(var(--gray-50));
+    font-weight: 600;
+    font-size: var(--text-sm);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+.dark .custom-table th {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+.custom-table td {
+    border-top: 1px solid var(--surface-border);
+}
+.custom-table td,
+.custom-table th {
+    font-size: var(--text-base);
+    text-align: center;
+    padding: var(--space-2);
+}
+.custom-table tr:nth-child(even) {
+    background-color: rgb(var(--gray-50));
+}
+.dark .custom-table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+.custom-table tr:hover {
+    background-color: rgba(var(--primary-500), 0.04);
+    transition: background 0.15s ease;
+}
+.dark .custom-table tr:hover {
+    background-color: rgba(var(--primary-400), 0.08);
+}
+.custom-table .flex-td {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.custom-table .flex-td p {
+    margin-bottom: var(--space-1);
+}
+/* Modifier for the flight/train departure-time row inside a .flex-td cell —
+   time and status badge sit side by side instead of stacked. */
+.custom-table .flex-td--row {
+    flex-direction: row;
+    margin-top: var(--space-1);
+}
+.custom-table .flex-td--row p {
+    margin-bottom: 0;
+}
+/* Left-align variant (periods-column.blade.php) instead of the default
+   centered cells — two classes on the selector out-specifies the plain
+   .custom-table th/td rule above regardless of source order. */
+.custom-table--left th,
+.custom-table--left td {
+    text-align: left;
+}
+/* Empty-state cell (hotel_periods_view.blade.php's "no pricing" row). */
+.ep-table-empty {
+    text-align: center;
+    padding: var(--space-5);
+}
+
+/* Row-status highlight — replaces TransferResource's old .color-green/-red/
+   -light-orange (the last of which actually rendered grey, #c0c0c0). Reuses
+   the same semantic tokens as everything else instead of its own palette. */
+.ep-row-success td {
+    background-color: rgba(var(--success-500), 0.06) !important;
+}
+.dark .ep-row-success td {
+    background-color: rgba(var(--success-400), 0.1) !important;
+}
+.ep-row-danger td {
+    background-color: rgba(var(--danger-500), 0.06) !important;
+}
+.dark .ep-row-danger td {
+    background-color: rgba(var(--danger-400), 0.1) !important;
+}
+.ep-row-warning td {
+    background-color: rgba(var(--warning-500), 0.08) !important;
+}
+.dark .ep-row-warning td {
+    background-color: rgba(var(--warning-400), 0.12) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FILTERS PANEL
+   The whole table (header + filters + rows) sits inside one Filament card,
+   .fi-ta-ctn, with divide-y section separators — that structure is kept
+   as-is rather than fought. What's fixed: .fi-ta-filters-above-content-ctn
+   (outer) and .fi-ta-filters (inner) previously each applied their own
+   padding, stacking into visibly uneven double spacing; the active-filter
+   indicator strip (.fi-ta-filter-indicators) was unstyled raw grey; and the
+   card itself used Filament's un-themed default radius/shadow instead of
+   the tokens every other card in the app reads from.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-ta-ctn {
+    border-radius: theme('borderRadius.lg');
+    box-shadow: theme('boxShadow.sm');
+}
+.fi-ta-filters-above-content-ctn {
+    padding: var(--space-5) var(--space-6);
+}
+.fi-ta-filters {
+    padding: 0;
+    gap: var(--space-4);
+}
+/* Header row ("Фильтры" heading + "Сбросить" reset link). */
+.fi-ta-filters > .flex {
+    margin-bottom: var(--space-1);
+}
+.fi-ta-filter-indicators {
+    background-color: rgba(var(--primary-500), 0.04);
+    padding: var(--space-3) var(--space-6);
+}
+.dark .fi-ta-filter-indicators {
+    background-color: rgba(var(--primary-400), 0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR
+   Chromeless, Linear/Notion-style: no distinct colored panel — Filament's own
+   <aside> is already lg:bg-transparent on desktop, so leaving background
+   alone here means the sidebar reads as part of the same canvas as the page
+   (--surface-page from body/.fi-body) in both themes, instead of a fixed
+   panel that ignores the light/dark toggle. Filament's own item/group
+   templates (vendor/filament/filament/resources/views/components/sidebar/)
+   already do the rest correctly — muted gray icon/label, primary-colored
+   text only when active (already teal, since primary = Color::Teal) — so
+   this only adds a soft teal tint to the pill instead of Filament's flat
+   neutral gray, on both hover and active.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-sidebar {
+    transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fi-sidebar-item-button:hover {
+    background-color: rgba(var(--primary-500), 0.06);
+}
+.dark .fi-sidebar-item-button:hover {
+    background-color: rgba(var(--primary-400), 0.1);
+}
+.fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background-color: rgba(var(--primary-500), 0.08);
+}
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background-color: rgba(var(--primary-400), 0.14);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOPBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fi-topbar-nav {
+    border-bottom: 1px solid var(--surface-border);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.dark .fi-topbar,
+.dark .fi-topbar-nav {
+    background: rgba(15, 23, 42, 0.9) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REPEATERS — Days / Expenses / Guides
+   Color identity lives on the header + border only, never on .fi-btn: the old
+   rules also repainted every button inside the repeater item (including the
+   delete action), turning its danger-red button primary-blue.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.repeater-days .fi-fo-repeater-item,
+.repeater-guides .fi-fo-repeater-item {
+    border: 2px solid rgb(var(--primary-600));
+}
+.repeater-days .fi-fo-repeater-item-header,
+.repeater-guides .fi-fo-repeater-item-header {
+    background: rgb(var(--primary-600));
+    border-radius: theme('borderRadius.md') theme('borderRadius.md') 0 0;
+}
+.repeater-days .fi-fo-repeater-item-header h4,
+.repeater-guides .fi-fo-repeater-item-header h4 {
+    color: #fff !important;
+}
+.repeater-days .fi-fo-repeater-item-content {
+    border-radius: 0 0 theme('borderRadius.md') theme('borderRadius.md');
+}
+.dark .repeater-days .fi-fo-repeater-item,
+.dark .repeater-guides .fi-fo-repeater-item {
+    border-color: rgb(var(--primary-500));
+}
+.dark .repeater-days .fi-fo-repeater-item-header,
+.dark .repeater-guides .fi-fo-repeater-item-header {
+    background: rgb(var(--primary-700));
+}
+
+.repeater-expenses .fi-fo-repeater-item {
+    border: 2px solid rgb(var(--success-600));
+}
+.repeater-expenses .fi-fo-repeater-item-header {
+    background: rgb(var(--success-600));
+    border-radius: theme('borderRadius.md') theme('borderRadius.md') 0 0;
+}
+.dark .repeater-expenses .fi-fo-repeater-item {
+    border-color: rgb(var(--success-500));
+}
+.dark .repeater-expenses .fi-fo-repeater-item-header {
+    background: rgb(var(--success-700));
+}
+
+/* Icon buttons inside repeater items — neutral by default, danger on hover
+   (delete). White on the colored headers above for contrast. */
+.fi-fo-repeater-item .fi-icon-btn-icon {
+    color: rgb(var(--gray-500));
+}
+.fi-fo-repeater-item .fi-icon-btn:hover .fi-icon-btn-icon {
+    color: rgb(var(--danger-500));
+}
+.dark .fi-fo-repeater-item .fi-icon-btn-icon {
+    color: rgb(var(--gray-400));
+}
+.dark .fi-fo-repeater-item .fi-icon-btn:hover .fi-icon-btn-icon {
+    color: rgb(var(--danger-400));
+}
+.repeater-days .fi-fo-repeater-item .fi-icon-btn-icon,
+.repeater-expenses .fi-fo-repeater-item .fi-icon-btn-icon,
+.repeater-guides .fi-fo-repeater-item .fi-icon-btn-icon {
+    color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH (login page)
+   Was a permanently-dark glassmorphism card regardless of the rest of the
+   (light) panel — the one screen a user sees before the theme toggle is even
+   reachable. Same tokens as everywhere else now: a plain elevated card in
+   light mode, glass in dark. The glow/dot-grid backdrop and card entrance
+   animation are kept (this page still gets to feel like an entrance), just
+   re-tinted to teal/emerald instead of blue/amber and toned down for light.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes ep-blob-drift-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(40px, -30px) scale(1.06); }
+    66%      { transform: translate(-20px, 20px) scale(0.96); }
+}
+@keyframes ep-blob-drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(-30px, 40px) scale(0.94); }
+    66%      { transform: translate(25px, -20px) scale(1.04); }
+}
+@keyframes ep-card-enter {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes ep-glow-pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(var(--primary-600), 0.35), 0 1px 3px rgba(0, 0, 0, 0.2); }
+    50%      { box-shadow: 0 6px 28px rgba(var(--primary-600), 0.55), 0 2px 6px rgba(0, 0, 0, 0.3); }
+}
+
+.fi-simple-layout {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface-page);
+}
+.fi-simple-layout::before {
+    content: '';
+    position: fixed;
+    width: 720px;
+    height: 720px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--primary-500), 0.12) 0%, transparent 68%);
+    top: -180px;
+    left: -180px;
+    animation: ep-blob-drift-1 12s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+.fi-simple-layout::after {
+    content: '';
+    position: fixed;
+    width: 560px;
+    height: 560px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--success-500), 0.08) 0%, transparent 68%);
+    bottom: -120px;
+    right: -120px;
+    animation: ep-blob-drift-2 15s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+.dark .fi-simple-layout::before {
+    background: radial-gradient(circle, rgba(var(--primary-400), 0.18) 0%, transparent 68%);
+}
+.dark .fi-simple-layout::after {
+    background: radial-gradient(circle, rgba(var(--success-400), 0.12) 0%, transparent 68%);
+}
+
+.fi-simple-main-ctn {
+    position: relative;
+    z-index: 1;
+}
+.fi-simple-main-ctn::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(var(--gray-400), 0.1) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.fi-simple-main {
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    border-radius: theme('borderRadius.xl');
+    box-shadow: theme('boxShadow.lg');
+    animation: ep-card-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    position: relative;
+    z-index: 2;
+}
+.dark .fi-simple-main {
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 0 0 1px rgba(var(--primary-500), 0.18),
+        0 20px 60px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+/* Thin accent line across the top of the card. */
+.fi-simple-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(var(--primary-500), 0.6), transparent);
+}
+
+.fi-simple-header-heading {
+    font-size: var(--text-xl);
+    line-height: var(--leading-xl);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+.fi-simple-header-subheading {
+    font-size: var(--text-base);
+    color: rgb(var(--gray-500));
+}
+.dark .fi-simple-header-subheading {
+    color: rgb(var(--gray-400));
+}
+
+/* Idle glow pulse on the sign-in button — a login-only flourish, not applied
+   to buttons generally (see the BUTTONS section above for why buttons don't
+   get hover lift/pulse elsewhere: it reads as noise on a page full of them). */
+.fi-simple-main .fi-btn-primary {
+    animation: ep-glow-pulse 3s ease-in-out infinite;
+}
+.fi-simple-main .fi-btn-primary:hover {
+    animation: none;
 }

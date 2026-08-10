@@ -16,21 +16,7 @@
     ]);
 @endphp
 
-<div class="custom-table-wrapper">
-    <table class="custom-table">
-        <thead>
-        <tr>
-            <th>Passengers</th>
-            <th>Date</th>
-            <th>City</th>
-            <th>Hotel</th>
-            <th>Guide</th>
-            <th>Flight</th>
-            <th>Train</th>
-            <th>Transfer</th>
-            <th>Extra</th>
-        </tr>
-        </thead>
+<x-data-table :headers="['Passengers', 'Date', 'City', 'Hotel', 'Guide', 'Flight', 'Train', 'Transfer', 'Extra']">
         @foreach($record->groups as $group)
             @php
                 $groupedByDate = $group->expenses
@@ -95,7 +81,7 @@
                         <div class="flex-td">
                             <p>{{ $hotel?->hotel?->name }}</p>
                             @if ($hotel?->status)
-                                <x-filament::badge :color="$hotel->status->getColor()" size="sm">
+                                <x-filament::badge :color="$hotel->status->getColor()" :icon="$hotel->status->getIcon()" size="sm">
                                     {{ $hotel->status->getLabel() }}
                                 </x-filament::badge>
                             @endif
@@ -106,7 +92,7 @@
                         <div class="flex-td">
                             <p>{{ $guideName }}</p>
                             @if ($guideStatus)
-                                <x-filament::badge :color="$guideStatus->getColor()" size="sm">
+                                <x-filament::badge :color="$guideStatus->getColor()" :icon="$guideStatus->getIcon()" size="sm">
                                     {{ $guideStatus->getLabel() }}
                                 </x-filament::badge>
                             @endif
@@ -117,7 +103,7 @@
                         <div class="flex-td">
                             <p>{{ $flight?->plane_route }}</p>
                             @if ($flight?->status)
-                                <x-filament::badge :color="$flight->status->getColor()" size="sm">
+                                <x-filament::badge :color="$flight->status->getColor()" :icon="$flight->status->getIcon()" size="sm">
                                     {{ $flight->status->getLabel() }}
                                 </x-filament::badge>
                             @endif
@@ -154,7 +140,7 @@
                         <div class="flex-td">
                             <p>{{ $extra?->other_name }}</p>
                             @if ($extra?->status)
-                                <x-filament::badge :color="$extra->status->getColor()" size="sm">
+                                <x-filament::badge :color="$extra->status->getColor()" :icon="$extra->status->getIcon()" size="sm">
                                     {{ $extra->status->getLabel() }}
                                 </x-filament::badge>
                             @endif
@@ -163,5 +149,4 @@
                 </tr>
             @endforeach
         @endforeach
-    </table>
-</div>
+</x-data-table>

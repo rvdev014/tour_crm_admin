@@ -24,23 +24,23 @@ class HotelStatsWidget extends BaseWidget
             ->query(fn() => $this->getQuery())
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Отель')
+                    ->label(__('Отель'))
                     ->searchable()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('stat_visits')
-                    ->label('Заездов')
-                    ->description('Кол-во туров')
+                    ->label(__('Заездов'))
+                    ->description(__('Кол-во туров'))
                     ->sortable()
                     ->alignCenter(),
                 
                 Tables\Columns\TextColumn::make('stat_nights')
-                    ->label('Продано ночей')
+                    ->label(__('Продано ночей'))
                     ->sortable()
                     ->alignCenter(),
                 
                 Tables\Columns\TextColumn::make('stat_people')
-                    ->label('Размещено людей')
+                    ->label(__('Размещено людей'))
                     ->sortable()
                     ->alignCenter(),
             ])

@@ -33,6 +33,14 @@ Route::get('/', function() {
     return redirect('/admin');
 });
 
+Route::get('admin/locale/{locale}', function (string $locale) {
+    abort_unless(in_array($locale, ['en', 'ru'], true), 404);
+
+    auth()->user()?->update(['locale' => $locale]);
+
+    return redirect()->back();
+})->middleware('auth')->name('admin.locale');
+
 Route::get('export/{tour}', [\App\Http\Controllers\ExportController::class, 'export'])->name('export');
 //Route::get('export/{tour}', [\App\Http\Controllers\ExportController::class, 'export'])->name('export');
 Route::get('export-client/{tour}', [\App\Http\Controllers\ExportController::class, 'exportClient'])->name(

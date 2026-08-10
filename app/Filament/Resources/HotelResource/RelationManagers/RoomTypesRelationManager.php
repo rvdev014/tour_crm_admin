@@ -58,13 +58,13 @@ class RoomTypesRelationManager extends RelationManager
                     ]),
                 
                 Forms\Components\Select::make('season_type')
-                    ->label('Season Type')
+                    ->label(__('Season Type'))
                     // Adjust these options to match your actual season types
                     ->options(RoomSeasonType::class)
                     ->required(),
                 
                 Forms\Components\Select::make('year')
-                    ->label('Year')
+                    ->label(__('Year'))
                     ->default(now()->year)
                     ->options(function() {
                         $currentYear = (int)date('Y');
@@ -77,12 +77,12 @@ class RoomTypesRelationManager extends RelationManager
                     }),
                 
                 Forms\Components\TextInput::make('price')
-                    ->label('Price Uz')
+                    ->label(__('Price Uz'))
                     ->required()
                     ->maxLength(255),
                 
                 Forms\Components\TextInput::make('price_foreign')
-                    ->label('Price Foreign')
+                    ->label(__('Price Foreign'))
                     ->required()
                     ->maxLength(255),
             ]);
@@ -106,7 +106,7 @@ class RoomTypesRelationManager extends RelationManager
             ->recordTitleAttribute('roomType.name')
             ->filters([
                 Tables\Filters\SelectFilter::make('year')
-                    ->label('Год периода')
+                    ->label(__('Год периода'))
                     ->options(function () {
                         $years = range(now()->subYears(2)->year, now()->addYears(2)->year);
                         return array_combine($years, $years);
@@ -119,7 +119,7 @@ class RoomTypesRelationManager extends RelationManager
                         );
                     })
             ])
-            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersLayout(FiltersLayout::AboveContentCollapsible)
             ->columns([
                 Tables\Columns\TextColumn::make('roomType.name'),
                 Tables\Columns\TextColumn::make('season_type')
@@ -141,11 +141,11 @@ class RoomTypesRelationManager extends RelationManager
 //                        return $record->period?->getExtendedLabelAttribute() ?? '-';
 //                    }),
                 Tables\Columns\TextColumn::make('price')
-                    ->label('Price Uz')
+                    ->label(__('Price Uz'))
                     ->money()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('price_foreign')
-                    ->label('Price Foreign')
+                    ->label(__('Price Foreign'))
                     ->money()
                     ->numeric(),
                 //                Tables\Columns\TextColumn::make('person_type')->badge(),

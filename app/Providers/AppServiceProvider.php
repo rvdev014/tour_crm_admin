@@ -3,12 +3,9 @@
 namespace App\Providers;
 
 use App\Livewire\Hooks\TranslatesDatabaseErrors;
-use Filament\Support\Assets\Css;
-use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use PhpOffice\PhpWord\Settings as PhpWordSettings;
@@ -35,39 +32,39 @@ class AppServiceProvider extends ServiceProvider
         // friendly notification, instead of a raw Symfony/Ignition 500 page.
         Livewire::componentHook(TranslatesDatabaseErrors::class);
 
-        FilamentAsset::register([
-            Css::make('custom-stylesheet', __DIR__.'/../../resources/custom-css/admin.css'),
-        ]);
-
-        // Amber glow orb injected into login page background
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::BODY_START,
-            fn (): HtmlString => new HtmlString(
-                '<div aria-hidden="true" style="position:fixed;width:480px;height:480px;border-radius:50%;'
-                .'background:radial-gradient(circle,rgba(245,158,11,0.07) 0%,transparent 68%);'
-                .'top:35%;right:-100px;animation:blob-drift-2 18s ease-in-out infinite;'
-                .'pointer-events:none;z-index:0;"></div>'
-            ),
-        );
-
-        // Login page: tagline below the form
+        // Login page: tagline below the form. Styled via .ep-auth-tagline in
+        // theme.css instead of an inline style string, so it follows the same
+        // tokens as everything else instead of hand-picked colors/spacing.
         FilamentView::registerRenderHook(
             PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
-            fn (): HtmlString => new HtmlString(
-                '<p style="text-align:center;margin-top:1.25rem;color:rgba(100,130,170,0.55);'
-                .'font-size:0.6875rem;letter-spacing:0.06em;font-family:Inter,sans-serif;'
-                .'text-transform:uppercase;">East Asia Point · Tour Management</p>'
-            ),
+            fn () => view('filament.hooks.login-tagline'),
         );
 
-        // Footer on login page
+        // App-wide footer (renders on both the auth layout and every panel page —
+        // PanelsRenderHook::FOOTER is shared by simple.blade.php and index.blade.php).
+        // Styled via .ep-footer in theme.css.
         FilamentView::registerRenderHook(
             PanelsRenderHook::FOOTER,
-            fn (): HtmlString => new HtmlString(
-                '<div style="text-align:center;padding:0.75rem 0 2rem;color:rgba(100,120,150,0.35);'
-                .'font-size:0.6875rem;letter-spacing:0.05em;font-family:Inter,sans-serif;'
-                .'position:relative;z-index:2;">© '.date('Y').' East Asia Point</div>'
-            ),
+            fn () => view('filament.hooks.footer'),
         );
+
+        // Every form field and table column supports ->translateLabel(), which
+        // wraps getLabel() in __() — but it defaults off per-instance, and most
+        // of this app's fields never call it. Rather than adding
+        // ->translateLabel() to hundreds of individual field/column
+        // definitions, turn it on globally here: this also covers *implicit*
+        // labels (no explicit ->label() at all, e.g. TextInput::make
+        // ('arrival_time') auto-humanizing to "Arrival time"), which is most
+        // of them — those aren't touched by the explicit ->label(__('...'))
+        // wrapping already applied elsewhere, since there's no string literal
+        // to wrap. Translation only actually applies where lang/ru.json has a
+        // matching key; anything not yet in that dictionary just falls back to
+        // the (English) auto-humanized text, same as before this was added.
+        $this->app->resolving(function ($object) {
+            if ($object instanceof \Filament\Forms\Components\Component
+                || $object instanceof \Filament\Tables\Columns\Column) {
+                $object->translateLabel();
+            }
+        });
     }
 }

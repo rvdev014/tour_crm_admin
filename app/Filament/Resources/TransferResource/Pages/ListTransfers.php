@@ -26,11 +26,11 @@ class ListTransfers extends ListRecords
                         ->withColumns([
 
                             Column::make('date_time')
-                                ->heading('Date & Time')
+                                ->heading(__('Date & Time'))
                                 ->formatStateUsing(fn ($state) => $state->format('d.m.Y H:i')),
 
                             Column::make('driver_ids')
-                                ->heading('Drivers')
+                                ->heading(__('Drivers'))
                                 ->formatStateUsing(function ($state) {
                                     if (empty($state)) {
                                         return '-';

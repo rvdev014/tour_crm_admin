@@ -30,27 +30,27 @@ class ListCompanyExpenses extends ListRecords
                         ->fromTable()
                         ->withColumns([
                             Column::make('group_number')
-                                ->heading('Group number')
+                                ->heading(__('Group number'))
                                 ->getStateUsing(function (Tour $record) {
                                     return $record->group_number;
                                 }),
                             Column::make('company')
-                                ->heading('Company')
+                                ->heading(__('Company'))
                                 ->getStateUsing(function (Tour $record) {
                                     return $record->company->name;
                                 }),
                             Column::make('inn')
-                                ->heading('Company Inn')
+                                ->heading(__('Company Inn'))
                                 ->getStateUsing(function (Tour $record) {
                                     return $record->company->inn;
                                 }),
                             Column::make('tour_pax')
-                                ->heading('Pax')
+                                ->heading(__('Pax'))
                                 ->getStateUsing(function (Tour $record) {
                                     return $record->getTotalPax();
                                 }),
                             Column::make('price')
-                                ->heading('Price')
+                                ->heading(__('Price'))
                                 ->getStateUsing(function (Tour $record) {
                                     if ($record->isCorporate()) {
                                         $price = $record->expenses_total;
@@ -60,22 +60,22 @@ class ListCompanyExpenses extends ListRecords
                                     return TourService::formatMoney($price) . ' ' . CurrencyEnum::UZS->getSymbol();
                                 }),
                             Column::make('payment_status')
-                                ->heading('Payment Status')
+                                ->heading(__('Payment Status'))
                                 ->getStateUsing(function (Tour $record) {
                                     return $record->payment_status?->getLabel();
                                 }),
                             Column::make('start_date')
-                                ->heading('Start Date')
+                                ->heading(__('Start Date'))
                                 ->getStateUsing(function (Tour $record) {
                                     return $record->start_date?->format('d.m.Y H:i');
                                 }),
                             Column::make('end_date')
-                                ->heading('End Date')
+                                ->heading(__('End Date'))
                                 ->getStateUsing(function (Tour $record) {
                                     return $record->end_date?->format('d.m.Y H:i');
                                 }),
                             Column::make('created_at')
-                                ->heading('Created At')
+                                ->heading(__('Created At'))
                                 ->getStateUsing(function (Tour $record) {
                                     return $record->created_at?->format('d.m.Y H:i');
                                 }),

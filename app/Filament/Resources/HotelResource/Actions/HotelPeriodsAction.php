@@ -19,14 +19,14 @@ class HotelPeriodsAction extends Action
     {
         parent::setUp();
 
-        $this->label('Room prices');
+        $this->label(__('Room prices'));
 
         $this->modalHeading(fn (Model $record) => $record->name);
 
         $this->modalSubmitAction(fn (StaticAction $action, Model $record) => $action
-            ->label('Edit')
+            ->label(__('Edit'))
             ->url(route('filament.admin.resources.hotels.edit', $record)));
-        $this->modalCancelAction(fn (StaticAction $action) => $action->label('Close'));
+        $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('Close')));
 
         $this->modalWidth(MaxWidth::ExtraLarge);
 
@@ -34,7 +34,10 @@ class HotelPeriodsAction extends Action
             'record' => $record,
         ]));
 
-        $this->color('gray');
+        // Read-only "view" action (eye icon, no mutation) — info, matching every
+        // other secondary/navigation action in the app, not gray (reserved for
+        // neutral/cancel).
+        $this->color('info');
 
         $this->icon(FilamentIcon::resolve('actions::view-action') ?? 'heroicon-m-eye');
 

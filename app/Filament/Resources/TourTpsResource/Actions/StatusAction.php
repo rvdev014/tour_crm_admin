@@ -23,11 +23,11 @@ class StatusAction extends Action
     {
         parent::setUp();
 
-        $this->label('Statuses');
+        $this->label(__('Statuses'));
 
         $this->modalHeading(fn (Model $record) => "Statuses for Tour TPS {$record->group_number}");
 
-        $this->modalSubmitAction(fn (StaticAction $action, $record) => $action->url(route('filament.admin.resources.tour-tps.edit', $record->id))->label('Edit'));
+        $this->modalSubmitAction(fn (StaticAction $action, $record) => $action->url(route('filament.admin.resources.tour-tps.edit', $record->id))->label(__('Edit')));
         $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('filament-actions::view.single.modal.actions.close.label')));
 
         $this->modalWidth(MaxWidth::ScreenExtraLarge);
@@ -39,7 +39,10 @@ class StatusAction extends Action
             ]);
         });
 
-        $this->color('gray');
+        // Read-only "view" action (eye icon, no mutation) — info, matching every
+        // other secondary/navigation action in the app, not gray (reserved for
+        // neutral/cancel).
+        $this->color('info');
 
         $this->icon(FilamentIcon::resolve('actions::view-action') ?? 'heroicon-m-eye');
 

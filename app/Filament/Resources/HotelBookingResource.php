@@ -18,6 +18,41 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HotelBookingResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = TourDayExpense::class;
     protected static ?string $label = 'Hotel Bookings';
 
@@ -63,10 +98,10 @@ class HotelBookingResource extends Resource
                     ->color('info')
                     ->html(),
                 Tables\Columns\TextColumn::make('hotel.booking_cancellation_days')
-                    ->label('Expiry period')
+                    ->label(__('Expiry period'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('expires_at')
-                    ->label('Expires at')
+                    ->label(__('Expires at'))
                     ->getStateUsing(function (TourDayExpense $record) {
                         $bookingDate = $record->tourDay?->date ?? $record->date;
                         $diff = $bookingDate->diffInDays(now());
@@ -74,7 +109,7 @@ class HotelBookingResource extends Resource
                     }),
 
                 Tables\Columns\TextColumn::make('tour_pax')
-                    ->label('Pax')
+                    ->label(__('Pax'))
                     ->getStateUsing(function (TourDayExpense $record) {
                         $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         return $tour->getTotalPax();

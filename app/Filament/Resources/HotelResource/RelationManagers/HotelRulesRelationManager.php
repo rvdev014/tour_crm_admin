@@ -57,7 +57,7 @@ class HotelRulesRelationManager extends RelationManager
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\Select::make('rule_type')
-                            ->label('Rule Type')
+                            ->label(__('Rule Type'))
                             // **IMPORTANT:** Replace this with your actual constants
                             ->options([
                                 HotelRule::TYPE_EARLY_CHECK_IN => 'Early Check-in',
@@ -70,12 +70,12 @@ class HotelRulesRelationManager extends RelationManager
                 Forms\Components\Card::make('Time Parameters')
                     ->schema([
                         Forms\Components\TimePicker::make('start_time')
-                            ->label('Start Time (from)')
+                            ->label(__('Start Time (from)'))
                             ->seconds(false) // Optionally: remove seconds
                             ->nullable(),
                         
                         Forms\Components\TimePicker::make('end_time')
-                            ->label('End Time (until)')
+                            ->label(__('End Time (until)'))
                             ->seconds(false)
                             ->nullable(),
                     ])->columns(2)
@@ -85,10 +85,10 @@ class HotelRulesRelationManager extends RelationManager
                         'late_check_out',
                     ])),
                 
-                Forms\Components\Section::make('Price Impact')
+                Forms\Components\Section::make(__('Price Impact'))
                     ->schema([
                         Forms\Components\Select::make('price_impact_type')
-                            ->label('Price Impact Type')
+                            ->label(__('Price Impact Type'))
                             // **IMPORTANT:** Replace this with your actual constants
                             ->options([
                                 HotelRule::IMPACT_PERCENTAGE => 'Percentage',
@@ -108,7 +108,7 @@ class HotelRulesRelationManager extends RelationManager
                             ->maxValue(
                                 fn(Forms\Get $get): ?float => $get('price_impact_type') === 'percentage' ? 100 : null
                             )
-                            ->placeholder('E.g., 50.00 or 1000')
+                            ->placeholder(__('E.g., 50.00 or 1000'))
                             ->required(fn(Forms\Get $get): bool => $get('price_impact_type') !== 'none')
                             ->visible(fn(Forms\Get $get): bool => $get('price_impact_type') !== 'none'),
                     ])->columns(2)
@@ -120,8 +120,8 @@ class HotelRulesRelationManager extends RelationManager
                     ])),
                 
                 Forms\Components\Toggle::make('is_inclusive')
-                    ->label('Is Included in Price?')
-                    ->helperText('Check if this rule is already included in the base price/service.')
+                    ->label(__('Is Included in Price?'))
+                    ->helperText(__('Check if this rule is already included in the base price/service.'))
                     ->default(false),
             ]);
     }
@@ -133,7 +133,7 @@ class HotelRulesRelationManager extends RelationManager
             ->recordTitleAttribute('rule_type')
             ->columns([
                 Tables\Columns\TextColumn::make('rule_type')
-                    ->label('Rule Type')
+                    ->label(__('Rule Type'))
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'early_check_in' => 'info',
@@ -145,17 +145,17 @@ class HotelRulesRelationManager extends RelationManager
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('start_time')
-                    ->label('Start')
+                    ->label(__('Start'))
                     ->dateTime('H:i')
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('end_time')
-                    ->label('End')
+                    ->label(__('End'))
                     ->dateTime('H:i')
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('impact_value')
-                    ->label('Impact (Value)')
+                    ->label(__('Impact (Value)'))
                     ->formatStateUsing(function(string $state, $record): string {
                         $symbol = $record->price_impact_type === 'percentage' ? '%' : ' $'; // Or another currency
                         return number_format($record->impact_value, 2) . $symbol;
@@ -163,7 +163,7 @@ class HotelRulesRelationManager extends RelationManager
                     ->sortable(),
                 
                 Tables\Columns\IconColumn::make('is_inclusive')
-                    ->label('Included')
+                    ->label(__('Included'))
                     ->boolean(),
             ])
             ->filters([

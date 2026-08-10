@@ -14,16 +14,7 @@
         ->get();
 @endphp
 
-<div class="custom-table-wrapper">
-    <table class="custom-table">
-        <thead>
-        <tr>
-            <th>Room type</th>
-            <th>Season type</th>
-            <th>Price Uz</th>
-            <th>Price Foreign</th>
-        </tr>
-        </thead>
+<x-data-table :headers="['Room type', 'Season type', 'Price Uz', 'Price Foreign']">
         @forelse($roomTypes as $roomType)
             <tr>
                 <td>{{ $roomType->roomType?->name }}</td>
@@ -54,8 +45,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="4" style="text-align: center; padding: 1rem;">No pricing for {{ $year }}.</td>
+                <td colspan="4" class="ep-table-empty">No pricing for {{ $year }}.</td>
             </tr>
         @endforelse
-    </table>
-</div>
+</x-data-table>

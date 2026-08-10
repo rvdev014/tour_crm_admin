@@ -18,6 +18,41 @@ use Illuminate\Database\Eloquent\Model;
 
 class WebTourRequestResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = WebTourRequest::class;
     
     protected static ?string $label = 'Web Tour Requests';
@@ -48,40 +83,40 @@ class WebTourRequestResource extends Resource
         return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\Select::make('user_id')
-                    ->label('User')
+                    ->label(__('User'))
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                     
                 Forms\Components\Select::make('web_tour_id')
-                    ->label('Web Tour')
+                    ->label(__('Web Tour'))
                     ->relationship('webTour', 'name_en')
                     ->searchable()
                     ->preload()
                     ->nullable(),
                     
                 Forms\Components\TextInput::make('phone')
-                    ->label('Phone')
+                    ->label(__('Phone'))
                     ->tel()
                     ->maxLength(255),
                     
                 Forms\Components\TextInput::make('citizenship')
-                    ->label('Citizenship')
+                    ->label(__('Citizenship'))
                     ->maxLength(255),
                     
                 Forms\Components\Textarea::make('comment')
-                    ->label('Comment')
+                    ->label(__('Comment'))
                     ->rows(3)
                     ->columnSpanFull(),
                     
                 Forms\Components\TextInput::make('travellers_count')
-                    ->label('Travellers Count')
+                    ->label(__('Travellers Count'))
                     ->numeric()
                     ->minValue(1),
                     
                 Forms\Components\Select::make('tour_type')
-                    ->label('Tour Type')
+                    ->label(__('Tour Type'))
                     ->options([
                         WebTourType::Small->value => WebTourType::Small->getLabel(),
                         WebTourType::Private->value => WebTourType::Private->getLabel(),
@@ -90,11 +125,11 @@ class WebTourRequestResource extends Resource
                     ->nullable(),
                     
                 Forms\Components\DatePicker::make('start_date')
-                    ->label('Start Date')
+                    ->label(__('Start Date'))
                     ->required(),
                     
                 Forms\Components\Select::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->options([
                         WebTourStatus::New->value => WebTourStatus::New->getLabel(),
                         WebTourStatus::Waiting->value => WebTourStatus::Waiting->getLabel(),
@@ -112,19 +147,19 @@ class WebTourRequestResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('user_id')
-                    ->label('User')
+                    ->label(__('User'))
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload(),
                 
                 Tables\Filters\SelectFilter::make('web_tour_id')
-                    ->label('Web Tour')
+                    ->label(__('Web Tour'))
                     ->relationship('webTour', 'name_en')
                     ->searchable()
                     ->preload(),
                 
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->options([
                         WebTourStatus::New->value => WebTourStatus::New->getLabel(),
                         WebTourStatus::Waiting->value => WebTourStatus::Waiting->getLabel(),
@@ -133,7 +168,7 @@ class WebTourRequestResource extends Resource
                     ]),
                 
                 Tables\Filters\SelectFilter::make('tour_type')
-                    ->label('Tour Type')
+                    ->label(__('Tour Type'))
                     ->options([
                         WebTourType::Small->value => WebTourType::Small->getLabel(),
                         WebTourType::Private->value => WebTourType::Private->getLabel(),
@@ -142,11 +177,11 @@ class WebTourRequestResource extends Resource
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('ID'))
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('User')
+                    ->label(__('User'))
                     ->getStateUsing(function (WebTourRequest $record) {
                         $link = "/admin/users/$record->user_id/edit";
                         return "<a href='{$link}' target='_blank'>{$record->user->name} ({$record->user->email})</a>";
@@ -157,42 +192,42 @@ class WebTourRequestResource extends Resource
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('webTour.name_en')
-                    ->label('Web Tour')
+                    ->label(__('Web Tour'))
                     ->searchable()
                     ->sortable()
-                    ->placeholder('No tour selected'),
+                    ->placeholder(__('No tour selected')),
                     
                 Tables\Columns\TextColumn::make('email')
-                    ->label('Email')
+                    ->label(__('Email'))
                     ->getStateUsing(fn(WebTourRequest $record) => $record->email ?? $record->user?->email)
                     ->searchable()
                     ->copyable(),
 
                 Tables\Columns\TextColumn::make('phone')
-                    ->label('Phone')
+                    ->label(__('Phone'))
                     ->searchable(),
                     
                 Tables\Columns\TextColumn::make('citizenship')
-                    ->label('Citizenship')
+                    ->label(__('Citizenship'))
                     ->searchable(),
                     
                 Tables\Columns\TextColumn::make('travellers_count')
-                    ->label('Travellers')
+                    ->label(__('Travellers'))
                     ->numeric()
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('tour_type')
-                    ->label('Tour Type')
+                    ->label(__('Tour Type'))
                     ->formatStateUsing(fn (?WebTourType $state): string => $state?->getLabel() ?? 'Not specified')
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('start_date')
-                    ->label('Start Date')
+                    ->label(__('Start Date'))
                     ->date()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->badge()
                     ->sortable(),
                 
@@ -202,13 +237,13 @@ class WebTourRequestResource extends Resource
                     }),
                     
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
+                    ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                     
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Updated At')
+                    ->label(__('Updated At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

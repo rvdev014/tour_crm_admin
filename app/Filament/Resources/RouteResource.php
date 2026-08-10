@@ -15,6 +15,41 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RouteResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = Route::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
@@ -24,8 +59,8 @@ class RouteResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\Section::make('Waypoints')
-                ->description('Add cities in order from start to destination. Minimum 2 cities required.')
+            Forms\Components\Section::make(__('Waypoints'))
+                ->description(__('Add cities in order from start to destination. Minimum 2 cities required.'))
                 ->schema([
                     Forms\Components\Repeater::make('waypoints')
                         ->relationship('waypoints')
@@ -35,7 +70,7 @@ class RouteResource extends Resource
                         ->deletable(true)
                         ->schema([
                             Forms\Components\Select::make('city_id')
-                                ->label('City')
+                                ->label(__('City'))
                                 ->options(fn() => TourService::getCities())
                                 ->native(false)
                                 ->searchable()
@@ -45,8 +80,8 @@ class RouteResource extends Resource
                         ->columns(1),
                 ]),
 
-            Forms\Components\Section::make('Prices by transport class')
-                ->description('Set the flat price in USD for each transport class.')
+            Forms\Components\Section::make(__('Prices by transport class'))
+                ->description(__('Set the flat price in USD for each transport class.'))
                 ->schema([
                     Forms\Components\Repeater::make('prices')
                         ->relationship('prices')
@@ -54,7 +89,7 @@ class RouteResource extends Resource
                         ->deletable(true)
                         ->schema([
                             Forms\Components\Select::make('transport_class_id')
-                                ->label('Transport class')
+                                ->label(__('Transport class'))
                                 ->options(fn() => TransportClass::query()->orderBy('order')->pluck('name', 'id')->toArray())
                                 ->native(false)
                                 ->searchable()
@@ -64,7 +99,7 @@ class RouteResource extends Resource
                                     'distinct' => 'Each transport class can only have one price on this route.',
                                 ]),
                             Forms\Components\TextInput::make('price')
-                                ->label('Price (USD)')
+                                ->label(__('Price (USD)'))
                                 ->numeric()
                                 ->minValue(0)
                                 ->required(),
@@ -87,11 +122,11 @@ class RouteResource extends Resource
             ->searchable()
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('ID'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('display_name')
-                    ->label('Route')
+                    ->label(__('Route'))
                     ->searchable(query: function($query, $search) {
                         $query->where(function($q) use ($search) {
                             $q->whereHas('waypoints', function($wq) use ($search) {
@@ -106,7 +141,7 @@ class RouteResource extends Resource
                         });
                     }),
                 Tables\Columns\TextColumn::make('prices_summary')
-                    ->label('Prices (USD)')
+                    ->label(__('Prices (USD)'))
                     ->getStateUsing(function(Route $record) {
                         return $record->prices->map(function($p) {
                             $name = $p->transportClass?->name ?? "#{$p->transport_class_id}";

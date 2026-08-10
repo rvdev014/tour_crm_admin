@@ -23,7 +23,7 @@ class PricesAction extends Action
     {
         parent::setUp();
 
-        $this->label('Statuses');
+        $this->label(__('Statuses'));
 
         $this->modalHeading(fn(Model $record) => "Prices for tour: {$record->name}");
 
@@ -45,7 +45,10 @@ class PricesAction extends Action
             ]);
         });
 
-        $this->color('gray');
+        // Read-only "view" action (eye icon, no mutation) — info, matching every
+        // other secondary/navigation action in the app, not gray (reserved for
+        // neutral/cancel).
+        $this->color('info');
 
         $this->icon(FilamentIcon::resolve('actions::view-action') ?? 'heroicon-m-eye');
 

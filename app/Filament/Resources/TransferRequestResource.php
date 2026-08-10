@@ -21,6 +21,41 @@ use App\Filament\Resources\TransferRequestResource\Pages;
 
 class TransferRequestResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = TransferRequest::class;
     
     protected static ?string $label = 'Transfer Requests';
@@ -52,64 +87,64 @@ class TransferRequestResource extends Resource
         return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('from')
-                    ->label('From')
+                    ->label(__('From'))
                     ->required(),
                 
                 Forms\Components\Select::make('to')
-                    ->label('To')
+                    ->label(__('To'))
                     ->required(),
                 
                 Forms\Components\DateTimePicker::make('date_time')
-                    ->label('Date & Time')
+                    ->label(__('Date & Time'))
                     ->required(),
                 
                 Forms\Components\TextInput::make('passengers_count')
-                    ->label('Passengers Count')
+                    ->label(__('Passengers Count'))
                     ->numeric()
                     ->minValue(1)
                     ->maxValue(50)
                     ->required(),
                 
                 Forms\Components\Select::make('transport_class_id')
-                    ->label('Transport Class')
+                    ->label(__('Transport Class'))
                     ->relationship('transportClass', 'name')
                     ->nullable(),
                 
                 Forms\Components\TextInput::make('fio')
-                    ->label('Full Name')
+                    ->label(__('Full Name'))
                     ->maxLength(255)
                     ->required(),
                 
                 Forms\Components\TextInput::make('phone')
-                    ->label('Phone')
+                    ->label(__('Phone'))
                     ->tel()
                     ->maxLength(255)
                     ->required(),
                 
                 Forms\Components\Textarea::make('comment')
-                    ->label('Comment')
+                    ->label(__('Comment'))
                     ->rows(3)
                     ->maxLength(1000)
                     ->columnSpanFull(),
                 
                 Forms\Components\Checkbox::make('is_sample_baggage')
-                    ->label('Is Sample Baggage'),
+                    ->label(__('Is Sample Baggage')),
                 
                 Forms\Components\TextInput::make('baggage_count')
-                    ->label('Baggage Count')
+                    ->label(__('Baggage Count'))
                     ->numeric()
                     ->minValue(0),
                 
                 Forms\Components\TextInput::make('terminal_name')
-                    ->label('Terminal Name')
+                    ->label(__('Terminal Name'))
                     ->maxLength(255),
                 
                 Forms\Components\TextInput::make('text_on_sign')
-                    ->label('Text on Sign')
+                    ->label(__('Text on Sign'))
                     ->maxLength(255),
                 
                 Forms\Components\Checkbox::make('activate_flight_tracking')
-                    ->label('Activate Flight Tracking'),
+                    ->label(__('Activate Flight Tracking')),
             ]);
     }
     
@@ -121,54 +156,54 @@ class TransferRequestResource extends Resource
             ->defaultPaginationPageOption(30)
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('ID'))
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('from')
-                    ->label('From')
+                    ->label(__('From'))
                     ->wrap()
-                    ->extraAttributes(['style' => 'width: 200px'])
+                    ->extraAttributes(['class' => 'w-[200px]'])
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('to')
-                    ->label('To')
+                    ->label(__('To'))
                     ->wrap()
-                    ->extraAttributes(['style' => 'width: 200px'])
+                    ->extraAttributes(['class' => 'w-[200px]'])
                     ->searchable()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('distance')
-                    ->label('Distance')
+                    ->label(__('Distance'))
                     ->suffix(' km')
                     ->searchable()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('transportClass.name')
-                    ->label('Transport Class')
+                    ->label(__('Transport Class'))
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('date_time')
-                    ->label('Date & Time')
+                    ->label(__('Date & Time'))
                     ->dateTime()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('passengers_count')
-                    ->label('Passengers')
+                    ->label(__('Passengers'))
                     ->numeric()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('fio')
-                    ->label('Full Name')
+                    ->label(__('Full Name'))
                     ->searchable()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('phone')
-                    ->label('Phone')
+                    ->label(__('Phone'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->badge()
                     ->sortable(),
                 
@@ -178,14 +213,14 @@ class TransferRequestResource extends Resource
                     }),
                 
                 Tables\Columns\TextColumn::make('terminal_name')
-                    ->label('Location details')
+                    ->label(__('Location details'))
                     ->searchable()
-                    ->placeholder('Not specified'),
+                    ->placeholder(__('Not specified')),
                 
                 Tables\Columns\TextColumn::make('baggage_count')
-                    ->label('Baggage Count')
+                    ->label(__('Baggage Count'))
                     ->numeric()
-                    ->placeholder('Not specified'),
+                    ->placeholder(__('Not specified')),
                 
                 //                Tables\Columns\IconColumn::make('is_sample_baggage')
                 //                    ->label('Sample Baggage')
@@ -196,19 +231,19 @@ class TransferRequestResource extends Resource
                 //                    ->boolean(),
                 
                 Tables\Columns\TextColumn::make('text_on_sign')
-                    ->label('Text on Sign')
+                    ->label(__('Text on Sign'))
                     ->searchable()
-                    ->placeholder('Not specified')
+                    ->placeholder(__('Not specified'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
+                    ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Updated At')
+                    ->label(__('Updated At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -217,9 +252,9 @@ class TransferRequestResource extends Resource
                 Tables\Filters\Filter::make('date_range')
                     ->form([
                         Forms\Components\DatePicker::make('from_date')
-                            ->label('From Date'),
+                            ->label(__('From Date')),
                         Forms\Components\DatePicker::make('until_date')
-                            ->label('Until Date'),
+                            ->label(__('Until Date')),
                     ])
                     ->query(function(Builder $query, array $data): Builder {
                         return $query
@@ -234,12 +269,12 @@ class TransferRequestResource extends Resource
                     }),
                 
                 Tables\Filters\SelectFilter::make('transport_class_id')
-                    ->label('Transport Class')
+                    ->label(__('Transport Class'))
                     ->relationship('transportClass', 'name'),
             ])
             ->actions([
                 Tables\Actions\Action::make('accept')
-                    ->label('Accept')
+                    ->label(__('Accept'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(
@@ -247,7 +282,7 @@ class TransferRequestResource extends Resource
                         ) => $record->status === TransferRequestStatus::Booked && $record->status !== TransferRequestStatus::Accepted
                     )
                     ->requiresConfirmation()
-                    ->modalHeading('Accept Transfer Request')
+                    ->modalHeading(__('Accept Transfer Request'))
                     ->modalDescription('This will create a new transfer and send a confirmation email to the user.')
                     ->action(function(TransferRequest $record) {
                         try {

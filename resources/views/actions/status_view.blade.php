@@ -8,22 +8,7 @@
     $record->loadMissing('days.expenses');
 @endphp
 
-<div class="custom-table-wrapper">
-    <table class="custom-table">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Cities</th>
-            <th>Hotel</th>
-            <th>Guide</th>
-            <th>Flight</th>
-            <th>Train</th>
-            <th>Transfer</th>
-            <th>Lunch</th>
-            <th>Dinner</th>
-            <th>Extra</th>
-        </tr>
-        </thead>
+<x-data-table :headers="['Date', 'Cities', 'Hotel', 'Guide', 'Flight', 'Train', 'Transfer', 'Lunch', 'Dinner', 'Extra']">
         @foreach($record->days as $day)
 
             @php
@@ -72,6 +57,7 @@
                         @if ($hotel?->status)
                             <x-filament::badge
                                 :color="$hotel->status->getColor()"
+                                :icon="$hotel->status->getIcon()"
                                 size="sm"
                             >
                                 {{ $hotel->status->getLabel() }}
@@ -86,6 +72,7 @@
                         @if ($guideStatus)
                             <x-filament::badge
                                 :color="$guideStatus->getColor()"
+                                :icon="$guideStatus->getIcon()"
                                 size="sm"
                             >
                                 {{ $guideStatus->getLabel() }}
@@ -96,11 +83,12 @@
 
                 <td>
                     <p>{{ $flightExpense?->plane_route }}</p>
-                    <div class="flex-td" style="margin-top: 5px; flex-direction: row; justify-content: center">
-                        <p style="margin-bottom: 0;">{{ $flightExpense?->departure_time }}</p>&nbsp;&nbsp;
+                    <div class="flex-td flex-td--row">
+                        <p>{{ $flightExpense?->departure_time }}</p>&nbsp;&nbsp;
                         @if ($flightExpense?->status)
                             <x-filament::badge
                                 :color="$flightExpense->status->getColor()"
+                                :icon="$flightExpense->status->getIcon()"
                                 size="md"
                             >
                                 {{ $flightExpense->status->getLabel() }}
@@ -111,11 +99,12 @@
 
                 <td>
                     <p>{{ $train?->train?->name }}</p>
-                    <div class="flex-td" style="margin-top: 5px; flex-direction: row; justify-content: center">
-                        <p style="margin-bottom: 0;">{{ $train?->departure_time }}</p>&nbsp;&nbsp;
+                    <div class="flex-td flex-td--row">
+                        <p>{{ $train?->departure_time }}</p>&nbsp;&nbsp;
                         @if ($train?->status)
                             <x-filament::badge
                                 :color="$train?->status->getColor()"
+                                :icon="$train?->status->getIcon()"
                                 size="md"
                             >
                                 {{ $train?->status->getLabel() }}
@@ -145,6 +134,7 @@
                         @if ($lunch?->status)
                             <x-filament::badge
                                 :color="$lunch->status->getColor()"
+                                :icon="$lunch->status->getIcon()"
                                 size="sm"
                             >
                                 {{ $lunch->status->getLabel() }}
@@ -159,6 +149,7 @@
                         @if ($dinner?->status)
                             <x-filament::badge
                                 :color="$dinner->status->getColor()"
+                                :icon="$dinner->status->getIcon()"
                                 size="sm"
                             >
                                 {{ $dinner->status->getLabel() }}
@@ -173,6 +164,7 @@
                         @if ($extra?->status)
                             <x-filament::badge
                                 :color="$extra->status->getColor()"
+                                :icon="$extra->status->getIcon()"
                                 size="sm"
                             >
                                 {{ $extra->status->getLabel() }}
@@ -183,9 +175,5 @@
 
             </tr>
         @endforeach
-    </table>
-</div>
-
-
-
+</x-data-table>
 
