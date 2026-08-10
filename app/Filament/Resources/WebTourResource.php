@@ -73,10 +73,10 @@ class WebTourResource extends Resource
                 ->tabs([
 
                     // ── Tab 1: Basic Info ────────────────────────────────
-                    Forms\Components\Tabs\Tab::make('Basic Info')
+                    Forms\Components\Tabs\Tab::make(__('Basic Info'))
                         ->icon('heroicon-o-information-circle')
                         ->schema([
-                            Forms\Components\Section::make('Tour Names')
+                            Forms\Components\Section::make(__('Tour Names'))
                                 ->description(__('Enter the tour name in both languages.'))
                                 ->icon('heroicon-o-language')
                                 ->columns(2)
@@ -90,7 +90,7 @@ class WebTourResource extends Resource
                                         ->maxLength(255),
                                 ]),
 
-                            Forms\Components\Section::make('Status & Type')
+                            Forms\Components\Section::make(__('Status & Type'))
                                 ->icon('heroicon-o-adjustments-horizontal')
                                 ->columns(3)
                                 ->schema([
@@ -110,7 +110,7 @@ class WebTourResource extends Resource
                                         ->inline(false),
                                 ]),
 
-                            Forms\Components\Section::make('Tour Dates')
+                            Forms\Components\Section::make(__('Tour Dates'))
                                 ->description(__('The advertised departure window for this tour, shown on the website. Not applicable to pax-based (Free) pricing, which has no fixed dates.'))
                                 ->icon('heroicon-o-calendar')
                                 ->columns(2)
@@ -125,7 +125,7 @@ class WebTourResource extends Resource
                                         ->required(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value),
                                 ]),
 
-                            Forms\Components\Section::make('Categories')
+                            Forms\Components\Section::make(__('Categories'))
                                 ->icon('heroicon-o-tag')
                                 ->schema([
                                     Forms\Components\Select::make('categories')
@@ -138,10 +138,10 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 2: Media & Description ───────────────────────
-                    Forms\Components\Tabs\Tab::make('Media & Description')
+                    Forms\Components\Tabs\Tab::make(__('Media & Description'))
                         ->icon('heroicon-o-photo')
                         ->schema([
-                            Forms\Components\Section::make('Cover Photo')
+                            Forms\Components\Section::make(__('Cover Photo'))
                                 ->description(__('This will be the main thumbnail shown in tour listings.'))
                                 ->icon('heroicon-o-camera')
                                 ->schema([
@@ -154,7 +154,7 @@ class WebTourResource extends Resource
                                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                                 ]),
 
-                            Forms\Components\Section::make('Photo Gallery')
+                            Forms\Components\Section::make(__('Photo Gallery'))
                                 ->description(__('Upload additional photos shown in the tour gallery (up to 20 images).'))
                                 ->icon('heroicon-o-rectangle-stack')
                                 ->schema([
@@ -171,7 +171,7 @@ class WebTourResource extends Resource
                                         ->imagePreviewHeight('120'),
                                 ]),
 
-                            Forms\Components\Section::make('Descriptions')
+                            Forms\Components\Section::make(__('Descriptions'))
                                 ->icon('heroicon-o-document-text')
                                 ->columns(2)
                                 ->schema([
@@ -191,10 +191,10 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 3: Itinerary ─────────────────────────────────
-                    Forms\Components\Tabs\Tab::make('Itinerary')
+                    Forms\Components\Tabs\Tab::make(__('Itinerary'))
                         ->icon('heroicon-o-map-pin')
                         ->schema([
-                            Forms\Components\Section::make('Daily Program')
+                            Forms\Components\Section::make(__('Daily Program'))
                                 ->description(__('Add each day of the tour with its location, photos and activities.'))
                                 ->icon('heroicon-o-list-bullet')
                                 ->schema([
@@ -269,10 +269,10 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 4: Packages & Accommodation ──────────────────
-                    Forms\Components\Tabs\Tab::make('Packages & Accommodation')
+                    Forms\Components\Tabs\Tab::make(__('Packages & Accommodation'))
                         ->icon('heroicon-o-check-badge')
                         ->schema([
-                            Forms\Components\Section::make('What\'s Included')
+                            Forms\Components\Section::make(__('What\'s Included'))
                                 ->icon('heroicon-o-check-circle')
                                 ->schema([
                                     Forms\Components\Select::make('packagesIncluded')
@@ -290,7 +290,7 @@ class WebTourResource extends Resource
                                         }),
                                 ]),
 
-                            Forms\Components\Section::make('What\'s Not Included')
+                            Forms\Components\Section::make(__('What\'s Not Included'))
                                 ->icon('heroicon-o-x-circle')
                                 ->schema([
                                     Forms\Components\Select::make('packagesNotIncluded')
@@ -308,7 +308,7 @@ class WebTourResource extends Resource
                                         }),
                                 ]),
 
-                            Forms\Components\Section::make('Accommodation')
+                            Forms\Components\Section::make(__('Accommodation'))
                                 ->description(__('Add hotel accommodation options for this tour.'))
                                 ->icon('heroicon-o-building-office')
                                 ->schema([
@@ -348,11 +348,11 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 5: Pricing ────────────────────────────────────
-                    Forms\Components\Tabs\Tab::make('Pricing')
+                    Forms\Components\Tabs\Tab::make(__('Pricing'))
                         ->icon('heroicon-o-banknotes')
                         ->schema([
                             // Default date-based prices
-                            Forms\Components\Section::make('Date & Price Entries')
+                            Forms\Components\Section::make(__('Date & Price Entries'))
                                 ->description(__('Set price per person (USD) for specific date ranges.'))
                                 ->icon('heroicon-o-calendar')
                                 ->visible(fn ($get) => $get('type') === null || $get('type') === WebTourPriceType::Default->value)
@@ -396,7 +396,7 @@ class WebTourResource extends Resource
                                 ]),
 
                             // Free / pax-based prices
-                            Forms\Components\Section::make('Pax-Based Pricing')
+                            Forms\Components\Section::make(__('Pax-Based Pricing'))
                                 ->description(__('Set price per person (USD) depending on group size.'))
                                 ->icon('heroicon-o-users')
                                 ->visible(fn ($get) => $get('type') === WebTourPriceType::Free->value)
@@ -437,7 +437,7 @@ class WebTourResource extends Resource
                                 ]),
 
                             // Per-person exact-count prices
-                            Forms\Components\Section::make('Per-Person Pricing')
+                            Forms\Components\Section::make(__('Per-Person Pricing'))
                                 ->description(__('Set price per person (USD) for an exact number of people (e.g. 1 person, 2 people, ...).'))
                                 ->icon('heroicon-o-user')
                                 ->visible(fn ($get) => $get('type') === WebTourPriceType::PerPerson->value)
@@ -473,10 +473,10 @@ class WebTourResource extends Resource
                         ]),
 
                     // ── Tab 6: Similar Tours ──────────────────────────────
-                    Forms\Components\Tabs\Tab::make('Similar Tours')
+                    Forms\Components\Tabs\Tab::make(__('Similar Tours'))
                         ->icon('heroicon-o-arrows-right-left')
                         ->schema([
-                            Forms\Components\Section::make('Related Tours')
+                            Forms\Components\Section::make(__('Related Tours'))
                                 ->description(__('Select tours to show in the "More similar tours" section on this tour\'s page.'))
                                 ->icon('heroicon-o-link')
                                 ->schema([

@@ -85,7 +85,7 @@ class HotelRulesRelationManager extends RelationManager
                         'late_check_out',
                     ])),
                 
-                Forms\Components\Section::make('Price Impact')
+                Forms\Components\Section::make(__('Price Impact'))
                     ->schema([
                         Forms\Components\Select::make('price_impact_type')
                             ->label(__('Price Impact Type'))

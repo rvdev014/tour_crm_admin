@@ -117,6 +117,11 @@ class TransferResource extends Resource
             ->schema([
                 Hidden::make('sell_price_currency'),
                 Hidden::make('buy_price_currency'),
+
+                Forms\Components\Section::make(__('Trip details'))
+                    ->icon('heroicon-o-map')
+                    ->description(__('Destination city, the company that requested the transfer, and the contracted driver supplier.'))
+                    ->schema([
                 Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\Select::make('to_city_id')
@@ -146,7 +151,12 @@ class TransferResource extends Resource
                         ->searchable()
                         ->preload(),
                 ]),
+                    ]),
 
+                Forms\Components\Section::make(__('Driver'))
+                    ->icon('heroicon-o-identification')
+                    ->description(__('Contact details for the driver actually assigned to this transfer.'))
+                    ->schema([
                 Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('driver_name')
                         ->label(__('Driver name'))
@@ -156,7 +166,12 @@ class TransferResource extends Resource
                         ->tel()
                         ->columnSpan(2),
                 ]),
+                    ]),
 
+                Forms\Components\Section::make(__('Status & class'))
+                    ->icon('heroicon-o-truck')
+                    ->description(__('Passenger count, booking status, and the transport class/route that sets pricing.'))
+                    ->schema([
                 Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\TextInput::make('pax')
@@ -221,7 +236,12 @@ class TransferResource extends Resource
                             }
                         }),
                 ]),
+                    ]),
 
+                Forms\Components\Section::make(__('Schedule & destination'))
+                    ->icon('heroicon-o-calendar-days')
+                    ->description(__('Pickup date and time, plus the free-text destination and vehicle details.'))
+                    ->schema([
                 Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\DateTimePicker::make('date_time')
@@ -237,10 +257,15 @@ class TransferResource extends Resource
                     Forms\Components\TextInput::make('nameplate')
                         ->label(__('Табличка')),
                 ]),
+                    ]),
 
+                Forms\Components\Section::make(__('Pricing'))
+                    ->icon('heroicon-o-banknotes')
+                    ->description(__('Sell and buy price, with a one-click currency toggle.'))
+                    ->schema([
                 Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('sell_price')
-                        ->label(fn($get) => 'Sell price (' . ($get('sell_price_currency') ?? 'UZS') . ')')
+                        ->label(fn($get) => __('Sell price') . ' (' . ($get('sell_price_currency') ?? 'UZS') . ')')
                         ->suffixAction(
                             Components\Actions\Action::make('toggle-currency')
                                 ->icon('heroicon-o-banknotes')
@@ -251,7 +276,7 @@ class TransferResource extends Resource
                         )
                         ->numeric(),
                     Forms\Components\TextInput::make('buy_price')
-                        ->label(fn($get) => 'Buy price (' . ($get('buy_price_currency') ?? 'UZS') . ')')
+                        ->label(fn($get) => __('Buy price') . ' (' . ($get('buy_price_currency') ?? 'UZS') . ')')
                         ->suffixAction(
                             Components\Actions\Action::make('toggle-currency')
                                 ->icon('heroicon-o-banknotes')
@@ -261,8 +286,11 @@ class TransferResource extends Resource
                                 })
                         )
                         ->numeric(),
-                    Forms\Components\Textarea::make('comment'),
+                    Forms\Components\Textarea::make('comment')
+                        ->label(__('Comment'))
+                        ->columnSpanFull(),
                 ]),
+                    ]),
             ]);
     }
 

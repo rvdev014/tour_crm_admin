@@ -59,7 +59,7 @@ class RouteResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\Section::make('Waypoints')
+            Forms\Components\Section::make(__('Waypoints'))
                 ->description(__('Add cities in order from start to destination. Minimum 2 cities required.'))
                 ->schema([
                     Forms\Components\Repeater::make('waypoints')
@@ -80,7 +80,7 @@ class RouteResource extends Resource
                         ->columns(1),
                 ]),
 
-            Forms\Components\Section::make('Prices by transport class')
+            Forms\Components\Section::make(__('Prices by transport class'))
                 ->description(__('Set the flat price in USD for each transport class.'))
                 ->schema([
                     Forms\Components\Repeater::make('prices')

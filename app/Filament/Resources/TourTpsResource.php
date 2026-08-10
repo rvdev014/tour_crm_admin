@@ -102,7 +102,7 @@ class TourTpsResource extends Resource
             Hidden::make('guide_price_currency'),
             Hidden::make('transport_price_currency'),
 
-            Section::make('Route & company')
+            Section::make(__('Route & company'))
                 ->description(__('Which company is running the tour, and where it goes.'))
                 ->icon('heroicon-o-map')
                 ->collapsible()
@@ -144,7 +144,7 @@ class TourTpsResource extends Resource
                     ]),
                 ]),
 
-            Section::make('Schedule')
+            Section::make(__('Schedule'))
                 ->description(__('Arrival and departure dates for the group.'))
                 ->icon('heroicon-o-calendar-days')
                 ->collapsible()
@@ -187,7 +187,7 @@ class TourTpsResource extends Resource
                     ]),
                 ]),
 
-            Section::make('Passengers & pricing')
+            Section::make(__('Passengers & pricing'))
                 ->description(__('Group size and per-person price. These determine the tour\'s total price.'))
                 ->icon('heroicon-o-users')
                 ->collapsible()
@@ -223,7 +223,7 @@ class TourTpsResource extends Resource
                     ]),
                 ]),
 
-            Section::make('Payment & notes')
+            Section::make(__('Payment & notes'))
                 ->icon('heroicon-o-credit-card')
                 ->collapsible()
                 ->schema([
@@ -249,7 +249,7 @@ class TourTpsResource extends Resource
                     ]),
                 ]),
 
-            Section::make('Guide info')
+            Section::make(__('Guide info'))
                 ->description(__('Local guide fee is entered via the Guide expense in Day expenses. Escort guide contact details and fee are entered here.'))
                 ->icon('heroicon-o-identification')
                 ->collapsible()
@@ -290,7 +290,7 @@ class TourTpsResource extends Resource
                     ]),
                 ]),
 
-            Section::make('Transport info')
+            Section::make(__('Transport info'))
                 ->icon('heroicon-o-truck')
                 ->collapsible()
                 ->schema([
@@ -318,14 +318,14 @@ class TourTpsResource extends Resource
                     ]),
                 ]),
 
-            Section::make('Rooming info')
+            Section::make(__('Rooming info'))
                 ->description(__('Room counts by type for foreign guests. This drives Hotel expense pricing for this tour — fill it in before adding Hotel expenses in Day expenses.'))
                 ->icon('heroicon-o-building-office-2')
                 ->collapsible()
                 ->schema([
                     ...TourService::generateRoomingSchema(RoomPersonType::Foreign, true),
 
-                    Section::make('Other rooming')
+                    Section::make(__('Other rooming'))
                         ->schema(TourService::generateRoomingSchema(RoomPersonType::Foreign))
                         ->collapsible()
                         ->collapsed(),

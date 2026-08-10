@@ -95,11 +95,11 @@ class HotelResource extends Resource
                     ->tabs([
 
                         // ── Tab 1: Basic Information ─────────────────────
-                        Forms\Components\Tabs\Tab::make('Basic Info')
+                        Forms\Components\Tabs\Tab::make(__('Basic Info'))
                             ->icon('heroicon-o-information-circle')
                             ->schema([
 
-                                Forms\Components\Section::make('Hotel Identity')
+                                Forms\Components\Section::make(__('Hotel Identity'))
                                     ->icon('heroicon-o-building-office')
                                     ->columns(3)
                                     ->schema([
@@ -144,7 +144,7 @@ class HotelResource extends Resource
                                             ->inline(false),
                                     ]),
 
-                                Forms\Components\Section::make('Location')
+                                Forms\Components\Section::make(__('Location'))
                                     ->icon('heroicon-o-map-pin')
                                     ->columns(2)
                                     ->schema([
@@ -177,7 +177,7 @@ class HotelResource extends Resource
                                             ->columnSpan(2),
                                     ]),
 
-                                Forms\Components\Section::make('Business Details')
+                                Forms\Components\Section::make(__('Business Details'))
                                     ->icon('heroicon-o-briefcase')
                                     ->columns(3)
                                     ->schema([
@@ -208,13 +208,13 @@ class HotelResource extends Resource
                                             ->inline(false),
                                     ]),
 
-                                Forms\Components\Section::make('Contact Phones')
+                                Forms\Components\Section::make(__('Contact Phones'))
                                     ->icon('heroicon-o-phone')
                                     ->schema([
                                         Forms\Components\Repeater::make('phones')
                                             ->relationship('phones')
                                             ->label(__(''))
-                                            ->addActionLabel('+ Add Phone')
+                                            ->addActionLabel(__('+ Add Phone'))
                                             ->addActionAlignment('end')
                                             ->simple(
                                                 PhoneInput::make('phone_number')
@@ -227,11 +227,11 @@ class HotelResource extends Resource
                             ]),
 
                         // ── Tab 2: Media & Description ────────────────────
-                        Forms\Components\Tabs\Tab::make('Media & Description')
+                        Forms\Components\Tabs\Tab::make(__('Media & Description'))
                             ->icon('heroicon-o-photo')
                             ->schema([
 
-                                Forms\Components\Section::make('Photo Gallery')
+                                Forms\Components\Section::make(__('Photo Gallery'))
                                     ->description(__('Upload hotel photos shown on the website. First photo will be used as the cover.'))
                                     ->icon('heroicon-o-rectangle-stack')
                                     ->schema([
@@ -259,7 +259,7 @@ class HotelResource extends Resource
                                             ->storeFiles(false),
                                     ]),
 
-                                Forms\Components\Section::make('Descriptions')
+                                Forms\Components\Section::make(__('Descriptions'))
                                     ->icon('heroicon-o-document-text')
                                     ->columns(2)
                                     ->schema([
@@ -279,11 +279,11 @@ class HotelResource extends Resource
                             ]),
 
                         // ── Tab 3: Facilities & Notes ─────────────────────
-                        Forms\Components\Tabs\Tab::make('Facilities & Notes')
+                        Forms\Components\Tabs\Tab::make(__('Facilities & Notes'))
                             ->icon('heroicon-o-star')
                             ->schema([
 
-                                Forms\Components\Section::make('Facilities')
+                                Forms\Components\Section::make(__('Facilities'))
                                     ->description(__('Select all amenities and services available at this hotel.'))
                                     ->icon('heroicon-o-check-circle')
                                     ->schema([
@@ -295,7 +295,7 @@ class HotelResource extends Resource
                                             ->searchable(),
                                     ]),
 
-                                Forms\Components\Section::make('Internal Notes')
+                                Forms\Components\Section::make(__('Internal Notes'))
                                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
                                     ->schema([
                                         Forms\Components\Textarea::make('comment')
@@ -306,11 +306,11 @@ class HotelResource extends Resource
                             ]),
 
                         // ── Tab 4: Seasons & Periods ──────────────────────
-                        Forms\Components\Tabs\Tab::make('Seasons')
+                        Forms\Components\Tabs\Tab::make(__('Seasons'))
                             ->icon('heroicon-o-calendar-days')
                             ->schema([
 
-                                Forms\Components\Section::make('Pricing Periods')
+                                Forms\Components\Section::make(__('Pricing Periods'))
                                     ->description(__('Define high / low season date ranges for this year. Room prices are set per period in the Rooms tab below.'))
                                     ->icon('heroicon-o-calendar')
                                     ->schema([
@@ -318,7 +318,7 @@ class HotelResource extends Resource
                                             ->relationship('currentYearPeriods')
                                             ->label(__(''))
                                             ->grid(2)
-                                            ->addActionLabel('+ Add Period')
+                                            ->addActionLabel(__('+ Add Period'))
                                             ->addActionAlignment('end')
                                             ->collapsible()
                                             ->itemLabel(function ($get, $uuid) {

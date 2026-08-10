@@ -96,7 +96,7 @@ class DaysRelationManager extends RelationManager
                         return "Expense $index";
                     })
                     ->relationship('expenses')
-                    ->addActionLabel('Add expense')
+                    ->addActionLabel(__('Add expense'))
                     ->addActionAlignment('end')
                     ->schema([
                         Components\Grid::make()->schema([
@@ -138,7 +138,7 @@ class DaysRelationManager extends RelationManager
                         ]),
 
                         // Hotel
-                        Components\Section::make('Hotel info')
+                        Components\Section::make(__('Hotel info'))
                             ->icon('heroicon-o-building-office-2')
                             ->description(__('Pick the hotel and stay dates. Total nights drives day auto-creation and cost.'))
                             ->schema([
@@ -200,7 +200,7 @@ class DaysRelationManager extends RelationManager
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Hotel->value),
 
                         // Guide
-                        Components\Section::make('Guide info')
+                        Components\Section::make(__('Guide info'))
                             ->icon('heroicon-o-identification')
                             ->description(__('Assign one or more guides for this expense.'))
                             ->schema([
@@ -240,7 +240,7 @@ class DaysRelationManager extends RelationManager
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Guide->value),
 
                         // Transport
-                        Components\Section::make('Transport info')
+                        Components\Section::make(__('Transport info'))
                             ->icon('heroicon-o-truck')
                             ->description(__('Vehicle class, route, and pickup time for this transfer.'))
                             ->schema([
@@ -323,7 +323,7 @@ class DaysRelationManager extends RelationManager
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Transport->value),
 
                         // Museum
-                        Components\Section::make('Museum info')
+                        Components\Section::make(__('Museum info'))
                             ->icon('heroicon-o-building-library')
                             ->description(__('Select the museums (and optionally specific exhibits) for this visit.'))
                             ->schema([
@@ -384,7 +384,7 @@ class DaysRelationManager extends RelationManager
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Museum->value),
 
                         // Lunch and Dinner
-                        Components\Section::make('Lunch / Dinner info')
+                        Components\Section::make(__('Lunch / Dinner info'))
                             ->icon('heroicon-o-cake')
                             ->description(__('Pick the restaurant for this meal.'))
                             ->schema([
@@ -424,7 +424,7 @@ class DaysRelationManager extends RelationManager
                             ])->visible(fn ($get) => self::isLunch($get('type'))),
 
                         // Train
-                        Components\Section::make('Train info')
+                        Components\Section::make(__('Train info'))
                             ->icon('heroicon-o-ticket')
                             ->description(__('Train, route, and class seat counts.'))
                             ->schema([
@@ -482,7 +482,7 @@ class DaysRelationManager extends RelationManager
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Train->value),
 
                         // Show
-                        Components\Section::make('Show info')
+                        Components\Section::make(__('Show info'))
                             ->icon('heroicon-o-film')
                             ->description(__('Pick the show for this evening.'))
                             ->schema([
@@ -512,7 +512,7 @@ class DaysRelationManager extends RelationManager
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Show->value),
 
                         // Flight
-                        Components\Section::make('Flight info')
+                        Components\Section::make(__('Flight info'))
                             ->icon('heroicon-o-paper-airplane')
                             ->description(__('Flight route, timings, and service fee.'))
                             ->schema([
@@ -563,7 +563,7 @@ class DaysRelationManager extends RelationManager
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Flight->value),
 
                         // Extra
-                        Components\Section::make('Extra info')
+                        Components\Section::make(__('Extra info'))
                             ->icon('heroicon-o-plus-circle')
                             ->description(__('Any other one-off cost for this day.'))
                             ->schema([
