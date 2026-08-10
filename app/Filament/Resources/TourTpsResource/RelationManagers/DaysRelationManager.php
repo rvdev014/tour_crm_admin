@@ -52,7 +52,7 @@ class DaysRelationManager extends RelationManager
                         ->native(false)
                         ->required(),
                     Components\Select::make('city_id')
-                        ->label('City')
+                        ->label(__('City'))
                         ->native(false)
                         ->searchable()
                         ->preload()
@@ -106,7 +106,7 @@ class DaysRelationManager extends RelationManager
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
-                                ->label('Expense Type')
+                                ->label(__('Expense Type'))
                                 ->options(function ($get) {
                                     $options = ExpenseType::casesOptions();
                                     unset($options[ExpenseType::Conference->value]);
@@ -140,14 +140,14 @@ class DaysRelationManager extends RelationManager
                         // Hotel
                         Components\Section::make('Hotel info')
                             ->icon('heroicon-o-building-office-2')
-                            ->description('Pick the hotel and stay dates. Total nights drives day auto-creation and cost.')
+                            ->description(__('Pick the hotel and stay dates. Total nights drives day auto-creation and cost.'))
                             ->schema([
                                 Components\Grid::make(4)->schema([
                                     Components\Select::make('hotel_id')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Hotel')
+                                        ->label(__('Hotel'))
                                         ->options(
                                             fn ($get) => TourService::getHotels($get('city_id') ?? $get('../../city_id'))
                                         )
@@ -161,11 +161,11 @@ class DaysRelationManager extends RelationManager
                                         ->searchable()
                                         ->preload()
                                         ->required()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
                                     Components\TimePicker::make('hotel_checkin_time')
                                         ->native(false)
                                         ->seconds(false)
-                                        ->label('Check-in time')
+                                        ->label(__('Check-in time'))
                                         ->reactive()
                                         ->afterStateUpdated(function ($get, $set) {
                                             $set('hotel_total_nights', TourService::calculateHotelNights(
@@ -178,7 +178,7 @@ class DaysRelationManager extends RelationManager
                                     Components\DateTimePicker::make('hotel_checkout_date_time')
                                         ->native(false)
                                         ->seconds(false)
-                                        ->label('Check-out date & time')
+                                        ->label(__('Check-out date & time'))
                                         ->reactive()
                                         ->afterStateUpdated(function ($get, $set) {
                                             $set('hotel_total_nights', TourService::calculateHotelNights(
@@ -191,18 +191,18 @@ class DaysRelationManager extends RelationManager
                                 ]),
                                 Components\Grid::make(4)->schema([
                                     Components\TextInput::make('hotel_total_nights')
-                                        ->label('Total nights')
+                                        ->label(__('Total nights'))
                                         ->numeric(),
                                 ]),
                                 Components\Textarea::make('comment')
-                                    ->label('Comment')
+                                    ->label(__('Comment'))
                                     ->columnSpanFull(),
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Hotel->value),
 
                         // Guide
                         Components\Section::make('Guide info')
                             ->icon('heroicon-o-identification')
-                            ->description('Assign one or more guides for this expense.')
+                            ->description(__('Assign one or more guides for this expense.'))
                             ->schema([
                                 Components\Grid::make()->schema([
 
@@ -214,7 +214,7 @@ class DaysRelationManager extends RelationManager
                                         ->schema([
                                             Components\Grid::make()->schema([
                                                 Components\TextInput::make('name')
-                                                    ->label('Guide name'),
+                                                    ->label(__('Guide name')),
                                                 PhoneInput::make('phone')
                                                     ->strictMode()
                                                     ->onlyCountries(['UZ'])
@@ -230,11 +230,11 @@ class DaysRelationManager extends RelationManager
                                             ->options(ExpenseStatus::class)
                                             ->default(ExpenseStatus::New->value)
                                             ->required()
-                                            ->label('Status'),
+                                            ->label(__('Status')),
 
                                         self::getExpensePriceInput('Guide price'),
 
-                                        Components\Textarea::make('comment')->label('Comment'),
+                                        Components\Textarea::make('comment')->label(__('Comment')),
                                     ]),
                                 ]),
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Guide->value),
@@ -242,7 +242,7 @@ class DaysRelationManager extends RelationManager
                         // Transport
                         Components\Section::make('Transport info')
                             ->icon('heroicon-o-truck')
-                            ->description('Vehicle class, route, and pickup time for this transfer.')
+                            ->description(__('Vehicle class, route, and pickup time for this transfer.'))
                             ->schema([
 
                                 Components\Hidden::make('price_currency'),
@@ -251,7 +251,7 @@ class DaysRelationManager extends RelationManager
                                     Components\TimePicker::make('transport_time')
                                         ->seconds(false),
                                     Components\Select::make('transport_class_id')
-                                        ->label('Transport class')
+                                        ->label(__('Transport class'))
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -262,7 +262,7 @@ class DaysRelationManager extends RelationManager
                                             $set('price', null);
                                         }),
                                     Components\Select::make('route_id')
-                                        ->label('Route')
+                                        ->label(__('Route'))
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -291,13 +291,13 @@ class DaysRelationManager extends RelationManager
 
                                 Components\Grid::make(3)->schema([
                                     Components\TextInput::make('transport_route')
-                                        ->label('Destination')
+                                        ->label(__('Destination'))
                                         ->required(),
                                     Components\Select::make('to_city_id')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('City to')
+                                        ->label(__('City to'))
                                         ->options(TourService::getCities())
                                         ->reactive(),
 
@@ -308,7 +308,7 @@ class DaysRelationManager extends RelationManager
                                         ->options(ExpenseStatus::class)
                                         ->default(ExpenseStatus::New->value)
                                         ->required()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
                                 ]),
 
                                 Components\Grid::make(3)->schema([
@@ -317,7 +317,7 @@ class DaysRelationManager extends RelationManager
                                         ->numeric()
                                         ->reactive(),
                                     Components\Textarea::make('comment')
-                                        ->label('Comment'),
+                                        ->label(__('Comment')),
                                 ]),
 
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Transport->value),
@@ -325,12 +325,12 @@ class DaysRelationManager extends RelationManager
                         // Museum
                         Components\Section::make('Museum info')
                             ->icon('heroicon-o-building-library')
-                            ->description('Select the museums (and optionally specific exhibits) for this visit.')
+                            ->description(__('Select the museums (and optionally specific exhibits) for this visit.'))
                             ->schema([
 
                                 Components\Grid::make(4)->schema([
                                     Components\Select::make('museum_ids')
-                                        ->label('Museum')
+                                        ->label(__('Museum'))
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -345,7 +345,7 @@ class DaysRelationManager extends RelationManager
                                         ->suffixAction(function () {
                                             return [
                                                 Components\Actions\Action::make('create_museum')
-                                                    ->label('Create museum')
+                                                    ->label(__('Create museum'))
                                                     ->icon('heroicon-o-plus')
                                                     ->url(route('filament.admin.resources.museums.create'), true),
                                             ];
@@ -353,7 +353,7 @@ class DaysRelationManager extends RelationManager
                                         ->preload()
                                         ->reactive(),
                                     Components\Select::make('museum_item_ids')
-                                        ->label('Museum Children')
+                                        ->label(__('Museum Children'))
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
@@ -376,9 +376,9 @@ class DaysRelationManager extends RelationManager
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
 
-                                    Components\Textarea::make('comment')->label('Comment'),
+                                    Components\Textarea::make('comment')->label(__('Comment')),
                                 ]),
 
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Museum->value),
@@ -386,7 +386,7 @@ class DaysRelationManager extends RelationManager
                         // Lunch and Dinner
                         Components\Section::make('Lunch / Dinner info')
                             ->icon('heroicon-o-cake')
-                            ->description('Pick the restaurant for this meal.')
+                            ->description(__('Pick the restaurant for this meal.'))
                             ->schema([
 
                                 Components\Grid::make(4)->schema([
@@ -401,7 +401,7 @@ class DaysRelationManager extends RelationManager
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Restaurant')
+                                        ->label(__('Restaurant'))
                                         ->options(
                                             fn ($get) => TourService::getRestaurants(
                                                 $get('city_id') ?? $get('../../city_id')
@@ -416,9 +416,9 @@ class DaysRelationManager extends RelationManager
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
 
-                                    Components\Textarea::make('comment')->label('Comment'),
+                                    Components\Textarea::make('comment')->label(__('Comment')),
                                 ]),
 
                             ])->visible(fn ($get) => self::isLunch($get('type'))),
@@ -426,7 +426,7 @@ class DaysRelationManager extends RelationManager
                         // Train
                         Components\Section::make('Train info')
                             ->icon('heroicon-o-ticket')
-                            ->description('Train, route, and class seat counts.')
+                            ->description(__('Train, route, and class seat counts.'))
                             ->schema([
 
                                 Components\Grid::make(4)->schema([
@@ -434,35 +434,35 @@ class DaysRelationManager extends RelationManager
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Train')
+                                        ->label(__('Train'))
                                         ->options(TourService::getTrains()),
 
                                     Components\Select::make('to_city_id')
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('City to')
+                                        ->label(__('City to'))
                                         ->options(TourService::getCities())
                                         ->reactive(),
 
                                     Components\TimePicker::make('departure_time')
                                         ->seconds(false)
-                                        ->label('Departure time'),
+                                        ->label(__('Departure time')),
 
                                     Components\DateTimePicker::make('arrival_time')
                                         ->seconds(false)
-                                        ->label('Arrival time'),
+                                        ->label(__('Arrival time')),
                                 ]),
 
                                 Components\Grid::make(4)->schema([
                                     Components\TextInput::make('train_class_second')
-                                        ->label('Second')
+                                        ->label(__('Second'))
                                         ->numeric(),
                                     Components\TextInput::make('train_class_business')
-                                        ->label('Business')
+                                        ->label(__('Business'))
                                         ->numeric(),
                                     Components\TextInput::make('train_class_vip')
-                                        ->label('VIP')
+                                        ->label(__('VIP'))
                                         ->numeric(),
 
                                     Components\Select::make('status')
@@ -476,7 +476,7 @@ class DaysRelationManager extends RelationManager
                                 ]),
 
                                 Components\Textarea::make('comment')
-                                    ->label('Comment')
+                                    ->label(__('Comment'))
                                     ->columnSpanFull(),
 
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Train->value),
@@ -484,7 +484,7 @@ class DaysRelationManager extends RelationManager
                         // Show
                         Components\Section::make('Show info')
                             ->icon('heroicon-o-film')
-                            ->description('Pick the show for this evening.')
+                            ->description(__('Pick the show for this evening.'))
                             ->schema([
 
                                 Components\Grid::make(3)->schema([
@@ -492,7 +492,7 @@ class DaysRelationManager extends RelationManager
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Show')
+                                        ->label(__('Show'))
                                         ->options(fn ($get) => TourService::getShows($get('../../city_id')))
                                         ->reactive()
                                         ->required(),
@@ -504,9 +504,9 @@ class DaysRelationManager extends RelationManager
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
 
-                                    Components\Textarea::make('comment')->label('Comment'),
+                                    Components\Textarea::make('comment')->label(__('Comment')),
                                 ]),
 
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Show->value),
@@ -514,7 +514,7 @@ class DaysRelationManager extends RelationManager
                         // Flight
                         Components\Section::make('Flight info')
                             ->icon('heroicon-o-paper-airplane')
-                            ->description('Flight route, timings, and service fee.')
+                            ->description(__('Flight route, timings, and service fee.'))
                             ->schema([
 
                                 Components\Grid::make(4)->schema([
@@ -529,35 +529,35 @@ class DaysRelationManager extends RelationManager
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
 
                                     Components\Textarea::make('comment')
-                                        ->label('Comment'),
+                                        ->label(__('Comment')),
                                 ]),
 
                                 Components\Grid::make(4)->schema([
                                     Components\TimePicker::make('departure_time')
                                         ->seconds(false)
-                                        ->label('Departure time'),
+                                        ->label(__('Departure time')),
 
                                     Components\TextInput::make('departure_number')
-                                        ->label('Departure reys number'),
+                                        ->label(__('Departure reys number')),
 
                                     Components\DateTimePicker::make('arrival_time')
                                         ->seconds(false)
-                                        ->label('Arrival time'),
+                                        ->label(__('Arrival time')),
 
                                     Components\TextInput::make('arrival_number')
-                                        ->label('Arrival reys number'),
+                                        ->label(__('Arrival reys number')),
                                 ]),
 
                                 Components\Grid::make(4)->schema([
                                     Components\Select::make('plane_type')
                                         ->options(PlaneType::class)
-                                        ->label('Plane type'),
+                                        ->label(__('Plane type')),
 
                                     Components\TextInput::make('plane_service_fee')
-                                        ->label('Service fee'),
+                                        ->label(__('Service fee')),
                                 ]),
 
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Flight->value),
@@ -565,11 +565,11 @@ class DaysRelationManager extends RelationManager
                         // Extra
                         Components\Section::make('Extra info')
                             ->icon('heroicon-o-plus-circle')
-                            ->description('Any other one-off cost for this day.')
+                            ->description(__('Any other one-off cost for this day.'))
                             ->schema([
                                 Components\Grid::make(4)->schema([
                                     Components\TextInput::make('other_name')
-                                        ->label('Name'),
+                                        ->label(__('Name')),
 
                                     self::getExpensePriceInput(),
 
@@ -580,9 +580,9 @@ class DaysRelationManager extends RelationManager
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->label('Status'),
+                                        ->label(__('Status')),
 
-                                    Components\Textarea::make('comment')->label('Comment'),
+                                    Components\Textarea::make('comment')->label(__('Comment')),
                                 ]),
                             ])->visible(fn ($get) => $get('type') == ExpenseType::Extra->value),
 
@@ -689,14 +689,14 @@ class DaysRelationManager extends RelationManager
             ->recordTitleAttribute('date')
             ->columns([
                 Tables\Columns\TextColumn::make('day')
-                    ->label('Day')
+                    ->label(__('Day'))
                     ->state(fn ($rowLoop) => $rowLoop->index + 1),
                 Tables\Columns\TextColumn::make('date')
                     ->formatStateUsing(fn ($state) => $state ? $state->format('d.m.Y') : null),
                 Tables\Columns\TextColumn::make('city.name'),
 
                 Tables\Columns\TextColumn::make('hotel')
-                    ->label('Hotel')
+                    ->label(__('Hotel'))
                     ->getStateUsing(function (TourDay $record) {
                         $hotelExpense = $record->getExpense(ExpenseType::Hotel);
 
@@ -707,7 +707,7 @@ class DaysRelationManager extends RelationManager
                     }),
 
                 Tables\Columns\TextColumn::make('guide')
-                    ->label('Guide')
+                    ->label(__('Guide'))
                     ->getStateUsing(function (TourDay $record) {
 
                         if ($record->tour->guide_type == GuideType::Escort) {
@@ -727,7 +727,7 @@ class DaysRelationManager extends RelationManager
                     }),
 
                 Tables\Columns\TextColumn::make('plane')
-                    ->label('Flight')
+                    ->label(__('Flight'))
                     ->getStateUsing(function (TourDay $record) {
                         $planeExpense = $record->getExpense(ExpenseType::Flight);
 
@@ -739,7 +739,7 @@ class DaysRelationManager extends RelationManager
                     }),
 
                 Tables\Columns\TextColumn::make('train')
-                    ->label('Train')
+                    ->label(__('Train'))
                     ->getStateUsing(function (TourDay $record) {
                         $trainExpense = $record->getExpense(ExpenseType::Train);
 
@@ -751,7 +751,7 @@ class DaysRelationManager extends RelationManager
                     }),
 
                 Tables\Columns\TextColumn::make('transport')
-                    ->label('Transfer')
+                    ->label(__('Transfer'))
                     ->getStateUsing(function (TourDay $record) {
                         $transportExpense = $record->getExpense(ExpenseType::Transport);
                         /** @var Transfer $transfer */
@@ -764,7 +764,7 @@ class DaysRelationManager extends RelationManager
                     }),
 
                 Tables\Columns\TextColumn::make('lunch')
-                    ->label('Lunch')
+                    ->label(__('Lunch'))
                     ->getStateUsing(function (TourDay $record) {
                         $lunchExpense = $record->getExpense(ExpenseType::Lunch);
 
@@ -775,7 +775,7 @@ class DaysRelationManager extends RelationManager
                     }),
 
                 Tables\Columns\TextColumn::make('dinner')
-                    ->label('Dinner')
+                    ->label(__('Dinner'))
                     ->getStateUsing(function (TourDay $record) {
                         $lunchExpense = $record->getExpense(ExpenseType::Dinner);
 
@@ -786,7 +786,7 @@ class DaysRelationManager extends RelationManager
                     }),
 
                 Tables\Columns\TextColumn::make('extra')
-                    ->label('Extra')
+                    ->label(__('Extra'))
                     ->getStateUsing(function (TourDay $record) {
                         $extraExpense = $record->getExpense(ExpenseType::Extra);
 
@@ -801,7 +801,7 @@ class DaysRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->modalHeading('Add day')
+                    ->modalHeading(__('Add day'))
                     ->modalWidth('5xl')
                     ->after(function () {
                         /** @var Tour $tour */

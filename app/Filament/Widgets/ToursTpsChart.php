@@ -19,7 +19,7 @@ class ToursTpsChart extends ChartWidget
     {
         return [
             Select::make('country_id')
-                ->label('Country')
+                ->label(__('Country'))
                 ->options(
                     Country::query()
                         ->whereHas('tours', fn($q) => $q->where('type', TourType::TPS))

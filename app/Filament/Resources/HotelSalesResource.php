@@ -26,6 +26,41 @@ use App\Filament\Resources\HotelSalesResource\Pages;
 
 class HotelSalesResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = Hotel::class;
     protected static ?string $label = 'Hotel Sales';
     
@@ -58,14 +93,14 @@ class HotelSalesResource extends Resource
                 Tables\Filters\Filter::make('filters')
                     ->columnSpanFull()
                     ->form([
-                        Components\Grid::make(6)->schema([
+                        Components\Grid::make(['sm' => 2, 'md' => 4])->schema([
                             Components\Select::make('currency')
-                                ->label('Currency')
+                                ->label(__('Currency'))
                                 ->native(false)
                                 ->formatStateUsing(fn() => CurrencyEnum::UZS->value)
                                 ->options(CurrencyEnum::class),
                             Components\Select::make('company_id')
-                                ->label('Company')
+                                ->label(__('Company'))
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
@@ -104,13 +139,13 @@ class HotelSalesResource extends Resource
                         }
                         return $indicators;
                     })
-            ], layout: FiltersLayout::AboveContent)
+            ], layout: FiltersLayout::AboveContentCollapsible)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 
                 PeriodsColumn::make('room_prices')
-                    ->label('Room prices')
+                    ->label(__('Room prices'))
                     ->getStateUsing(function($record, $livewire) {
                         $filters = $livewire->tableFilters;
                         
@@ -137,15 +172,15 @@ class HotelSalesResource extends Resource
                 Tables\Columns\TextColumn::make('inn')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('country.name')
-                    ->label('Country')
+                    ->label(__('Country'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('city.name')
-                    ->label('City')
+                    ->label(__('City'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('rate')
-                    ->label('Rate')
+                    ->label(__('Rate'))
                     ->getStateUsing(fn($record) => RateEnum::tryFrom($record->rate)?->getLabel())
                     ->sortable(),
             ])

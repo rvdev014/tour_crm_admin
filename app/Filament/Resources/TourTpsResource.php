@@ -37,6 +37,41 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class TourTpsResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     use InteractsWithForms;
 
     protected static ?string $model = Tour::class;
@@ -68,14 +103,14 @@ class TourTpsResource extends Resource
             Hidden::make('transport_price_currency'),
 
             Section::make('Route & company')
-                ->description('Which company is running the tour, and where it goes.')
+                ->description(__('Which company is running the tour, and where it goes.'))
                 ->icon('heroicon-o-map')
                 ->collapsible()
                 ->schema([
                     Components\Grid::make(4)->schema([
                         Components\TextInput::make('group_number')
-                            ->label('Group number')
-                            ->helperText('Generated automatically')
+                            ->label(__('Group number'))
+                            ->helperText(__('Generated automatically'))
                             ->formatStateUsing(function ($record, $get) {
                                 if (! empty($record)) {
                                     return $record->group_number;
@@ -110,14 +145,14 @@ class TourTpsResource extends Resource
                 ]),
 
             Section::make('Schedule')
-                ->description('Arrival and departure dates for the group.')
+                ->description(__('Arrival and departure dates for the group.'))
                 ->icon('heroicon-o-calendar-days')
                 ->collapsible()
                 ->schema([
                     Components\Grid::make(4)->schema([
                         Components\DateTimePicker::make('start_date')
                             ->displayFormat('d.m.Y H:i')
-                            ->label('Arrival time')
+                            ->label(__('Arrival time'))
                             //                        ->native(false)
                             ->seconds(false)
                             ->minDate(fn ($record) => $record ? $record->start_date : null)
@@ -137,41 +172,41 @@ class TourTpsResource extends Resource
                             ->reactive()
                             ->required(),
                         Components\TextInput::make('arrival_number')
-                            ->label('Arrival reys number'),
+                            ->label(__('Arrival reys number')),
 
                         Components\DateTimePicker::make('end_date')
                             ->displayFormat('d.m.Y H:i')
-                            ->label('Departure time')
+                            ->label(__('Departure time'))
                             //                        ->native(false)
                             ->seconds(false)
                             ->minDate(fn ($get) => Carbon::parse($get('start_date'))->addDay()->format('d.m.Y H:i'))
                             ->reactive()
                             ->required(),
                         Components\TextInput::make('departure_number')
-                            ->label('Departure reys number'),
+                            ->label(__('Departure reys number')),
                     ]),
                 ]),
 
             Section::make('Passengers & pricing')
-                ->description('Group size and per-person price. These determine the tour\'s total price.')
+                ->description(__('Group size and per-person price. These determine the tour\'s total price.'))
                 ->icon('heroicon-o-users')
                 ->collapsible()
                 ->schema([
                     Components\Grid::make(4)->schema([
                         Components\TextInput::make('pax_foreign')
-                            ->label('Pax Foreign')
-                            ->helperText('Foreign citizens')
-                            ->placeholder('0')
+                            ->label(__('Pax Foreign'))
+                            ->helperText(__('Foreign citizens'))
+                            ->placeholder(__('0'))
                             ->required()
                             ->numeric(),
                         Components\TextInput::make('leader_pax')
-                            ->helperText('Group leaders / escorts')
-                            ->placeholder('0')
+                            ->helperText(__('Group leaders / escorts'))
+                            ->placeholder(__('0'))
                             ->numeric(),
                         Components\TextInput::make('price')
                             ->label(fn ($get) => 'Price ('.($get('price_currency') ?? 'UZS').')')
-                            ->helperText('Per person')
-                            ->placeholder('0')
+                            ->helperText(__('Per person'))
+                            ->placeholder(__('0'))
                             ->suffixAction(
                                 Components\Actions\Action::make('toggle-currency')
                                     ->icon('heroicon-o-banknotes')
@@ -182,8 +217,8 @@ class TourTpsResource extends Resource
                             )
                             ->numeric(),
                         Components\TextInput::make('single_supplement_price')
-                            ->label('Single supplement price')
-                            ->placeholder('0')
+                            ->label(__('Single supplement price'))
+                            ->placeholder(__('0'))
                             ->numeric(),
                     ]),
                 ]),
@@ -210,12 +245,12 @@ class TourTpsResource extends Resource
                     ]),
                     Components\Grid::make(4)->schema([
                         Components\TextInput::make('fit')
-                            ->label('FIT'),
+                            ->label(__('FIT')),
                     ]),
                 ]),
 
             Section::make('Guide info')
-                ->description('Local guide fee is entered via the Guide expense in Day expenses. Escort guide contact details and fee are entered here.')
+                ->description(__('Local guide fee is entered via the Guide expense in Day expenses. Escort guide contact details and fee are entered here.'))
                 ->icon('heroicon-o-identification')
                 ->collapsible()
                 ->schema([
@@ -241,7 +276,7 @@ class TourTpsResource extends Resource
 
                         Components\TextInput::make('guide_price')
                             ->label(fn ($get) => 'Price ('.($get('guide_price_currency') ?? 'UZS').')')
-                            ->placeholder('0')
+                            ->placeholder(__('0'))
                             ->suffixAction(
                                 Components\Actions\Action::make('toggle-currency')
                                     ->icon('heroicon-o-banknotes')
@@ -267,7 +302,7 @@ class TourTpsResource extends Resource
                             ->options(TransportType::class),
                         Components\TextInput::make('transport_price')
                             ->label(fn ($get) => 'Transfer Price ('.($get('transport_price_currency') ?? 'UZS').')')
-                            ->placeholder('0')
+                            ->placeholder(__('0'))
                             ->suffixAction(
                                 Components\Actions\Action::make('toggle-currency')
                                     ->icon('heroicon-o-banknotes')
@@ -284,7 +319,7 @@ class TourTpsResource extends Resource
                 ]),
 
             Section::make('Rooming info')
-                ->description('Room counts by type for foreign guests. This drives Hotel expense pricing for this tour — fill it in before adding Hotel expenses in Day expenses.')
+                ->description(__('Room counts by type for foreign guests. This drives Hotel expense pricing for this tour — fill it in before adding Hotel expenses in Day expenses.'))
                 ->icon('heroicon-o-building-office-2')
                 ->collapsible()
                 ->schema([
@@ -348,17 +383,17 @@ class TourTpsResource extends Resource
                 Tables\Filters\Filter::make('country_id')
                     ->columnSpanFull()
                     ->form([
-                        Components\Grid::make(6)->schema([
+                        Components\Grid::make(['sm' => 2, 'md' => 3])->schema([
                             Components\Checkbox::make('active')
-                                ->label('Active')
+                                ->label(__('Active'))
                                 ->default(false)
                                 ->inline(false),
                             Components\Checkbox::make('archive')
-                                ->label('Archive')
+                                ->label(__('Archive'))
                                 ->default(false)
                                 ->inline(false),
                             Components\Select::make('year')
-                                ->label('Year')
+                                ->label(__('Year'))
                                 ->native(false)
                                 ->default((int) date('Y'))
                                 ->options(function () {
@@ -372,7 +407,7 @@ class TourTpsResource extends Resource
                                     );
                                 }),
                         ]),
-                        Components\Grid::make(6)->schema([
+                        Components\Grid::make(['sm' => 2, 'md' => 3, 'xl' => 6])->schema([
                             Components\Select::make('country_id')
                                 ->native(false)
                                 ->searchable()
@@ -389,7 +424,7 @@ class TourTpsResource extends Resource
                                 ->preload()
                                 ->options(Company::query()->pluck('name', 'id')->toArray()),
                             Components\Select::make('created_by')
-                                ->label('Admin creator')
+                                ->label(__('Admin creator'))
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
@@ -488,7 +523,7 @@ class TourTpsResource extends Resource
 
                         return $indicators;
                     }),
-            ], layout: FiltersLayout::AboveContent)
+            ], layout: FiltersLayout::AboveContentCollapsible)
             ->columns([
                 Columns\TextColumn::make('group_number')
                     ->searchable(),
@@ -555,7 +590,7 @@ class TourTpsResource extends Resource
                 Columns\TextColumn::make('createdBy.name')
                     ->sortable(),
                 Columns\TextColumn::make('createdBy.operator_percent_tps')
-                    ->label('Operator %')
+                    ->label(__('Operator %'))
                     ->suffix('%')
                     ->sortable(),
                 Columns\TextColumn::make('country.name'),
@@ -594,11 +629,11 @@ class TourTpsResource extends Resource
                         ->url(fn(Tour $record) => route('export', $record)),
                 ]),*/
                 Tables\Actions\Action::make('export_all')
-                    ->label('Reports')
+                    ->label(__('Reports'))
                     ->icon('heroicon-o-document-text')
                     ->url(fn (Tour $record) => route('export-all', $record)),
                 Tables\Actions\EditAction::make(),
-                StatusAction::make()->label('')->icon(''),
+                StatusAction::make()->label(__(''))->icon(''),
             ], position: Tables\Enums\ActionsPosition::BeforeColumns)
             ->headerActions([
 

@@ -25,6 +25,41 @@ use App\Filament\Resources\CompanyExpenseResource\RelationManagers;
 
 class CompanyExpenseResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = TourDayExpense::class;
     protected static ?string $label = 'Company Expenses';
     
@@ -62,10 +97,10 @@ class CompanyExpenseResource extends Resource
                 Tables\Filters\Filter::make('filters')
                     ->columnSpanFull()
                     ->form([
-                        Forms\Components\Grid::make(6)->schema([
+                        Forms\Components\Grid::make(['sm' => 2, 'md' => 3, 'xl' => 6])->schema([
                             Forms\Components\Select::make('tour_type')
                                 ->native(false)
-                                ->label('Tour Type')
+                                ->label(__('Tour Type'))
                                 ->options([
                                     TourType::TPS->value => TourType::TPS->getLabel(),
                                     TourType::Corporate->value => TourType::Corporate->getLabel(),
@@ -76,7 +111,7 @@ class CompanyExpenseResource extends Resource
                                 ->multiple()
                                 ->searchable()
                                 ->preload()
-                                ->label('Company')
+                                ->label(__('Company'))
                                 ->options(
                                     fn() => Company::all()
                                         ->where('type', CompanyType::Corporate)
@@ -184,10 +219,10 @@ class CompanyExpenseResource extends Resource
                         
                         return $indicators;
                     })
-            ], layout: FiltersLayout::AboveContent)
+            ], layout: FiltersLayout::AboveContentCollapsible)
             ->columns([
                 Tables\Columns\TextColumn::make('group_number')
-                    ->label('Group number')
+                    ->label(__('Group number'))
                     ->getStateUsing(function(TourDayExpense $record) {
                         $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         if ($tour->isCorporate()) {
@@ -230,7 +265,7 @@ class CompanyExpenseResource extends Resource
                     }),
                 
                 Tables\Columns\TextColumn::make('inn')
-                    ->label('Company Inn')
+                    ->label(__('Company Inn'))
                     ->getStateUsing(function(TourDayExpense $record) {
                         $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         return $tour->company->inn;
@@ -259,7 +294,7 @@ class CompanyExpenseResource extends Resource
                     }),
                 
                 Tables\Columns\TextColumn::make('passengers')
-                    ->label('Passengers FIO')
+                    ->label(__('Passengers FIO'))
                     ->getStateUsing(function(TourDayExpense $record) {
                         $passengers = [];
                         if ($record->tourGroup) {
@@ -280,7 +315,7 @@ class CompanyExpenseResource extends Resource
                     }),
                 
                 Tables\Columns\TextColumn::make('expense_name')
-                    ->label('Expense Name')
+                    ->label(__('Expense Name'))
                     ->getStateUsing(function(TourDayExpense $record) {
                         return match ($record->type) {
                             ExpenseType::Hotel                      => $record->hotel?->name,
@@ -294,7 +329,7 @@ class CompanyExpenseResource extends Resource
                     }),
                 
                 Tables\Columns\TextColumn::make('tour_pax')
-                    ->label('Pax')
+                    ->label(__('Pax'))
                     ->getStateUsing(function(TourDayExpense $record) {
                         $tour = $record->tourGroup?->tour ?? $record->tourDay->tour;
                         if ($record->tourGroup) {
@@ -304,7 +339,7 @@ class CompanyExpenseResource extends Resource
                     }),
                 
                 Tables\Columns\TextColumn::make('route')
-                    ->label('Route')
+                    ->label(__('Route'))
                     ->getStateUsing(function(TourDayExpense $record) {
                         $fromCity = $record->tourDay?->city?->name ?? $record->city?->name;
                         
@@ -317,7 +352,7 @@ class CompanyExpenseResource extends Resource
                     }),
                 
                 Tables\Columns\TextColumn::make('buy_price')
-                    ->label('Buy price')
+                    ->label(__('Buy price'))
                     ->getStateUsing(function (TourDayExpense $record) {
                         if ($record->type === ExpenseType::Transport) {
                             $transfer = Transfer::where('tour_day_expense_id', $record->id)->first();

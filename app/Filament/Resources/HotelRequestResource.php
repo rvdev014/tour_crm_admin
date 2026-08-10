@@ -16,6 +16,41 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HotelRequestResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = HotelRequest::class;
     
     protected static ?string $label = 'Hotel Requests';
@@ -46,37 +81,37 @@ class HotelRequestResource extends Resource
         return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\Select::make('hotel_id')
-                    ->label('Hotel')
+                    ->label(__('Hotel'))
                     ->relationship('hotel', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                     
                 Forms\Components\Select::make('room_type_id')
-                    ->label('Room Type')
+                    ->label(__('Room Type'))
                     ->relationship('roomType', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                     
                 Forms\Components\DateTimePicker::make('checkin_time')
-                    ->label('Check-in Date & Time')
+                    ->label(__('Check-in Date & Time'))
                     ->required(),
                     
                 Forms\Components\DateTimePicker::make('checkout_time')
-                    ->label('Check-out Date & Time')
+                    ->label(__('Check-out Date & Time'))
                     ->after('checkin_time')
                     ->required(),
                     
                 Forms\Components\Select::make('user_id')
-                    ->label('User')
+                    ->label(__('User'))
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload()
                     ->nullable(),
                     
                 Forms\Components\Textarea::make('comment')
-                    ->label('Comments')
+                    ->label(__('Comments'))
                     ->rows(3)
                     ->columnSpanFull(),
             ]);
@@ -88,37 +123,37 @@ class HotelRequestResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('ID'))
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('hotel.name')
-                    ->label('Hotel')
+                    ->label(__('Hotel'))
                     ->searchable()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('roomType.name')
-                    ->label('Room Type')
+                    ->label(__('Room Type'))
                     ->searchable()
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('checkin_time')
-                    ->label('Check-in')
+                    ->label(__('Check-in'))
                     ->dateTime('M j, Y H:i')
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('checkout_time')
-                    ->label('Check-out')
+                    ->label(__('Check-out'))
                     ->dateTime('M j, Y H:i')
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('User')
+                    ->label(__('User'))
                     ->searchable()
                     ->sortable()
-                    ->placeholder('Guest'),
+                    ->placeholder(__('Guest')),
                     
                 Tables\Columns\TextColumn::make('comment')
-                    ->label('Comments')
+                    ->label(__('Comments'))
                     ->searchable()
                     ->limit(50)
                     ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
@@ -136,32 +171,32 @@ class HotelRequestResource extends Resource
                     }),
                 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
+                    ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                     
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Updated At')
+                    ->label(__('Updated At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('hotel_id')
-                    ->label('Hotel')
+                    ->label(__('Hotel'))
                     ->relationship('hotel', 'name')
                     ->searchable()
                     ->preload(),
                     
                 Tables\Filters\SelectFilter::make('room_type_id')
-                    ->label('Room Type')
+                    ->label(__('Room Type'))
                     ->relationship('roomType', 'name')
                     ->searchable()
                     ->preload(),
                     
                 Tables\Filters\SelectFilter::make('user_id')
-                    ->label('User')
+                    ->label(__('User'))
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload(),

@@ -20,6 +20,17 @@ class WhatsAppInbox extends Page
 
     protected static string $view = 'filament.pages.whats-app-inbox';
 
+    // Filament matches pages/resources to their registered NavigationGroup by
+    // comparing this against the group's getLabel() — see the identical
+    // comment on every Resource's getNavigationGroup() override for why that
+    // needs translating consistently, or the match silently fails.
+    // getNavigationLabel()/getTitle() are deliberately left alone: "WhatsApp"
+    // is a product name, not translated either language.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
     public ?int $selectedContactId = null;
 
     public string $search = '';

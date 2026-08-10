@@ -17,6 +17,41 @@ use App\Filament\Resources\RestaurantResource\RelationManagers;
 
 class RestaurantResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = Restaurant::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
@@ -50,7 +85,7 @@ class RestaurantResource extends Resource
                     Forms\Components\TextInput::make('inn')
                         ->required(),
                     Forms\Components\TextInput::make('company_name')
-                        ->label('Legal name'),
+                        ->label(__('Legal name')),
                 ]),
                 Forms\Components\Grid::make(4)->schema([
                     Forms\Components\Select::make('country_id')
@@ -71,7 +106,7 @@ class RestaurantResource extends Resource
                         ->required()
                         ->numeric(),
                     Forms\Components\TextInput::make('telegram_chat_id')
-                        ->label('Telegram chat ID')
+                        ->label(__('Telegram chat ID'))
                         ->maxLength(255),
                     Forms\Components\Repeater::make('phones')
                         ->relationship('phones')
@@ -108,7 +143,7 @@ class RestaurantResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('company_name')
-                    ->label('Legal name')
+                    ->label(__('Legal name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('country.name')
@@ -119,7 +154,7 @@ class RestaurantResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('phone_list')
-                    ->label('Phones')
+                    ->label(__('Phones'))
                     ->getStateUsing(function($record) {
                         return $record->phones->map(function($phone) {
                             return "<a href='https://t.me/{$phone->phone_number}' target='_blank'>{$phone->phone_number}</a>";
@@ -130,7 +165,7 @@ class RestaurantResource extends Resource
 
                 Tables\Columns\TextColumn::make('price_per_person'),
                 Tables\Columns\TextColumn::make('telegram_chat_id')
-                    ->label('Telegram chat ID')
+                    ->label(__('Telegram chat ID'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

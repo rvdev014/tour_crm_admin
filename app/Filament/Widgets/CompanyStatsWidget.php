@@ -24,23 +24,23 @@ class CompanyStatsWidget extends BaseWidget
             ->query(fn() => $this->getQuery())
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Компания')
+                    ->label(__('Компания'))
                     ->searchable()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('total_tours_count')
-                    ->label('Туров')
+                    ->label(__('Туров'))
                     ->alignCenter()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('total_nights_calculated')
-                    ->label('Ночей')
-                    ->description('В выбранных городах/отелях')
+                    ->label(__('Ночей'))
+                    ->description(__('В выбранных городах/отелях'))
                     ->alignCenter()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('total_people_calculated')
-                    ->label('Туристов')
+                    ->label(__('Туристов'))
                     ->alignCenter()
                     ->sortable(),
             ])

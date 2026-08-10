@@ -25,7 +25,7 @@ class ListHotels extends ListRecords
     {
         return [
             Actions\Action::make('export_all')
-                ->label('Export All')
+                ->label(__('Export All'))
                 ->icon('heroicon-o-document-text')
                 ->requiresConfirmation(true)
                 ->action(fn() => $this->exportExpenses()),

@@ -32,7 +32,7 @@ class ReviewsRelationManager extends RelationManager
                         ->minValue(1)
                         ->maxValue(5),
                     Forms\Components\Toggle::make('is_active')
-                        ->label('Active')
+                        ->label(__('Active'))
                         ->default(false),
                 ]),
                 Forms\Components\Textarea::make('comment')
@@ -66,7 +66,7 @@ class ReviewsRelationManager extends RelationManager
                     ->limit(50)
                     ->searchable(),
                 Tables\Columns\ToggleColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('Active'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -75,7 +75,7 @@ class ReviewsRelationManager extends RelationManager
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Active Status')
+                    ->label(__('Active Status'))
                     ->boolean()
                     ->trueLabel('Active reviews')
                     ->falseLabel('Inactive reviews')

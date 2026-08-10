@@ -77,13 +77,13 @@ class EditTransfer extends EditRecord
     {
         return [
             Actions\Action::make('export_all')
-                ->label('Export voucher')
+                ->label(__('Export voucher'))
                 ->icon('heroicon-o-document-text')
                 ->visible($this->record->status == ExpenseStatus::Confirmed)
                 ->url(route('export-transfer', $this->record)),
 
             Actions\Action::make('export_tablichka')
-                ->label('Табличка')
+                ->label(__('Табличка'))
                 ->icon('heroicon-o-identification')
                 ->color('info')
                 ->url(route('export-tablichka', $this->record)),

@@ -85,12 +85,12 @@ class EditTour extends EditRecord
 //                ->icon('heroicon-o-document-text')
 //                ->url(route('export', $this->record)),
             Actions\Action::make('cancelTour')
-                ->label('Cancel')
+                ->label(__('Cancel'))
                 ->icon('heroicon-o-no-symbol')
                 ->color('danger')
                 // Add a confirmation modal so it's not clicked by accident
                 ->requiresConfirmation()
-                ->modalHeading('Cancel Tour')
+                ->modalHeading(__('Cancel Tour'))
                 ->modalDescription('Are you sure you want to cancel this tour? This will mark it as cancelled in the system.')
                 ->modalSubmitActionLabel('Yes, cancel it')
                 ->action(function () {
@@ -109,9 +109,9 @@ class EditTour extends EditRecord
             SendMailAction::make('mail_hotel')
                 ->tour($tour)
                 ->type('hotels')
-                ->label('Mail Hotels'),
+                ->label(__('Mail Hotels')),
             Actions\Action::make('export_all')
-                ->label('Export All')
+                ->label(__('Export All'))
                 ->icon('heroicon-o-document-text')
                 ->url(route('export-all', $this->record)),
 //            Actions\DeleteAction::make()

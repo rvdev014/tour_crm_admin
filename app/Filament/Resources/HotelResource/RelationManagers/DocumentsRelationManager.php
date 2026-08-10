@@ -23,7 +23,7 @@ class DocumentsRelationManager extends RelationManager
         return $form->disabled(fn () => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\FileUpload::make('file_path')
-                    ->label('Document')
+                    ->label(__('Document'))
                     ->required()
                     ->disk('public')
                     ->directory('hotel-documents')
@@ -39,13 +39,13 @@ class DocumentsRelationManager extends RelationManager
             ->recordTitleAttribute('file_name')
             ->columns([
                 Tables\Columns\TextColumn::make('file_name')
-                    ->label('Name')
+                    ->label(__('Name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('file_type')
-                    ->label('Type')
+                    ->label(__('Type'))
                     ->badge(),
                 Tables\Columns\TextColumn::make('file_size')
-                    ->label('Size')
+                    ->label(__('Size'))
                     ->formatStateUsing(fn ($state) => $state ? number_format($state / 1024, 1).' KB' : '-'),
             ])
             ->headerActions([
@@ -59,7 +59,7 @@ class DocumentsRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\Action::make('view')
-                    ->label('View')
+                    ->label(__('View'))
                     ->icon('heroicon-o-eye')
                     ->url(fn (Attachment $record) => $record->getUrl())
                     ->openUrlInNewTab()

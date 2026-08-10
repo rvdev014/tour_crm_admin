@@ -49,6 +49,7 @@ class User extends Authenticatable implements FilamentUser
         'google_id',
         'timezone',
         'timezone_updated_at',
+        'locale',
     ];
 
     /**

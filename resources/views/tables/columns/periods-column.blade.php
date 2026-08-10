@@ -43,24 +43,21 @@
     $currencySymbol = $isUsd ? CurrencyEnum::USD->getSymbol() : CurrencyEnum::UZS->getSymbol();
 @endphp
 
-<div class="custom-table-wrapper">
-    <table class="custom-table">
-        @if($isFirst)
-            <thead>
-            <tr>
-                <th style="min-width: 100px">Room type</th>
-                <th style="min-width: 100px">Season type</th>
-                <th style="min-width: 150px">Price Uz</th>
-                <th style="min-width: 150px">Price Foreign</th>
-            </tr>
-            </thead>
-        @endif
+<x-data-table
+    class="custom-table--left"
+    :headers="$isFirst ? [
+        ['label' => 'Room type', 'class' => 'min-w-[100px]'],
+        ['label' => 'Season type', 'class' => 'min-w-[100px]'],
+        ['label' => 'Price Uz', 'class' => 'min-w-[150px]'],
+        ['label' => 'Price Foreign', 'class' => 'min-w-[150px]'],
+    ] : null"
+>
         @foreach($roomTypes as $roomType)
 
             <tr>
-                <td style="min-width: 100px; text-align: left;">{{ $roomType?->roomType?->name }}</td>
+                <td class="min-w-[100px]">{{ $roomType?->roomType?->name }}</td>
 
-                <td style="min-width: 100px; text-align: left;">
+                <td class="min-w-[100px]">
                     <div class="flex-td">
                         @if ($roomType?->season_type)
                             @php
@@ -86,10 +83,9 @@
                     $priceForeign = $roomType->getPriceByGroup($group, RoomPersonType::Foreign);
                 @endphp
 
-                <td style="min-width: 150px; text-align: left;">{{ number_format(ExpenseService::getPrice($price, $isUsd), 0, '.', ' ') }} {{ $currencySymbol }}</td>
-                <td style="min-width: 150px; text-align: left;">{{ number_format(ExpenseService::getPrice($priceForeign, $isUsd), 0, '.', ' ') }} {{ $currencySymbol }}</td>
+                <td class="min-w-[150px]">{{ number_format(ExpenseService::getPrice($price, $isUsd), 0, '.', ' ') }} {{ $currencySymbol }}</td>
+                <td class="min-w-[150px]">{{ number_format(ExpenseService::getPrice($priceForeign, $isUsd), 0, '.', ' ') }} {{ $currencySymbol }}</td>
 
             </tr>
         @endforeach
-    </table>
-</div>
+</x-data-table>

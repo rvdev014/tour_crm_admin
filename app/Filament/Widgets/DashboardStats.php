@@ -88,7 +88,10 @@ class DashboardStats extends BaseWidget
         $color = $difference > 0 ? 'success' : 'danger';
         $chart = $difference > 0 ? [7, 2, 10, 3, 15, 4, 17] : [17, 4, 15, 3, 10, 2, 7];
 
-        return Stat::make($label, $total)->icon($icon)->color('success');
+        // Was hardcoded to ->color('success') regardless of $difference, so every
+        // stat card showed a green "trending up" icon even in months where the
+        // metric fell — $icon/$color/$chart were computed above but never used.
+        return Stat::make($label, $total)->icon($icon)->color($color)->chart($chart);
     }
 
     public static function format($value): string

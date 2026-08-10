@@ -28,6 +28,41 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class HotelResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = Hotel::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
@@ -69,7 +104,7 @@ class HotelResource extends Resource
                                     ->columns(3)
                                     ->schema([
                                         Forms\Components\TextInput::make('name')
-                                            ->label('Hotel Name')
+                                            ->label(__('Hotel Name'))
                                             ->required()
                                             ->maxLength(255)
                                             ->unique(ignoreRecord: true)
@@ -78,7 +113,7 @@ class HotelResource extends Resource
                                             ])
                                             ->columnSpan(2),
                                         Forms\Components\Select::make('rate')
-                                            ->label('Star Rating')
+                                            ->label(__('Star Rating'))
                                             ->options(function () {
                                                 $options = [];
                                                 foreach (RateEnum::cases() as $rate) {
@@ -88,7 +123,7 @@ class HotelResource extends Resource
                                                 return $options;
                                             }),
                                         Forms\Components\TextInput::make('email')
-                                            ->label('Email')
+                                            ->label(__('Email'))
                                             ->email()
                                             ->suffixAction(function ($record) {
                                                 if (! $record?->email) {
@@ -102,9 +137,9 @@ class HotelResource extends Resource
                                                 ];
                                             }),
                                         Forms\Components\TextInput::make('inn')
-                                            ->label('INN'),
+                                            ->label(__('INN')),
                                         Forms\Components\Toggle::make('is_visible')
-                                            ->label('Visible on Website')
+                                            ->label(__('Visible on Website'))
                                             ->default(false)
                                             ->inline(false),
                                     ]),
@@ -114,7 +149,7 @@ class HotelResource extends Resource
                                     ->columns(2)
                                     ->schema([
                                         Forms\Components\Select::make('country_id')
-                                            ->label('Country')
+                                            ->label(__('Country'))
                                             ->native(false)
                                             ->searchable()
                                             ->preload()
@@ -122,20 +157,20 @@ class HotelResource extends Resource
                                             ->afterStateUpdated(fn ($set) => $set('city_id', null))
                                             ->reactive(),
                                         Forms\Components\Select::make('city_id')
-                                            ->label('City')
+                                            ->label(__('City'))
                                             ->native(false)
                                             ->searchable()
                                             ->preload()
                                             ->relationship('city', 'name')
                                             ->options(fn ($get) => TourService::getCities($get('country_id'))),
                                         Forms\Components\TextInput::make('address')
-                                            ->label('Address')
+                                            ->label(__('Address'))
                                             ->maxLength(255)
                                             ->columnSpan(2),
                                         Forms\Components\TextInput::make('coordinates')
-                                            ->label('Coordinates (Lat, Lng)')
-                                            ->placeholder('41.2995, 69.2401')
-                                            ->helperText('Latitude and longitude separated by a comma')
+                                            ->label(__('Coordinates (Lat, Lng)'))
+                                            ->placeholder(__('41.2995, 69.2401'))
+                                            ->helperText(__('Latitude and longitude separated by a comma'))
                                             ->formatStateUsing(fn ($record) => $record?->latitude && $record?->longitude
                                                 ? $record->latitude.', '.$record->longitude : '')
                                             ->dehydrated(false)
@@ -147,26 +182,26 @@ class HotelResource extends Resource
                                     ->columns(3)
                                     ->schema([
                                         Forms\Components\TextInput::make('company_name')
-                                            ->label('Company Name')
+                                            ->label(__('Company Name'))
                                             ->maxLength(255),
                                         Forms\Components\TextInput::make('contract_number')
-                                            ->label('Contract Number')
+                                            ->label(__('Contract Number'))
                                             ->maxLength(255),
                                         Forms\Components\DatePicker::make('contract_date')
-                                            ->label('Contract Date')
+                                            ->label(__('Contract Date'))
                                             ->native(false),
                                         Forms\Components\TextInput::make('booking_cancellation_days')
-                                            ->label('Cancellation Days')
+                                            ->label(__('Cancellation Days'))
                                             ->numeric(),
                                         Forms\Components\Select::make('tour_sbor')
-                                            ->label('Tour Service Fee')
+                                            ->label(__('Tour Service Fee'))
                                             ->options([
                                                 5 => '5%',
                                                 10 => '10%',
                                                 15 => '15%',
                                             ]),
                                         Forms\Components\Checkbox::make('nds_included')
-                                            ->label('VAT (NDS) Included')
+                                            ->label(__('VAT (NDS) Included'))
                                             ->helperText(fn () => 'Checked: this hotel\'s room prices will have VAT/NDS added automatically (currently '
                                                 .rtrim(rtrim(number_format(TourService::getVatPercent(), 2), '0'), '.')
                                                 .'%, set in Settings). Unchecked: prices are charged exactly as entered, with no VAT added.')
@@ -178,7 +213,7 @@ class HotelResource extends Resource
                                     ->schema([
                                         Forms\Components\Repeater::make('phones')
                                             ->relationship('phones')
-                                            ->label('')
+                                            ->label(__(''))
                                             ->addActionLabel('+ Add Phone')
                                             ->addActionAlignment('end')
                                             ->simple(
@@ -197,11 +232,11 @@ class HotelResource extends Resource
                             ->schema([
 
                                 Forms\Components\Section::make('Photo Gallery')
-                                    ->description('Upload hotel photos shown on the website. First photo will be used as the cover.')
+                                    ->description(__('Upload hotel photos shown on the website. First photo will be used as the cover.'))
                                     ->icon('heroicon-o-rectangle-stack')
                                     ->schema([
                                         Forms\Components\FileUpload::make('photos')
-                                            ->label('')
+                                            ->label(__(''))
                                             ->multiple()
                                             ->image()
                                             ->reorderable()
@@ -229,13 +264,13 @@ class HotelResource extends Resource
                                     ->columns(2)
                                     ->schema([
                                         Forms\Components\RichEditor::make('description_en')
-                                            ->label('Description (English)')
+                                            ->label(__('Description (English)'))
                                             ->toolbarButtons([
                                                 'bold', 'italic', 'underline', 'strike',
                                                 'bulletList', 'orderedList', 'link', 'undo', 'redo',
                                             ]),
                                         Forms\Components\RichEditor::make('description_ru')
-                                            ->label('Description (Russian)')
+                                            ->label(__('Description (Russian)'))
                                             ->toolbarButtons([
                                                 'bold', 'italic', 'underline', 'strike',
                                                 'bulletList', 'orderedList', 'link', 'undo', 'redo',
@@ -249,11 +284,11 @@ class HotelResource extends Resource
                             ->schema([
 
                                 Forms\Components\Section::make('Facilities')
-                                    ->description('Select all amenities and services available at this hotel.')
+                                    ->description(__('Select all amenities and services available at this hotel.'))
                                     ->icon('heroicon-o-check-circle')
                                     ->schema([
                                         Forms\Components\Select::make('facilities')
-                                            ->label('')
+                                            ->label(__(''))
                                             ->relationship('facilities', 'name_ru')
                                             ->multiple()
                                             ->preload()
@@ -264,7 +299,7 @@ class HotelResource extends Resource
                                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
                                     ->schema([
                                         Forms\Components\Textarea::make('comment')
-                                            ->label('Notes / Comments')
+                                            ->label(__('Notes / Comments'))
                                             ->rows(4)
                                             ->maxLength(1000),
                                     ]),
@@ -276,12 +311,12 @@ class HotelResource extends Resource
                             ->schema([
 
                                 Forms\Components\Section::make('Pricing Periods')
-                                    ->description('Define high / low season date ranges for this year. Room prices are set per period in the Rooms tab below.')
+                                    ->description(__('Define high / low season date ranges for this year. Room prices are set per period in the Rooms tab below.'))
                                     ->icon('heroicon-o-calendar')
                                     ->schema([
                                         Forms\Components\Repeater::make('periods')
                                             ->relationship('currentYearPeriods')
-                                            ->label('')
+                                            ->label(__(''))
                                             ->grid(2)
                                             ->addActionLabel('+ Add Period')
                                             ->addActionAlignment('end')
@@ -297,16 +332,16 @@ class HotelResource extends Resource
                                             ->schema([
                                                 Forms\Components\Grid::make(3)->schema([
                                                     Forms\Components\DatePicker::make('start_date')
-                                                        ->label('From')
+                                                        ->label(__('From'))
                                                         ->native(false)
                                                         ->required(),
                                                     Forms\Components\DatePicker::make('end_date')
-                                                        ->label('To')
+                                                        ->label(__('To'))
                                                         ->native(false)
                                                         ->minDate(fn ($get) => $get('start_date'))
                                                         ->required(),
                                                     Forms\Components\Select::make('season_type')
-                                                        ->label('Season Type')
+                                                        ->label(__('Season Type'))
                                                         ->options(RoomSeasonType::class)
                                                         ->required(),
                                                 ]),
@@ -329,20 +364,20 @@ class HotelResource extends Resource
                 Tables\Filters\Filter::make('filters')
                     ->columnSpanFull()
                     ->form([
-                        Forms\Components\Grid::make(6)->schema([
+                        Forms\Components\Grid::make(['sm' => 2, 'md' => 4])->schema([
                             Forms\Components\Select::make('city_id')
-                                ->label('City')
+                                ->label(__('City'))
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
                                 ->options(fn () => TourService::getCities()),
                             Forms\Components\Select::make('currency')
-                                ->label('Currency')
+                                ->label(__('Currency'))
                                 ->native(false)
                                 ->default(CurrencyEnum::UZS->value)
                                 ->options(CurrencyEnum::class),
                             Forms\Components\Select::make('year')
-                                ->label('Year')
+                                ->label(__('Year'))
                                 ->default(date('Y'))
                                 ->native(false)
                                 ->options(function () {
@@ -352,7 +387,7 @@ class HotelResource extends Resource
                                     return array_combine($years, $years);
                                 }),
                             Forms\Components\Select::make('season_type')
-                                ->label('Season Type')
+                                ->label(__('Season Type'))
                                 ->native(false)
                                 ->options(RoomSeasonType::class),
                         ]),
@@ -376,15 +411,18 @@ class HotelResource extends Resource
 
                         return $indicators;
                     }),
-            ], layout: FiltersLayout::AboveContent)
+            ], layout: FiltersLayout::AboveContentCollapsible)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->color('primary')
+                    // info, not primary — every other "this cell opens something
+                    // else" column in the app (email/phone links, group_number
+                    // links) uses info; this was the one outlier.
+                    ->color('info')
                     ->action(HotelPeriodsAction::make()),
 
                 PeriodsColumn::make('room_prices')
-                    ->label('Room prices')
+                    ->label(__('Room prices'))
                     ->getStateUsing(function ($record, $livewire) {
                         $filters = $livewire->tableFilters;
 
@@ -407,17 +445,17 @@ class HotelResource extends Resource
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('country.name')
-                    ->label('Country')
+                    ->label(__('Country'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('city.name')
-                    ->label('City')
+                    ->label(__('City'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('phone_list')
-                    ->label('Phones')
+                    ->label(__('Phones'))
                     ->getStateUsing(fn ($record) => $record->phones
                         ->map(fn ($p) => "<a href='https://t.me/{$p->phone_number}' target='_blank'>{$p->phone_number}</a>")
                         ->implode('<br/>'))
@@ -425,12 +463,12 @@ class HotelResource extends Resource
                     ->html(),
 
                 Tables\Columns\TextColumn::make('rate')
-                    ->label('Rate')
+                    ->label(__('Rate'))
                     ->getStateUsing(fn ($record) => RateEnum::tryFrom($record->rate)?->getLabel())
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('booking_cancellation_days')
-                    ->label('Booking days')
+                    ->label(__('Booking days'))
                     ->sortable(),
             ])
             ->recordUrl(null)

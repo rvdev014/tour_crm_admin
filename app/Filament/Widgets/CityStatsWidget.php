@@ -24,22 +24,22 @@ class CityStatsWidget extends BaseWidget
             ->query(fn() => $this->getQuery())
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Город')
+                    ->label(__('Город'))
                     ->searchable()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('stat_visits')
-                    ->label('Кол-во туров')
+                    ->label(__('Кол-во туров'))
                     ->sortable()
                     ->alignCenter(),
                 
                 Tables\Columns\TextColumn::make('stat_nights')
-                    ->label('Ночей')
+                    ->label(__('Ночей'))
                     ->sortable()
                     ->alignCenter(),
                 
                 Tables\Columns\TextColumn::make('stat_people')
-                    ->label('Туристов')
+                    ->label(__('Туристов'))
                     ->sortable()
                     ->alignCenter(),
             ])

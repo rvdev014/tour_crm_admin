@@ -22,7 +22,22 @@ class TourStatistics extends \Filament\Pages\Dashboard
     protected static ?string $title = 'Статистика Туров';
     protected static ?string $navigationLabel = 'Аналитика';
 //    protected static string $view = 'filament.pages.tour-statistics';
-    
+
+    // $title/$navigationLabel above are hardcoded Russian (unlike the rest of
+    // the app's English-keyed strings) — wrap them the same way as every
+    // other resource/page nav override so they follow the locale switcher
+    // instead of staying pinned to Russian regardless of it. See
+    // lang/en.json for the English counterparts.
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __(parent::getTitle());
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
     // Регистрируем виджеты, которые будут на этой странице
     public function getWidgets(): array
     {
@@ -46,21 +61,21 @@ class TourStatistics extends \Filament\Pages\Dashboard
             ->schema([
                 Grid::make(5)->schema([
                     DatePicker::make('startDate')
-                        ->label('C даты'),
+                        ->label(__('C даты')),
                     DatePicker::make('endDate')
-                        ->label('По дату'),
+                        ->label(__('По дату')),
                     Select::make('company_ids')
-                        ->label('Компании')
+                        ->label(__('Компании'))
                         ->multiple()
                         ->options(Company::pluck('name', 'id'))
                         ->searchable(),
                     Select::make('city_ids')
-                        ->label('Города')
+                        ->label(__('Города'))
                         ->multiple()
                         ->options(City::pluck('name', 'id'))
                         ->searchable(),
                     Select::make('hotel_ids')
-                        ->label('Отели')
+                        ->label(__('Отели'))
                         ->multiple()
                         ->options(Hotel::pluck('name', 'id'))
                         ->searchable(),

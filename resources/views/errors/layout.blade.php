@@ -5,6 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Error' }} · East Asia Point</title>
     <style>
+        /*
+         * This page renders standalone (no Filament layout, no built app.css —
+         * it has to survive a 500 even if the asset pipeline is the thing
+         * that's broken), so it can't reference the design tokens in
+         * resources/css/filament/admin/theme.css directly. The values below
+         * are kept in sync with that file by hand: teal primary (--primary-*),
+         * green secondary (--success-*), slate surfaces (--surface-*), same
+         * radius/shadow scale. Light is the default surface; dark follows the
+         * OS preference via prefers-color-scheme, since this page has no
+         * access to the panel's own theme toggle state.
+         */
+        :root {
+            --ep-page: #F8FAFC;
+            --ep-card: rgba(255, 255, 255, 0.9);
+            --ep-card-border: #E2E8F0;
+            --ep-text: #0F172A;
+            --ep-text-muted: #64748B;
+            --ep-code: #0D9488;
+            --ep-footer: #94A3B8;
+            --ep-error-id-bg: rgba(15, 23, 42, 0.04);
+            --ep-error-id-border: #E2E8F0;
+            --ep-btn-secondary-bg: rgba(15, 23, 42, 0.04);
+            --ep-btn-secondary-border: #E2E8F0;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ep-page: #020617;
+                --ep-card: rgba(15, 23, 42, 0.82);
+                --ep-card-border: rgba(255, 255, 255, 0.08);
+                --ep-text: #F8FAFC;
+                --ep-text-muted: #94A3B8;
+                --ep-code: #2DD4BF;
+                --ep-footer: rgba(148, 163, 184, 0.55);
+                --ep-error-id-bg: rgba(255, 255, 255, 0.05);
+                --ep-error-id-border: rgba(255, 255, 255, 0.08);
+                --ep-btn-secondary-bg: rgba(255, 255, 255, 0.04);
+                --ep-btn-secondary-border: rgba(255, 255, 255, 0.08);
+            }
+        }
+
         @keyframes blob-drift-1 {
             0%, 100% { transform: translate(0, 0) scale(1); }
             33%       { transform: translate(40px, -30px) scale(1.06); }
@@ -26,8 +66,8 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            background: #030810;
-            color: #e2e8f0;
+            background: var(--ep-page);
+            color: var(--ep-text);
             font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
@@ -47,7 +87,7 @@
             width: 720px;
             height: 720px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, transparent 68%);
+            background: radial-gradient(circle, rgba(13, 148, 136, 0.12) 0%, transparent 68%);
             top: -180px;
             left: -180px;
             animation: blob-drift-1 12s ease-in-out infinite;
@@ -61,7 +101,7 @@
             width: 560px;
             height: 560px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(5, 150, 105, 0.12) 0%, transparent 68%);
+            background: radial-gradient(circle, rgba(22, 163, 74, 0.08) 0%, transparent 68%);
             bottom: -120px;
             right: -120px;
             animation: blob-drift-2 15s ease-in-out infinite;
@@ -72,7 +112,7 @@
         .dot-grid {
             position: fixed;
             inset: 0;
-            background-image: radial-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+            background-image: radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px);
             background-size: 36px 36px;
             pointer-events: none;
             z-index: 0;
@@ -83,14 +123,14 @@
             z-index: 1;
             width: 100%;
             max-width: 460px;
-            background: rgba(5, 14, 32, 0.82);
+            background: var(--ep-card);
             backdrop-filter: blur(28px) saturate(1.4);
             -webkit-backdrop-filter: blur(28px) saturate(1.4);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 22px;
+            border: 1px solid var(--ep-card-border);
+            border-radius: 16px;
             box-shadow:
-                0 0 0 1px rgba(37, 99, 235, 0.18),
-                0 20px 60px rgba(0, 0, 0, 0.65),
+                0 0 0 1px rgba(13, 148, 136, 0.1),
+                0 20px 60px rgba(15, 23, 42, 0.16),
                 inset 0 1px 0 rgba(255, 255, 255, 0.06);
             padding: 44px 40px 36px;
             text-align: center;
@@ -102,21 +142,21 @@
             font-weight: 600;
             letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: #60a5fa;
+            color: var(--ep-code);
             margin: 0 0 14px;
         }
 
         h1 {
             font-size: 1.375rem;
             font-weight: 600;
-            color: #f8fafc;
+            color: var(--ep-text);
             margin: 0 0 12px;
             line-height: 1.35;
         }
 
         p.message {
             font-size: 0.9375rem;
-            color: #94a3b8;
+            color: var(--ep-text-muted);
             line-height: 1.6;
             margin: 0 0 28px;
         }
@@ -140,36 +180,36 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, #0D9488, #0F766E);
             color: #fff;
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(13, 148, 136, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
         .btn-primary:hover {
-            box-shadow: 0 6px 28px rgba(37, 99, 235, 0.55), 0 2px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 28px rgba(13, 148, 136, 0.5), 0 2px 6px rgba(0, 0, 0, 0.25);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.04);
-            color: #cbd5e1;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--ep-btn-secondary-bg);
+            color: var(--ep-text-muted);
+            border: 1px solid var(--ep-btn-secondary-border);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(13, 148, 136, 0.08);
         }
 
         .error-id {
             margin-top: 24px;
             padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            border-top: 1px solid var(--ep-card-border);
         }
 
         .error-id-label {
             font-size: 0.6875rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: rgba(148, 163, 184, 0.55);
+            color: var(--ep-footer);
             margin: 0 0 6px;
         }
 
@@ -177,9 +217,9 @@
             display: inline-block;
             font-family: "SF Mono", Menlo, Consolas, monospace;
             font-size: 0.8125rem;
-            color: #cbd5e1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--ep-text-muted);
+            background: var(--ep-error-id-bg);
+            border: 1px solid var(--ep-error-id-border);
             border-radius: 6px;
             padding: 5px 10px;
             user-select: all;
@@ -190,7 +230,7 @@
             z-index: 1;
             text-align: center;
             margin-top: 22px;
-            color: rgba(100, 120, 150, 0.45);
+            color: var(--ep-footer);
             font-size: 0.6875rem;
             letter-spacing: 0.05em;
         }

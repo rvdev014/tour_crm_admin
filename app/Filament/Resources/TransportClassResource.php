@@ -16,6 +16,41 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TransportClassResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = TransportClass::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
@@ -37,7 +72,7 @@ class TransportClassResource extends Resource
                 Forms\Components\TextInput::make('order')
                     ->numeric()
                     ->default(0)
-                    ->label('Order'),
+                    ->label(__('Order')),
                 Forms\Components\Textarea::make('description')
                     ->rows(3),
                 Forms\Components\TextInput::make('price_per_km')
@@ -51,28 +86,28 @@ class TransportClassResource extends Resource
 
                 Forms\Components\TextInput::make('limit_distance')
                     ->numeric()
-                    ->label('Limit distance'),
+                    ->label(__('Limit distance')),
                 Forms\Components\TextInput::make('additional_price_per_km')
                     ->numeric()
-                    ->label('Additional price per km'),
+                    ->label(__('Additional price per km')),
 
                 Forms\Components\TextInput::make('passenger_capacity')
                     ->numeric()
-                    ->label('Passenger Capacity'),
+                    ->label(__('Passenger Capacity')),
                 Forms\Components\TextInput::make('luggage_capacity')
                     ->numeric()
-                    ->label('Luggage Capacity'),
+                    ->label(__('Luggage Capacity')),
 
                 Forms\Components\TextInput::make('waiting_time_included')
                     ->numeric()
-                    ->label('Waiting Time Included'),
+                    ->label(__('Waiting Time Included')),
                 Forms\Components\Checkbox::make('meeting_with_place')
-                    ->label('Meeting with Place'),
+                    ->label(__('Meeting with Place')),
                 Forms\Components\Checkbox::make('non_refundable_rate')
-                    ->label('Non Refundable Rate'),
+                    ->label(__('Non Refundable Rate')),
                 Forms\Components\TextInput::make('vehicle_example')
                     ->maxLength(255)
-                    ->label('Vehicle Example'),
+                    ->label(__('Vehicle Example')),
             ]);
     }
 

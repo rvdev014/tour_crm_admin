@@ -25,6 +25,41 @@ use Illuminate\Support\Carbon;
 
 class TransferResource extends Resource
 {
+
+    // Sidebar label — Filament otherwise falls back to the auto-derived
+    // English plural model name (e.g. "Hotels"), which never changes with
+    // the panel's locale. See AppServiceProvider for the equivalent
+    // ->translateLabel() hook covering field/column labels; this can't be
+    // done the same way since getNavigationLabel() is called statically.
+    public static function getNavigationLabel(): string
+    {
+        return __(parent::getNavigationLabel());
+    }
+
+    // See the comment on getNavigationLabel() above / AdminPanelProvider's
+    // navigationGroups() — Filament matches resources to their registered
+    // group by comparing this value against the group's getLabel(), so both
+    // sides need translating the same way or the match silently fails.
+    public static function getNavigationGroup(): ?string
+    {
+        return ($group = parent::getNavigationGroup()) ? __($group) : null;
+    }
+
+    // Breadcrumb text ("X > List" above the page heading) — a third, separate
+    // label pipeline from getNavigationLabel()/getNavigationGroup() above
+    // (falls back to getTitleCasePluralModelLabel(), not either of those).
+    public static function getBreadcrumb(): string
+    {
+        return __(parent::getBreadcrumb());
+    }
+
+    // Plural model label — feeds table empty states ("Не найдено tours") and
+    // some page headings. Singular getModelLabel() is deliberately NOT
+    // overridden; see the class-level comment above the other nav overrides.
+    public static function getPluralModelLabel(): string
+    {
+        return __(parent::getPluralModelLabel());
+    }
     protected static ?string $model = Transfer::class;
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
     protected static ?string $navigationGroup = 'Operations';
@@ -88,7 +123,7 @@ class TransferResource extends Resource
                         ->native(false)
                         ->searchable()
                         ->preload()
-                        ->label('City')
+                        ->label(__('City'))
                         ->relationship('toCity', 'name')
                         ->options(TourService::getCities())
                         ->preload()
@@ -98,13 +133,13 @@ class TransferResource extends Resource
                         ->native(false)
                         ->searchable()
                         ->preload()
-                        ->label('Company')
+                        ->label(__('Company'))
                         ->relationship('company', 'name'),
 
                     Forms\Components\TextInput::make('requested_by'),
 
                     Forms\Components\Select::make('driver_ids')
-                        ->label('Driver supplier')
+                        ->label(__('Driver supplier'))
                         ->options(TourService::getDrivers())
                         ->native(false)
                         ->multiple()
@@ -114,10 +149,10 @@ class TransferResource extends Resource
 
                 Forms\Components\Grid::make(4)->schema([
                     Forms\Components\TextInput::make('driver_name')
-                        ->label('Driver name')
+                        ->label(__('Driver name'))
                         ->columnSpan(2),
                     Forms\Components\TextInput::make('driver_phone')
-                        ->label('Driver phone number')
+                        ->label(__('Driver phone number'))
                         ->tel()
                         ->columnSpan(2),
                 ]),
@@ -125,7 +160,7 @@ class TransferResource extends Resource
                 Forms\Components\Grid::make(4)->schema([
 
                     Forms\Components\TextInput::make('pax')
-                        ->label('Pax')
+                        ->label(__('Pax'))
                         ->numeric()
                         ->readOnly(fn($record) => !empty($record?->tour_day_expense_id)),
 
@@ -147,10 +182,10 @@ class TransferResource extends Resource
                             
                             return $options;
                         })
-                        ->label('Status'),
+                        ->label(__('Status')),
 
                     Forms\Components\Select::make('transport_class_id')
-                        ->label('Transport class')
+                        ->label(__('Transport class'))
                         ->native(false)
                         ->searchable()
                         ->preload()
@@ -163,7 +198,7 @@ class TransferResource extends Resource
                         }),
 
                     Forms\Components\Select::make('route_id')
-                        ->label('Route')
+                        ->label(__('Route'))
                         ->native(false)
                         ->searchable()
                         ->preload()
@@ -195,12 +230,12 @@ class TransferResource extends Resource
                         ->seconds(false),
 
                     Forms\Components\TextInput::make('route')
-                        ->label('Destination'),
+                        ->label(__('Destination')),
 
                     Forms\Components\TextInput::make('mark')
-                        ->label('Marka'),
+                        ->label(__('Marka')),
                     Forms\Components\TextInput::make('nameplate')
-                        ->label('Табличка'),
+                        ->label(__('Табличка')),
                 ]),
 
                 Forms\Components\Grid::make(4)->schema([
@@ -256,31 +291,32 @@ END,
             })
 //            ->defaultSort('date_time', 'desc')
             ->filtersFormColumns(3)
-            ->recordClasses(function ($record) {
-                if ($record->status == ExpenseStatus::Done) {
-                    return ' color-green';
-                }
-
-                return match ($record->status) {
-                    ExpenseStatus::Done => 'color-green',
-                    ExpenseStatus::Rejected => 'color-red',
-                    ExpenseStatus::Confirmed => 'color-light-orange',
-                    default => null,
-                };
+            // Was: an `if` returning ' color-green' for Done ahead of a match() that
+            // also handled Done, so that arm of the match could never run — and
+            // 'color-light-orange' actually rendered flat grey (#c0c0c0), not
+            // orange. Row highlight classes now come from the same semantic
+            // tokens as everything else (theme.css's .ep-row-*), Confirmed
+            // mapped to warning so it's a visible "needs attention" cue instead
+            // of a no-op grey.
+            ->recordClasses(fn ($record) => match ($record->status) {
+                ExpenseStatus::Done => 'ep-row-success',
+                ExpenseStatus::Rejected => 'ep-row-danger',
+                ExpenseStatus::Confirmed => 'ep-row-warning',
+                default => null,
             })
             ->filters([
                 Tables\Filters\Filter::make('today')
                     ->columnSpanFull()
                     ->form([
-                        Components\Grid::make(7)->schema([
+                        Components\Grid::make(['sm' => 2, 'md' => 4, 'xl' => 7])->schema([
                             Components\Checkbox::make('today')
-                                ->label('Today')
+                                ->label(__('Today'))
                                 ->default(false),
                             Components\Checkbox::make('tomorrow')
-                                ->label('Tomorrow')
+                                ->label(__('Tomorrow'))
                                 ->default(false),
                             Components\Select::make('driver_ids')
-                                ->label('Drivers')
+                                ->label(__('Drivers'))
                                 ->options(TourService::getDrivers())
                                 ->native(false)
                                 ->multiple()
@@ -291,7 +327,7 @@ END,
                                 ->multiple()
                                 ->searchable()
                                 ->preload()
-                                ->label('Company')
+                                ->label(__('Company'))
                                 ->relationship('company', 'name'),
                             Components\Select::make('statuses')
                                 ->native(false)
@@ -389,14 +425,14 @@ END,
 
                         return $indicators;
                     }),
-            ], layout: FiltersLayout::AboveContent)
+            ], layout: FiltersLayout::AboveContentCollapsible)
             ->columns([
                 Tables\Columns\TextColumn::make('number')
-                    ->label('Number')
+                    ->label(__('Number'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('tour_id')
-                    ->label('Tour')
+                    ->label(__('Tour'))
                     ->getStateUsing(function (Transfer $record) {
                         $tour = $record->tourDayExpense?->tourGroup?->tour
                             ?? $record->tourDayExpense?->tour
@@ -419,10 +455,10 @@ END,
                     }),
 
                 Tables\Columns\TextColumn::make('company.name')
-                    ->label('Company'),
+                    ->label(__('Company')),
 
                 Tables\Columns\TextColumn::make('date_time')
-                    ->label('Date & Time')
+                    ->label(__('Date & Time'))
                     ->dateTime()
                     ->formatStateUsing(function ($state) {
                         return <<<HTML
@@ -435,7 +471,7 @@ HTML;
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('route')
-                    ->label('Destination')
+                    ->label(__('Destination'))
                     ->limit(50),
 
                 Tables\Columns\TextColumn::make('pax')
@@ -446,13 +482,13 @@ HTML;
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('toCity.name')
-                    ->label('Location')
+                    ->label(__('Location'))
                 /*->formatStateUsing(function ($record, $state) {
                     return $state . ' - ' . $record->toCity?->name;
                 })*/,
 
                 Tables\Columns\TextColumn::make('driver_name')
-                    ->label('Driver')
+                    ->label(__('Driver'))
                     ->formatStateUsing(function ($record) {
                         $parts = array_filter([
                             $record->driver_name,
@@ -480,7 +516,7 @@ HTML;
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('Created'))
                     ->dateTime()
                     ->sortable(),
                 //                Tables\Columns\TextColumn::make('updated_at')

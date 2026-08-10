@@ -23,7 +23,7 @@ class TariffsRelationManager extends RelationManager
                     ->native(false)
                     ->searchable()
                     ->preload()
-                    ->label('City from')
+                    ->label(__('City from'))
                     ->relationship('fromCity', 'name')
                     ->options(fn() => TourService::getCities(null, isAll: true))
                     ->reactive(),
@@ -32,7 +32,7 @@ class TariffsRelationManager extends RelationManager
                     ->native(false)
                     ->searchable()
                     ->preload()
-                    ->label('City to')
+                    ->label(__('City to'))
                     ->relationship('toCity', 'name')
                     ->options(function ($get) {
                         $fromCityId = $get('from_city_id');
@@ -48,15 +48,15 @@ class TariffsRelationManager extends RelationManager
 
                 Forms\Components\Grid::make(3)->schema([
                     Forms\Components\TextInput::make('class_second')
-                        ->label('Class Second')
+                        ->label(__('Class Second'))
                         ->numeric(),
 
                     Forms\Components\TextInput::make('class_business')
-                        ->label('Class Business')
+                        ->label(__('Class Business'))
                         ->numeric(),
 
                     Forms\Components\TextInput::make('class_vip')
-                        ->label('Class VIP')
+                        ->label(__('Class VIP'))
                         ->numeric(),
                 ])
             ]);
@@ -68,26 +68,26 @@ class TariffsRelationManager extends RelationManager
             ->recordTitleAttribute('train_id')
             ->columns([
                 Tables\Columns\TextColumn::make('fromCity.name')
-                    ->label('City from')
+                    ->label(__('City from'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('toCity.name')
-                    ->label('City to')
+                    ->label(__('City to'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('class_second')
                     ->numeric()
-                    ->label('Class Second')
+                    ->label(__('Class Second'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('class_business')
                     ->numeric()
-                    ->label('Class Business')
+                    ->label(__('Class Business'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('class_vip')
                     ->numeric()
-                    ->label('Class VIP')
+                    ->label(__('Class VIP'))
                     ->searchable(),
             ])
             ->filters([
