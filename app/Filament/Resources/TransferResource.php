@@ -170,7 +170,7 @@ class TransferResource extends Resource
 
                 Forms\Components\Section::make(__('Status & class'))
                     ->icon('heroicon-o-truck')
-                    ->description(__('Passenger count, booking status, and the transport class/route that sets pricing.'))
+                    ->description(__('Passenger count, booking status, and transport class.'))
                     ->schema([
                 Forms\Components\Grid::make(4)->schema([
 
@@ -205,36 +205,7 @@ class TransferResource extends Resource
                         ->searchable()
                         ->preload()
                         ->options(fn() => TourService::getTransportClasses())
-                        ->disabled(fn($record) => !empty($record?->tour_day_expense_id))
-                        ->reactive()
-                        ->afterStateUpdated(function ($state, $set) {
-                            $set('route_id', null);
-                            $set('sell_price', null);
-                        }),
-
-                    Forms\Components\Select::make('route_id')
-                        ->label(__('Route'))
-                        ->native(false)
-                        ->searchable()
-                        ->preload()
-                        ->options(fn($get) => $get('transport_class_id')
-                            ? TourService::getRoutesForTransportClass((int)$get('transport_class_id'))
-                            : []
-                        )
-                        ->disabled(fn($record) => !empty($record?->tour_day_expense_id))
-                        ->reactive()
-                        ->afterStateUpdated(function ($state, $get, $set) {
-                            if ($state && $get('transport_class_id')) {
-                                $price = TourService::getRoutePriceForTransportClass(
-                                    (int)$state,
-                                    (int)$get('transport_class_id')
-                                );
-                                if ($price !== null) {
-                                    $set('sell_price', $price);
-                                    $set('sell_price_currency', 'USD');
-                                }
-                            }
-                        }),
+                        ->disabled(fn($record) => !empty($record?->tour_day_expense_id)),
                 ]),
                     ]),
 

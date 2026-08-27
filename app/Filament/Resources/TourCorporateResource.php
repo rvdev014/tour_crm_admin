@@ -419,34 +419,7 @@ class TourCorporateResource extends Resource
                                         ->native(false)
                                         ->searchable()
                                         ->preload()
-                                        ->options(fn() => TourService::getTransportClasses())
-                                        ->reactive()
-                                        ->afterStateUpdated(function($state, $set) {
-                                            $set('route_id', null);
-                                            $set('price', null);
-                                        }),
-                                    Components\Select::make('route_id')
-                                        ->label(__('Route'))
-                                        ->native(false)
-                                        ->searchable()
-                                        ->preload()
-                                        ->options(fn($get) => $get('transport_class_id')
-                                            ? TourService::getRoutesForTransportClass((int)$get('transport_class_id'))
-                                            : []
-                                        )
-                                        ->reactive()
-                                        ->afterStateUpdated(function($state, $get, $set) {
-                                            if ($state && $get('transport_class_id')) {
-                                                $price = TourService::getRoutePriceForTransportClass(
-                                                    (int)$state,
-                                                    (int)$get('transport_class_id')
-                                                );
-                                                if ($price !== null) {
-                                                    $set('price', $price);
-                                                    $set('price_currency', 'USD');
-                                                }
-                                            }
-                                        }),
+                                        ->options(fn() => TourService::getTransportClasses()),
                                 ]),
 
                                 Components\Grid::make(3)->schema([

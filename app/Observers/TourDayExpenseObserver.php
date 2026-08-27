@@ -119,11 +119,7 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
             'driver_ids' => $tourDayExpense->transport_driver_ids,
             'place_of_submission' => $tourDayExpense->transport_place,
             'route' => $tourDayExpense->transport_route,
-            'transport_route' => $tourDayExpense->route_id
-                ? \App\Models\Route::find($tourDayExpense->route_id)?->display_name
-                : null,
             'transport_class_id' => $tourDayExpense->transport_class_id,
-            'route_id' => $tourDayExpense->route_id,
             'date_time' => $dateTime,
         ];
     }

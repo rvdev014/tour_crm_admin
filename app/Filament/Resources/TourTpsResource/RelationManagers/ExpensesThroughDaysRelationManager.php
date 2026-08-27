@@ -6,7 +6,6 @@ use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Enums\PlaneType;
-use App\Models\Route;
 use App\Models\Tour;
 use App\Models\TourDay;
 use App\Models\TourDayExpense;
@@ -185,7 +184,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                 // Transport
                 Components\Section::make(__('Transport info'))
                     ->icon('heroicon-o-truck')
-                    ->description(__('Vehicle class, route, and pickup time for this transfer.'))
+                    ->description(__('Vehicle class and pickup time for this transfer.'))
                     ->schema([
 
                         Components\Hidden::make('price_currency'),
@@ -198,43 +197,13 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                                 ->native(false)
                                 ->searchable()
                                 ->preload()
-                                ->options(fn () => TourService::getTransportClasses())
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, $set) {
-                                    $set('route_id', null);
-                                    $set('price', null);
-                                }),
-                            Components\Select::make('route_id')
-                                ->label(__('Route'))
-                                ->native(false)
-                                ->searchable()
-                                ->preload()
-                                ->options(fn ($get) => $get('transport_class_id')
-                                    ? TourService::getRoutesForTransportClass((int) $get('transport_class_id'))
-                                    : []
-                                )
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, $get, $set) {
-                                    if ($state && $get('transport_class_id')) {
-                                        $price = TourService::getRoutePriceForTransportClass(
-                                            (int) $state,
-                                            (int) $get('transport_class_id')
-                                        );
-                                        if ($price !== null) {
-                                            $set('price', $price);
-                                            $set('price_currency', 'USD');
-                                        }
-                                        $route = Route::with('waypoints.city')->find($state);
-                                        if ($route) {
-                                            $set('transport_route', $route->display_name);
-                                        }
-                                    }
-                                }),
+                                ->options(fn () => TourService::getTransportClasses()),
                         ]),
 
                         Components\Grid::make(3)->schema([
                             Components\TextInput::make('transport_route')
-                                ->label(__('Destination')),
+                                ->label(__('Destination'))
+                                ->required(),
                             Components\Select::make('to_city_id')
                                 ->native(false)
                                 ->searchable()
@@ -254,10 +223,7 @@ class ExpensesThroughDaysRelationManager extends RelationManager
                         ]),
 
                         Components\Grid::make(3)->schema([
-                            Components\TextInput::make('price')
-                                ->label(fn ($get) => 'Price ('.($get('price_currency') ?? 'USD').')')
-                                ->numeric()
-                                ->reactive(),
+                            self::getExpensePriceInput(),
                             Components\Textarea::make('comment')
                                 ->label(__('Comment')),
                         ]),
