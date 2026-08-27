@@ -47,6 +47,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<Review> $reviews
  * @property-read Collection<Review> $activeReviews
  * @property-read Collection<Category> $categories
+ * @property-read Collection<Destination> $pinnedDestinations
  */
 class WebTour extends Model
 {
@@ -148,5 +149,10 @@ class WebTour extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'web_tour_categories');
+    }
+
+    public function pinnedDestinations(): BelongsToMany
+    {
+        return $this->belongsToMany(Destination::class, 'destination_web_tour');
     }
 }

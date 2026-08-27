@@ -6,6 +6,7 @@ use App\Enums\TransferRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BannerResource;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\DestinationResource;
 use App\Http\Resources\ReviewResource;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\TransferRequestResource;
@@ -15,6 +16,7 @@ use App\Models\Banner;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Destination;
 use App\Models\Facility;
 use App\Models\Hotel;
 use App\Models\RoomType;
@@ -221,6 +223,58 @@ class ManualController extends Controller
         $categories = Category::query()->get();
 
         return response()->json(['data' => CategoryResource::collection($categories)]);
+    }
+
+    public function getDestinations(): JsonResponse
+    {
+        $destinations = Destination::query()
+            ->published()
+            ->countries()
+            ->with(['publishedChildren'])
+            ->orderBy('order')
+            ->orderBy('title_ru')
+            ->get();
+
+        return response()->json(['data' => DestinationResource::collection($destinations)]);
+    }
+
+    public function getDestination(string $slug): JsonResponse
+    {
+        /** @var Destination $destination */
+        $destination = Destination::query()
+            ->published()
+            ->where('slug', $slug)
+            ->with(['sections', 'publishedChildren', 'parent'])
+            ->firstOrFail();
+
+        $destination->setRelation('tours', $destination->toursQuery()->limit(12)->get());
+
+        return response()->json(['data' => DestinationResource::make($destination)]);
+    }
+
+    public function getDestinationTours(string $slug, Request $request): JsonResponse
+    {
+        /** @var Destination $destination */
+        $destination = Destination::query()
+            ->published()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        $tours = $destination->toursQuery()->paginate(10);
+
+        return response()->json([
+            'data' => WebTourResource::collection($tours->items()),
+            'pagination' => [
+                'current_page' => $tours->currentPage(),
+                'last_page' => $tours->lastPage(),
+                'per_page' => $tours->perPage(),
+                'total' => $tours->total(),
+                'from' => $tours->firstItem(),
+                'to' => $tours->lastItem(),
+                'has_next_page' => $tours->hasMorePages(),
+                'has_previous_page' => $tours->currentPage() > 1,
+            ],
+        ]);
     }
 
     public function storeTransferRequest(Request $request): JsonResponse
