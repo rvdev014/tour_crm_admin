@@ -22,6 +22,7 @@ class DestinationSectionResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'anchor' => $this->anchor,
+            'photo' => $this->photo ? asset('storage/'.$this->photo) : null,
             'content' => $this->content,
             'order' => $this->order,
         ];

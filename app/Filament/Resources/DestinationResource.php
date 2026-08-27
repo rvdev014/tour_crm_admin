@@ -232,6 +232,13 @@ class DestinationResource extends Resource
                                         ->addActionAlignment('end')
                                         ->itemLabel(fn ($state) => $state['title_ru'] ?? null)
                                         ->schema([
+                                            Forms\Components\FileUpload::make('photo')
+                                                ->label(__('Section Photo'))
+                                                ->image()
+                                                ->imagePreviewHeight('160')
+                                                ->directory('destinations/sections')
+                                                ->maxSize(5120)
+                                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                                             Forms\Components\Grid::make(3)->schema([
                                                 Forms\Components\TextInput::make('title_ru')
                                                     ->label(__('Title (RU)'))
