@@ -547,5 +547,11 @@
     "SEO Description": "SEO описание",
     "Title": "Название",
     "Destinations": "Направления",
-    "Section Photo": "Фото раздела"
+    "Section Photo": "Фото раздела",
+    "Flight Requests": "Заявки на авиабилеты",
+    "Departure Date": "Дата вылета",
+    "Return Date": "Дата возврата",
+    "Cabin Class": "Класс обслуживания",
+    "Economy": "Эконом",
+    "One-way": "В одну сторону"
 }
