@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FlightController;
 use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\ManualController;
+use App\Http\Controllers\Api\TrainController;
 use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/unbooked-transfer-request', [ManualController::class, 'getUnbookedTransferRequest']);
     Route::post('/hotel-requests', [HotelController::class, 'storeHotelRequest']);
     Route::post('/flight-requests', [FlightController::class, 'storeFlightRequest']);
+    Route::post('/train-requests', [TrainController::class, 'storeTrainRequest']);
 });
 
 Route::controller(ManualController::class)->group(function () {

@@ -549,9 +549,15 @@
     "Destinations": "Направления",
     "Section Photo": "Фото раздела",
     "Flight Requests": "Заявки на авиабилеты",
-    "Departure Date": "Дата вылета",
+    "Departure Date": "Дата отправления",
     "Return Date": "Дата возврата",
     "Cabin Class": "Класс обслуживания",
     "Economy": "Эконом",
-    "One-way": "В одну сторону"
+    "One-way": "В одну сторону",
+    "Train Requests": "Заявки на ЖД билеты",
+    "Wagon Class": "Класс вагона",
+    "Seated": "Сидячий",
+    "Platskart": "Плацкарт",
+    "Kupe": "Купе",
+    "SV / Lux": "СВ / Люкс"
 }
