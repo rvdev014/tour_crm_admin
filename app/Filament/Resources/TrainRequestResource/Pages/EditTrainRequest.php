@@ -13,7 +13,8 @@ class EditTrainRequest extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         // if status field changed, set status_updated_by to auth user
-        if ($this->record->status?->value !== $data['status']) {
+        // (loose comparison: the form submits status as a string, the enum's value is an int)
+        if ($this->record->status?->value != $data['status']) {
             $data['status_updated_by'] = auth()->id();
         }
 

@@ -196,8 +196,13 @@ class TrainRequestResource extends Resource
                         return strlen($state) > 50 ? $state : null;
                     }),
 
-                Tables\Columns\TextColumn::make('status')
-                    ->badge()
+                Tables\Columns\SelectColumn::make('status')
+                    ->label(__('Status'))
+                    ->options(WebTourStatus::class)
+                    ->disabled(fn () => auth()->user()->isOperator())
+                    ->afterStateUpdated(function ($record) {
+                        $record->update(['status_updated_by' => auth()->id()]);
+                    })
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
