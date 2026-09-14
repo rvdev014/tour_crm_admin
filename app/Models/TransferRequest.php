@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-use DateTime;
-use App\Enums\TransportClassEnum;
+use App\Enums\TransferLegDirection;
 use App\Enums\TransferRequestStatus;
+use App\Enums\TransportClassEnum;
+use DateTime;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -25,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property DateTime $date_time
  * @property int $passengers_count
  * @property int $parent_id
+ * @property int|null $transfer_booking_id
+ * @property TransferLegDirection|null $direction
+ * @property int $vehicle_count
  * @property string $terminal_name
  * @property string $fio
  * @property string $phone
@@ -36,14 +40,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $payment_valid_until
  * @property DateTime $created_at
  * @property DateTime $updated_at
- *
  * @property TransferRequest|null $parent
  * @property Collection<TransferRequest> $children
  * @property User|null $user
  * @property User|null $statusUpdatedBy
  * @property TransportClass|null $transportClass
- * @property City $fromCity
- * @property City $toCity
+ * @property TransferBooking|null $transferBooking
  */
 class TransferRequest extends Model
 {
@@ -55,6 +57,8 @@ class TransferRequest extends Model
         'date_time' => 'datetime',
         'transport_class' => TransportClassEnum::class,
         'status' => TransferRequestStatus::class,
+        'direction' => TransferLegDirection::class,
+        'vehicle_count' => 'integer',
         'is_sample_baggage' => 'boolean',
         'activate_flight_tracking' => 'boolean',
         'baggage_count' => 'integer',
@@ -74,24 +78,19 @@ class TransferRequest extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function statusUpdatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'status_updated_by');
     }
 
-    public function fromCity(): BelongsTo
-    {
-        return $this->belongsTo(City::class, 'from_city_id');
-    }
-
-    public function toCity(): BelongsTo
-    {
-        return $this->belongsTo(City::class, 'to_city_id');
-    }
-
     public function transportClass(): BelongsTo
     {
         return $this->belongsTo(TransportClass::class, 'transport_class_id');
+    }
+
+    public function transferBooking(): BelongsTo
+    {
+        return $this->belongsTo(TransferBooking::class);
     }
 }

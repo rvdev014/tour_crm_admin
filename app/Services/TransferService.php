@@ -10,7 +10,6 @@ use App\Models\Transfer;
 use App\Models\TransferRequest;
 use App\Models\TransportClass;
 use Carbon\Carbon;
-use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -24,7 +23,6 @@ class TransferService
         $unbookedRequest = TransferRequest::query()
             ->where('user_id', $user->id)
             ->where('status', '<', TransferRequestStatus::Booked->value)
-            ->with(['fromCity', 'toCity'])
             ->orderBy('created_at')
             ->first();
 
@@ -88,18 +86,18 @@ class TransferService
                     'to' => $transferRequest->to,
                     'date_time' => $transferRequest->date_time,
                     'pax' => $transferRequest->passengers_count,
-                    'route' => $transferRequest->from . ' - ' . $transferRequest->to,
+                    'route' => $transferRequest->from.' - '.$transferRequest->to,
                     'passenger' => $transferRequest->fio,
                     'comment' => $transferRequest->comment,
-//                                'transport_type' => \App\Enums\TransportType::Sedan,
-//                                'transport_comfort_level' => \App\Enums\TransportComfortLevel::Standard,
+                    //                                'transport_type' => \App\Enums\TransportType::Sedan,
+                    //                                'transport_comfort_level' => \App\Enums\TransportComfortLevel::Standard,
                     'nameplate' => $transferRequest->text_on_sign,
                     'requested_by' => $transferRequest->fio,
                     'status' => ExpenseStatus::New,
                     'location_details' => $transferRequest->terminal_name,
                     'sell_price' => $transferRequest->total_fare,
                     'transfer_request_id' => $transferRequest->id,
-//                                'company_id' => 1, // Default company
+                    //                                'company_id' => 1, // Default company
                 ]
             );
 
@@ -109,6 +107,7 @@ class TransferService
             }
 
             DB::commit();
+
             return $transfer;
         } catch (Throwable $exception) {
             DB::rollBack();
@@ -124,6 +123,7 @@ class TransferService
 
         /** @var Collection<Transfer> $transfers */
         $transfers = Transfer::query()
+            ->whereNotNull('transfer_request_id')
             ->with(['transferRequest.user'])
             ->where('date_time', '>=', $targetWindowStart)
             ->where('date_time', '<=', $targetWindowEnd)
@@ -131,7 +131,7 @@ class TransferService
             ->get();
 
         foreach ($transfers as $transfer) {
-            if (!$transfer->transferRequest->user?->email) {
+            if (! $transfer->transferRequest?->user?->email) {
                 continue;
             }
 
@@ -140,19 +140,30 @@ class TransferService
         }
     }
 
-    public static function calculateTotalFare(TransferRequest $transferRequest, TransportClass $transportClass): float
+    /**
+     * The tiered fare formula: price_per_km up to the class's limit_distance,
+     * then additional_price_per_km beyond it. Shared by the legacy wizard
+     * (via the TransferRequest-based overload below) and the stateless
+     * TransferService::quote(), which prices classes before any request row
+     * exists.
+     */
+    public static function calculateFare(float $distance, TransportClass $transportClass): float
     {
-        $distance = $transferRequest->distance;
-        $pricePerKm = $transportClass->price_per_km;
-        $limitDistance = $transportClass->limit_distance;
+        $pricePerKm = (float) $transportClass->price_per_km;
+        $limitDistance = (float) $transportClass->limit_distance;
 
-        if (!$limitDistance || $distance <= $limitDistance) {
+        if (! $limitDistance || $distance <= $limitDistance) {
             return round($pricePerKm * $distance, 2);
         }
 
         $baseCost = $pricePerKm * $limitDistance;
-        $extraCost = $transportClass->additional_price_per_km * ($distance - $limitDistance);
+        $extraCost = (float) $transportClass->additional_price_per_km * ($distance - $limitDistance);
 
-        return $baseCost + $extraCost;
+        return round($baseCost + $extraCost, 2);
+    }
+
+    public static function calculateTotalFare(TransferRequest $transferRequest, TransportClass $transportClass): float
+    {
+        return self::calculateFare((float) $transferRequest->distance, $transportClass);
     }
 }
