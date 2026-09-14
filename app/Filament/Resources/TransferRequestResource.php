@@ -2,26 +2,25 @@
 
 namespace App\Filament\Resources;
 
-use Throwable;
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\TransferRequest;
-use Filament\Resources\Resource;
-use App\Services\TransferService;
 use App\Enums\TransferRequestStatus;
 use App\Exceptions\DatabaseErrorTranslator;
+use App\Filament\Resources\TransferRequestResource\Pages;
+use App\Models\TransferRequest;
+use App\Services\TransferService;
+use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use App\Filament\Resources\TransferRequestResource\Pages;
+use Throwable;
 
 class TransferRequestResource extends Resource
 {
-
     // Sidebar label — Filament otherwise falls back to the auto-derived
     // English plural model name (e.g. "Hotels"), which never changes with
     // the panel's locale. See AppServiceProvider for the equivalent
@@ -56,98 +55,108 @@ class TransferRequestResource extends Resource
     {
         return __(parent::getPluralModelLabel());
     }
+
     protected static ?string $model = TransferRequest::class;
-    
+
     protected static ?string $label = 'Transfer Requests';
+
     protected static ?string $pluralLabel = 'Transfer Requests';
-    
+
     protected static ?string $navigationIcon = 'heroicon-o-truck';
+
     protected static ?string $navigationGroup = 'Website Management';
+
     protected static ?int $navigationSort = 4;
-    
-    
+
     public static function canViewAny(): bool
     {
-        return !auth()->user()->isOperator() && !auth()->user()->isAccountant();
+        return ! auth()->user()->isOperator() && ! auth()->user()->isAccountant();
     }
-    
+
     public static function getNavigationBadge(): ?string
     {
-        $count = static::$model::where('status', TransferRequestStatus::Created->value)->count();
-        return $count > 0 ? (string)$count : null;
+        // Legs created by the new booking flow (see TransferBookingResource)
+        // land directly at Booked, awaiting accept — that, plus any
+        // still-open legacy wizard request, is what needs staff attention.
+        $count = static::$model::whereIn('status', [
+            TransferRequestStatus::Created->value,
+            TransferRequestStatus::Booked->value,
+        ])->whereNull('transfer_booking_id')->count();
+
+        return $count > 0 ? (string) $count : null;
     }
-    
+
     public static function canCreate(): bool
     {
         return false;
     }
-    
+
     public static function form(Form $form): Form
     {
-        return $form->disabled(fn() => auth()->user()->isOperator())
+        return $form->disabled(fn () => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('from')
                     ->label(__('From'))
                     ->required(),
-                
-                Forms\Components\Select::make('to')
+
+                Forms\Components\TextInput::make('to')
                     ->label(__('To'))
                     ->required(),
-                
+
                 Forms\Components\DateTimePicker::make('date_time')
                     ->label(__('Date & Time'))
                     ->required(),
-                
+
                 Forms\Components\TextInput::make('passengers_count')
                     ->label(__('Passengers Count'))
                     ->numeric()
                     ->minValue(1)
                     ->maxValue(50)
                     ->required(),
-                
+
                 Forms\Components\Select::make('transport_class_id')
                     ->label(__('Transport Class'))
                     ->relationship('transportClass', 'name')
                     ->nullable(),
-                
+
                 Forms\Components\TextInput::make('fio')
                     ->label(__('Full Name'))
                     ->maxLength(255)
                     ->required(),
-                
+
                 Forms\Components\TextInput::make('phone')
                     ->label(__('Phone'))
                     ->tel()
                     ->maxLength(255)
                     ->required(),
-                
+
                 Forms\Components\Textarea::make('comment')
                     ->label(__('Comment'))
                     ->rows(3)
                     ->maxLength(1000)
                     ->columnSpanFull(),
-                
+
                 Forms\Components\Checkbox::make('is_sample_baggage')
                     ->label(__('Is Sample Baggage')),
-                
+
                 Forms\Components\TextInput::make('baggage_count')
                     ->label(__('Baggage Count'))
                     ->numeric()
                     ->minValue(0),
-                
+
                 Forms\Components\TextInput::make('terminal_name')
                     ->label(__('Terminal Name'))
                     ->maxLength(255),
-                
+
                 Forms\Components\TextInput::make('text_on_sign')
                     ->label(__('Text on Sign'))
                     ->maxLength(255),
-                
+
                 Forms\Components\Checkbox::make('activate_flight_tracking')
                     ->label(__('Activate Flight Tracking')),
             ]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
@@ -158,7 +167,17 @@ class TransferRequestResource extends Resource
                 Tables\Columns\TextColumn::make('id')
                     ->label(__('ID'))
                     ->sortable(),
-                
+
+                Tables\Columns\TextColumn::make('transferBooking.reference')
+                    ->label(__('Booking'))
+                    ->placeholder(__('— (legacy request)'))
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('direction')
+                    ->label(__('Leg'))
+                    ->badge()
+                    ->placeholder('—'),
+
                 Tables\Columns\TextColumn::make('from')
                     ->label(__('From'))
                     ->wrap()
@@ -172,76 +191,76 @@ class TransferRequestResource extends Resource
                     ->extraAttributes(['class' => 'w-[200px]'])
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('distance')
                     ->label(__('Distance'))
                     ->suffix(' km')
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('transportClass.name')
                     ->label(__('Transport Class'))
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('date_time')
                     ->label(__('Date & Time'))
                     ->dateTime()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('passengers_count')
                     ->label(__('Passengers'))
                     ->numeric()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('fio')
                     ->label(__('Full Name'))
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('phone')
                     ->label(__('Phone'))
                     ->searchable(),
-                
+
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('status_updated_by')
-                    ->formatStateUsing(function($record) {
+                    ->formatStateUsing(function ($record) {
                         return $record->statusUpdatedBy?->name;
                     }),
-                
+
                 Tables\Columns\TextColumn::make('terminal_name')
                     ->label(__('Location details'))
                     ->searchable()
                     ->placeholder(__('Not specified')),
-                
+
                 Tables\Columns\TextColumn::make('baggage_count')
                     ->label(__('Baggage Count'))
                     ->numeric()
                     ->placeholder(__('Not specified')),
-                
+
                 //                Tables\Columns\IconColumn::make('is_sample_baggage')
                 //                    ->label('Sample Baggage')
                 //                    ->boolean(),
-                
+
                 //                Tables\Columns\IconColumn::make('activate_flight_tracking')
                 //                    ->label('Flight Tracking')
                 //                    ->boolean(),
-                
+
                 Tables\Columns\TextColumn::make('text_on_sign')
                     ->label(__('Text on Sign'))
                     ->searchable()
                     ->placeholder(__('Not specified'))
                     ->toggleable(isToggledHiddenByDefault: true),
-                
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('Updated At'))
                     ->dateTime()
@@ -256,18 +275,18 @@ class TransferRequestResource extends Resource
                         Forms\Components\DatePicker::make('until_date')
                             ->label(__('Until Date')),
                     ])
-                    ->query(function(Builder $query, array $data): Builder {
+                    ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 $data['from_date'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date),
                             )
                             ->when(
                                 $data['until_date'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date),
                             );
                     }),
-                
+
                 Tables\Filters\SelectFilter::make('transport_class_id')
                     ->label(__('Transport Class'))
                     ->relationship('transportClass', 'name'),
@@ -278,13 +297,18 @@ class TransferRequestResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(
-                        fn(TransferRequest $record
-                        ) => $record->status === TransferRequestStatus::Booked && $record->status !== TransferRequestStatus::Accepted
+                        // New-flow legs (transfer_booking_id set) are
+                        // accepted as a whole booking from
+                        // TransferBookingResource, not leg by leg here.
+                        fn (TransferRequest $record
+                        ) => $record->transfer_booking_id === null
+                            && $record->status === TransferRequestStatus::Booked
+                            && $record->status !== TransferRequestStatus::Accepted
                     )
                     ->requiresConfirmation()
                     ->modalHeading(__('Accept Transfer Request'))
                     ->modalDescription('This will create a new transfer and send a confirmation email to the user.')
-                    ->action(function(TransferRequest $record) {
+                    ->action(function (TransferRequest $record) {
                         try {
                             $transfer = TransferService::acceptRequest($record);
                             Notification::make()
@@ -310,22 +334,22 @@ class TransferRequestResource extends Resource
                         }
                     }),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()->authorize(fn() => auth()->user()->isAdmin())
+                Tables\Actions\DeleteAction::make()->authorize(fn () => auth()->user()->isAdmin()),
             ], position: Tables\Enums\ActionsPosition::AfterColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
+                    Tables\Actions\DeleteBulkAction::make()->authorize(fn () => auth()->user()->isAdmin()),
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [

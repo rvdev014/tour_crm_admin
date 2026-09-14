@@ -327,7 +327,7 @@ class ManualController extends Controller
 
         return response()->json([
             'message' => 'Transfer request created successfully',
-            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity'])),
+            'data' => new TransferRequestResource($transferRequest),
         ], 201);
     }
 
@@ -354,7 +354,7 @@ class ManualController extends Controller
 
             return response()->json([
                 'message' => 'Transfer request updated successfully',
-                'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity'])),
+                'data' => new TransferRequestResource($transferRequest),
             ]);
         }
 
@@ -383,7 +383,7 @@ class ManualController extends Controller
 
         return response()->json([
             'message' => 'Transfer request updated successfully',
-            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity'])),
+            'data' => new TransferRequestResource($transferRequest),
         ]);
     }
 
@@ -440,7 +440,7 @@ class ManualController extends Controller
 
         return response()->json([
             'message' => 'Transfer request booked successfully',
-            'data' => new TransferRequestResource($transferRequest->load(['fromCity', 'toCity'])),
+            'data' => new TransferRequestResource($transferRequest),
         ]);
     }
 }

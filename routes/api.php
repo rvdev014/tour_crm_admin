@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\FlightController;
 use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\ManualController;
 use App\Http\Controllers\Api\TrainController;
+use App\Http\Controllers\Api\TransferController;
 use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/transfer-requests/{id}', [ManualController::class, 'updateTransferRequest']);
     Route::post('/transfer-requests/{id}/book', [ManualController::class, 'bookTransferRequest']);
     Route::get('/unbooked-transfer-request', [ManualController::class, 'getUnbookedTransferRequest']);
+    Route::post('/transfer-bookings', [TransferController::class, 'storeBooking']);
+    Route::get('/transfer-bookings/{reference}', [TransferController::class, 'getBooking']);
     Route::post('/hotel-requests', [HotelController::class, 'storeHotelRequest']);
     Route::post('/flight-requests', [FlightController::class, 'storeFlightRequest']);
     Route::post('/train-requests', [TrainController::class, 'storeTrainRequest']);
@@ -48,6 +51,9 @@ Route::controller(ManualController::class)->group(function () {
     Route::get('/room-types', 'getRoomTypes');
     Route::get('/transport-classes', 'getTransportClasses');
     Route::get('/categories', 'getCategories');
+    Route::get('/transfer-extras', [TransferController::class, 'getExtras']);
+    Route::post('/transfer-quotes', [TransferController::class, 'storeQuote'])
+        ->middleware('throttle:30,1');
     Route::get('/destinations', 'getDestinations');
     Route::get('/destinations/{slug}/tours', 'getDestinationTours');
     Route::get('/destinations/{slug}', 'getDestination');

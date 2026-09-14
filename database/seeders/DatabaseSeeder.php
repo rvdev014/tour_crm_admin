@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             CompanySeeder::class,
             RoomTypeSeeder::class,
             SettingSeeder::class,
+            TransferExtraSeeder::class,
         ]);
     }
 }
