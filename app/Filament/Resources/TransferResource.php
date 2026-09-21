@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Models\User;
+use App\Enums\DriverTransferStatus;
 use App\Enums\ExpenseStatus;
 use App\Filament\Resources\TransferResource\Pages;
 use App\Filament\Resources\TransferResource\RelationManagers;
@@ -166,6 +167,20 @@ class TransferResource extends Resource
                         ->tel()
                         ->columnSpan(2),
                 ]),
+                // What the driver reports from the cabinet. Read-only here: only the driver (or the
+                // "Set driver status" header action, which is logged) changes it.
+                Forms\Components\Placeholder::make('driver_status_info')
+                    ->label(__('Driver status'))
+                    ->visibleOn('edit')
+                    ->content(function (?Transfer $record) {
+                        if (empty($record?->driver_ids)) {
+                            return '—';
+                        }
+
+                        $changedAt = $record->driver_status_updated_at?->diffForHumans();
+
+                        return $record->effectiveDriverStatus()->getLabel().($changedAt ? " · {$changedAt}" : '');
+                    }),
                     ]),
 
                 Forms\Components\Section::make(__('Status & class'))
@@ -334,6 +349,12 @@ END,
                                 ->searchable()
                                 ->preload()
                                 ->options(ExpenseStatus::class),
+                            Components\Select::make('driver_statuses')
+                                ->label(__('Driver status'))
+                                ->native(false)
+                                ->multiple()
+                                ->preload()
+                                ->options(DriverTransferStatus::class),
                             Components\DatePicker::make('date_from')
                                 ->displayFormat('d.m.Y')
                                 ->native(false),
@@ -363,7 +384,10 @@ END,
                             $query = $query->whereIn('company_id', $data['companies']);
                         }
                         if ($data['driver_ids']) {
-                            $query = $query->whereJsonContains('driver_ids', $data['driver_ids']);
+                            $query = static::whereAnyDriver($query, $data['driver_ids']);
+                        }
+                        if ($data['driver_statuses'] ?? null) {
+                            $query = static::whereDriverStatusIn($query, $data['driver_statuses']);
                         }
                         if ($data['date_from']) {
                             $query = $query->whereDate('date_time', '>=', $data['date_from']);
@@ -406,10 +430,17 @@ END,
                             $indicators['company_id'] = $companyNames . " ({$query->count()})";
                         }
                         if ($data['driver_ids']) {
-                            $query = $query->whereJsonContains('driver_ids', $data['driver_ids']);
+                            $query = static::whereAnyDriver($query, $data['driver_ids']);
                             $drivers = Driver::query()->whereIn('id', $data['driver_ids'])->get();
                             $driverNames = $drivers->map(fn($driver) => $driver->name)->join(', ');
                             $indicators['driver_ids'] = $driverNames . " ({$query->count()})";
+                        }
+                        if ($data['driver_statuses'] ?? null) {
+                            $query = static::whereDriverStatusIn($query, $data['driver_statuses']);
+                            $labels = collect($data['driver_statuses'])
+                                ->map(fn ($status) => DriverTransferStatus::from($status)->getLabel())
+                                ->join(', ');
+                            $indicators['driver_statuses'] = __('Driver status') . ': ' . $labels . " ({$query->count()})";
                         }
                         if ($data['date_from']) {
                             $indicators['date_from'] = 'Order from ' . Carbon::parse(
@@ -496,6 +527,18 @@ HTML;
                         return implode(' / ', $parts);
                     }),
 
+                // What the driver last reported from the cabinet. NULL in the DB reads as "Assigned"; a
+                // transfer with no driver at all shows nothing rather than a misleading "Assigned".
+                // Not sortable: the list's own date ordering (modifyQueryUsing) runs first, and a plain
+                // varchar sort would be alphabetical, not lifecycle order.
+                Tables\Columns\TextColumn::make('driver_status')
+                    ->label(__('Driver status'))
+                    ->badge()
+                    ->getStateUsing(fn (Transfer $record) => empty($record->driver_ids) ? null : $record->effectiveDriverStatus())
+                    ->description(fn (Transfer $record) => empty($record->driver_ids) ? null : $record->driver_status_updated_at?->diffForHumans())
+                    ->placeholder('—')
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->sortable(),
@@ -533,10 +576,45 @@ HTML;
             ]);
     }
 
+    /**
+     * Transfers assigned to ANY of the given drivers.
+     *
+     * driver_ids is a varchar column holding a JSON array of ids stored as STRINGS (["2","6"]), so the
+     * ids are cast to string. The previous code passed the whole array to a single whereJsonContains,
+     * which is `@> '["2","6"]'` — "assigned to ALL of them" — so picking two drivers only ever matched
+     * transfers that both were on.
+     */
+    public static function whereAnyDriver(Builder $query, array $driverIds): Builder
+    {
+        return $query->where(function (Builder $q) use ($driverIds) {
+            foreach ($driverIds as $id) {
+                $q->orWhereJsonContains('driver_ids', (string) $id);
+            }
+        });
+    }
+
+    /**
+     * Filter by the status the driver reported. A NULL column means the driver has not acted yet, which
+     * reads as "Assigned" — so filtering for Assigned must include the NULL rows, or it would match
+     * almost nothing. Transfers with no driver at all are excluded.
+     */
+    public static function whereDriverStatusIn(Builder $query, array $statuses): Builder
+    {
+        return $query->whereNotNull('driver_ids')
+            ->where('driver_ids', '!=', '[]')
+            ->where(function (Builder $q) use ($statuses) {
+                $q->whereIn('driver_status', $statuses);
+
+                if (in_array(DriverTransferStatus::Assigned->value, $statuses, true)) {
+                    $q->orWhereNull('driver_status');
+                }
+            });
+    }
+
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DriverStatusLogsRelationManager::class,
         ];
     }
 

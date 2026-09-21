@@ -36,8 +36,9 @@ class ListTransfers extends ListRecords
                                         return '-';
                                     }
 
-                                    $driver = Driver::query()->find($state);
-                                    return $driver?->name ?? '-';
+                                    // $state is the driver_ids ARRAY; find($array) returns a Collection, so the
+                                    // old `$driver?->name` was always null and the column always printed '-'.
+                                    return Driver::query()->whereIn('id', (array) $state)->pluck('name')->join(', ') ?: '-';
                                 }),
 
                         ])

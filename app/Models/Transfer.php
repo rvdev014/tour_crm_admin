@@ -5,11 +5,13 @@ namespace App\Models;
 use Carbon\Carbon;
 use App\Enums\TransportType;
 use App\Enums\ExpenseStatus;
+use App\Enums\DriverTransferStatus;
 use App\Services\TourService;
 use App\Observers\TransferObserver;
 use App\Enums\TransportComfortLevel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
@@ -39,6 +41,8 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  *
  * @property int $created_by
  * @property array $driver_ids
+ * @property DriverTransferStatus|null $driver_status NULL = driver has not acted yet, see effectiveDriverStatus()
+ * @property Carbon|null $driver_status_updated_at
  * @property string $driver_name
  * @property string $driver_phone
  * @property string $place_of_submission
@@ -58,10 +62,11 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property integer $notified_times
  * @property string $from
  * @property string $to
+ * @property string|null $from_coords "lat,lng", copied from the transfer request
+ * @property string|null $to_coords "lat,lng", copied from the transfer request
  * @property string $transfer_request_id
  *
  * @property User $createdBy
- * @property Driver $driver
  * @property TourDayExpense $tourDayExpense
  * @property Company $company
  * @property City $fromCity
@@ -81,8 +86,12 @@ class Transfer extends Model
         'transport_comfort_level' => TransportComfortLevel::class,
         'date_time' => 'datetime',
         'user_notified_at' => 'datetime',
+        // Drivers are linked through this JSON array of drivers.id — stored as STRINGS in production
+        // (["2","6"]), not ints. There is no FK and no driver() relation; see DriverTransferQuery.
         'driver_ids' => 'array',
         'old_values' => 'array',
+        'driver_status' => DriverTransferStatus::class,
+        'driver_status_updated_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -104,9 +113,18 @@ class Transfer extends Model
         return $this->belongsTo(Company::class);
     }
 
-    public function driver(): BelongsTo
+    public function driverStatusLogs(): HasMany
     {
-        return $this->belongsTo(Driver::class);
+        return $this->hasMany(TransferDriverStatusLog::class);
+    }
+
+    /**
+     * NULL driver_status means the driver has not acted yet, which reads as Assigned. Always go
+     * through this instead of reading the column, so the rule lives in one place.
+     */
+    public function effectiveDriverStatus(): DriverTransferStatus
+    {
+        return $this->driver_status ?? DriverTransferStatus::Assigned;
     }
 
     public function fromCity(): BelongsTo

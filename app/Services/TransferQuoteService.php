@@ -316,6 +316,8 @@ class TransferQuoteService
                     $transfers->push(\App\Models\Transfer::query()->create([
                         'from' => $leg->from,
                         'to' => $leg->to,
+                        'from_coords' => $leg->from_coords,
+                        'to_coords' => $leg->to_coords,
                         'date_time' => $leg->date_time,
                         'pax' => $leg->passengers_count,
                         'route' => $leg->from.' - '.$leg->to,

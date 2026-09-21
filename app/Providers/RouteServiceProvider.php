@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\PhoneNormalizer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -28,6 +29,17 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Two limits: a tight one per phone+IP (stops guessing one driver's password) and a looser
+        // one per IP (stops spraying many phone numbers from one address).
+        RateLimiter::for('driver-login', function(Request $request) {
+            $phone = PhoneNormalizer::uz((string) $request->input('phone')) ?? 'invalid';
+
+            return [
+                Limit::perMinute(5)->by($phone.'|'.$request->ip()),
+                Limit::perMinute(30)->by($request->ip()),
+            ];
+        });
+
         $this->routes(function() {
             Route::middleware(['api', 'locale'])
                 ->prefix('api')
@@ -35,6 +47,11 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
+
+            Route::middleware(['web', 'driver.locale'])
+                ->prefix('driver')
+                ->name('driver.')
+                ->group(base_path('routes/driver.php'));
         });
     }
 }

@@ -84,6 +84,8 @@ class TransferService
                 [
                     'from' => $transferRequest->from,
                     'to' => $transferRequest->to,
+                    'from_coords' => $transferRequest->from_coords,
+                    'to_coords' => $transferRequest->to_coords,
                     'date_time' => $transferRequest->date_time,
                     'pax' => $transferRequest->passengers_count,
                     'route' => $transferRequest->from.' - '.$transferRequest->to,

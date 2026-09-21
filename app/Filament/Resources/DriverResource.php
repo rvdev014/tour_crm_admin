@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DriverResource\Pages;
 use App\Filament\Resources\DriverResource\RelationManagers;
 use App\Models\Driver;
+use App\Support\PhoneNormalizer;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -15,6 +17,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class DriverResource extends Resource
@@ -91,13 +94,62 @@ class DriverResource extends Resource
                 PhoneInput::make('phone')
                     ->strictMode()
                     ->onlyCountries(['UZ'])
-                    ->defaultCountry('UZ'),
-//                Forms\Components\TextInput::make('car_number')
-//                    ->maxLength(255),
-//                Forms\Components\TextInput::make('car_model')
-//                    ->maxLength(255),
+                    ->defaultCountry('UZ')
+                    // The phone is also the driver's cabinet login. Two spellings of one number
+                    // ("90 111 22 33" / "+998901112233") must not become two drivers, so uniqueness is
+                    // checked on the NORMALIZED value — the DB's partial unique index would otherwise
+                    // surface as a raw 500 on save.
+                    ->rules(fn (?Model $record) => [
+                        function (string $attribute, mixed $value, Closure $fail) use ($record) {
+                            $normalized = PhoneNormalizer::uz($value);
+
+                            if ($normalized === null) {
+                                return;
+                            }
+
+                            $taken = Driver::query()
+                                ->where('phone_normalized', $normalized)
+                                ->when($record, fn ($query) => $query->whereKeyNot($record->getKey()))
+                                ->exists();
+
+                            if ($taken) {
+                                $fail(__('This phone number is already used by another driver.'));
+                            }
+                        },
+                    ]),
+                Forms\Components\TextInput::make('car_number')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('car_model')
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('chat_id')
                     ->maxLength(255),
+
+                Forms\Components\Section::make(__('Cabinet access'))
+                    ->icon('heroicon-o-key')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\Toggle::make('is_active')
+                            ->label(__('Cabinet access enabled'))
+                            ->default(true)
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('password')
+                            ->label(__('Password'))
+                            ->password()
+                            ->revealable()
+                            ->minLength(6)
+                            ->maxLength(255)
+                            ->autocomplete('new-password')
+                            // Blank means "leave unchanged" (and, on create, "no cabinet access yet").
+                            // Driver's `hashed` cast hashes whatever is written.
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->helperText(__('Leave empty to keep the current password')),
+                        Forms\Components\Placeholder::make('cabinet_url')
+                            ->label(__('Login page'))
+                            ->content(fn () => route('driver.login')),
+                        Forms\Components\Placeholder::make('last_login_at')
+                            ->label(__('Last login'))
+                            ->content(fn (?Model $record) => $record?->last_login_at?->diffForHumans() ?? '—'),
+                    ]),
             ]);
     }
 
@@ -119,6 +171,16 @@ class DriverResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('chat_id')
                     ->searchable(),
+                // Can this driver log in right now? Needs a password AND an enabled account.
+                Tables\Columns\IconColumn::make('cabinet')
+                    ->label(__('Cabinet'))
+                    ->boolean()
+                    ->getStateUsing(fn (Driver $record) => filled($record->password) && $record->is_active),
+                Tables\Columns\TextColumn::make('last_login_at')
+                    ->label(__('Last login'))
+                    ->since()
+                    ->placeholder('—')
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -133,6 +195,36 @@ class DriverResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('generate_password')
+                    ->label(__('Generate password'))
+                    ->icon('heroicon-o-key')
+                    ->color('gray')
+                    ->requiresConfirmation()
+                    ->modalHeading(__('Generate a new password?'))
+                    ->modalDescription(__('The current password stops working immediately. The new one is shown only once — copy it right away.'))
+                    ->action(function (Driver $record) {
+                        // The login is the normalized phone; without a usable one the password would be useless.
+                        if (PhoneNormalizer::uz($record->phone) === null) {
+                            Notification::make()
+                                ->title(__('Set a valid phone number first'))
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $password = Str::password(8, symbols: false);
+                        $record->update(['password' => $password]);
+
+                        // Shown once, in the session flash — never stored, never written to the database
+                        // (no sendToDatabase()). Only the hash is persisted.
+                        Notification::make()
+                            ->title(__('New password generated'))
+                            ->body("{$record->phone} — {$password}")
+                            ->success()
+                            ->persistent()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

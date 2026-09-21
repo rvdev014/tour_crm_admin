@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources\TransferResource\Pages;
 
+use App\Enums\DriverTransferStatus;
 use App\Enums\ExpenseStatus;
 use App\Filament\Resources\TransferResource;
 use App\Models\Transfer;
+use App\Models\TransferDriverStatusLog;
+use App\Services\DriverTransferStatusService;
 use App\Services\ExpenseService;
 use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
@@ -86,6 +90,38 @@ class EditTransfer extends EditRecord
                 ->icon('heroicon-o-identification')
                 ->color('info')
                 ->url(route('export-tablichka', $this->record)),
+
+            // For the inevitable mis-tap in the driver cabinet: a driver can only move forward one step,
+            // an operator can set any status. Logged as an "admin" change in the history tab.
+            Actions\Action::make('set_driver_status')
+                ->label(__('Set driver status'))
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->visible(fn () => ! empty($this->record->driver_ids))
+                ->form(fn () => [
+                    Select::make('status')
+                        ->label(__('Driver status'))
+                        ->options(DriverTransferStatus::class)
+                        ->default($this->record->effectiveDriverStatus()->value)
+                        ->native(false)
+                        ->required(),
+                ])
+                ->action(function (array $data) {
+                    $changed = DriverTransferStatusService::apply(
+                        $this->record,
+                        DriverTransferStatus::from($data['status']),
+                        null,
+                        TransferDriverStatusLog::SOURCE_ADMIN,
+                    );
+
+                    Notification::make()
+                        ->title($changed ? __('Driver status updated') : __('The driver already has this status'))
+                        ->success()
+                        ->send();
+
+                    // The status and its timestamp are shown in the form and the history tab.
+                    $this->dispatch('$refresh');
+                }),
             //            Actions\DeleteAction::make(),
         ];
     }

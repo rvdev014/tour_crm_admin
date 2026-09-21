@@ -77,7 +77,9 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->role !== UserRole::User;
+        // Was: `return $this->role !== UserRole::User;` for ANY panel. Harmless with a single panel, but it
+        // would silently grant every CRM staff member access to whatever panel is added next.
+        return $panel->getId() === 'admin' && $this->role !== UserRole::User;
     }
 
     public function isAdmin(): bool

@@ -66,6 +66,13 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
         'locale' => \App\Http\Middleware\Locale::class,
+
+        // Driver cabinet (/driver)
+        'auth.driver' => \App\Http\Middleware\AuthenticateDriver::class,
+        'guest.driver' => \App\Http\Middleware\RedirectIfDriver::class,
+        'driver.locale' => \App\Http\Middleware\SetDriverLocale::class,
+        'driver.nocache' => \App\Http\Middleware\PreventDriverPageCaching::class,
+
         'whatsapp.signature' => \App\Http\Middleware\VerifyWhatsAppSignature::class,
     ];
 }
