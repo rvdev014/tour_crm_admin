@@ -60,6 +60,10 @@ Route::get('export-tablichka/{transfer}', [\App\Http\Controllers\ExportControlle
     'export-tablichka'
 );
 
+// The owner's transfer report as an Excel file (Admin/Accountant only — see the controller).
+Route::get('admin/transfer-analytics/export', \App\Http\Controllers\TransferAnalyticsExportController::class)
+    ->name('admin.transfer-analytics.export');
+
 // Receipt photos that drivers attach to expenses. They live on a private disk; see the controller.
 Route::get('admin/driver-expenses/{expense}/receipt', \App\Http\Controllers\AdminDriverExpenseReceiptController::class)
     ->whereNumber('expense')
