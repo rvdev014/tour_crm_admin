@@ -312,23 +312,37 @@ class TransferResource extends Resource
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
             ->searchable()
-            ->modifyQueryUsing(function ($query) {
+            // The order is NOT set here: an orderBy added in modifyQueryUsing runs before Filament applies the
+            // column the user clicked, so it always won and the sort arrows did nothing. defaultSort() is
+            // skipped by Filament as soon as a column is chosen, which is exactly what we want.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with([
+                'toCity', 'company', 'createdBy',
+                // read by the "Number" cell to show the tour number under the transfer number
+                'tourDayExpense.tourGroup.tour', 'tourDayExpense.tour', 'tourDayExpense.tourDay.tour',
+            ]))
+            // Today and later first (soonest at the top), then the past (most recent first) — same as before.
+            ->defaultSort(function (Builder $query) use ($table) {
+                // Grouped by day the days are already in order, so inside a day it is simply by time.
+                if ($table->getLivewire()->getTableGrouping()?->getId() === 'date_time') {
+                    return $query->orderBy('date_time');
+                }
+
                 $now = Carbon::today()->toDateTimeString();
 
-                $query
-                    ->with(['toCity', 'company', 'createdBy'])
-                    ->orderByRaw(
-                        "
-CASE
-    WHEN date_time >= ?::timestamp THEN 0
-    ELSE 1
-END,
-    ABS(EXTRACT(EPOCH FROM (date_time - ?::timestamp))) ASC
-                    ",
-                        [$now, $now]
-                    );
+                return $query->orderByRaw(
+                    'CASE WHEN date_time >= ?::timestamp THEN 0 ELSE 1 END, ABS(EXTRACT(EPOCH FROM (date_time - ?::timestamp))) ASC',
+                    [$now, $now],
+                );
             })
-//            ->defaultSort('date_time', 'desc')
+            ->persistSortInSession()
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
+            ->groups([
+                static::dayGroup($table),
+                Tables\Grouping\Group::make('company.name')->label(__('Company')),
+                Tables\Grouping\Group::make('status')->label(__('Status')),
+            ])
+            ->defaultGroup('date_time')
             ->filtersFormColumns(3)
             // Was: an `if` returning ' color-green' for Done ahead of a match() that
             // also handled Done, so that arm of the match could never run — and
@@ -482,80 +496,71 @@ END,
                     }),
             ], layout: FiltersLayout::AboveContentCollapsible)
             ->columns([
+                // A cell shows its second line only when its own value is not empty, so a missing top value is shown
+                // as a dash (->default('—')): otherwise a transfer with a tour but no number would lose the tour.
+
+                // Number, with the tour it belongs to underneath (was two columns).
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('Number'))
-                    ->searchable(),
+                    ->default('—')
+                    ->description(fn (Transfer $record) => static::tourNumber($record))
+                    ->sortable()
+                    ->searchable(query: fn (Builder $query, string $search) => static::searchTransfer(
+                        $query, $search, ['number', 'group_number'],
+                        ['tourDayExpense.tourGroup.tour' => 'group_number', 'tourDayExpense.tour' => 'group_number', 'tourDayExpense.tourDay.tour' => 'group_number'],
+                    )),
 
-                Tables\Columns\TextColumn::make('tour_id')
-                    ->label(__('Tour'))
-                    ->getStateUsing(function (Transfer $record) {
-                        $tour = $record->tourDayExpense?->tourGroup?->tour
-                            ?? $record->tourDayExpense?->tour
-                            ?? $record->tourDayExpense?->tourDay?->tour
-                            ?? null;
-                        return $tour?->group_number ?? $record->group_number ?? '-';
-                    })
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query
-                            ->where('group_number', 'like', "%{$search}%")
-                            ->orWhereHas('tourDayExpense.tourGroup.tour', function (Builder $query) use ($search) {
-                                $query->where('group_number', 'like', "%{$search}%");
-                            })
-                            ->orWhereHas('tourDayExpense.tour', function (Builder $query) use ($search) {
-                                $query->where('group_number', 'like', "%{$search}%");
-                            })
-                            ->orWhereHas('tourDayExpense.tourDay.tour', function (Builder $query) use ($search) {
-                                $query->where('group_number', 'like', "%{$search}%");
-                            });
-                    }),
-
-                Tables\Columns\TextColumn::make('company.name')
-                    ->label(__('Company')),
-
+                // Date and time on two labelled lines. The one column that renders HTML; every value in it is escaped,
+                // and the Excel export replaces it (see ListTransfers), so no markup ever reaches a spreadsheet.
                 Tables\Columns\TextColumn::make('date_time')
                     ->label(__('Date & Time'))
-                    ->dateTime()
-                    ->formatStateUsing(function ($state) {
-                        return <<<HTML
-<div style="text-align: center">
-    <p>{$state->format('d.m.Y')} {$state->format('H:i')}</p>
-</div>
-HTML;
-                    })
+                    ->formatStateUsing(fn ($state) => blank($state) ? '—' : static::labelled(__('Date'), $state->format('d.m.Y'))
+                        .static::labelled(__('Time'), $state->format('H:i')))
                     ->html()
                     ->sortable(),
 
+                // Company, with who asked for the transfer underneath.
+                Tables\Columns\TextColumn::make('company.name')
+                    ->label(__('Company'))
+                    ->default('—')
+                    ->description(fn (Transfer $record) => filled($record->requested_by) ? $record->requested_by : null)
+                    ->sortable()
+                    ->searchable(query: fn (Builder $query, string $search) => static::searchTransfer(
+                        $query, $search, ['requested_by'], ['company' => 'name'],
+                    )),
+
+                // Destination, with the city underneath (was "Location").
                 Tables\Columns\TextColumn::make('route')
                     ->label(__('Destination'))
-                    ->limit(50),
+                    ->default('—')
+                    ->wrap()
+                    ->lineClamp(2)
+                    ->description(fn (Transfer $record) => $record->toCity?->name)
+                    ->sortable()
+                    ->searchable(query: fn (Builder $query, string $search) => static::searchTransfer(
+                        $query, $search, ['route'], ['toCity' => 'name'],
+                    )),
 
+                // Passenger count with the pickup sign underneath — the sign is what the driver holds up.
                 Tables\Columns\TextColumn::make('pax')
-                    ->formatStateUsing(function ($record, $state) {
-                        return $state . ' pax';
-                    })
-                    ->numeric()
+                    ->label(__('Pax'))
+                    ->icon('heroicon-m-user')
+                    ->default('—')
+                    ->description(fn (Transfer $record) => filled($record->nameplate) ? $record->nameplate : null)
+                    ->wrap()
+                    ->searchable(['nameplate'])
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('toCity.name')
-                    ->label(__('Location'))
-                /*->formatStateUsing(function ($record, $state) {
-                    return $state . ' - ' . $record->toCity?->name;
-                })*/,
 
                 Tables\Columns\TextColumn::make('driver_name')
                     ->label(__('Driver'))
-                    ->formatStateUsing(function ($record) {
-                        $parts = array_filter([
-                            $record->driver_name,
-                            $record->driver_phone,
-                        ]);
-                        return implode(' / ', $parts);
-                    }),
+                    ->default('—')
+                    ->description(fn (Transfer $record) => filled($record->driver_phone) ? $record->driver_phone : null)
+                    ->sortable()
+                    ->searchable(['driver_name', 'driver_phone']),
 
                 // What the driver last reported from the cabinet. NULL in the DB reads as "Assigned"; a
                 // transfer with no driver at all shows nothing rather than a misleading "Assigned".
-                // Not sortable: the list's own date ordering (modifyQueryUsing) runs first, and a plain
-                // varchar sort would be alphabetical, not lifecycle order.
+                // Not sortable: a plain varchar sort would be alphabetical, not lifecycle order.
                 Tables\Columns\TextColumn::make('driver_status')
                     ->label(__('Driver status'))
                     ->badge()
@@ -568,28 +573,26 @@ HTML;
                     ->badge()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('requested_by'),
-
-                Tables\Columns\TextColumn::make('createdBy.name'),
-
-                //                Tables\Columns\TextColumn::make('transport_comfort_level')->sortable(),
-
+                // Sell price, with the purchase price underneath (was two columns; sorting is by sell price).
                 Tables\Columns\TextColumn::make('sell_price')
-                    ->money()
+                    ->label(__('Sell price'))
+                    ->getStateUsing(fn (Transfer $record) => filled($record->sell_price)
+                        ? \Filament\Support\format_money($record->sell_price, Tables\Table::$defaultCurrency)
+                        : '—')
+                    ->description(fn (Transfer $record) => filled($record->buy_price)
+                        ? __('Buy price').': '.\Filament\Support\format_money($record->buy_price, Tables\Table::$defaultCurrency)
+                        : null)
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('buy_price')
-                    ->money()
-                    ->sortable(),
+                // Rarely needed, so off by default; the "Columns" menu turns them on.
+                Tables\Columns\TextColumn::make('createdBy.name')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('Created'))
                     ->dateTime()
-                    ->sortable(),
-                //                Tables\Columns\TextColumn::make('updated_at')
-                //                    ->dateTime()
-                //                    ->sortable()
-                //                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -634,6 +637,128 @@ HTML;
                     $q->orWhereNull('driver_status');
                 }
             });
+    }
+
+    /** One "label value" line of the date cell. Escaped: the cell is rendered as HTML. */
+    protected static function labelled(string $label, string $value): string
+    {
+        return '<span class="ep-kv"><span class="ep-kv__k">'.e($label).'</span>'.e($value).'</span>';
+    }
+
+    /**
+     * A phone number for a spreadsheet cell. A bare "+998901112233" is read as a NUMBER — the plus disappears and a
+     * long one can lose digits — so Uzbek numbers are spaced, and any other all-digit number gets a space after the
+     * first three characters. Anything already containing separators is left alone.
+     */
+    public static function phoneAsText(?string $phone): ?string
+    {
+        if (blank($phone) || ! preg_match('/^\+?\d{6,}$/', $phone)) {
+            return $phone;
+        }
+
+        if (preg_match('/^(\+?998)(\d{2})(\d{3})(\d{2})(\d{2})$/', $phone, $m)) {
+            return "{$m[1]} {$m[2]} {$m[3]} {$m[4]} {$m[5]}";
+        }
+
+        return preg_replace('/^(\+?\d{3})(\d+)$/', '$1 $2', $phone);
+    }
+
+    /** The number of the tour a transfer belongs to (null for a standalone transfer). Also used by the Excel export. */
+    public static function tourGroupNumber(Transfer $record): ?string
+    {
+        $tour = $record->tourDayExpense?->tourGroup?->tour
+            ?? $record->tourDayExpense?->tour
+            ?? $record->tourDayExpense?->tourDay?->tour;
+        $number = $tour?->group_number ?? $record->group_number;
+
+        return filled($number) ? (string) $number : null;
+    }
+
+    /** The line under the transfer number. */
+    protected static function tourNumber(Transfer $record): ?string
+    {
+        $number = static::tourGroupNumber($record);
+
+        return $number === null ? null : __('Tour').' '.$number;
+    }
+
+    /**
+     * Case-insensitive "contains" search over some columns and some relations' columns, OR-ed together.
+     * Filament hands the closure its own nested where-group, so the ORs cannot leak into the rest of the query.
+     * LIKE wildcards typed by the user are escaped.
+     *
+     * @param  array<int, string>  $columns
+     * @param  array<string, string>  $relations  relation (dot notation allowed) => column
+     */
+    protected static function searchTransfer(Builder $query, string $search, array $columns, array $relations = []): Builder
+    {
+        $like = '%'.addcslashes($search, '%_\\').'%';
+
+        foreach ($columns as $column) {
+            $query->orWhere($column, 'ilike', $like);
+        }
+        foreach ($relations as $relation => $column) {
+            $query->orWhereHas($relation, fn (Builder $q) => $q->where($column, 'ilike', $like));
+        }
+
+        return $query;
+    }
+
+    /**
+     * Rows grouped under a heading per calendar day.
+     *
+     * Not ->date(): that would print the heading in Filament's fixed "Sep 14, 2026" format. Days run today ->
+     * future -> past (nearest first), the same idea as the flat list's order but by whole days, because ordering
+     * by distance in hours would interleave two days. The direction toggle of the group menu is honoured.
+     */
+    protected static function dayGroup(Table $table): Tables\Grouping\Group
+    {
+        return Tables\Grouping\Group::make('date_time')
+            ->label(__('Date'))
+            ->collapsible()
+            ->getKeyFromRecordUsing(fn (Transfer $record) => $record->date_time?->toDateString())
+            ->getTitleFromRecordUsing(fn (Transfer $record) => $record->date_time?->translatedFormat('d.m.Y, l') ?? '—')
+            ->getDescriptionFromRecordUsing(fn (Transfer $record) => static::dayCount($table, $record))
+            ->groupQueryUsing(fn ($query) => $query->groupByRaw('date(date_time)'))
+            ->scopeQueryByKeyUsing(fn ($query, string $key) => $query->whereDate('date_time', $key))
+            ->orderQueryUsing(function (Builder $query, string $direction) {
+                if ($direction === 'desc') {
+                    return $query->orderByRaw('date_time::date DESC');
+                }
+
+                $today = Carbon::today()->toDateString();
+
+                return $query
+                    ->orderByRaw('CASE WHEN date_time::date >= ?::date THEN 0 ELSE 1 END', [$today])
+                    ->orderByRaw('ABS(date_time::date - ?::date)', [$today]);
+            });
+    }
+
+    /**
+     * "Transfers: 6" for a day heading. Counted over the whole filtered list, not the current page, so a day that
+     * continues on the next page still shows its real total. One grouped query per render, not one per heading.
+     */
+    protected static function dayCount(Table $table, Transfer $record): ?string
+    {
+        static $cache;
+        $cache ??= new \WeakMap;
+
+        $livewire = $table->getLivewire();
+
+        if (! isset($cache[$livewire])) {
+            $cache[$livewire] = $livewire->getFilteredTableQuery()
+                ->toBase()
+                ->cloneWithout(['columns', 'orders'])
+                ->cloneWithoutBindings(['select', 'order'])
+                ->selectRaw('date(date_time) as day, count(*) as total')
+                ->groupByRaw('date(date_time)')
+                ->pluck('total', 'day')
+                ->all();
+        }
+
+        $total = $cache[$livewire][$record->date_time?->toDateString()] ?? null;
+
+        return $total === null ? null : __('Transfers').': '.$total;
     }
 
     public static function getRelations(): array

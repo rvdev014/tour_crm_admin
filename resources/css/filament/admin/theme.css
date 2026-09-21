@@ -420,6 +420,21 @@ select {
     background-color: rgba(var(--warning-400), 0.12) !important;
 }
 
+/* "Label value" line inside a table cell — the Date / Time cell of the transfers list (TransferResource::labelled()).
+   The label is the quiet part; the value keeps the normal text colour. */
+.ep-kv {
+    display: block;
+    white-space: nowrap;
+}
+.ep-kv__k {
+    margin-right: 0.35em;
+    color: rgb(var(--gray-500));
+    font-size: 0.875em;
+}
+.dark .ep-kv__k {
+    color: rgb(var(--gray-400));
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    FILTERS PANEL
    The whole table (header + filters + rows) sits inside one Filament card,

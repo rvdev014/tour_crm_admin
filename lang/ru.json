@@ -601,5 +601,7 @@
     "Review reopened": "Проверка возобновлена",
     "The receipt photo will be deleted too.": "Фото чека тоже будет удалено.",
     "Client phone": "Телефон клиента",
-    "Enter the phone number in international format, e.g. +44 7911 123456.": "Введите номер в международном формате, например +44 7911 123456."
+    "Enter the phone number in international format, e.g. +44 7911 123456.": "Введите номер в международном формате, например +44 7911 123456.",
+    "Time": "Время",
+    "Created by": "Создал"
 }
