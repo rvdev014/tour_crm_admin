@@ -92,6 +92,12 @@
 
         main { max-width: 640px; margin: 0 auto; padding-bottom: 32px; }
 
+        /* ── dispatcher tabs ────────────────────────────────────── */
+        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--line); }
+        .tabs a { flex: 1; min-height: 46px; display: grid; place-items: center; padding: 0 8px; font-weight: 600;
+            text-decoration: none; color: var(--muted); border-bottom: 3px solid transparent; }
+        .tabs a[aria-current="page"] { color: var(--primary); border-bottom-color: var(--primary); }
+
         /* ── date strip ─────────────────────────────────────────── */
         .strip { display: flex; gap: 6px; overflow-x: auto; padding: 12px 16px;
             scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none;
@@ -121,8 +127,10 @@
         .card__sub { display: block; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; margin-top: 2px; }
         .jump { display: block; text-align: center; padding: 12px; color: var(--primary); font-weight: 600; text-decoration: none; }
         .card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--muted); }
-        .card__map { flex: 0 0 56px; display: grid; place-items: center; border-left: 1px solid var(--line);
+        .card__map { flex: 0 0 50px; display: grid; place-items: center; border-left: 1px solid var(--line);
             color: var(--primary); text-decoration: none; }
+        .card__who { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--primary); }
+        .card__who svg { flex: 0 0 auto; }
         .empty { text-align: center; color: var(--muted); padding: 48px 16px; }
 
         /* ── badge ──────────────────────────────────────────────── */
@@ -133,6 +141,7 @@
         .badge--warning { color: var(--b-warning); background: var(--b-warning-bg); }
         .badge--primary { color: var(--b-primary); background: var(--b-primary-bg); }
         .badge--success { color: var(--b-success); background: var(--b-success-bg); }
+        .badge--danger { color: var(--danger); background: var(--danger-bg); }
 
         /* ── detail ─────────────────────────────────────────────── */
         .panel { margin: 12px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); }
@@ -150,9 +159,62 @@
             border-radius: 10px; border: 1px solid var(--line); color: var(--primary); font-weight: 600;
             font-size: 14px; text-decoration: none; }
 
+        /* ── pickup sign + comment, client contact ──────────────── */
+        .callout { margin: 0 16px 4px; padding: 14px 16px; border-radius: 10px; background: var(--b-warning-bg); color: var(--b-warning); }
+        .callout__label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; opacity: .85; }
+        .callout__label + .callout__sign, .callout__label + .callout__text { margin-top: 2px; }
+        .callout__sign { font-size: 26px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; margin-bottom: 10px; }
+        .callout__text { font-size: 16px; font-weight: 600; white-space: pre-line; overflow-wrap: anywhere; }
+        .client { padding: 12px 16px 14px; }
+        .client .callout__label { color: var(--muted); }
+        .contact { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+        .contact__btn { flex: 1 1 96px; min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+            padding: 8px 6px; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700; text-decoration: none; text-align: center; }
+        .contact__btn--call { background: var(--primary); color: var(--on-primary); }
+        .contact__btn--whatsapp { background: #25D366; color: #06331a; }
+        .contact__btn--telegram { background: #229ED9; color: #fff; }
+        /* On the list card: the sign to look for, and a two-line preview of the operator's note. */
+        .card__sign { display: block; margin-top: 6px; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+        .card__k { font-weight: 600; color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: .04em; margin-right: 4px; }
+        .card__note { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 4px;
+            font-size: 14px; color: var(--muted); white-space: pre-line; overflow-wrap: anywhere; }
+
+        /* ── expenses ───────────────────────────────────────────── */
+        .panel__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 10px; }
+        .panel__head h2 { margin: 0; font-size: 18px; }
+        .expense { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 16px; border-top: 1px solid var(--line); }
+        .expense__main { flex: 1 1 60%; min-width: 0; }
+        .expense__actions { display: flex; gap: 8px; flex: 1 1 100%; }
+        .expense__actions a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border: 1px solid var(--line);
+            border-radius: 10px; font-weight: 600; font-size: 14px; text-decoration: none; color: var(--primary); }
+        .expense__actions .expense__delete { color: var(--danger); }
+        .panel__foot { padding: 12px 16px 16px; border-top: 1px solid var(--line); }
+        .btn--add { min-height: 52px; font-size: 16px; gap: 8px; }
+        .amount { display: flex; align-items: center; gap: 10px; }
+        .amount input { flex: 1; min-width: 0; }
+        .amount__cur { font-weight: 700; color: var(--muted); }
+        .field select { width: 100%; min-height: 52px; padding: 0 14px; font-size: 16px; color: var(--text);
+            background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+        .field input[type="file"] { padding: 12px 14px; min-height: 52px; }
+        .field .hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+        .form-panel { padding: 16px; }
+
+        /* ── people (dispatcher: driver blocks, directory) ─────────── */
+        .person__name { font-weight: 600; }
+        .person__meta { color: var(--muted); font-size: 14px; margin-top: 2px; }
+        .person--off { opacity: .6; }
+        .row__map--solid { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+        .setstatus label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); margin-bottom: 6px; }
+        /* 16px minimum keeps iOS Safari from zooming the page when the select is focused. */
+        .setstatus select { width: 100%; min-height: 52px; padding: 0 12px; margin-bottom: 10px; font-size: 16px;
+            color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+
         /* ── action bar ─────────────────────────────────────────── */
         .action { position: sticky; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
             background: linear-gradient(to top, var(--bg) 70%, transparent); }
+        /* The dispatcher's status picker is taller than a single button: a solid bar, not the fade-out one,
+           or the label is drawn over the text scrolling underneath it. */
+        .action--form { background: var(--bg); border-top: 1px solid var(--line); }
         .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; padding: 0 20px;
             border: 0; border-radius: var(--radius); background: var(--primary); color: var(--on-primary);
             font-size: 18px; font-weight: 700; cursor: pointer; text-decoration: none; }

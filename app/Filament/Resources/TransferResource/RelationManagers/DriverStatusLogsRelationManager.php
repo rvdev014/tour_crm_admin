@@ -50,6 +50,7 @@ class DriverStatusLogsRelationManager extends RelationManager
                     ->label(__('Changed by'))
                     ->formatStateUsing(fn (string $state, TransferDriverStatusLog $record) => match ($state) {
                         TransferDriverStatusLog::SOURCE_DRIVER => $record->driver?->name ?? __('Driver'),
+                        TransferDriverStatusLog::SOURCE_DISPATCHER => __('Dispatcher').': '.($record->driver?->name ?? '—'),
                         TransferDriverStatusLog::SOURCE_ADMIN => __('Operator'),
                         default => __('System'),
                     }),

@@ -4,8 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DriverResource\Pages;
 use App\Filament\Resources\DriverResource\RelationManagers;
+use App\Enums\DriverRole;
 use App\Models\Driver;
+use App\Models\Transfer;
 use App\Support\PhoneNormalizer;
+use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -88,6 +91,34 @@ class DriverResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('role')
+                    ->label(__('Role'))
+                    ->options(DriverRole::class)
+                    ->default(DriverRole::Driver->value)
+                    ->required()
+                    ->native(false)
+                    ->helperText(__('A dispatcher sees every transfer in the cabinet and can set any status. They are not offered as a driver on trips.'))
+                    // Turning a driver into a dispatcher while they are still on upcoming trips would leave
+                    // them in driver_ids but missing from the "Driver supplier" picker (which lists drivers
+                    // only), and their Telegram reminders would keep firing. Make the operator reassign first.
+                    ->rules(fn (?Model $record) => [
+                        function (string $attribute, mixed $value, Closure $fail) use ($record) {
+                            $becomingDispatcher = $value === DriverRole::Dispatcher->value;
+
+                            if ($record === null || ! $becomingDispatcher || $record->role === DriverRole::Dispatcher) {
+                                return;
+                            }
+
+                            $upcoming = Transfer::query()
+                                ->where('date_time', '>=', Carbon::now('Asia/Tashkent')->startOfDay())
+                                ->whereJsonContains('driver_ids', (string) $record->getKey())
+                                ->count();
+
+                            if ($upcoming > 0) {
+                                $fail(__('This driver is still assigned to :count upcoming transfers. Reassign them first.', ['count' => $upcoming]));
+                            }
+                        },
+                    ]),
                 /*Forms\Components\TextInput::make('phone')
                     ->tel()
                     ->maxLength(255),*/
@@ -125,6 +156,7 @@ class DriverResource extends Resource
                     ->maxLength(255),
 
                 Forms\Components\Section::make(__('Cabinet access'))
+                    ->description(__('Both drivers and dispatchers sign in with the phone number and this password.'))
                     ->icon('heroicon-o-key')
                     ->columns(2)
                     ->schema([
@@ -163,6 +195,9 @@ class DriverResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('role')
+                    ->label(__('Role'))
+                    ->badge(),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('car_number')
@@ -191,7 +226,9 @@ class DriverResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('role')
+                    ->label(__('Role'))
+                    ->options(DriverRole::class),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

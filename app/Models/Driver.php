@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\DriverRole;
 use App\Support\PhoneNormalizer;
 use Carbon\Carbon;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
@@ -25,6 +27,7 @@ use Illuminate\Support\Str;
  * @property string|null $car_model
  * @property string|null $password
  * @property bool $is_active
+ * @property DriverRole|null $role NULL only on a model that was create()d without it (the DB default is 'driver')
  * @property string|null $locale
  * @property Carbon|null $last_login_at
  */
@@ -41,6 +44,7 @@ class Driver extends Model implements AuthenticatableContract
         'car_model',
         'password',
         'is_active',
+        'role',
         'locale',
         'last_login_at',
     ];
@@ -53,8 +57,24 @@ class Driver extends Model implements AuthenticatableContract
     protected $casts = [
         'password' => 'hashed',
         'is_active' => 'boolean',
+        'role' => DriverRole::class,
         'last_login_at' => 'datetime',
     ];
+
+    /**
+     * A model that was create()d without a role has no `role` in memory (the DB default applies only
+     * on read-back), so "not a dispatcher" must include NULL — never assume the attribute is set.
+     */
+    public function isDispatcher(): bool
+    {
+        return $this->role === DriverRole::Dispatcher;
+    }
+
+    /** Accounts that can be assigned to a trip. Dispatchers are staff, not vehicles. */
+    public function scopeAssignable(Builder $query): Builder
+    {
+        return $query->where('role', DriverRole::Driver->value);
+    }
 
     /**
      * A driver with no password set has no cabinet access, but must fail like any wrong password.

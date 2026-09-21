@@ -322,6 +322,7 @@ class TransferQuoteService
                         'pax' => $leg->passengers_count,
                         'route' => $leg->from.' - '.$leg->to,
                         'passenger' => $leg->fio,
+                        'client_phone' => $leg->phone,
                         'comment' => $leg->comment,
                         'nameplate' => $leg->text_on_sign,
                         'requested_by' => $leg->fio,

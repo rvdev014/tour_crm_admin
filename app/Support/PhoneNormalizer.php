@@ -29,4 +29,14 @@ class PhoneNormalizer
 
         return null;
     }
+
+    /**
+     * Value for a tel: link. Uses the normalized number when there is one; otherwise falls back to
+     * whatever digits (and a leading +) the operator typed, so a call button still works for numbers
+     * the strict normalizer refuses (a login must be trustworthy; a dial link only has to be dialable).
+     */
+    public static function tel(?string $raw): ?string
+    {
+        return self::uz($raw) ?? (preg_replace('/[^\d+]/', '', (string) $raw) ?: null);
+    }
 }

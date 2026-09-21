@@ -23,6 +23,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class TransferResource extends Resource
 {
@@ -143,6 +144,30 @@ class TransferResource extends Resource
                         ->relationship('company', 'name'),
 
                     Forms\Components\TextInput::make('requested_by'),
+
+                    // The client's phone, for the driver (call / WhatsApp / Telegram in the driver cabinet).
+                    // Clients are mostly foreign tourists, so — unlike the driver form — every country is allowed.
+                    // The picker's own validation is client-side only, hence the server-side rule: what gets
+                    // stored must be a real international number, or a wa.me / t.me link built from it would
+                    // point at the wrong person.
+                    PhoneInput::make('client_phone')
+                        ->label(__('Client phone'))
+                        ->defaultCountry('UZ')
+                        ->dehydrateStateUsing(fn ($state) => filled($state) ? preg_replace('/[\s\-().]/', '', $state) : null)
+                        ->rules(fn (?Model $record) => [
+                            function (string $attribute, mixed $value, \Closure $fail) use ($record) {
+                                // Empty is fine, and so is a value nobody touched: numbers copied from the website
+                                // are stored as the customer typed them, and an operator saving an old transfer
+                                // must not be forced to rewrite a number they never edited.
+                                if (blank($value) || $value === $record?->client_phone) {
+                                    return;
+                                }
+
+                                if (! preg_match('/^\+[1-9]\d{6,14}$/', preg_replace('/[\s\-().]/', '', (string) $value))) {
+                                    $fail(__('Enter the phone number in international format, e.g. +44 7911 123456.'));
+                                }
+                            },
+                        ]),
 
                     Forms\Components\Select::make('driver_ids')
                         ->label(__('Driver supplier'))
@@ -615,6 +640,7 @@ HTML;
     {
         return [
             RelationManagers\DriverStatusLogsRelationManager::class,
+            RelationManagers\DriverExpensesRelationManager::class,
         ];
     }
 

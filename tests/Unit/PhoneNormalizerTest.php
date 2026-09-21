@@ -36,6 +36,26 @@ class PhoneNormalizerTest extends TestCase
         ];
     }
 
+    /** @dataProvider telCases */
+    public function test_tel_gives_a_dialable_value(?string $input, ?string $expected): void
+    {
+        $this->assertSame($expected, PhoneNormalizer::tel($input));
+    }
+
+    public static function telCases(): array
+    {
+        return [
+            'normalizable number is normalized' => ['90 111 22 33', '+998901112233'],
+            'already e164' => ['+998901112233', '+998901112233'],
+            // uz() refuses this as a LOGIN number (ambiguous), but a call button only has to be dialable.
+            'refused by uz() falls back to the typed digits' => ['998299221', '998299221'],
+            'punctuation is stripped, a leading plus is kept' => ['+7 (916) 123-45-67', '+79161234567'],
+            'no digits at all' => ['abc', null],
+            'empty' => ['', null],
+            'null' => [null, null],
+        ];
+    }
+
     public function test_the_same_number_written_differently_normalizes_identically(): void
     {
         $this->assertSame(

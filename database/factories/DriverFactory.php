@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\DriverRole;
 use App\Models\Driver;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -24,7 +25,14 @@ class DriverFactory extends Factory
             // Hashed by the model's 'hashed' cast.
             'password' => 'password',
             'is_active' => true,
+            'role' => DriverRole::Driver,
         ];
+    }
+
+    /** Staff account: sees every transfer, can set any status, is never assigned to a trip. */
+    public function dispatcher(): static
+    {
+        return $this->state(fn () => ['role' => DriverRole::Dispatcher]);
     }
 
     /** Driver who has no cabinet access (never given a password). */

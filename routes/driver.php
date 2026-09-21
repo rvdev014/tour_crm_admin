@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\Driver\DriverAuthController;
+use App\Http\Controllers\Driver\DriverDirectoryController;
+use App\Http\Controllers\Driver\DriverExpenseController;
 use App\Http\Controllers\Driver\DriverLocaleController;
 use App\Http\Controllers\Driver\DriverTransferController;
 use App\Models\Driver;
+use App\Services\DriverExpenseQuery;
 use App\Services\DriverTransferQuery;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +35,17 @@ Route::bind('driverTransfer', function (string $id) {
     return DriverTransferQuery::forDriver($driver)->findOrFail($id);
 });
 
+// Same idea for expenses: a driver resolves only expenses THEY entered (on trips they can see), a
+// dispatcher any expense on a visible trip; everything else is a 404. Named `driverExpense` so it cannot
+// collide with any other route's `{expense}` parameter (Route::bind is global by name).
+Route::bind('driverExpense', function (string $id) {
+    $driver = Auth::guard('driver')->user();
+
+    abort_unless($driver instanceof Driver, 404);
+
+    return DriverExpenseQuery::forViewer($driver)->findOrFail($id);
+});
+
 Route::middleware('driver.nocache')->group(function () {
     Route::middleware('guest.driver')->group(function () {
         Route::get('login', [DriverAuthController::class, 'showLogin'])->name('login');
@@ -49,10 +63,24 @@ Route::middleware('driver.nocache')->group(function () {
 
         Route::get('transfers', [DriverTransferController::class, 'index'])->name('transfers');
 
+        // Dispatcher-only: a plain driver gets a 404 (see EnsureDriverIsDispatcher).
+        Route::get('drivers', DriverDirectoryController::class)->middleware('driver.dispatcher')->name('drivers');
+
         Route::prefix('transfers/{driverTransfer}')->whereNumber('driverTransfer')->group(function () {
             Route::get('/', [DriverTransferController::class, 'show'])->name('transfers.show');
             Route::get('complete', [DriverTransferController::class, 'complete'])->name('transfers.complete');
             Route::post('status', [DriverTransferController::class, 'updateStatus'])->name('transfers.status');
+
+            Route::get('expenses/create', [DriverExpenseController::class, 'create'])->name('transfers.expenses.create');
+            Route::post('expenses', [DriverExpenseController::class, 'store'])
+                ->middleware('throttle:driver-expenses')
+                ->name('transfers.expenses.store');
+        });
+
+        Route::prefix('expenses/{driverExpense}')->whereNumber('driverExpense')->group(function () {
+            Route::get('receipt', [DriverExpenseController::class, 'receipt'])->name('expenses.receipt');
+            Route::get('delete', [DriverExpenseController::class, 'confirmDelete'])->name('expenses.delete');
+            Route::post('delete', [DriverExpenseController::class, 'destroy'])->name('expenses.destroy');
         });
     });
 });

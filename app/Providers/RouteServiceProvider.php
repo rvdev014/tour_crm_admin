@@ -40,6 +40,14 @@ class RouteServiceProvider extends ServiceProvider
             ];
         });
 
+        // Each submission uploads a photo, so cap them per account: generous for a real driver entering a
+        // day's expenses, tight enough that a stuck retry loop cannot fill the disk.
+        RateLimiter::for('driver-expenses', function(Request $request) {
+            $viewer = $request->user('driver');
+
+            return Limit::perMinute(20)->by('expenses|'.($viewer?->getKey() ?? $request->ip()));
+        });
+
         $this->routes(function() {
             Route::middleware(['api', 'locale'])
                 ->prefix('api')

@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $driver_id
  * @property DriverTransferStatus|null $from_status
  * @property DriverTransferStatus $to_status
- * @property string $source driver|admin|system
+ * @property string $source driver|dispatcher|admin|system (string(16): fits 'dispatcher', no migration needed)
  * @property Carbon $created_at
  * @property Transfer $transfer
  * @property Driver|null $driver
@@ -27,6 +27,8 @@ class TransferDriverStatusLog extends Model
     use HasFactory;
 
     public const SOURCE_DRIVER = 'driver';
+
+    public const SOURCE_DISPATCHER = 'dispatcher';
 
     public const SOURCE_ADMIN = 'admin';
 

@@ -70,6 +70,7 @@ class Kernel extends HttpKernel
         // Driver cabinet (/driver)
         'auth.driver' => \App\Http\Middleware\AuthenticateDriver::class,
         'guest.driver' => \App\Http\Middleware\RedirectIfDriver::class,
+        'driver.dispatcher' => \App\Http\Middleware\EnsureDriverIsDispatcher::class,
         'driver.locale' => \App\Http\Middleware\SetDriverLocale::class,
         'driver.nocache' => \App\Http\Middleware\PreventDriverPageCaching::class,
 

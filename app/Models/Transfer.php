@@ -62,6 +62,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property integer $notified_times
  * @property string $from
  * @property string $to
+ * @property string|null $client_phone the client's phone, as typed/collected; see App\Support\ClientContact
  * @property string|null $from_coords "lat,lng", copied from the transfer request
  * @property string|null $to_coords "lat,lng", copied from the transfer request
  * @property string $transfer_request_id
@@ -106,6 +107,14 @@ class Transfer extends Model
                 $transfer->number = 1000 + $transfer->id;
             }
         });
+
+        // The database cascade removes the expense ROWS, but not the receipt photos on disk. Delete the
+        // expenses as models first so TransferDriverExpense::deleted() cleans the files up. (A mass
+        // `Transfer::where(...)->delete()` fires no model events and would skip this — callers that delete
+        // transfers in bulk must go through the models.)
+        static::deleting(function(Transfer $transfer) {
+            $transfer->driverExpenses()->get()->each->delete();
+        });
     }
 
     public function company(): BelongsTo
@@ -116,6 +125,11 @@ class Transfer extends Model
     public function driverStatusLogs(): HasMany
     {
         return $this->hasMany(TransferDriverStatusLog::class);
+    }
+
+    public function driverExpenses(): HasMany
+    {
+        return $this->hasMany(TransferDriverExpense::class);
     }
 
     /**

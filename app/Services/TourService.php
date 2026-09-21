@@ -110,7 +110,10 @@ class TourService
     {
         return CacheService::remember(
             'drivers',
+            // Only drivers: this feeds the "Driver supplier" pickers, and a dispatcher must never be
+            // offered as the person driving a trip.
             fn () => Driver::query()
+                ->assignable()
                 ->select('name', 'id')
                 ->get()
                 ->pluck('name', 'id')

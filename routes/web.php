@@ -60,3 +60,8 @@ Route::get('export-tablichka/{transfer}', [\App\Http\Controllers\ExportControlle
     'export-tablichka'
 );
 
+// Receipt photos that drivers attach to expenses. They live on a private disk; see the controller.
+Route::get('admin/driver-expenses/{expense}/receipt', \App\Http\Controllers\AdminDriverExpenseReceiptController::class)
+    ->whereNumber('expense')
+    ->name('admin.driver-expenses.receipt');
+

@@ -50,7 +50,9 @@ class TourDayExpenseObserver implements ShouldHandleEventsAfterCommit
     public function deleted(TourDayExpense $tourDayExpense): void
     {
         if ($tourDayExpense->type === ExpenseType::Transport) {
-            Transfer::where('tour_day_expense_id', $tourDayExpense->id)->delete();
+            // Per model, not a mass delete: Transfer::deleting() removes the drivers' receipt photos from
+            // disk, and a mass query fires no model events.
+            Transfer::where('tour_day_expense_id', $tourDayExpense->id)->get()->each->delete();
         }
     }
 

@@ -90,6 +90,7 @@ class TransferService
                     'pax' => $transferRequest->passengers_count,
                     'route' => $transferRequest->from.' - '.$transferRequest->to,
                     'passenger' => $transferRequest->fio,
+                    'client_phone' => $transferRequest->phone,
                     'comment' => $transferRequest->comment,
                     //                                'transport_type' => \App\Enums\TransportType::Sedan,
                     //                                'transport_comfort_level' => \App\Enums\TransportComfortLevel::Standard,

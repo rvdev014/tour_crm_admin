@@ -15,6 +15,10 @@
         </form>
     </header>
 
+    @if ($isDispatcher)
+        @include('driver.partials.tabs')
+    @endif
+
     <main>
         @include('driver.partials.date-strip')
 
