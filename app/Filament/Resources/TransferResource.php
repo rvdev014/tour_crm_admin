@@ -145,30 +145,6 @@ class TransferResource extends Resource
 
                     Forms\Components\TextInput::make('requested_by'),
 
-                    // The client's phone, for the driver (call / WhatsApp / Telegram in the driver cabinet).
-                    // Clients are mostly foreign tourists, so — unlike the driver form — every country is allowed.
-                    // The picker's own validation is client-side only, hence the server-side rule: what gets
-                    // stored must be a real international number, or a wa.me / t.me link built from it would
-                    // point at the wrong person.
-                    PhoneInput::make('client_phone')
-                        ->label(__('Client phone'))
-                        ->defaultCountry('UZ')
-                        ->dehydrateStateUsing(fn ($state) => filled($state) ? preg_replace('/[\s\-().]/', '', $state) : null)
-                        ->rules(fn (?Model $record) => [
-                            function (string $attribute, mixed $value, \Closure $fail) use ($record) {
-                                // Empty is fine, and so is a value nobody touched: numbers copied from the website
-                                // are stored as the customer typed them, and an operator saving an old transfer
-                                // must not be forced to rewrite a number they never edited.
-                                if (blank($value) || $value === $record?->client_phone) {
-                                    return;
-                                }
-
-                                if (! preg_match('/^\+[1-9]\d{6,14}$/', preg_replace('/[\s\-().]/', '', (string) $value))) {
-                                    $fail(__('Enter the phone number in international format, e.g. +44 7911 123456.'));
-                                }
-                            },
-                        ]),
-
                     Forms\Components\Select::make('driver_ids')
                         ->label(__('Driver supplier'))
                         ->options(TourService::getDrivers())
@@ -253,7 +229,7 @@ class TransferResource extends Resource
                     ->icon('heroicon-o-calendar-days')
                     ->description(__('Pickup date and time, plus the free-text destination and vehicle details.'))
                     ->schema([
-                Forms\Components\Grid::make(4)->schema([
+                Forms\Components\Grid::make(5)->schema([
 
                     Forms\Components\DateTimePicker::make('date_time')
                         ->displayFormat('d.m.Y H:i')
@@ -267,6 +243,30 @@ class TransferResource extends Resource
                         ->label(__('Marka')),
                     Forms\Components\TextInput::make('nameplate')
                         ->label(__('Табличка')),
+
+                    // The client's phone, for the driver (call / WhatsApp / Telegram in the driver cabinet).
+                    // Clients are mostly foreign tourists, so — unlike the driver form — every country is allowed.
+                    // The picker's own validation is client-side only, hence the server-side rule: what gets
+                    // stored must be a real international number, or a wa.me / t.me link built from it would
+                    // point at the wrong person.
+                    PhoneInput::make('client_phone')
+                        ->label(__('Client phone'))
+                        ->defaultCountry('UZ')
+                        ->dehydrateStateUsing(fn ($state) => filled($state) ? preg_replace('/[\s\-().]/', '', $state) : null)
+                        ->rules(fn (?Model $record) => [
+                            function (string $attribute, mixed $value, \Closure $fail) use ($record) {
+                                // Empty is fine, and so is a value nobody touched: numbers copied from the website
+                                // are stored as the customer typed them, and an operator saving an old transfer
+                                // must not be forced to rewrite a number they never edited.
+                                if (blank($value) || $value === $record?->client_phone) {
+                                    return;
+                                }
+
+                                if (! preg_match('/^\+[1-9]\d{6,14}$/', preg_replace('/[\s\-().]/', '', (string) $value))) {
+                                    $fail(__('Enter the phone number in international format, e.g. +44 7911 123456.'));
+                                }
+                            },
+                        ]),
                 ]),
                     ]),
 
@@ -510,15 +510,6 @@ class TransferResource extends Resource
                         ['tourDayExpense.tourGroup.tour' => 'group_number', 'tourDayExpense.tour' => 'group_number', 'tourDayExpense.tourDay.tour' => 'group_number'],
                     )),
 
-                // Date and time on two labelled lines. The one column that renders HTML; every value in it is escaped,
-                // and the Excel export replaces it (see ListTransfers), so no markup ever reaches a spreadsheet.
-                Tables\Columns\TextColumn::make('date_time')
-                    ->label(__('Date & Time'))
-                    ->formatStateUsing(fn ($state) => blank($state) ? '—' : static::labelled(__('Date'), $state->format('d.m.Y'))
-                        .static::labelled(__('Time'), $state->format('H:i')))
-                    ->html()
-                    ->sortable(),
-
                 // Company, with who asked for the transfer underneath.
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('Company'))
@@ -528,6 +519,15 @@ class TransferResource extends Resource
                     ->searchable(query: fn (Builder $query, string $search) => static::searchTransfer(
                         $query, $search, ['requested_by'], ['company' => 'name'],
                     )),
+
+                // Date and time on two labelled lines. The one column that renders HTML; every value in it is escaped,
+                // and the Excel export replaces it (see ListTransfers), so no markup ever reaches a spreadsheet.
+                Tables\Columns\TextColumn::make('date_time')
+                    ->label(__('Date & Time'))
+                    ->formatStateUsing(fn ($state) => blank($state) ? '—' : static::labelled(__('Date'), $state->format('d.m.Y'))
+                        .static::labelled(__('Time'), $state->format('H:i')))
+                    ->html()
+                    ->sortable(),
 
                 // Destination, with the city underneath (was "Location").
                 Tables\Columns\TextColumn::make('route')

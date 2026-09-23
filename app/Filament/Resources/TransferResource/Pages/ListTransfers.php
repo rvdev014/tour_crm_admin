@@ -34,6 +34,12 @@ class ListTransfers extends ListRecords
                                 ->heading(__('Tour'))
                                 ->getStateUsing(fn (Transfer $record) => TransferResource::tourGroupNumber($record)),
 
+                            Column::make('company')
+                                ->heading(__('Company'))
+                                ->getStateUsing(fn (Transfer $record) => $record->company?->name),
+
+                            Column::make('requested_by')->heading(__('Requested by')),
+
                             Column::make('date')
                                 ->heading(__('Date'))
                                 ->getStateUsing(fn (Transfer $record) => $record->date_time?->format('d.m.Y')),
@@ -41,12 +47,6 @@ class ListTransfers extends ListRecords
                             Column::make('time')
                                 ->heading(__('Time'))
                                 ->getStateUsing(fn (Transfer $record) => $record->date_time?->format('H:i')),
-
-                            Column::make('company')
-                                ->heading(__('Company'))
-                                ->getStateUsing(fn (Transfer $record) => $record->company?->name),
-
-                            Column::make('requested_by')->heading(__('Requested by')),
 
                             Column::make('route')->heading(__('Destination')),
 
