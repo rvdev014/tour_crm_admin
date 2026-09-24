@@ -76,6 +76,43 @@ class HotelRoomType extends Model
         return $hotelPrice ?? 0;
     }
 
+    /**
+     * Same as getPrice(), but VAT and the tourist tax (tour_sbor) are only
+     * added when the hotel actually has them set — used for the hotels list
+     * preview, which should mirror the Seasons tab, not the always-taxed
+     * figure getPrice() uses for tour costs/exports.
+     */
+    public function getListPrice($personType): int|float
+    {
+        $isUzbek = $personType === RoomPersonType::Uzbek;
+
+        $hotelPrice = $isUzbek ? $this->price : $this->price_foreign;
+        if ($this->hotel->nds_included) {
+            $hotelPrice += $hotelPrice * TourService::getVatPercent() / 100;
+        }
+
+        if (!empty($this->hotel->tour_sbor)) {
+            $tourSborValue = TourService::getTourSborValue();
+            if ($isUzbek) {
+                $tourSborValue = $tourSborValue * 0.04 / 100;
+            }
+            $hotelPrice += $tourSborValue * $this->hotel->tour_sbor / 100;
+        }
+
+        return $hotelPrice ?? 0;
+    }
+
+    public function getListPriceByGroup(?Group $group = null, $personType = null): int|float
+    {
+        $price = $this->getListPrice($personType ?? RoomPersonType::Foreign);
+        if (!$group) {
+            return $price;
+        }
+
+        $additionalPrice = $price * $group->getPercent($price) / 100;
+        return $price + $additionalPrice;
+    }
+
     public function getPriceWithPercent($companyId, $personType): int|float
     {
         $hotelPrice = $this->getPrice($personType);

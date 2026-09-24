@@ -432,6 +432,11 @@ class HotelResource extends Resource
                             'currency' => $filters['filters']['currency'],
                             'year' => $filters['filters']['year'],
                             'season_type' => $filters['filters']['season_type'] ?? null,
+                            // Show the stored price, only taxed with VAT/tourist
+                            // tax when the hotel actually has them — matches the
+                            // Seasons tab, unlike the always-taxed cost figure
+                            // getPrice() uses for tour expenses/exports.
+                            'listPrice' => true,
                         ];
                     }),
 

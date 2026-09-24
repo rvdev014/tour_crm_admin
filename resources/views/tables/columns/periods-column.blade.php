@@ -9,6 +9,7 @@
     $currency = $state['currency'] ?? CurrencyEnum::UZS->value;
     $year = $state['year'] ?? null;
     $seasonType = $state['season_type'] ?? null;
+    $listPrice = $state['listPrice'] ?? false;
 
 //    if (!empty($year)) {
 //        $hotel->load(['roomTypes' => fn ($query) => $query->where('year', $year)]);
@@ -79,8 +80,13 @@
                 </td>
 
                 @php
-                    $price = $roomType->getPriceByGroup($group, RoomPersonType::Uzbek);
-                    $priceForeign = $roomType->getPriceByGroup($group, RoomPersonType::Foreign);
+                    if ($listPrice) {
+                        $price = $roomType->getListPriceByGroup($group, RoomPersonType::Uzbek);
+                        $priceForeign = $roomType->getListPriceByGroup($group, RoomPersonType::Foreign);
+                    } else {
+                        $price = $roomType->getPriceByGroup($group, RoomPersonType::Uzbek);
+                        $priceForeign = $roomType->getPriceByGroup($group, RoomPersonType::Foreign);
+                    }
                 @endphp
 
                 <td class="min-w-[150px]">{{ number_format(ExpenseService::getPrice($price, $isUsd), 0, '.', ' ') }} {{ $currencySymbol }}</td>
