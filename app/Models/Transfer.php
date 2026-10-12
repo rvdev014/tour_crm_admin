@@ -106,6 +106,18 @@ class Transfer extends Model
             if (empty($transfer->number)) {
                 $transfer->number = 1000 + $transfer->id;
             }
+
+            // MapLink::yandex() prefers coordinates over the address text. If an operator retypes
+            // `from`/`to` (e.g. over a website booking's old GPS point) without also clearing the
+            // matching *_coords, the driver's map pin would keep pointing at the stale coordinate
+            // instead of the address just entered. Coordinates are only ever written by the API
+            // from a transfer request, so there is no legitimate admin edit that changes both at once.
+            if ($transfer->isDirty('from') && ! $transfer->isDirty('from_coords')) {
+                $transfer->from_coords = null;
+            }
+            if ($transfer->isDirty('to') && ! $transfer->isDirty('to_coords')) {
+                $transfer->to_coords = null;
+            }
         });
 
         // The database cascade removes the expense ROWS, but not the receipt photos on disk. Delete the

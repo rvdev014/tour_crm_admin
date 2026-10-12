@@ -54,6 +54,8 @@ return [
         'transport' => 'Класс',
         'comment' => 'Примечание',
         'open_map' => 'Открыть на карте',
+        'open_pickup_map' => 'Открыть место подачи на карте',
+        'open_destination_map' => 'Открыть пункт назначения на карте',
         'client' => 'Клиент',
         'call_client' => 'Позвонить',
         'status' => 'Статус',

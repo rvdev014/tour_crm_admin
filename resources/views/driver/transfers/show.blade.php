@@ -128,21 +128,8 @@
                     @endforelse
                 @endif
 
-                @if ($t->route)
-                    <div class="row">
-                        <div class="row__text">
-                            <dt>{{ __('driver.show.destination') }}</dt>
-                            <dd>{{ $t->route }}</dd>
-                        </div>
-                        @if ($t->destinationMapUrl)
-                            <a class="row__map" href="{{ $t->destinationMapUrl }}" target="_blank" rel="noopener">
-                                <svg width="20" height="20" aria-hidden="true"><use href="#i-pin"/></svg>
-                                {{ __('driver.show.open_map') }}
-                            </a>
-                        @endif
-                    </div>
-                @endif
-
+                {{-- Pickup before destination (A → B), each with its own map button — matches
+                     the two "From" / "To" fields an operator can now fill on the transfer. --}}
                 @if ($t->pickup)
                     <div class="row">
                         <div class="row__text">
@@ -150,7 +137,24 @@
                             <dd>{{ $t->pickup }}</dd>
                         </div>
                         @if ($t->pickupMapUrl)
-                            <a class="row__map" href="{{ $t->pickupMapUrl }}" target="_blank" rel="noopener">
+                            <a class="row__map" href="{{ $t->pickupMapUrl }}" target="_blank" rel="noopener"
+                               aria-label="{{ __('driver.show.open_pickup_map') }}">
+                                <svg width="20" height="20" aria-hidden="true"><use href="#i-pin"/></svg>
+                                {{ __('driver.show.open_map') }}
+                            </a>
+                        @endif
+                    </div>
+                @endif
+
+                @if ($t->route)
+                    <div class="row">
+                        <div class="row__text">
+                            <dt>{{ __('driver.show.destination') }}</dt>
+                            <dd>{{ $t->route }}</dd>
+                        </div>
+                        @if ($t->destinationMapUrl)
+                            <a class="row__map" href="{{ $t->destinationMapUrl }}" target="_blank" rel="noopener"
+                               aria-label="{{ __('driver.show.open_destination_map') }}">
                                 <svg width="20" height="20" aria-hidden="true"><use href="#i-pin"/></svg>
                                 {{ __('driver.show.open_map') }}
                             </a>

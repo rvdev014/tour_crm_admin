@@ -130,4 +130,72 @@ class TransferCoordinatesTest extends TestCase
         // The destination is unchanged, so its pin still applies.
         $this->assertStringContainsString('ll=69.267204,41.261837', $html);
     }
+
+    // ── retyping from/to clears the matching stale coordinate (Transfer::booted) ───────────
+
+    public function test_editing_from_clears_from_coords_so_the_new_address_is_used(): void
+    {
+        $transfer = TransferService::acceptRequest($this->request());
+        $this->assertSame(self::FROM, $transfer->fresh()->from_coords);
+
+        $transfer->update(['from' => 'New pickup address']);
+
+        $this->assertNull($transfer->fresh()->from_coords);
+        $this->assertSame(self::TO, $transfer->fresh()->to_coords, 'the untouched leg keeps its pin');
+    }
+
+    public function test_editing_to_clears_to_coords_so_the_new_address_is_used(): void
+    {
+        $transfer = TransferService::acceptRequest($this->request());
+
+        $transfer->update(['to' => 'New destination address']);
+
+        $this->assertNull($transfer->fresh()->to_coords);
+        $this->assertSame(self::FROM, $transfer->fresh()->from_coords);
+    }
+
+    public function test_saving_a_transfer_without_touching_from_or_to_keeps_its_coordinates(): void
+    {
+        $transfer = TransferService::acceptRequest($this->request());
+
+        $transfer->update(['comment' => 'unrelated edit']);
+
+        $this->assertSame(self::FROM, $transfer->fresh()->from_coords);
+        $this->assertSame(self::TO, $transfer->fresh()->to_coords);
+    }
+
+    public function test_setting_from_and_its_coords_together_keeps_the_given_coords(): void
+    {
+        // An explicit *_coords write alongside the address (e.g. a future admin geopicker, or a
+        // script) must not be clobbered — only a bare address edit should null the pin.
+        $transfer = TransferService::acceptRequest($this->request());
+        $newCoords = '41.30, 69.27';
+
+        $transfer->update(['from' => 'New pickup address', 'from_coords' => $newCoords]);
+
+        $this->assertSame($newCoords, $transfer->fresh()->from_coords);
+    }
+
+    // ── an operator fills From/To on a manual transfer (no transfer_request at all) ────────
+
+    public function test_an_operator_typed_from_and_to_each_get_their_own_map_pin(): void
+    {
+        $driver = Driver::factory()->create();
+        $transfer = Transfer::factory()->create([
+            'driver_ids' => [(string) $driver->id],
+            'status' => \App\Enums\ExpenseStatus::Confirmed,
+            'from' => 'Tashkent International Airport',
+            'to' => 'Registon Plaza, Samarkand',
+            'route' => null,
+            'place_of_submission' => null,
+        ]);
+
+        $html = $this->actingAs($driver, 'driver')
+            ->get(route('driver.transfers.show', $transfer->id))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('maps/?text='.rawurlencode('Tashkent International Airport'), $html);
+        $this->assertStringContainsString('maps/?text='.rawurlencode('Registon Plaza, Samarkand'), $html);
+    }
 }

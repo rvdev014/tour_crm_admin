@@ -56,6 +56,8 @@ return [
         'transport' => 'Klass',
         'comment' => 'Izoh',
         'open_map' => 'Xaritada ochish',
+        'open_pickup_map' => 'Olib ketish joyini xaritada ochish',
+        'open_destination_map' => 'Manzilni xaritada ochish',
         'client' => 'Mijoz',
         'call_client' => 'Qo\'ng\'iroq',
         'status' => 'Holat',

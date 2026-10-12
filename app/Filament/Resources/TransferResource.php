@@ -239,6 +239,19 @@ class TransferResource extends Resource
                     Forms\Components\TextInput::make('route')
                         ->label(__('Destination')),
 
+                    // Separate pickup/drop-off addresses for the driver cabinet, which turns each into
+                    // its own "open on map" button (App\Support\MapLink, via DriverTransferPresenter).
+                    // Website-booked transfers already have these (copied from the transfer request,
+                    // with coordinates); this is what lets an operator fill them in for manual and
+                    // tour transfers too. Retyping either one clears its stale *_coords — see
+                    // Transfer::booted() — so the map pin follows the new address, not an old GPS point.
+                    Forms\Components\TextInput::make('from')
+                        ->label(__('From'))
+                        ->helperText(__('Pickup address for the driver — opens on the map.')),
+                    Forms\Components\TextInput::make('to')
+                        ->label(__('To'))
+                        ->helperText(__('Drop-off address for the driver — opens on the map.')),
+
                     Forms\Components\TextInput::make('mark')
                         ->label(__('Marka')),
                     Forms\Components\TextInput::make('nameplate')

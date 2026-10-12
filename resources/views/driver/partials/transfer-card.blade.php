@@ -48,9 +48,17 @@
             <svg width="24" height="24" aria-hidden="true"><use href="#i-phone"/></svg>
         </a>
     @endif
+    {{-- Pickup before destination (A → B), matching the trip page. Same icon for both — the
+         muted/primary color pairing (card__map--pickup) is what tells them apart at a glance. --}}
+    @if ($t->pickupMapUrl)
+        <a class="card__map card__map--pickup" href="{{ $t->pickupMapUrl }}" target="_blank" rel="noopener"
+           aria-label="{{ __('driver.show.open_pickup_map') }}">
+            <svg width="24" height="24" aria-hidden="true"><use href="#i-pin"/></svg>
+        </a>
+    @endif
     @if ($t->destinationMapUrl)
         <a class="card__map" href="{{ $t->destinationMapUrl }}" target="_blank" rel="noopener"
-           aria-label="{{ __('driver.show.open_map') }}">
+           aria-label="{{ __('driver.show.open_destination_map') }}">
             <svg width="26" height="26" aria-hidden="true"><use href="#i-pin"/></svg>
         </a>
     @endif

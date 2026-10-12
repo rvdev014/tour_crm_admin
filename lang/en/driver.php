@@ -54,6 +54,8 @@ return [
         'transport' => 'Class',
         'comment' => 'Note',
         'open_map' => 'Open on map',
+        'open_pickup_map' => 'Open pickup point on map',
+        'open_destination_map' => 'Open destination on map',
         'client' => 'Client',
         'call_client' => 'Call',
         'status' => 'Status',

@@ -56,6 +56,22 @@ class DriverCabinetTest extends TestCase
             ->assertSee('Registon Plaza');
     }
 
+    public function test_list_card_links_pickup_and_destination_to_separate_map_pins(): void
+    {
+        $this->transfer([
+            'route' => null,
+            'place_of_submission' => null,
+            'from' => 'Tashkent International Airport',
+            'to' => 'Registon Plaza',
+        ]);
+
+        $this->asDriver()->get(route('driver.transfers'))
+            ->assertOk()
+            ->assertSee('card__map--pickup', false)
+            ->assertSee('maps/?text='.rawurlencode('Tashkent International Airport'), false)
+            ->assertSee('maps/?text='.rawurlencode('Registon Plaza'), false);
+    }
+
     public function test_list_never_shows_another_drivers_transfer(): void
     {
         $other = Driver::factory()->create();

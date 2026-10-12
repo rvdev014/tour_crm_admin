@@ -129,6 +129,9 @@
         .card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--muted); }
         .card__map { flex: 0 0 50px; display: grid; place-items: center; border-left: 1px solid var(--line);
             color: var(--primary); text-decoration: none; }
+        /* Pickup's button sits to the left of destination's (A → B); muted so the two are easy to
+           tell apart at a glance without a second icon. */
+        .card__map--pickup { color: var(--muted); }
         .card__who { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--primary); }
         .card__who svg { flex: 0 0 auto; }
         .empty { text-align: center; color: var(--muted); padding: 48px 16px; }
