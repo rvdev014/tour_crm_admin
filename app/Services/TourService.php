@@ -37,6 +37,11 @@ use Throwable;
 
 class TourService
 {
+    // "Transfer boss" — gets a copy of every driver-facing transfer notification
+    // (create, update, reminder) sent by sendTelegramTransfer(), including transfers
+    // with no driver assigned yet. Hardcoded per operator request, +998 93 394 31 91.
+    private const TRANSFER_BOSS_CHAT_ID = '2254596';
+
     public function notifyDrivers(): void
     {
         try {
@@ -586,6 +591,16 @@ HTML;
     public static function sendTelegramTransfer($data, $isUpdated = false, $isReminder = false): void
     {
         $driverIds = $data['driver_ids'] ?? [];
+
+        // Built once, not per driver: the text never varied by driver (driver_ids/driver_name
+        // are the only driver fields getOneMessage() actually reads), and getOneMessage() has a
+        // side effect — it resnapshots the transfer's old_values on every call. Calling it more
+        // than once per send would silently drop the "changed from X" strikethrough on the
+        // second-and-later messages (old_values would already match the new state by then),
+        // which previously meant a 2nd assigned driver — and now the boss copy too — would have
+        // missed it.
+        $message = self::buildTransferTelegramMessage($data, $driverIds, $isUpdated, $isReminder);
+
         foreach ($driverIds as $driverId) {
             /** @var Driver $driver */
             $driver = Driver::query()->find($driverId ?? null);
@@ -593,34 +608,48 @@ HTML;
                 continue;
             }
 
-            $message = TourService::getOneMessage([
-                'transfer_id' => $data['id'],
-                'transfer_number' => 1000 + $data['id'],
-                'driver_id' => $driverId,
-                'pax' => $data['pax'],
-                'driver_ids' => $driverIds,
-                'driver_name' => $data['driver_name'] ?? null,
-                'to_city' => $data['to_city_id'],
-                'transport_place' => $data['place_of_submission'],
-                'route' => $data['route'],
-                'mark' => $data['mark'],
-                'nameplate' => $data['nameplate'],
-                'date' => $data['date_time'],
-                'transport_type' => $data['transport_type'],
-                'price' => $data['price'] ?? '',
-                'comment' => $data['comment'],
-            ]);
-
-            if ($isReminder) {
-                $message = "⏰ <b>НАПОМИНАНИЕ</b>\n".$message;
-            }
-
-            if ($isUpdated) {
-                $message = "♻️ <b>Обновлено</b>\n".$message;
-            }
-
             TelegramService::sendMessage($driver->chat_id, $message, ['parse_mode' => 'HTML']);
         }
+
+        // Boss gets a copy regardless of whether a driver was notified above (no driver
+        // assigned yet, or no driver had a working chat_id) — see TRANSFER_BOSS_CHAT_ID.
+        TelegramService::sendMessage(self::TRANSFER_BOSS_CHAT_ID, $message, ['parse_mode' => 'HTML']);
+    }
+
+    private static function buildTransferTelegramMessage($data, array $driverIds, bool $isUpdated, bool $isReminder): string
+    {
+        // ?? null/'' throughout: this now always runs (see sendTelegramTransfer(), so the boss
+        // gets a copy even with no driver to gate on), including for a transfer that is still the
+        // same in-memory, just-created instance from TransferService::acceptRequest() — which
+        // never sets to_city_id/place_of_submission/mark/transport_type — so those keys can be
+        // genuinely absent from $data, not just null. Previously this only ran once a driver with
+        // a chat_id was found, which happened to hide the missing keys in that one real case.
+        $message = TourService::getOneMessage([
+            'transfer_id' => $data['id'],
+            'transfer_number' => 1000 + $data['id'],
+            'pax' => $data['pax'] ?? null,
+            'driver_ids' => $driverIds,
+            'driver_name' => $data['driver_name'] ?? null,
+            'to_city' => $data['to_city_id'] ?? null,
+            'transport_place' => $data['place_of_submission'] ?? null,
+            'route' => $data['route'] ?? null,
+            'mark' => $data['mark'] ?? null,
+            'nameplate' => $data['nameplate'] ?? null,
+            'date' => $data['date_time'] ?? null,
+            'transport_type' => $data['transport_type'] ?? null,
+            'price' => $data['price'] ?? '',
+            'comment' => $data['comment'] ?? null,
+        ]);
+
+        if ($isReminder) {
+            $message = "⏰ <b>НАПОМИНАНИЕ</b>\n".$message;
+        }
+
+        if ($isUpdated) {
+            $message = "♻️ <b>Обновлено</b>\n".$message;
+        }
+
+        return $message;
     }
 
     public static function getOneMessage($data, bool $withPhone = true): string
