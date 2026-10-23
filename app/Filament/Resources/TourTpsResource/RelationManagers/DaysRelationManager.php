@@ -35,18 +35,18 @@ class DaysRelationManager extends RelationManager
                     Components\DatePicker::make('date')
                         ->displayFormat('d.m.Y')
                         ->minDate(fn ($record) => $record ? $record->date : null)
-                        ->formatStateUsing(function ($record) {
-                            if ($record) {
-                                return $record->date;
-                            }
-
+                        // Only a default: on edit Filament fills the picker from the record itself.
+                        // formatStateUsing() used to hand the picker a raw Carbon here, which replaced
+                        // its own normalised "Y-m-d H:i:s" string and let the browser's timezone nudge
+                        // the date on every Livewire round trip.
+                        ->default(function () {
                             /** @var TourDay $lastDay */
                             $lastDay = $this->ownerRecord->daysNormal()->latest('date')->first();
                             if ($lastDay) {
-                                return $lastDay->date->addDay();
+                                return $lastDay->date->copy()->addDay()->format('Y-m-d');
                             }
 
-                            return $this->ownerRecord->start_date;
+                            return $this->ownerRecord->start_date?->format('Y-m-d');
                         })
                         ->native(false)
                         ->required(),
@@ -614,13 +614,13 @@ class DaysRelationManager extends RelationManager
         }
 
         $nights = (float) ($data['hotel_total_nights'] ?? 0);
-        $checkinDate = $get('../../date');
+        $checkinDate = $get('date');
         if ($nights > 1 && $checkinDate) {
             TourService::ensureFollowingDaysExist(
                 $tour,
                 Carbon::parse($checkinDate),
                 $nights,
-                $get('../../city_id')
+                $get('city_id')
             );
         }
     }
