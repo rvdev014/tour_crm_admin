@@ -543,6 +543,31 @@ select {
     background: rgb(var(--primary-700));
 }
 
+/* Hotel pricing periods: every item cycles through six colours so neighbours always
+   differ. The header is only tinted (not filled) so the date text keeps its contrast. */
+.repeater-periods .fi-fo-repeater-item {
+    --period: 37 99 235;
+    border: 2px solid rgb(var(--period));
+}
+.repeater-periods .fi-fo-repeater-item:nth-child(6n + 2) { --period: 217 119 6; }
+.repeater-periods .fi-fo-repeater-item:nth-child(6n + 3) { --period: 124 58 237; }
+.repeater-periods .fi-fo-repeater-item:nth-child(6n + 4) { --period: 225 29 72; }
+.repeater-periods .fi-fo-repeater-item:nth-child(6n + 5) { --period: 5 150 105; }
+.repeater-periods .fi-fo-repeater-item:nth-child(6n + 6) { --period: 8 145 178; }
+.repeater-periods .fi-fo-repeater-item-header {
+    background: rgb(var(--period) / 0.14);
+    border-radius: theme('borderRadius.md') theme('borderRadius.md') 0 0;
+}
+.dark .repeater-periods .fi-fo-repeater-item { --period: 96 165 250; }
+.dark .repeater-periods .fi-fo-repeater-item:nth-child(6n + 2) { --period: 251 191 36; }
+.dark .repeater-periods .fi-fo-repeater-item:nth-child(6n + 3) { --period: 167 139 250; }
+.dark .repeater-periods .fi-fo-repeater-item:nth-child(6n + 4) { --period: 251 113 133; }
+.dark .repeater-periods .fi-fo-repeater-item:nth-child(6n + 5) { --period: 52 211 153; }
+.dark .repeater-periods .fi-fo-repeater-item:nth-child(6n + 6) { --period: 34 211 238; }
+.dark .repeater-periods .fi-fo-repeater-item-header {
+    background: rgb(var(--period) / 0.2);
+}
+
 .repeater-expenses .fi-fo-repeater-item {
     border: 2px solid rgb(var(--success-600));
 }

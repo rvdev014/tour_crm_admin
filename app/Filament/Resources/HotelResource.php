@@ -107,6 +107,9 @@ class HotelResource extends Resource
                                             ->relationship('currentYearPeriods')
                                             ->label(__(''))
                                             ->grid(2)
+                                            // Each period gets its own border colour (see .repeater-periods in
+                                            // theme.css) so many periods are easy to tell apart.
+                                            ->extraAttributes(['class' => 'repeater-periods'])
                                             ->addActionLabel(__('+ Add Period'))
                                             ->addActionAlignment('end')
                                             ->collapsible()
