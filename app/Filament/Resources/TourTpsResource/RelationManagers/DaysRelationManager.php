@@ -711,7 +711,11 @@ class DaysRelationManager extends RelationManager
                         return view('filament.columns.status-column', [
                             'name' => $trainExpense?->train?->name,
                             'status' => $trainExpense?->status,
-                            'content' => '<p>'.($trainExpense?->arrival_time ? \Carbon\Carbon::parse($trainExpense->arrival_time)->format('d-m H:i') : '')." - {$trainExpense?->departure_time}</p>",
+                            // Departure first, then arrival.
+                            'content' => '<p>'.collect([
+                                $trainExpense?->departure_time,
+                                $trainExpense?->arrival_time ? \Carbon\Carbon::parse($trainExpense->arrival_time)->format('d-m H:i') : null,
+                            ])->filter()->join(' - ').'</p>',
                         ]);
                     }),
 
