@@ -79,19 +79,24 @@ class AdminPanelProvider extends PanelProvider
                 // every resource alongside getNavigationLabel()), or the
                 // match silently fails and Filament falls back to an
                 // unregistered, untranslated ad-hoc group per resource.
-                NavigationGroup::make(__('Tours')),
-                NavigationGroup::make(__('Operations')),
-                NavigationGroup::make(__('Finance'))
+                // The labels are closures because panel() runs at boot, before
+                // SetPanelLocale applies the user's language: a plain __() here
+                // would resolve in the default locale (ru) while the resources
+                // resolve in the user's (e.g. en), so the match failed and the
+                // groups lost their order and ->collapsed() defaults.
+                NavigationGroup::make(fn () => __('Tours')),
+                NavigationGroup::make(fn () => __('Operations')),
+                NavigationGroup::make(fn () => __('Finance'))
                     ->collapsed(),
-                NavigationGroup::make(__('Website Requests'))
+                NavigationGroup::make(fn () => __('Website Requests'))
                     ->collapsed(),
-                NavigationGroup::make(__('Website Content'))
+                NavigationGroup::make(fn () => __('Website Content'))
                     ->collapsed(),
-                NavigationGroup::make(__('Manual'))
+                NavigationGroup::make(fn () => __('Manual'))
                     ->collapsed(),
-                NavigationGroup::make(__('Team'))
+                NavigationGroup::make(fn () => __('Team'))
                     ->collapsed(),
-                NavigationGroup::make(__('Settings'))
+                NavigationGroup::make(fn () => __('Settings'))
                     ->collapsed(),
             ])
             // Filament keeps each user's open/closed groups in localStorage and only
@@ -103,9 +108,9 @@ class AdminPanelProvider extends PanelProvider
                 fn () => new HtmlString(<<<'HTML'
                     <script>
                         try {
-                            if (localStorage.getItem('navLayoutVersion') !== '2') {
+                            if (localStorage.getItem('navLayoutVersion') !== '3') {
                                 localStorage.removeItem('collapsedGroups');
-                                localStorage.setItem('navLayoutVersion', '2');
+                                localStorage.setItem('navLayoutVersion', '3');
                             }
                         } catch (e) {}
                     </script>
