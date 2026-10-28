@@ -94,7 +94,51 @@ class HotelResource extends Resource
                 Forms\Components\Tabs::make('Hotel')
                     ->tabs([
 
-                        // ── Tab 1: Basic Information ─────────────────────
+                        // ── Tab 1: Seasons & Periods ──────────────────────
+                        Forms\Components\Tabs\Tab::make(__('Seasons'))
+                            ->icon('heroicon-o-calendar-days')
+                            ->schema([
+
+                                Forms\Components\Section::make(__('Pricing Periods'))
+                                    ->description(__('Define high / low season date ranges for this year. Room prices are set per period in the Rooms tab below.'))
+                                    ->icon('heroicon-o-calendar')
+                                    ->schema([
+                                        Forms\Components\Repeater::make('periods')
+                                            ->relationship('currentYearPeriods')
+                                            ->label(__(''))
+                                            ->grid(2)
+                                            ->addActionLabel(__('+ Add Period'))
+                                            ->addActionAlignment('end')
+                                            ->collapsible()
+                                            ->itemLabel(function ($get, $uuid) {
+                                                $item = $get("periods.$uuid") ?? [];
+                                                $from = $item['start_date'] ?? '—';
+                                                $to = $item['end_date'] ?? '—';
+                                                $type = $item['season_type'] ?? '';
+
+                                                return "$from → $to".($type ? "  ($type)" : '');
+                                            })
+                                            ->schema([
+                                                Forms\Components\Grid::make(3)->schema([
+                                                    Forms\Components\DatePicker::make('start_date')
+                                                        ->label(__('From'))
+                                                        ->native(false)
+                                                        ->required(),
+                                                    Forms\Components\DatePicker::make('end_date')
+                                                        ->label(__('To'))
+                                                        ->native(false)
+                                                        ->minDate(fn ($get) => $get('start_date'))
+                                                        ->required(),
+                                                    Forms\Components\Select::make('season_type')
+                                                        ->label(__('Season Type'))
+                                                        ->options(RoomSeasonType::class)
+                                                        ->required(),
+                                                ]),
+                                            ]),
+                                    ]),
+                            ]),
+
+                        // ── Tab 2: Basic Information ─────────────────────
                         Forms\Components\Tabs\Tab::make(__('Basic Info'))
                             ->icon('heroicon-o-information-circle')
                             ->schema([
@@ -226,7 +270,7 @@ class HotelResource extends Resource
                                     ]),
                             ]),
 
-                        // ── Tab 2: Media & Description ────────────────────
+                        // ── Tab 3: Media & Description ────────────────────
                         Forms\Components\Tabs\Tab::make(__('Media & Description'))
                             ->icon('heroicon-o-photo')
                             ->schema([
@@ -278,7 +322,7 @@ class HotelResource extends Resource
                                     ]),
                             ]),
 
-                        // ── Tab 3: Facilities & Notes ─────────────────────
+                        // ── Tab 4: Facilities & Notes ─────────────────────
                         Forms\Components\Tabs\Tab::make(__('Facilities & Notes'))
                             ->icon('heroicon-o-star')
                             ->schema([
@@ -302,50 +346,6 @@ class HotelResource extends Resource
                                             ->label(__('Notes / Comments'))
                                             ->rows(4)
                                             ->maxLength(1000),
-                                    ]),
-                            ]),
-
-                        // ── Tab 4: Seasons & Periods ──────────────────────
-                        Forms\Components\Tabs\Tab::make(__('Seasons'))
-                            ->icon('heroicon-o-calendar-days')
-                            ->schema([
-
-                                Forms\Components\Section::make(__('Pricing Periods'))
-                                    ->description(__('Define high / low season date ranges for this year. Room prices are set per period in the Rooms tab below.'))
-                                    ->icon('heroicon-o-calendar')
-                                    ->schema([
-                                        Forms\Components\Repeater::make('periods')
-                                            ->relationship('currentYearPeriods')
-                                            ->label(__(''))
-                                            ->grid(2)
-                                            ->addActionLabel(__('+ Add Period'))
-                                            ->addActionAlignment('end')
-                                            ->collapsible()
-                                            ->itemLabel(function ($get, $uuid) {
-                                                $item = $get("periods.$uuid") ?? [];
-                                                $from = $item['start_date'] ?? '—';
-                                                $to = $item['end_date'] ?? '—';
-                                                $type = $item['season_type'] ?? '';
-
-                                                return "$from → $to".($type ? "  ($type)" : '');
-                                            })
-                                            ->schema([
-                                                Forms\Components\Grid::make(3)->schema([
-                                                    Forms\Components\DatePicker::make('start_date')
-                                                        ->label(__('From'))
-                                                        ->native(false)
-                                                        ->required(),
-                                                    Forms\Components\DatePicker::make('end_date')
-                                                        ->label(__('To'))
-                                                        ->native(false)
-                                                        ->minDate(fn ($get) => $get('start_date'))
-                                                        ->required(),
-                                                    Forms\Components\Select::make('season_type')
-                                                        ->label(__('Season Type'))
-                                                        ->options(RoomSeasonType::class)
-                                                        ->required(),
-                                                ]),
-                                            ]),
                                     ]),
                             ]),
 
