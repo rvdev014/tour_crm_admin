@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FlightController;
 use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\ManualController;
+use App\Http\Controllers\Api\TrainWebPriceController;
 use App\Http\Controllers\Api\TrainController;
 use App\Http\Controllers\Api\TransferController;
 use App\Http\Controllers\WhatsAppWebhookController;
@@ -51,6 +52,8 @@ Route::controller(ManualController::class)->group(function () {
     Route::get('/room-types', 'getRoomTypes');
     Route::get('/transport-classes', 'getTransportClasses');
     Route::get('/categories', 'getCategories');
+    Route::get('/train-prices/cities', [TrainWebPriceController::class, 'cities']);
+    Route::get('/train-prices', [TrainWebPriceController::class, 'index']);
     Route::get('/transfer-extras', [TransferController::class, 'getExtras']);
     Route::post('/transfer-quotes', [TransferController::class, 'storeQuote'])
         ->middleware('throttle:30,1');

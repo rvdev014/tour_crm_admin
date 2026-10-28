@@ -25,4 +25,9 @@ class Train extends Model
     {
         return $this->hasMany(TrainTariff::class);
     }
+
+    public function webPrices(): HasMany
+    {
+        return $this->hasMany(TrainWebPrice::class);
+    }
 }

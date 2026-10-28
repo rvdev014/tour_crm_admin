@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\TrainWebClass;
 use App\Enums\WagonClass;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,6 +26,9 @@ class StoreTrainRequestRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'string', 'email', 'max:255'],
             'comment' => ['nullable', 'string', 'max:1000'],
+            // Set together when the visitor books a guaranteed ticket from the price list.
+            'train_web_price_id' => ['nullable', 'integer', 'exists:train_web_prices,id', 'required_with:train_class'],
+            'train_class' => ['nullable', Rule::enum(TrainWebClass::class), 'required_with:train_web_price_id'],
         ];
     }
 }

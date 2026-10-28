@@ -139,6 +139,7 @@ class TrainRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('webPrice.train'))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
@@ -173,6 +174,20 @@ class TrainRequestResource extends Resource
                 Tables\Columns\TextColumn::make('wagon_class')
                     ->label(__('Wagon Class'))
                     ->badge(),
+
+                Tables\Columns\TextColumn::make('is_guaranteed')
+                    ->label(__('Guaranteed'))
+                    ->badge()
+                    ->color(fn (bool $state) => $state ? 'success' : 'gray')
+                    ->formatStateUsing(fn (bool $state) => $state ? __('Guaranteed') : '-')
+                    // Which ticket the visitor picked: train, class and the fixed UZS price.
+                    ->tooltip(fn (TrainRequest $record) => $record->is_guaranteed
+                        ? collect([
+                            $record->webPrice?->train?->name,
+                            $record->train_class ? __($record->train_class->getLabel()) : null,
+                            $record->price_uzs ? number_format($record->price_uzs, 0, '.', ' ').' UZS' : null,
+                        ])->filter()->join(' · ')
+                        : null),
 
                 Tables\Columns\TextColumn::make('user.name')
                     ->label(__('User'))
@@ -212,6 +227,8 @@ class TrainRequestResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\TernaryFilter::make('is_guaranteed')
+                    ->label(__('Guaranteed')),
                 Tables\Filters\SelectFilter::make('user_id')
                     ->label(__('User'))
                     ->relationship('user', 'name')

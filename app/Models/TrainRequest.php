@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TrainWebClass;
 use App\Enums\WagonClass;
 use App\Enums\WebTourStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,6 +29,10 @@ use Illuminate\Support\Carbon;
  * @property string|null $comment
  * @property WebTourStatus $status
  * @property int|null $status_updated_by
+ * @property bool $is_guaranteed
+ * @property int|null $train_web_price_id
+ * @property TrainWebClass|null $train_class
+ * @property float|null $price_uzs
  * @property-read User|null $user
  * @property-read User|null $statusUpdatedBy
  */
@@ -48,6 +53,10 @@ class TrainRequest extends Model
         'comment',
         'status',
         'status_updated_by',
+        'is_guaranteed',
+        'train_web_price_id',
+        'train_class',
+        'price_uzs',
     ];
 
     protected $casts = [
@@ -55,11 +64,19 @@ class TrainRequest extends Model
         'return_date' => 'date',
         'wagon_class' => WagonClass::class,
         'status' => WebTourStatus::class,
+        'is_guaranteed' => 'boolean',
+        'train_class' => TrainWebClass::class,
+        'price_uzs' => 'float',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function webPrice(): BelongsTo
+    {
+        return $this->belongsTo(TrainWebPrice::class, 'train_web_price_id');
     }
 
     public function statusUpdatedBy(): BelongsTo
