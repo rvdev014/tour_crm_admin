@@ -36,6 +36,7 @@ enum TourStatus:int implements HasLabel, HasColor, HasIcon
         return match ($this) {
             self::Confirmed    => '',
             self::NotConfirmed => '',
+            self::Cancelled    => 'heroicon-o-x-circle',
         };
     }
 }
