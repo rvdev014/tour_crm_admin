@@ -12,12 +12,14 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -79,17 +81,36 @@ class AdminPanelProvider extends PanelProvider
                 // unregistered, untranslated ad-hoc group per resource.
                 NavigationGroup::make(__('Tours')),
                 NavigationGroup::make(__('Operations')),
-                NavigationGroup::make(__('Finance')),
-                NavigationGroup::make(__('Manual'))
+                NavigationGroup::make(__('Finance'))
                     ->collapsed(),
-                NavigationGroup::make(__('Website Requests')),
+                NavigationGroup::make(__('Website Requests'))
+                    ->collapsed(),
                 NavigationGroup::make(__('Website Content'))
+                    ->collapsed(),
+                NavigationGroup::make(__('Manual'))
                     ->collapsed(),
                 NavigationGroup::make(__('Team'))
                     ->collapsed(),
                 NavigationGroup::make(__('Settings'))
                     ->collapsed(),
             ])
+            // Filament keeps each user's open/closed groups in localStorage and only
+            // applies ->collapsed() defaults when nothing is saved, so people who
+            // ever clicked a group would never see a new default layout. Bump the
+            // version below to reset everyone to the defaults once after a layout change.
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn () => new HtmlString(<<<'HTML'
+                    <script>
+                        try {
+                            if (localStorage.getItem('navLayoutVersion') !== '2') {
+                                localStorage.removeItem('collapsedGroups');
+                                localStorage.setItem('navLayoutVersion', '2');
+                            }
+                        } catch (e) {}
+                    </script>
+                    HTML),
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([])
