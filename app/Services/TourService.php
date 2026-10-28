@@ -22,6 +22,7 @@ use App\Models\RoomType;
 use App\Models\Setting;
 use App\Models\Show;
 use App\Enums\TourStatus;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Tour;
 use App\Models\TourDayExpense;
 use App\Models\TourHotel;
@@ -42,6 +43,21 @@ class TourService
     // (create, update, reminder) sent by sendTelegramTransfer(), including transfers
     // with no driver assigned yet. Hardcoded per operator request, +998 93 394 31 91.
     private const TRANSFER_BOSS_CHAT_ID = '2254596';
+
+    /**
+     * Default order of the tour lists: tours that haven't finished yet (running or
+     * upcoming) first, soonest start on top; finished tours after, latest end first.
+     * Judged by the end date so a tour that already started but is still running
+     * doesn't drop into the finished section. CURRENT_DATE rather than NOW() keeps a
+     * tour ending today on top for the whole day.
+     */
+    public static function orderByActiveFirst(Builder $query): Builder
+    {
+        return $query
+            ->orderByRaw('CASE WHEN COALESCE(end_date, start_date) >= CURRENT_DATE THEN 0 ELSE 1 END ASC')
+            ->orderByRaw('CASE WHEN COALESCE(end_date, start_date) >= CURRENT_DATE THEN start_date END ASC')
+            ->orderByRaw('CASE WHEN COALESCE(end_date, start_date) < CURRENT_DATE THEN end_date END DESC');
+    }
 
     /**
      * Hover text for a Not Confirmed tour in the list: one line per expense that is

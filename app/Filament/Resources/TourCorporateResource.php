@@ -687,7 +687,7 @@ class TourCorporateResource extends Resource
         return $table
             ->modifyQueryUsing(fn ($query) => $query->with('groups.expenses'))
             ->striped()
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort(fn (Builder $query) => TourService::orderByActiveFirst($query))
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
             ->filters([

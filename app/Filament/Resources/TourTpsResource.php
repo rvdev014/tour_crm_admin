@@ -369,12 +369,9 @@ class TourTpsResource extends Resource
         return $table
             ->modifyQueryUsing(function ($query) {
                 return $query
-                    ->with('company', 'createdBy', 'country', 'days.expenses')
-                    ->orderByRaw('CASE WHEN start_date >= NOW() THEN 0 ELSE 1 END ASC')
-                    ->orderByRaw('CASE WHEN start_date >= NOW() THEN start_date END ASC')
-                    ->orderByRaw('CASE WHEN start_date < NOW() THEN start_date END DESC');
-                //                    ->orderBy('start_date', 'desc')
+                    ->with('company', 'createdBy', 'country', 'days.expenses');
             })
+            ->defaultSort(fn (Builder $query) => TourService::orderByActiveFirst($query))
             ->striped()
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
