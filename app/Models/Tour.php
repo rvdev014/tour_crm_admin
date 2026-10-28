@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CurrencyEnum;
+use App\Enums\ExpenseStatus;
 use App\Enums\ExpenseType;
 use App\Enums\GuideType;
 use App\Enums\PaymentStatus;
@@ -237,6 +238,41 @@ class Tour extends Model
             'id',
             'id'
         );
+    }
+
+    /**
+     * Every expense of the tour: corporate expenses hang off the groups, TPS ones off the days.
+     *
+     * @return \Illuminate\Support\Collection<int, TourDayExpense>
+     */
+    public function listExpenses(): \Illuminate\Support\Collection
+    {
+        return $this->isCorporate()
+            ? $this->groups->flatMap->expenses
+            : $this->days->flatMap->expenses;
+    }
+
+    /**
+     * Expenses still waiting on a confirmation: New, or no status set at all.
+     *
+     * @return \Illuminate\Support\Collection<int, TourDayExpense>
+     */
+    public function unconfirmedExpenses(): \Illuminate\Support\Collection
+    {
+        return $this->listExpenses()->filter(
+            fn (TourDayExpense $expense) => $expense->status === null || $expense->status === ExpenseStatus::New
+        );
+    }
+
+    // What the list badge shows. Worked out from the expenses rather than read from the
+    // stored `status`, which TPS tours never recalculate after creation.
+    public function displayStatus(): TourStatus
+    {
+        if ($this->is_cancelled) {
+            return TourStatus::Cancelled;
+        }
+
+        return $this->unconfirmedExpenses()->isEmpty() ? TourStatus::Confirmed : TourStatus::NotConfirmed;
     }
 
     public function isCorporate(): bool

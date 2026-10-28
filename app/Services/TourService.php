@@ -21,6 +21,7 @@ use App\Models\RestaurantMenu;
 use App\Models\RoomType;
 use App\Models\Setting;
 use App\Models\Show;
+use App\Enums\TourStatus;
 use App\Models\Tour;
 use App\Models\TourDayExpense;
 use App\Models\TourHotel;
@@ -41,6 +42,34 @@ class TourService
     // (create, update, reminder) sent by sendTelegramTransfer(), including transfers
     // with no driver assigned yet. Hardcoded per operator request, +998 93 394 31 91.
     private const TRANSFER_BOSS_CHAT_ID = '2254596';
+
+    /**
+     * Hover text for a Not Confirmed tour in the list: one line per expense that is
+     * still New or has no status. Null for any other tour so no tooltip shows.
+     */
+    public static function unconfirmedTooltip(Tour $tour): ?string
+    {
+        if ($tour->displayStatus() !== TourStatus::NotConfirmed) {
+            return null;
+        }
+
+        $expenses = $tour->unconfirmedExpenses();
+        $lines = $expenses->take(10)->map(function (TourDayExpense $expense) use ($tour) {
+            $where = $tour->isCorporate()
+                ? $expense->tourGroup?->name
+                : $expense->tourDay?->date?->format('d.m');
+
+            return collect([$where, __($expense->type?->getLabel() ?? ''), $expense->status ? __($expense->status->getLabel()) : __('No status')])
+                ->filter()
+                ->join(' · ');
+        });
+
+        if ($expenses->count() > 10) {
+            $lines->push(__('+:count more', ['count' => $expenses->count() - 10]));
+        }
+
+        return $lines->join("\n");
+    }
 
     public function notifyDrivers(): void
     {

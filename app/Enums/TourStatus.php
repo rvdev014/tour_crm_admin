@@ -10,12 +10,15 @@ enum TourStatus:int implements HasLabel, HasColor, HasIcon
 {
     case Confirmed = 1;
     case NotConfirmed = 2;
+    // Display-only: derived from tours.is_cancelled (see Tour::displayStatus()), never stored in tours.status.
+    case Cancelled = 3;
 
     public function getLabel(): string
     {
         return match ($this) {
             self::Confirmed    => 'Confirmed',
             self::NotConfirmed => 'Not Confirmed',
+            self::Cancelled    => 'Cancelled',
         };
     }
 
@@ -24,6 +27,7 @@ enum TourStatus:int implements HasLabel, HasColor, HasIcon
         return match ($this) {
             self::Confirmed    => 'success',
             self::NotConfirmed => 'danger',
+            self::Cancelled    => 'gray',
         };
     }
 

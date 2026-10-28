@@ -710,3 +710,8 @@ select {
 .fi-simple-main .fi-btn-primary:hover {
     animation: none;
 }
+
+/* Multi-line tooltips (e.g. the unconfirmed-expenses list on the tour status badge). */
+.tippy-content {
+    white-space: pre-line;
+}

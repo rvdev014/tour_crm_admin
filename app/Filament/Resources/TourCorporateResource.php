@@ -685,6 +685,7 @@ class TourCorporateResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('groups.expenses'))
             ->striped()
             ->defaultSort('created_at', 'desc')
             ->paginationPageOptions([30, 50, 100])
@@ -824,8 +825,10 @@ class TourCorporateResource extends Resource
                     ->searchable(),
                 
                 Columns\TextColumn::make('status')
+                    ->state(fn (Tour $record) => $record->displayStatus())
                     ->badge()
-                    ->searchable(),
+                    ->tooltip(fn (Tour $record) => TourService::unconfirmedTooltip($record)),
+
                 
                 Columns\TextColumn::make('expenses_total')
                     ->badge(fn(Tour $record) => TourService::isVisible($record))

@@ -590,7 +590,7 @@ class ExpenseService
         $tourStatus = TourStatus::Confirmed;
         foreach ($allExpenses as $expense) {
             $status = $expense['status'] ?? null;
-            if ($status == ExpenseStatus::New->value) {
+            if (blank($status) || $status == ExpenseStatus::New->value) {
                 $tourStatus = TourStatus::NotConfirmed;
                 break;
             }

@@ -369,8 +369,7 @@ class TourTpsResource extends Resource
         return $table
             ->modifyQueryUsing(function ($query) {
                 return $query
-                    ->without('days', 'days.expenses')
-                    ->with('company', 'createdBy', 'country')
+                    ->with('company', 'createdBy', 'country', 'days.expenses')
                     ->orderByRaw('CASE WHEN start_date >= NOW() THEN 0 ELSE 1 END ASC')
                     ->orderByRaw('CASE WHEN start_date >= NOW() THEN start_date END ASC')
                     ->orderByRaw('CASE WHEN start_date < NOW() THEN start_date END DESC');
@@ -548,7 +547,10 @@ class TourTpsResource extends Resource
                         return 'LOCAL GUIDE';
                     }),
                 Columns\TextColumn::make('status')
-                    ->badge(),
+                    ->state(fn (Tour $record) => $record->displayStatus())
+                    ->badge()
+                    ->tooltip(fn (Tour $record) => TourService::unconfirmedTooltip($record)),
+
                 Columns\TextColumn::make('total_price')
                     ->formatStateUsing(function ($record, $state) {
                         /** @var Tour $record */
