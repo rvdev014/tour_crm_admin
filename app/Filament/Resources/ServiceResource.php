@@ -53,7 +53,7 @@ class ServiceResource extends Resource
     protected static ?string $model = Service::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-bell';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Content';
     protected static ?int $navigationSort = 7;
     
     public static function canViewAny(): bool

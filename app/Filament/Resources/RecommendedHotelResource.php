@@ -53,7 +53,7 @@ class RecommendedHotelResource extends Resource
     protected static ?string $model = RecommendedHotel::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-star';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Content';
     protected static ?int $navigationSort = 6;
     
     public static function canViewAny(): bool

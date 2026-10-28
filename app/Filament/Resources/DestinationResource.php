@@ -55,7 +55,7 @@ class DestinationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-globe-europe-africa';
 
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Content';
 
     protected static ?int $navigationSort = 3;
 

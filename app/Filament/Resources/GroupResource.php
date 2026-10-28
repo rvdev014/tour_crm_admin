@@ -51,7 +51,7 @@ class GroupResource extends Resource
     protected static ?string $model = Group::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationGroup = 'Team';
 
     public static function form(Form $form): Form
     {

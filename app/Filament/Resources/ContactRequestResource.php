@@ -56,7 +56,7 @@ class ContactRequestResource extends Resource
     protected static ?string $label = 'Contact Requests';
 
     protected static ?string $navigationIcon = 'heroicon-o-phone';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Requests';
     protected static ?int $navigationSort = 2;
 
     public static function canViewAny(): bool

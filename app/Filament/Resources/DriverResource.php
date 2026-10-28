@@ -64,7 +64,7 @@ class DriverResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
     protected static ?int $navigationSort = 10;
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationGroup = 'Team';
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function canViewAny(): bool

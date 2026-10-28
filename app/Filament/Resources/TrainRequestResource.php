@@ -57,7 +57,7 @@ class TrainRequestResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
 
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Requests';
 
     protected static ?int $navigationSort = 5;
 

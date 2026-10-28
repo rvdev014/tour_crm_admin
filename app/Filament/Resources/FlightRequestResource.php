@@ -56,7 +56,7 @@ class FlightRequestResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-paper-airplane';
 
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Requests';
 
     protected static ?int $navigationSort = 5;
 

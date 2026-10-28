@@ -59,7 +59,7 @@ class WebTourRequestResource extends Resource
     protected static ?string $pluralLabel = 'Web Tour Requests';
     
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Requests';
     protected static ?int $navigationSort = 3;
     
     public static function canViewAny(): bool

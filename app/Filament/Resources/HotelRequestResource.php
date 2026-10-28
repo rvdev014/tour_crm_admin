@@ -57,7 +57,7 @@ class HotelRequestResource extends Resource
     protected static ?string $pluralLabel = 'Hotel Requests';
     
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Requests';
     protected static ?int $navigationSort = 4;
     
     public static function canViewAny(): bool

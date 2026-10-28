@@ -53,7 +53,7 @@ class BannerResource extends Resource
     protected static ?string $model = Banner::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Content';
     protected static ?int $navigationSort = 5;
     
     public static function canViewAny(): bool

@@ -57,7 +57,7 @@ class WebTourResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
 
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Content';
 
     protected static ?int $navigationSort = 1;
 

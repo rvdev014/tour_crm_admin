@@ -53,7 +53,7 @@ class CategoryResource extends Resource
     protected static ?string $model = Category::class;
     
     protected static ?string $navigationIcon = 'heroicon-o-map';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Content';
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form

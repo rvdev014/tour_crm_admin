@@ -54,7 +54,7 @@ class TransportClassResource extends Resource
     protected static ?string $model = TransportClass::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Content';
     protected static ?int $navigationSort = 6;
     
     public static function canViewAny(): bool

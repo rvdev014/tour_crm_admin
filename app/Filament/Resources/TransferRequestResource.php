@@ -64,7 +64,7 @@ class TransferRequestResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Requests';
 
     protected static ?int $navigationSort = 4;
 

@@ -53,7 +53,7 @@ class FacilityResource extends Resource
     protected static ?string $model = Facility::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
-    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?string $navigationGroup = 'Website Content';
     protected static ?int $navigationSort = 5;
     
     public static function canViewAny(): bool

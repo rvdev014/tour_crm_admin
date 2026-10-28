@@ -82,7 +82,10 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make(__('Finance')),
                 NavigationGroup::make(__('Manual'))
                     ->collapsed(),
-                NavigationGroup::make(__('Website Management'))
+                NavigationGroup::make(__('Website Requests')),
+                NavigationGroup::make(__('Website Content'))
+                    ->collapsed(),
+                NavigationGroup::make(__('Team'))
                     ->collapsed(),
                 NavigationGroup::make(__('Settings'))
                     ->collapsed(),
