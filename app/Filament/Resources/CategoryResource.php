@@ -61,9 +61,9 @@ class CategoryResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name_ru')
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('name_en')
+                    ->required()
                     ->maxLength(255),
             ]);
     }

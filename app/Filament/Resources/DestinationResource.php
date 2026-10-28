@@ -105,7 +105,6 @@ class DestinationResource extends Resource
                                 ->schema([
                                     Forms\Components\TextInput::make('title_ru')
                                         ->label(__('Title (RU)'))
-                                        ->required()
                                         ->live(onBlur: true)
                                         ->maxLength(255)
                                         ->afterStateUpdated(function ($state, $get, $set) {
@@ -115,6 +114,7 @@ class DestinationResource extends Resource
                                         }),
                                     Forms\Components\TextInput::make('title_en')
                                         ->label(__('Title (EN)'))
+                                        ->required()
                                         ->maxLength(255)
                                         ->live(onBlur: true)
                                         ->afterStateUpdated(function ($state, $get, $set) {
@@ -242,10 +242,10 @@ class DestinationResource extends Resource
                                             Forms\Components\Grid::make(3)->schema([
                                                 Forms\Components\TextInput::make('title_ru')
                                                     ->label(__('Title (RU)'))
-                                                    ->required()
                                                     ->maxLength(255),
                                                 Forms\Components\TextInput::make('title_en')
                                                     ->label(__('Title (EN)'))
+                                                    ->required()
                                                     ->maxLength(255),
                                                 Forms\Components\TextInput::make('anchor')
                                                     ->label(__('Anchor'))

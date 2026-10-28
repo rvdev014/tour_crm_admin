@@ -78,7 +78,7 @@ class Destination extends Model
 
     public function children(): HasMany
     {
-        return $this->hasMany(self::class, 'parent_id')->orderBy('order')->orderBy('title_ru');
+        return $this->hasMany(self::class, 'parent_id')->orderBy('order')->orderByRaw('COALESCE(title_ru, title_en)');
     }
 
     public function publishedChildren(): HasMany

@@ -83,10 +83,10 @@ class WebTourResource extends Resource
                                 ->schema([
                                     Forms\Components\TextInput::make('name_ru')
                                         ->label(__('Name (RU)'))
-                                        ->required()
                                         ->maxLength(255),
                                     Forms\Components\TextInput::make('name_en')
                                         ->label(__('Name (EN)'))
+                                        ->required()
                                         ->maxLength(255),
                                 ]),
 
@@ -224,10 +224,10 @@ class WebTourResource extends Resource
                                             Forms\Components\Grid::make(3)->schema([
                                                 Forms\Components\TextInput::make('place_name_ru')
                                                     ->label(__('Place Name (RU)'))
-                                                    ->required()
                                                     ->maxLength(255),
                                                 Forms\Components\TextInput::make('place_name_en')
                                                     ->label(__('Place Name (EN)'))
+                                                    ->required()
                                                     ->maxLength(255),
                                                 Forms\Components\Select::make('city_id')
                                                     ->label(__('City'))
@@ -254,12 +254,12 @@ class WebTourResource extends Resource
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\RichEditor::make('description_ru')
                                                     ->label(__('Description (RU)'))
-                                                    ->required()
                                                     ->toolbarButtons([
                                                         'bold', 'italic', 'bulletList', 'orderedList', 'undo', 'redo',
                                                     ]),
                                                 Forms\Components\RichEditor::make('description_en')
                                                     ->label(__('Description (EN)'))
+                                                    ->required()
                                                     ->toolbarButtons([
                                                         'bold', 'italic', 'bulletList', 'orderedList', 'undo', 'redo',
                                                     ]),
@@ -323,10 +323,10 @@ class WebTourResource extends Resource
                                             Forms\Components\Grid::make(2)->schema([
                                                 Forms\Components\TextInput::make('header_ru')
                                                     ->label(__('Header (RU)'))
-                                                    ->required()
                                                     ->maxLength(255),
                                                 Forms\Components\TextInput::make('header_en')
                                                     ->label(__('Header (EN)'))
+                                                    ->required()
                                                     ->maxLength(255),
                                             ]),
                                             Forms\Components\Grid::make(2)->schema([

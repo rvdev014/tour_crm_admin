@@ -66,9 +66,9 @@ class FacilityResource extends Resource
         return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('name_ru')
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('name_en')
+                    ->required()
                     ->maxLength(255),
                 Forms\Components\FileUpload::make('icon')
                     ->image(),

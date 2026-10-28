@@ -66,9 +66,9 @@ class BannerResource extends Resource
         return $form->disabled(fn() => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('header_ru')
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('header_en')
+                    ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('description_ru')
                     ->columnSpanFull(),

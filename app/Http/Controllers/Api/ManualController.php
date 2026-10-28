@@ -232,7 +232,7 @@ class ManualController extends Controller
             ->countries()
             ->with(['publishedChildren'])
             ->orderBy('order')
-            ->orderBy('title_ru')
+            ->orderByRaw('COALESCE(title_ru, title_en)')
             ->get();
 
         return response()->json(['data' => DestinationResource::collection($destinations)]);

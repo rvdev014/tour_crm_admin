@@ -53,10 +53,10 @@ class TransferExtraResource extends Resource
         return $form->disabled(fn () => auth()->user()->isOperator())
             ->schema([
                 Forms\Components\TextInput::make('name_ru')
-                    ->required()
                     ->maxLength(255)
                     ->label(__('Name (RU)')),
                 Forms\Components\TextInput::make('name_en')
+                    ->required()
                     ->maxLength(255)
                     ->label(__('Name (EN)')),
                 Forms\Components\Textarea::make('description_ru')
