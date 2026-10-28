@@ -69,8 +69,14 @@ class WebTourRequestResource extends Resource
     
     public static function getNavigationBadge(): ?string
     {
-        $count = static::$model::where('status', WebTourStatus::New->value)->count();
-        return $count > 0 ? (string)$count : null;
+        $count = static::$model::needsAttention()->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'danger';
     }
     
     public static function canCreate(): bool
@@ -145,6 +151,7 @@ class WebTourRequestResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->recordClasses(fn ($record) => $record->requiresAttention() ? 'ep-row-danger' : null)
             ->filters([
                 Tables\Filters\SelectFilter::make('user_id')
                     ->label(__('User'))
@@ -240,7 +247,8 @@ class WebTourRequestResource extends Resource
                     ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->description(fn ($record) => $record->created_at?->diffForHumans())
+                    ->toggleable(),
                     
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('Updated At'))

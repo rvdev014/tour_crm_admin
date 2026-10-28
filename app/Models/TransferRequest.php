@@ -93,4 +93,24 @@ class TransferRequest extends Model
     {
         return $this->belongsTo(TransferBooking::class);
     }
+
+    /**
+     * Requests an operator still has to look at. Shared by the sidebar badge, the red row
+     * highlight and the live new-request alert, so all three always agree.
+     */
+    public function scopeNeedsAttention(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        // Legs created by the booking flow land at Booked awaiting accept (see TransferBookingResource);
+        // together with any still-open legacy wizard request that is what needs staff attention.
+        return $query
+            ->whereIn('status', [TransferRequestStatus::Created->value, TransferRequestStatus::Booked->value])
+            ->whereNull('transfer_booking_id');
+    }
+
+    /** Per-row twin of scopeNeedsAttention() (query: Model::needsAttention()), used for the red row highlight. Keep the two in step. */
+    public function requiresAttention(): bool
+    {
+        return in_array($this->status, [TransferRequestStatus::Created, TransferRequestStatus::Booked], true)
+            && $this->transfer_booking_id === null;
+    }
 }

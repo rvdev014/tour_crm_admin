@@ -75,15 +75,14 @@ class TransferRequestResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        // Legs created by the new booking flow (see TransferBookingResource)
-        // land directly at Booked, awaiting accept — that, plus any
-        // still-open legacy wizard request, is what needs staff attention.
-        $count = static::$model::whereIn('status', [
-            TransferRequestStatus::Created->value,
-            TransferRequestStatus::Booked->value,
-        ])->whereNull('transfer_booking_id')->count();
+        $count = static::$model::needsAttention()->count();
 
         return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'danger';
     }
 
     public static function canCreate(): bool
@@ -161,6 +160,7 @@ class TransferRequestResource extends Resource
     {
         return $table
             ->defaultSort('status', 'asc')
+            ->recordClasses(fn ($record) => $record->requiresAttention() ? 'ep-row-danger' : null)
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
             ->columns([
@@ -259,7 +259,8 @@ class TransferRequestResource extends Resource
                     ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->description(fn ($record) => $record->created_at?->diffForHumans())
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('Updated At'))

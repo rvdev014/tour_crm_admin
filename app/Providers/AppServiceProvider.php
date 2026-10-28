@@ -40,6 +40,12 @@ class AppServiceProvider extends ServiceProvider
             fn () => view('filament.hooks.login-tagline'),
         );
 
+        // Topbar pill + toast/beep when a new website request arrives (App\Livewire\NewRequestsAlert).
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::USER_MENU_BEFORE,
+            fn () => view('filament.hooks.new-requests-alert'),
+        );
+
         // App-wide footer (renders on both the auth layout and every panel page —
         // PanelsRenderHook::FOOTER is shared by simple.blade.php and index.blade.php).
         // Styled via .ep-footer in theme.css.

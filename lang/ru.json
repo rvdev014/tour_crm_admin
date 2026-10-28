@@ -635,5 +635,12 @@
     "Client phone": "Телефон клиента",
     "Enter the phone number in international format, e.g. +44 7911 123456.": "Введите номер в международном формате, например +44 7911 123456.",
     "Time": "Время",
-    "Created by": "Создал"
+    "Created by": "Создал",
+    "New request": "Новая заявка",
+    "Waiting for an operator": "Ждёт оператора",
+    "Open": "Открыть",
+    "new requests": "новых заявок",
+    "No new requests": "Нет новых заявок",
+    "Sound on": "Звук включён",
+    "Sound off": "Звук выключен"
 }

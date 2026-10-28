@@ -65,9 +65,14 @@ class TransferBookingResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = static::$model::where('status', TransferBookingStatus::New->value)->count();
+        $count = static::$model::needsAttention()->count();
 
         return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'danger';
     }
 
     public static function form(Form $form): Form
@@ -104,6 +109,7 @@ class TransferBookingResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->recordClasses(fn ($record) => $record->requiresAttention() ? 'ep-row-danger' : null)
             ->columns([
                 Tables\Columns\TextColumn::make('reference')
                     ->searchable()
@@ -126,7 +132,8 @@ class TransferBookingResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn ($record) => $record->created_at?->diffForHumans()),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')

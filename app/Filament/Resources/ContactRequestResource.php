@@ -66,8 +66,14 @@ class ContactRequestResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = static::$model::where('status', WebTourStatus::New->value)->count();
-        return $count > 0 ? (string)$count : null;
+        $count = static::$model::needsAttention()->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'danger';
     }
 
     public static function canCreate(): bool
@@ -156,6 +162,7 @@ class ContactRequestResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->recordClasses(fn ($record) => $record->requiresAttention() ? 'ep-row-danger' : null)
             ->paginationPageOptions([30, 50, 100])
             ->defaultPaginationPageOption(30)
             ->recordUrl(fn(ContactRequest $record) => static::getUrl('view', ['record' => $record]))
@@ -164,7 +171,8 @@ class ContactRequestResource extends Resource
                     ->label(__('Created'))
                     ->dateTime('d.m.Y H:i')
                     ->description(fn(ContactRequest $record) => $record->created_at->diffForHumans())
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn ($record) => $record->created_at?->diffForHumans()),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
