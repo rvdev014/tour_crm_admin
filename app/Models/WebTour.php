@@ -75,6 +75,11 @@ class WebTour extends Model
         return $this->getLocaleValue('description');
     }
 
+    public function getPriceNoteAttribute(): ?string
+    {
+        return $this->getLocaleValue('price_note');
+    }
+
     public function packages(): BelongsToMany
     {
         return $this->belongsToMany(Package::class, 'web_tour_packages');

@@ -470,6 +470,23 @@ class WebTourResource extends Resource
                                             ]),
                                         ]),
                                 ]),
+
+                            // Note shown under the price list on the website
+                            Forms\Components\Section::make(__('Price note'))
+                                ->description(__('Shown under the price list on the website. Leave empty to use the default text.'))
+                                ->icon('heroicon-o-information-circle')
+                                ->visible(fn ($get) => $get('type') === WebTourPriceType::PerPerson->value)
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\Textarea::make('price_note_en')
+                                        ->label(__('Price note (EN)'))
+                                        ->rows(3)
+                                        ->maxLength(1000),
+                                    Forms\Components\Textarea::make('price_note_ru')
+                                        ->label(__('Price note (RU)'))
+                                        ->rows(3)
+                                        ->maxLength(1000),
+                                ]),
                         ]),
 
                     // ── Tab 6: Similar Tours ──────────────────────────────

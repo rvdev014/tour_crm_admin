@@ -25,6 +25,7 @@ class WebTourResource extends JsonResource
             'price_type' => $this->type,
             'name' => $this->name,
             'description' => $this->description,
+            'price_note' => $this->price_note,
             'current_price' => $this->getCurrentPrice(),
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
