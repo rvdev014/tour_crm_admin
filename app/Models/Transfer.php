@@ -49,7 +49,6 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property string $route
  * @property string $transport_route
  * @property int $transport_class_id
- * @property int $route_id
  * @property string $passenger
  * @property numeric $sell_price
  * @property numeric $sell_price_result

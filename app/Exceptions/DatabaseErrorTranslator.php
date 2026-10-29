@@ -34,10 +34,6 @@ class DatabaseErrorTranslator
             'field' => null,
             'message' => 'This group number was just taken by another tour. Please save again.',
         ],
-        'route_prices_route_id_transport_class_id_unique' => [
-            'field' => null,
-            'message' => 'This transport class already has a price on this route.',
-        ],
     ];
 
     /** Referenced/referencing table name => plain-English label for messages. */

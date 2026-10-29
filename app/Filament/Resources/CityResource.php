@@ -8,10 +8,14 @@ use App\Models\City;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Validation\Rules\Unique;
 
@@ -110,7 +114,44 @@ class CityResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->authorize(fn() => auth()->user()->isAdmin()),
+                    // A city that is still referenced (hotels, tours, ...) is rejected by the database. Deleting the
+                    // selection one by one lets the unused ones go and reports the rest, instead of failing the whole batch.
+                    Tables\Actions\BulkAction::make('deleteUnused')
+                        ->label(__('Delete selected'))
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalDescription(__('Cities that are still used in hotels, tours or other records will be skipped.'))
+                        ->deselectRecordsAfterCompletion()
+                        ->authorize(fn() => auth()->user()->isAdmin())
+                        ->action(function (Collection $records) {
+                            $deleted = 0;
+                            $skipped = [];
+
+                            foreach ($records as $city) {
+                                try {
+                                    DB::transaction(fn () => $city->delete());
+                                    $deleted++;
+                                } catch (QueryException) {
+                                    $skipped[] = $city->name;
+                                }
+                            }
+
+                            if ($deleted > 0) {
+                                Notification::make()
+                                    ->title(__('Deleted cities: :count', ['count' => $deleted]))
+                                    ->success()
+                                    ->send();
+                            }
+
+                            if ($skipped) {
+                                Notification::make()
+                                    ->title(__('Skipped, still in use: :names', ['names' => implode(', ', $skipped)]))
+                                    ->warning()
+                                    ->persistent()
+                                    ->send();
+                            }
+                        }),
                 ]),
             ]);
     }

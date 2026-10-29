@@ -69,7 +69,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $transport_place
  * @property string $send_username
  * @property string $plane_route
- * @property int $route_id
  * @property int $transport_class_id
  *
  * Train
@@ -231,11 +230,6 @@ class TourDayExpense extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
-    }
-
-    public function route(): BelongsTo
-    {
-        return $this->belongsTo(Route::class);
     }
 
     public function transportClass(): BelongsTo
