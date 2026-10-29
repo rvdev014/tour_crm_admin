@@ -491,7 +491,7 @@
     "Price note": "Примечание к ценам",
     "Price note (EN)": "Примечание к ценам (EN)",
     "Price note (RU)": "Примечание к ценам (RU)",
-    "Shown under the price list on the website. Leave empty to use the default text.": "Отображается под списком цен на сайте. Оставьте пустым, чтобы использовать текст по умолчанию.",
+    "Shown under the price list on the website, or instead of the prices when the tour has none. Leave empty to use the default text.": "Отображается на сайте под списком цен или вместо цен, если их нет. Оставьте пустым, чтобы использовать текст по умолчанию.",
     "Photo Gallery": "Фотогалерея",
     "Price Impact": "Влияние на цену",
     "Prices by transport class": "Цены по классам транспорта",

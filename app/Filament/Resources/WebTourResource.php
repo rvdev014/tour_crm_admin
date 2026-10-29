@@ -473,9 +473,8 @@ class WebTourResource extends Resource
 
                             // Note shown under the price list on the website
                             Forms\Components\Section::make(__('Price note'))
-                                ->description(__('Shown under the price list on the website. Leave empty to use the default text.'))
+                                ->description(__('Shown under the price list on the website, or instead of the prices when the tour has none. Leave empty to use the default text.'))
                                 ->icon('heroicon-o-information-circle')
-                                ->visible(fn ($get) => $get('type') === WebTourPriceType::PerPerson->value)
                                 ->columns(2)
                                 ->schema([
                                     Forms\Components\Textarea::make('price_note_en')
