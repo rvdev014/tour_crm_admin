@@ -7,11 +7,13 @@ use App\Filament\Resources\CityResource\RelationManagers;
 use App\Models\City;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rules\Unique;
 
 class CityResource extends Resource
 {
@@ -69,11 +71,20 @@ class CityResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    // The same city name may exist in different countries, but not twice in one country.
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule, Get $get) => $rule->where('country_id', $get('country_id')),
+                    )
+                    ->validationMessages([
+                        'unique' => __('A city with this name already exists in this country.'),
+                    ]),
                 Forms\Components\Select::make('country_id')
                     ->native(false)
                     ->searchable()
                     ->preload()
+                    ->live()
                     ->relationship('country', 'name'),
             ]);
     }
