@@ -34,7 +34,30 @@ class DestinationResource extends JsonResource
             'parent' => new self($this->whenLoaded('parent')),
             'children' => self::collection($this->whenLoaded('publishedChildren')),
             'sections' => DestinationSectionResource::collection($this->whenLoaded('sections')),
+            'places' => DestinationPlaceResource::collection($this->whenLoaded('places')),
+            'dishes' => DestinationDishResource::collection($this->whenLoaded('dishes')),
+            'cuisine_intro' => $this->cuisine_intro,
+            'seasons' => $this->seasonsPayload(),
+            'map_photo' => $this->map_photo ? asset('storage/'.$this->map_photo) : null,
             'tours' => WebTourResource::collection($this->whenLoaded('tours')),
         ];
+    }
+
+    /**
+     * The seasons block, or null when nothing is filled in so the website can hide it.
+     *
+     * @return array<string, string|null>|null
+     */
+    private function seasonsPayload(): ?array
+    {
+        $seasons = [
+            'intro' => $this->seasons_intro,
+            'winter' => $this->season_winter,
+            'spring' => $this->season_spring,
+            'summer' => $this->season_summer,
+            'autumn' => $this->season_autumn,
+        ];
+
+        return array_filter($seasons) === [] ? null : $seasons;
     }
 }

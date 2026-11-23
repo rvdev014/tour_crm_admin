@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\DestinationPlaceCategory;
 use App\Filament\Resources\DestinationResource\Pages;
 use App\Models\Destination;
 use App\Models\WebTour;
@@ -261,6 +262,160 @@ class DestinationResource extends Resource
                                                     ->toolbarButtons(['bold', 'italic', 'bulletList', 'orderedList', 'link', 'undo', 'redo']),
                                             ]),
                                         ]),
+                                ]),
+                        ]),
+
+                    // ── Tab: Places to see ───────────────────────────────
+                    Forms\Components\Tabs\Tab::make(__('Places'))
+                        ->icon('heroicon-o-map-pin')
+                        ->schema([
+                            Forms\Components\Section::make(__('Places to see'))
+                                ->description(__('Photo cards grouped by category (outdoor, historical, cultural), like "Top outdoor experiences".'))
+                                ->icon('heroicon-o-camera')
+                                ->schema([
+                                    Forms\Components\Repeater::make('places')
+                                        ->relationship('places')
+                                        ->label('')
+                                        ->orderColumn('order')
+                                        ->collapsible()
+                                        ->addActionLabel('+ '.__('Add place'))
+                                        ->addActionAlignment('end')
+                                        ->itemLabel(fn ($state) => trim(
+                                            (DestinationPlaceCategory::tryFrom((string) ($state['category'] ?? ''))?->getLabel() ?? '')
+                                            .' · '.($state['title_en'] ?? $state['title_ru'] ?? '')
+                                        , ' ·') ?: null)
+                                        ->schema([
+                                            Forms\Components\FileUpload::make('photo')
+                                                ->label(__('Photo'))
+                                                ->image()
+                                                ->imagePreviewHeight('160')
+                                                ->directory('destinations/places')
+                                                ->maxSize(5120)
+                                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
+                                            Forms\Components\Grid::make(3)->schema([
+                                                Forms\Components\Select::make('category')
+                                                    ->label(__('Category'))
+                                                    ->options(DestinationPlaceCategory::class)
+                                                    ->default(DestinationPlaceCategory::Outdoor->value)
+                                                    ->required()
+                                                    ->native(false),
+                                                Forms\Components\TextInput::make('title_ru')
+                                                    ->label(__('Title (RU)'))
+                                                    ->maxLength(255),
+                                                Forms\Components\TextInput::make('title_en')
+                                                    ->label(__('Title (EN)'))
+                                                    ->required()
+                                                    ->maxLength(255),
+                                            ]),
+                                            Forms\Components\Grid::make(2)->schema([
+                                                Forms\Components\Textarea::make('description_ru')
+                                                    ->label(__('Description (RU)'))
+                                                    ->rows(2),
+                                                Forms\Components\Textarea::make('description_en')
+                                                    ->label(__('Description (EN)'))
+                                                    ->rows(2),
+                                            ]),
+                                            Forms\Components\Select::make('link_destination_id')
+                                                ->label(__('Link to place page'))
+                                                ->helperText(__('Optional. Makes the card open one of this country\'s place pages.'))
+                                                ->options(fn ($livewire) => Destination::query()
+                                                    ->where('parent_id', $livewire->getRecord()?->getKey() ?? 0)
+                                                    ->orderByRaw('COALESCE(title_ru, title_en)')
+                                                    ->get()
+                                                    ->mapWithKeys(fn (Destination $d) => [$d->id => $d->title_ru ?: $d->title_en]))
+                                                ->searchable()
+                                                ->native(false),
+                                        ]),
+                                ]),
+                        ]),
+
+                    // ── Tab: Cuisine ─────────────────────────────────────
+                    Forms\Components\Tabs\Tab::make(__('Cuisine'))
+                        ->icon('heroicon-o-cake')
+                        ->schema([
+                            Forms\Components\Section::make(__('Cuisine intro'))
+                                ->icon('heroicon-o-chat-bubble-bottom-center-text')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\Textarea::make('cuisine_intro_ru')
+                                        ->label(__('Intro (RU)'))
+                                        ->rows(3),
+                                    Forms\Components\Textarea::make('cuisine_intro_en')
+                                        ->label(__('Intro (EN)'))
+                                        ->rows(3),
+                                ]),
+
+                            Forms\Components\Section::make(__('Local dishes'))
+                                ->description(__('Dish cards with a photo, name and one-sentence description.'))
+                                ->icon('heroicon-o-fire')
+                                ->schema([
+                                    Forms\Components\Repeater::make('dishes')
+                                        ->relationship('dishes')
+                                        ->label('')
+                                        ->orderColumn('order')
+                                        ->collapsible()
+                                        ->addActionLabel('+ '.__('Add dish'))
+                                        ->addActionAlignment('end')
+                                        ->itemLabel(fn ($state) => $state['name_en'] ?? $state['name_ru'] ?? null)
+                                        ->schema([
+                                            Forms\Components\FileUpload::make('photo')
+                                                ->label(__('Photo'))
+                                                ->image()
+                                                ->imagePreviewHeight('160')
+                                                ->directory('destinations/dishes')
+                                                ->maxSize(5120)
+                                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
+                                            Forms\Components\Grid::make(2)->schema([
+                                                Forms\Components\TextInput::make('name_ru')
+                                                    ->label(__('Name (RU)'))
+                                                    ->maxLength(255),
+                                                Forms\Components\TextInput::make('name_en')
+                                                    ->label(__('Name (EN)'))
+                                                    ->required()
+                                                    ->maxLength(255),
+                                                Forms\Components\Textarea::make('description_ru')
+                                                    ->label(__('Description (RU)'))
+                                                    ->rows(2),
+                                                Forms\Components\Textarea::make('description_en')
+                                                    ->label(__('Description (EN)'))
+                                                    ->rows(2),
+                                            ]),
+                                        ]),
+                                ]),
+                        ]),
+
+                    // ── Tab: Seasons & Map ───────────────────────────────
+                    Forms\Components\Tabs\Tab::make(__('Seasons & Map'))
+                        ->icon('heroicon-o-sun')
+                        ->schema([
+                            Forms\Components\Section::make(__('Travel seasons'))
+                                ->description(__('What to expect in each season. Leave a season empty to hide it.'))
+                                ->icon('heroicon-o-calendar-days')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\Textarea::make('seasons_intro_ru')->label(__('Intro (RU)'))->rows(2),
+                                    Forms\Components\Textarea::make('seasons_intro_en')->label(__('Intro (EN)'))->rows(2),
+                                    Forms\Components\Textarea::make('season_winter_ru')->label(__('Winter (RU)'))->rows(3),
+                                    Forms\Components\Textarea::make('season_winter_en')->label(__('Winter (EN)'))->rows(3),
+                                    Forms\Components\Textarea::make('season_spring_ru')->label(__('Spring (RU)'))->rows(3),
+                                    Forms\Components\Textarea::make('season_spring_en')->label(__('Spring (EN)'))->rows(3),
+                                    Forms\Components\Textarea::make('season_summer_ru')->label(__('Summer (RU)'))->rows(3),
+                                    Forms\Components\Textarea::make('season_summer_en')->label(__('Summer (EN)'))->rows(3),
+                                    Forms\Components\Textarea::make('season_autumn_ru')->label(__('Autumn (RU)'))->rows(3),
+                                    Forms\Components\Textarea::make('season_autumn_en')->label(__('Autumn (EN)'))->rows(3),
+                                ]),
+
+                            Forms\Components\Section::make(__('Travel map'))
+                                ->description(__('A map image showing the main destinations.'))
+                                ->icon('heroicon-o-map')
+                                ->schema([
+                                    Forms\Components\FileUpload::make('map_photo')
+                                        ->label(__('Map image'))
+                                        ->image()
+                                        ->imagePreviewHeight('200')
+                                        ->directory('destinations/maps')
+                                        ->maxSize(10240)
+                                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                                 ]),
                         ]),
 

@@ -36,12 +36,15 @@ use Illuminate\Support\Carbon;
  * @property bool $is_featured
  * @property string|null $seo_title
  * @property string|null $seo_description
+ * @property string|null $map_photo
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Destination|null $parent
  * @property-read Collection<Destination> $children
  * @property-read City|null $city
  * @property-read Collection<DestinationSection> $sections
+ * @property-read Collection<DestinationPlace> $places
+ * @property-read Collection<DestinationDish> $dishes
  * @property-read Collection<WebTour> $pinnedTours
  */
 class Destination extends Model
@@ -69,6 +72,46 @@ class Destination extends Model
     public function getDescriptionAttribute(): ?string
     {
         return $this->getLocaleValue('description');
+    }
+
+    public function getCuisineIntroAttribute(): ?string
+    {
+        return $this->getLocaleValue('cuisine_intro');
+    }
+
+    public function getSeasonsIntroAttribute(): ?string
+    {
+        return $this->getLocaleValue('seasons_intro');
+    }
+
+    public function getSeasonWinterAttribute(): ?string
+    {
+        return $this->getLocaleValue('season_winter');
+    }
+
+    public function getSeasonSpringAttribute(): ?string
+    {
+        return $this->getLocaleValue('season_spring');
+    }
+
+    public function getSeasonSummerAttribute(): ?string
+    {
+        return $this->getLocaleValue('season_summer');
+    }
+
+    public function getSeasonAutumnAttribute(): ?string
+    {
+        return $this->getLocaleValue('season_autumn');
+    }
+
+    public function places(): HasMany
+    {
+        return $this->hasMany(DestinationPlace::class)->orderBy('order')->orderBy('id');
+    }
+
+    public function dishes(): HasMany
+    {
+        return $this->hasMany(DestinationDish::class)->orderBy('order')->orderBy('id');
     }
 
     public function parent(): BelongsTo

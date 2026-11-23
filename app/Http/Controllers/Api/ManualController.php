@@ -244,7 +244,7 @@ class ManualController extends Controller
         $destination = Destination::query()
             ->published()
             ->where('slug', $slug)
-            ->with(['sections', 'publishedChildren', 'parent'])
+            ->with(['sections', 'places.linkDestination.parent', 'dishes', 'publishedChildren', 'parent'])
             ->firstOrFail();
 
         $destination->setRelation('tours', $destination->toursQuery()->limit(12)->get());
